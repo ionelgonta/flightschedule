@@ -47,9 +47,9 @@ app/
 
 components/
 ├── flights/              # Flight-related components
-│   ├── FlightTable.tsx   # Main flight display table
-│   ├── FlightRow.tsx     # Individual flight row
+│   ├── FlightDisplay.tsx # Main flight display table
 │   ├── FlightFilters.tsx # Advanced filtering
+│   ├── FlightStatusBadge.tsx # Flight status indicators
 │   └── LoadingSkeleton.tsx # Loading states
 ├── ads/                  # Advertising components
 │   ├── AdBanner.tsx      # Reusable ad component
