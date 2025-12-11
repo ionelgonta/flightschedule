@@ -81,10 +81,38 @@ export const adConfig: AdConfig = {
 // Helper function to toggle ad zones
 export const toggleAdZone = (zone: keyof typeof adConfig.zones, active: boolean): void => {
   adConfig.zones[zone].active = active
+  // Salvează în localStorage pentru persistență
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('adConfig', JSON.stringify(adConfig))
+  }
 }
 
 // Helper function to set custom HTML for partner banners
 export const setCustomBanner = (zone: keyof typeof adConfig.zones, html: string): void => {
   adConfig.zones[zone].customHtml = html
-  adConfig.zones[zone].active = true
+  adConfig.zones[zone].active = html.length > 0
+  // Salvează în localStorage pentru persistență
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('adConfig', JSON.stringify(adConfig))
+  }
+}
+
+// Helper function to load config from localStorage
+export const loadAdConfig = (): void => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('adConfig')
+    if (saved) {
+      try {
+        const savedConfig = JSON.parse(saved)
+        Object.assign(adConfig.zones, savedConfig.zones)
+      } catch (error) {
+        console.error('Error loading ad config:', error)
+      }
+    }
+  }
+}
+
+// Initialize config on load
+if (typeof window !== 'undefined') {
+  loadAdConfig()
 }

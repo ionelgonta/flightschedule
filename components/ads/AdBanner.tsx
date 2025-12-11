@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { adConfig } from '@/lib/adConfig'
+import { useEffect, useRef, useState } from 'react'
+import { adConfig, loadAdConfig } from '@/lib/adConfig'
 
 interface AdBannerProps {
   slot: keyof typeof adConfig.zones
@@ -17,7 +17,13 @@ declare global {
 
 export function AdBanner({ slot, size, className = '' }: AdBannerProps) {
   const adRef = useRef<HTMLDivElement>(null)
-  const config = adConfig.zones[slot]
+  const [config, setConfig] = useState(adConfig.zones[slot])
+
+  useEffect(() => {
+    // Load saved config
+    loadAdConfig()
+    setConfig(adConfig.zones[slot])
+  }, [slot])
 
   useEffect(() => {
     if (!config.active || !adRef.current) return

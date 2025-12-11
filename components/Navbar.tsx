@@ -41,6 +41,12 @@ export function Navbar() {
             >
               Airports
             </Link>
+            <Link 
+              href="/admin" 
+              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors text-sm"
+            >
+              Admin
+            </Link>
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
@@ -98,6 +104,13 @@ export function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Airports
+              </Link>
+              <Link 
+                href="/admin" 
+                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Admin
               </Link>
             </div>
           </div>
