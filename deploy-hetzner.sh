@@ -8,9 +8,9 @@ set -e
 echo "🚀 Starting Flight Schedule deployment on Hetzner..."
 
 # Configurare variabile
-SERVER_IP="YOUR_SERVER_IP"
+SERVER_IP="23.88.113.154"
 SERVER_USER="root"
-DOMAIN="your-domain.com"
+DOMAIN="victoriaocara.com"
 PROJECT_NAME="flight-schedule"
 
 # Culori pentru output
