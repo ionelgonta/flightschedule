@@ -1,75 +1,202 @@
 import { Airport } from '@/types/flight'
 
 export const MAJOR_AIRPORTS: Airport[] = [
+  // Romanian Airports
   {
-    code: 'JFK',
-    name: 'John F. Kennedy International Airport',
-    city: 'New York',
-    country: 'United States',
-    timezone: 'America/New_York'
+    code: 'OTP',
+    name: 'Henri Coandă International Airport',
+    city: 'Bucharest',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 44.5711, lng: 26.0850 }
   },
   {
-    code: 'LAX',
-    name: 'Los Angeles International Airport',
-    city: 'Los Angeles',
-    country: 'United States',
-    timezone: 'America/Los_Angeles'
+    code: 'BBU',
+    name: 'Aurel Vlaicu International Airport',
+    city: 'Bucharest',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 44.5032, lng: 26.1020 }
   },
+  {
+    code: 'CLJ',
+    name: 'Cluj-Napoca International Airport',
+    city: 'Cluj-Napoca',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 46.7852, lng: 23.6862 }
+  },
+  {
+    code: 'TSR',
+    name: 'Timișoara Traian Vuia International Airport',
+    city: 'Timișoara',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 45.8099, lng: 21.3379 }
+  },
+  {
+    code: 'IAS',
+    name: 'Iași International Airport',
+    city: 'Iași',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 47.1785, lng: 27.6206 }
+  },
+  {
+    code: 'CND',
+    name: 'Mihail Kogălniceanu International Airport',
+    city: 'Constanța',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 44.3622, lng: 28.4883 }
+  },
+  {
+    code: 'SBZ',
+    name: 'Sibiu International Airport',
+    city: 'Sibiu',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 45.7856, lng: 24.0913 }
+  },
+  {
+    code: 'CRA',
+    name: 'Craiova Airport',
+    city: 'Craiova',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 44.3181, lng: 23.8886 }
+  },
+  {
+    code: 'BCM',
+    name: 'Bacău Airport',
+    city: 'Bacău',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 46.5219, lng: 26.9103 }
+  },
+  {
+    code: 'BAY',
+    name: 'Baia Mare Airport',
+    city: 'Baia Mare',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 47.6584, lng: 23.4700 }
+  },
+  {
+    code: 'OMR',
+    name: 'Oradea International Airport',
+    city: 'Oradea',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 47.0253, lng: 21.9025 }
+  },
+  {
+    code: 'SCV',
+    name: 'Suceava Stefan cel Mare Airport',
+    city: 'Suceava',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 47.6875, lng: 26.3540 }
+  },
+  {
+    code: 'TGM',
+    name: 'Târgu Mureș Transilvania Airport',
+    city: 'Târgu Mureș',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 46.4677, lng: 24.4125 }
+  },
+  {
+    code: 'ARW',
+    name: 'Arad Airport',
+    city: 'Arad',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 46.1766, lng: 21.2619 }
+  },
+  {
+    code: 'STU',
+    name: 'Satu Mare Airport',
+    city: 'Satu Mare',
+    country: 'Romania',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 47.7033, lng: 22.8857 }
+  },
+  
+  // Moldova Airport
+  {
+    code: 'RMO',
+    name: 'Chișinău International Airport',
+    city: 'Chișinău',
+    country: 'Moldova',
+    timezone: 'Europe/Chisinau',
+    coordinates: { lat: 46.9277, lng: 28.9310 }
+  },
+
+  // Major International Airports (for comparison and connections)
   {
     code: 'LHR',
     name: 'London Heathrow Airport',
     city: 'London',
     country: 'United Kingdom',
-    timezone: 'Europe/London'
+    timezone: 'Europe/London',
+    coordinates: { lat: 51.4700, lng: -0.4543 }
   },
   {
     code: 'CDG',
     name: 'Charles de Gaulle Airport',
     city: 'Paris',
     country: 'France',
-    timezone: 'Europe/Paris'
+    timezone: 'Europe/Paris',
+    coordinates: { lat: 49.0097, lng: 2.5479 }
   },
   {
     code: 'FRA',
     name: 'Frankfurt Airport',
     city: 'Frankfurt',
     country: 'Germany',
-    timezone: 'Europe/Berlin'
+    timezone: 'Europe/Berlin',
+    coordinates: { lat: 50.0379, lng: 8.5622 }
   },
   {
-    code: 'NRT',
-    name: 'Narita International Airport',
-    city: 'Tokyo',
-    country: 'Japan',
-    timezone: 'Asia/Tokyo'
+    code: 'MUC',
+    name: 'Munich Airport',
+    city: 'Munich',
+    country: 'Germany',
+    timezone: 'Europe/Berlin',
+    coordinates: { lat: 48.3538, lng: 11.7861 }
   },
   {
-    code: 'SIN',
-    name: 'Singapore Changi Airport',
-    city: 'Singapore',
-    country: 'Singapore',
-    timezone: 'Asia/Singapore'
+    code: 'VIE',
+    name: 'Vienna International Airport',
+    city: 'Vienna',
+    country: 'Austria',
+    timezone: 'Europe/Vienna',
+    coordinates: { lat: 48.1103, lng: 16.5697 }
+  },
+  {
+    code: 'FCO',
+    name: 'Leonardo da Vinci International Airport',
+    city: 'Rome',
+    country: 'Italy',
+    timezone: 'Europe/Rome',
+    coordinates: { lat: 41.8003, lng: 12.2389 }
+  },
+  {
+    code: 'IST',
+    name: 'Istanbul Airport',
+    city: 'Istanbul',
+    country: 'Turkey',
+    timezone: 'Europe/Istanbul',
+    coordinates: { lat: 41.2753, lng: 28.7519 }
   },
   {
     code: 'DXB',
     name: 'Dubai International Airport',
     city: 'Dubai',
     country: 'United Arab Emirates',
-    timezone: 'Asia/Dubai'
-  },
-  {
-    code: 'SYD',
-    name: 'Sydney Kingsford Smith Airport',
-    city: 'Sydney',
-    country: 'Australia',
-    timezone: 'Australia/Sydney'
-  },
-  {
-    code: 'OTP',
-    name: 'Henri Coandă International Airport',
-    city: 'Bucharest',
-    country: 'Romania',
-    timezone: 'Europe/Bucharest'
+    timezone: 'Asia/Dubai',
+    coordinates: { lat: 25.2532, lng: 55.3657 }
   }
 ]
 

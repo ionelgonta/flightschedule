@@ -62,26 +62,26 @@ export function Footer() {
 
           {/* Popular Airports */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Popular Airports</h3>
+            <h3 className="text-lg font-semibold mb-4">Romanian Airports</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/airport/JFK" className="text-gray-400 hover:text-white transition-colors">
-                  JFK - New York
+                <Link href="/airport/OTP" className="text-gray-400 hover:text-white transition-colors">
+                  OTP - Bucharest
                 </Link>
               </li>
               <li>
-                <Link href="/airport/LAX" className="text-gray-400 hover:text-white transition-colors">
-                  LAX - Los Angeles
+                <Link href="/airport/CLJ" className="text-gray-400 hover:text-white transition-colors">
+                  CLJ - Cluj-Napoca
                 </Link>
               </li>
               <li>
-                <Link href="/airport/LHR" className="text-gray-400 hover:text-white transition-colors">
-                  LHR - London
+                <Link href="/airport/TSR" className="text-gray-400 hover:text-white transition-colors">
+                  TSR - Timișoara
                 </Link>
               </li>
               <li>
-                <Link href="/airport/CDG" className="text-gray-400 hover:text-white transition-colors">
-                  CDG - Paris
+                <Link href="/airport/RMO" className="text-gray-400 hover:text-white transition-colors">
+                  RMO - Chișinău
                 </Link>
               </li>
             </ul>

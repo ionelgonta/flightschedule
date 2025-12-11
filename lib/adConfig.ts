@@ -1,4 +1,25 @@
-export const adConfig = {
+interface AdZone {
+  active: boolean
+  slotId: string
+  size: string
+  customHtml?: string
+}
+
+interface AdConfig {
+  publisherId: string
+  zones: {
+    'header-banner': AdZone
+    'sidebar-right': AdZone
+    'sidebar-square': AdZone
+    'inline-banner': AdZone
+    'footer-banner': AdZone
+    'mobile-banner': AdZone
+    'partner-banner-1': AdZone
+    'partner-banner-2': AdZone
+  }
+}
+
+export const adConfig: AdConfig = {
   // Replace with your actual AdSense publisher ID
   publisherId: 'ca-pub-XXXXXXXXXXXXXXXX',
   
@@ -58,12 +79,12 @@ export const adConfig = {
 }
 
 // Helper function to toggle ad zones
-export const toggleAdZone = (zone: keyof typeof adConfig.zones, active: boolean) => {
+export const toggleAdZone = (zone: keyof typeof adConfig.zones, active: boolean): void => {
   adConfig.zones[zone].active = active
 }
 
 // Helper function to set custom HTML for partner banners
-export const setCustomBanner = (zone: keyof typeof adConfig.zones, html: string) => {
+export const setCustomBanner = (zone: keyof typeof adConfig.zones, html: string): void => {
   adConfig.zones[zone].customHtml = html
   adConfig.zones[zone].active = true
 }

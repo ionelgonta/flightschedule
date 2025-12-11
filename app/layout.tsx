@@ -10,11 +10,11 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    default: 'Flight Schedule - Real-Time Flight Information',
-    template: '%s | Flight Schedule'
+    default: 'Orarul Zborurilor România - Informații Zboruri în Timp Real',
+    template: '%s | Orarul Zborurilor România'
   },
-  description: 'Finding reliable, real-time flight information is essential for every traveler, whether you are preparing for a departure, waiting for an arrival, or monitoring flight activity. Our platform offers continuous updates on arrivals and departures from major airports worldwide.',
-  keywords: ['flight schedule', 'airport arrivals', 'airport departures', 'real-time flights', 'flight tracking', 'airline information'],
+  description: 'Informații complete și în timp real despre zborurile din România și Moldova. Monitorizează sosirile și plecările de la aeroporturile OTP Otopeni, CLJ Cluj, TSR Timișoara, IAS Iași, RMO Chișinău și toate aeroporturile românești.',
+  keywords: ['orarul zborurilor', 'aeroporturi romania', 'zboruri otopeni', 'zboruri cluj', 'zboruri timisoara', 'zboruri iasi', 'zboruri chisinau', 'sosiri plecari', 'informatii zboruri', 'OTP', 'CLJ', 'TSR', 'IAS', 'RMO'],
   authors: [{ name: 'Flight Schedule' }],
   creator: 'Flight Schedule',
   publisher: 'Flight Schedule',
@@ -29,17 +29,17 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    locale: 'en_US',
+    locale: 'ro_RO',
     url: 'https://flight-schedule.vercel.app',
-    title: 'Flight Schedule - Real-Time Flight Information',
-    description: 'Real-time flight arrivals and departures from major airports worldwide. Track flights, check status, and get detailed airline information.',
-    siteName: 'Flight Schedule',
+    title: 'Orarul Zborurilor România - Informații Zboruri în Timp Real',
+    description: 'Informații în timp real despre sosirile și plecările zborurilor din aeroporturile majore din România și Moldova. Urmărește zborurile, verifică statusul și obține informații detaliate.',
+    siteName: 'Orarul Zborurilor România',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Flight Schedule - Real-Time Flight Information',
-    description: 'Real-time flight arrivals and departures from major airports worldwide.',
-    creator: '@flightschedule',
+    title: 'Orarul Zborurilor România - Informații Zboruri în Timp Real',
+    description: 'Informații în timp real despre zborurile din România și Moldova.',
+    creator: '@zboruriromania',
   },
   robots: {
     index: true,
