@@ -2,12 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import { adConfig, toggleAdZone, setCustomBanner } from '@/lib/adConfig'
-import { Save, Eye, EyeOff, Upload, Trash2, Settings } from 'lucide-react'
+import { Save, Eye, EyeOff, Upload, Trash2, Settings, Key, TestTube, CheckCircle, XCircle } from 'lucide-react'
 
 export default function AdminPage() {
   const [config, setConfig] = useState(adConfig)
   const [activeTab, setActiveTab] = useState('adsense')
   const [saved, setSaved] = useState(false)
+  
+  // API Key Management State
+  const [apiKey, setApiKey] = useState('')
+  const [currentApiKey, setCurrentApiKey] = useState('')
+  const [apiKeyTesting, setApiKeyTesting] = useState(false)
+  const [apiKeyValid, setApiKeyValid] = useState<boolean | null>(null)
+  const [apiKeyError, setApiKeyError] = useState('')
+  const [apiKeySaved, setApiKeySaved] = useState(false)
 
   const handleToggleZone = (zone: keyof typeof adConfig.zones) => {
     toggleAdZone(zone, !config.zones[zone].active)
@@ -24,6 +32,136 @@ export default function AdminPage() {
     localStorage.setItem('adConfig', JSON.stringify(config))
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  // Load current API key on component mount
+  useEffect(() => {
+    const loadCurrentApiKey = async () => {
+      try {
+        const response = await fetch('/api/admin/api-key')
+        const data = await response.json()
+        
+        if (data.success && data.hasKey) {
+          setCurrentApiKey(data.apiKey) // This is masked for security
+          // Don't set the full key in the input field for security
+        }
+      } catch (error) {
+        console.error('Error loading API key:', error)
+        // Fallback to environment variable
+        const envKey = process.env.NEXT_PUBLIC_FLIGHT_API_KEY || ''
+        if (envKey) {
+          setCurrentApiKey(`${envKey.substring(0, 8)}...${envKey.substring(envKey.length - 8)}`)
+        }
+      }
+    }
+    
+    loadCurrentApiKey()
+  }, [])
+
+  // Test API Key function
+  const testApiKey = async (keyToTest: string) => {
+    if (!keyToTest.trim()) {
+      setApiKeyError('Introduceți un API key')
+      return false
+    }
+
+    setApiKeyTesting(true)
+    setApiKeyError('')
+    setApiKeyValid(null)
+
+    try {
+      const response = await fetch('/api/admin/api-key', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          apiKey: keyToTest,
+          action: 'test'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setApiKeyValid(data.valid)
+        if (!data.valid) {
+          setApiKeyError(data.error || 'API key invalid')
+        } else {
+          setApiKeyError('')
+        }
+        return data.valid
+      } else {
+        setApiKeyValid(false)
+        setApiKeyError(data.error || 'Eroare la testarea API key-ului')
+        return false
+      }
+    } catch (error) {
+      setApiKeyValid(false)
+      setApiKeyError('Eroare de conexiune')
+      return false
+    } finally {
+      setApiKeyTesting(false)
+    }
+  }
+
+  // Save API Key function
+  const saveApiKey = async () => {
+    if (!apiKey.trim()) {
+      setApiKeyError('Introduceți un API key')
+      return
+    }
+
+    setApiKeyTesting(true)
+    setApiKeyError('')
+
+    try {
+      const response = await fetch('/api/admin/api-key', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          apiKey: apiKey,
+          action: 'save'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setCurrentApiKey(apiKey)
+        setApiKeySaved(true)
+        setApiKeyValid(true)
+        setApiKeyError('')
+        
+        // Show success message
+        setTimeout(() => setApiKeySaved(false), 3000)
+        
+        // Ask to restart application
+        setTimeout(() => {
+          if (confirm('API key salvat cu succes! Pentru a aplica modificările, aplicația trebuie repornită. Continuați?')) {
+            // În producție, aici ai putea face un restart automat sau notifica administratorul
+            alert('API key-ul a fost salvat în fișierul de configurare. Reporniți aplicația pentru a aplica modificările.')
+          }
+        }, 1000)
+      } else {
+        setApiKeyError(data.error || 'Eroare la salvarea API key-ului')
+        setApiKeyValid(false)
+      }
+    } catch (error) {
+      setApiKeyError('Eroare de conexiune la server')
+      setApiKeyValid(false)
+    } finally {
+      setApiKeyTesting(false)
+    }
+  }
+
+  // Handle API key input change
+  const handleApiKeyChange = (value: string) => {
+    setApiKey(value)
+    setApiKeyValid(null)
+    setApiKeyError('')
   }
 
   const adZones = [
@@ -90,6 +228,17 @@ export default function AdminPage() {
               >
                 <Upload className="h-4 w-4 inline mr-2" />
                 Bannere Parteneri
+              </button>
+              <button
+                onClick={() => setActiveTab('api')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'api'
+                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                <Key className="h-4 w-4 inline mr-2" />
+                API Management
               </button>
             </nav>
           </div>
@@ -252,6 +401,188 @@ export default function AdminPage() {
                     <li>• Testează pe dispozitive mobile</li>
                     <li>• Respectă dimensiunile recomandate pentru fiecare zonă</li>
                   </ul>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'api' && (
+              <div className="space-y-6">
+                {/* API Key Status */}
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center">
+                    <Key className="h-5 w-5 mr-2" />
+                    🔑 API.Market AeroDataBox Management
+                  </h4>
+                  <p className="text-blue-700 dark:text-blue-300 text-sm">
+                    Gestionează API key-ul pentru serviciul de date de zboruri AeroDataBox prin API.Market
+                  </p>
+                </div>
+
+                {/* Current API Key Status */}
+                <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
+                  <h5 className="font-medium text-gray-900 dark:text-white mb-4">
+                    Status API Key Curent
+                  </h5>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">API Key:</span>
+                      <span className="font-mono text-sm text-gray-900 dark:text-white">
+                        {currentApiKey ? `${currentApiKey.substring(0, 8)}...${currentApiKey.substring(-8)}` : 'Nu este configurat'}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Provider:</span>
+                      <span className="text-sm text-gray-900 dark:text-white">API.Market AeroDataBox</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Status:</span>
+                      <div className="flex items-center">
+                        {apiKeyValid === true && (
+                          <span className="flex items-center text-green-600 dark:text-green-400">
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Funcțional
+                          </span>
+                        )}
+                        {apiKeyValid === false && (
+                          <span className="flex items-center text-red-600 dark:text-red-400">
+                            <XCircle className="h-4 w-4 mr-1" />
+                            Nefuncțional
+                          </span>
+                        )}
+                        {apiKeyValid === null && currentApiKey && (
+                          <button
+                            onClick={() => testApiKey(currentApiKey)}
+                            disabled={apiKeyTesting}
+                            className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                          >
+                            <TestTube className="h-4 w-4 mr-1" />
+                            {apiKeyTesting ? 'Testare...' : 'Testează'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* API Key Management */}
+                <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
+                  <h5 className="font-medium text-gray-900 dark:text-white mb-4">
+                    Actualizare API Key
+                  </h5>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Noul API Key
+                      </label>
+                      <input
+                        type="text"
+                        value={apiKey}
+                        onChange={(e) => handleApiKeyChange(e.target.value)}
+                        placeholder="Introduceți noul API key de la API.Market"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm"
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Obțineți API key de la: <a href="https://api.market/dashboard" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">API.Market Dashboard</a>
+                      </p>
+                    </div>
+
+                    {/* API Key Validation Status */}
+                    {apiKeyError && (
+                      <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <p className="text-red-700 dark:text-red-400 text-sm flex items-center">
+                          <XCircle className="h-4 w-4 mr-2" />
+                          {apiKeyError}
+                        </p>
+                      </div>
+                    )}
+
+                    {apiKeyValid === true && (
+                      <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                        <p className="text-green-700 dark:text-green-400 text-sm flex items-center">
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          API Key valid și funcțional!
+                        </p>
+                      </div>
+                    )}
+
+                    {apiKeySaved && (
+                      <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <p className="text-blue-700 dark:text-blue-400 text-sm flex items-center">
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          API Key salvat cu succes!
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => testApiKey(apiKey)}
+                        disabled={apiKeyTesting || !apiKey.trim()}
+                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <TestTube className="h-4 w-4 mr-2" />
+                        {apiKeyTesting ? 'Testare...' : 'Testează API Key'}
+                      </button>
+                      
+                      <button
+                        onClick={saveApiKey}
+                        disabled={!apiKey.trim() || apiKeyTesting}
+                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Salvează API Key
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* API Information */}
+                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                  <h5 className="font-medium text-gray-900 dark:text-white mb-4">
+                    📊 Informații API
+                  </h5>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <h6 className="font-medium text-gray-900 dark:text-white mb-2">Provider</h6>
+                      <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                        <li>• <strong>Serviciu:</strong> AeroDataBox</li>
+                        <li>• <strong>Platform:</strong> API.Market</li>
+                        <li>• <strong>Rate Limit:</strong> 150 requests/minute</li>
+                        <li>• <strong>Autentificare:</strong> Bearer Token</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h6 className="font-medium text-gray-900 dark:text-white mb-2">Funcționalități</h6>
+                      <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                        <li>• Zboruri în timp real (sosiri/plecări)</li>
+                        <li>• Căutare zboruri după număr</li>
+                        <li>• Informații detaliate aeroporturi</li>
+                        <li>• Statistici și analize</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Help Section */}
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                  <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
+                    💡 Cum să obții un API Key
+                  </h4>
+                  <ol className="text-yellow-700 dark:text-yellow-300 text-sm space-y-1 list-decimal list-inside">
+                    <li>Vizitează <a href="https://api.market/dashboard" target="_blank" rel="noopener noreferrer" className="underline">API.Market Dashboard</a></li>
+                    <li>Creează un cont sau autentifică-te</li>
+                    <li>Abonează-te la serviciul AeroDataBox</li>
+                    <li>Generează un nou API key din dashboard</li>
+                    <li>Copiază key-ul și testează-l aici</li>
+                    <li>Salvează key-ul pentru a activa datele de zboruri</li>
+                  </ol>
                 </div>
               </div>
             )}
