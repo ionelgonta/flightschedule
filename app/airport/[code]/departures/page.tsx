@@ -154,7 +154,7 @@ export default function DeparturesPage({ params }: DeparturesPageProps) {
               flights={flights}
               type="departures"
               loading={loading}
-              error={error}
+              error={error || undefined}
               lastUpdated={lastUpdated}
               onRefresh={handleRefresh}
               onFiltersChange={handleFiltersChange}
