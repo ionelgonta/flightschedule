@@ -24,14 +24,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://flight-schedule.vercel.app'),
+  metadataBase: new URL('https://anyway.ro'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'ro_RO',
-    url: 'https://flight-schedule.vercel.app',
+    url: 'https://anyway.ro',
     title: 'Orarul Zborurilor România - Informații Zboruri în Timp Real',
     description: 'Informații în timp real despre sosirile și plecările zborurilor din aeroporturile majore din România și Moldova. Urmărește zborurile, verifică statusul și obține informații detaliate.',
     siteName: 'Orarul Zborurilor România',

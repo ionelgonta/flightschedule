@@ -53,21 +53,25 @@ Route (app)                              Size     First Load JS
 - [x] Error boundaries and loading states
 - [x] Lighthouse-optimized (95+ score ready)
 
-## 🚀 Quick Deploy to Vercel
+## 🚀 Deploy pe Hetzner Cloud
 
-### 1. Install Vercel CLI
+### 1. Conectare la Server
 ```bash
-npm i -g vercel
+ssh root@23.88.113.154
+cd /opt/anyway-flight-schedule
 ```
 
-### 2. Deploy
+### 2. Deploy Actualizări
 ```bash
-vercel
+git pull origin main
+docker-compose build --no-cache
+docker-compose up -d
 ```
 
-### 3. Production Deploy
+### 3. Verificare Status
 ```bash
-vercel --prod
+docker-compose ps
+docker-compose logs app -f
 ```
 
 ## 🔧 Pre-Deployment Configuration
@@ -81,13 +85,13 @@ vercel --prod
 3. Update slot IDs in `lib/adConfig.ts`
 
 ### Domain Configuration
-Update these files with your domain:
+Domeniile sunt deja configurate pentru anyway.ro:
 ```typescript
 // app/layout.tsx
-metadataBase: new URL('https://your-domain.com'),
+metadataBase: new URL('https://anyway.ro'),
 
 // app/sitemap.ts
-const baseUrl = 'https://your-domain.com'
+const baseUrl = 'https://anyway.ro'
 ```
 
 ## 📈 Post-Deployment Checklist

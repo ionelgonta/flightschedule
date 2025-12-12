@@ -150,7 +150,7 @@ onclick="gtag('event', 'click', {
 ### 📤 **Publicare Schimbări**
 1. Configurează bannerele în admin
 2. Testează pe localhost
-3. Deploy pe Vercel/hosting
+3. Deploy pe serverul Hetzner
 4. Verifică funcționarea pe producție
 
 ### 🔍 **Verificare Post-Deployment**

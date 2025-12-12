@@ -31,7 +31,7 @@ export default function AirportsPage() {
     '@type': 'WebPage',
     name: 'Airports - Flight Schedule',
     description: 'Browse all major airports worldwide with real-time flight information.',
-    url: 'https://flight-schedule.vercel.app/airports',
+    url: 'https://anyway.ro/airports',
   }
 
   return (

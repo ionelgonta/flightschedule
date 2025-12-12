@@ -170,45 +170,59 @@ yarn dev
 
 ## 🌐 Deployment
 
-### Vercel Deployment (Recommended)
+### Hetzner Cloud Deployment (Production)
 
-1. **Connect to Vercel**
+Aplicația este deployată pe serverul Hetzner Cloud cu Docker și Nginx.
+
+1. **Server Setup**
+   - Server: Hetzner Cloud (23.88.113.154)
+   - OS: Ubuntu 22.04
+   - Docker + Docker Compose
+   - Nginx cu SSL (Let's Encrypt)
+
+2. **Deployment Process**
    ```bash
-   npm i -g vercel
-   vercel
+   # Conectare la server
+   ssh root@23.88.113.154
+   
+   # Navigare la proiect
+   cd /opt/anyway-flight-schedule
+   
+   # Pull ultimele modificări
+   git pull origin main
+   
+   # Rebuild și restart
+   docker-compose build --no-cache
+   docker-compose up -d
    ```
 
-2. **Configure environment**
-   - Set up custom domain in Vercel dashboard
-   - Update `metadataBase` in `app/layout.tsx`
+3. **URLs de Acces**
+   - **Production**: https://anyway.ro
+   - **HTTP**: http://anyway.ro:8080
+   - **HTTPS**: https://anyway.ro:8443
 
-3. **Deploy**
-   ```bash
-   vercel --prod
-   ```
-
-### Manual Deployment
+### Local Development
 
 1. **Build the project**
    ```bash
    npm run build
    ```
 
-2. **Start production server**
+2. **Start development server**
    ```bash
-   npm start
+   npm run dev
    ```
 
 ### Environment Configuration
 
-Update these values for production:
+Configurația pentru producție:
 
 ```typescript
 // app/layout.tsx
-metadataBase: new URL('https://your-domain.com'),
+metadataBase: new URL('https://anyway.ro'),
 
 // app/sitemap.ts
-const baseUrl = 'https://your-domain.com'
+const baseUrl = 'https://anyway.ro'
 ```
 
 ## 🔧 Configuration
@@ -272,9 +286,10 @@ theme: {
 - **Compression** - Brotli and gzip compression
 
 ### Monitoring
-- Use Vercel Analytics for performance monitoring
-- Google PageSpeed Insights for SEO scoring
-- Google Search Console for search performance
+- Docker logs pentru monitoring aplicație
+- Google PageSpeed Insights pentru SEO scoring
+- Google Search Console pentru search performance
+- Nginx logs pentru traffic analysis
 
 ## 🔮 Future Enhancements
 

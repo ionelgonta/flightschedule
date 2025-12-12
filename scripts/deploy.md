@@ -1,122 +1,125 @@
 # Deployment Instructions
 
-## Quick Deploy to Vercel
+## Deploy pe Hetzner Cloud
 
 ### 1. Prerequisites
-- Node.js 18+ installed
-- Vercel account (free tier available)
-- Git repository
+- Acces SSH la serverul Hetzner (23.88.113.154)
+- Docker și Docker Compose instalate pe server
+- Git repository actualizat
 
-### 2. Install Vercel CLI
+### 2. Conectare la Server
 ```bash
-npm i -g vercel
+ssh root@23.88.113.154
+cd /opt/anyway-flight-schedule
 ```
 
-### 3. Deploy
+### 3. Deploy Actualizări
 ```bash
-# From project root
-vercel
+# Pull ultimele modificări din Git
+git pull origin main
 
-# Follow the prompts:
-# - Link to existing project? No
-# - Project name: flight-schedule (or your preferred name)
-# - Directory: ./
-# - Override settings? No
+# Configurează environment variables (dacă e necesar)
+nano .env.local
+
+# Rebuild aplicația cu noile modificări
+docker-compose build --no-cache
+
+# Restart toate serviciile
+docker-compose up -d
 ```
 
-### 4. Production Deployment
+### 4. Verificare Deployment
 ```bash
-vercel --prod
+# Verifică statusul containerelor
+docker-compose ps
+
+# Verifică logs-urile pentru erori
+docker-compose logs app -f
+
+# Test aplicația local
+curl -I http://localhost:8080
+
+# Test API endpoints
+curl -I http://localhost:8080/api/flights/OTP/arrivals
 ```
 
-### 5. Custom Domain (Optional)
-1. Go to Vercel Dashboard
-2. Select your project
-3. Go to Settings > Domains
-4. Add your custom domain
-5. Update the following files with your domain:
+### 5. Acces Public
+- **HTTPS Principal**: https://anyway.ro
+- **HTTP**: http://anyway.ro:8080  
+- **HTTPS Alternativ**: https://anyway.ro:8443
 
-```typescript
-// app/layout.tsx
-metadataBase: new URL('https://your-domain.com'),
-
-// app/sitemap.ts
-const baseUrl = 'https://your-domain.com'
-```
-
-## Manual Deployment
-
-### 1. Build the project
+### 6. Monitoring și Troubleshooting
 ```bash
-npm run build
+# Monitorizare logs în timp real
+docker-compose logs app -f
+
+# Restart doar aplicația
+docker-compose restart app
+
+# Verificare utilizare resurse
+docker stats
+
+# Verificare spațiu disk
+df -h
 ```
 
-### 2. Test production build locally
+### 7. Backup și Recovery
 ```bash
-npm start
+# Backup configurație
+cp .env.local .env.local.backup.$(date +%Y%m%d)
+
+# Backup baza de date (dacă există)
+# docker-compose exec db pg_dump -U user database > backup.sql
+
+# Recovery la versiunea anterioară
+git checkout HEAD~1
+docker-compose build --no-cache
+docker-compose up -d
 ```
 
-### 3. Deploy to your hosting provider
-- Upload the `.next` folder and other necessary files
-- Set Node.js version to 18+
-- Set build command: `npm run build`
-- Set start command: `npm start`
+### 8. SSL Certificate Renewal
+```bash
+# Verificare certificat SSL
+openssl x509 -in ssl/cert.pem -text -noout | grep "Not After"
 
-## Environment Variables
+# Renewal manual (dacă e necesar)
+certbot renew --dry-run
+```
 
-For production, you may want to set:
+## Environment Configuration
+
+Pentru producție, asigură-te că ai următoarele configurate în `.env.local`:
 
 ```bash
-# Vercel Dashboard > Settings > Environment Variables
-NODE_ENV=production
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
+# API Configuration
+NEXT_PUBLIC_FLIGHT_API_KEY=your_api_key_here
+NEXT_PUBLIC_FLIGHT_API_PROVIDER=aerodatabox
+NEXT_PUBLIC_CACHE_DURATION=600000
+NEXT_PUBLIC_AUTO_REFRESH_INTERVAL=600000
+
+# Site Configuration  
+NEXT_PUBLIC_SITE_URL=https://anyway.ro
 ```
 
-## Post-Deployment Checklist
+## Performance Optimization
 
-### 1. SEO Setup
-- [ ] Submit sitemap to Google Search Console
-- [ ] Verify robots.txt is accessible
-- [ ] Check meta tags with Facebook Debugger
-- [ ] Test structured data with Google Rich Results Test
+### 1. Docker Optimization
+```bash
+# Cleanup unused images
+docker system prune -a
 
-### 2. Performance
-- [ ] Run Lighthouse audit (aim for 95+ score)
-- [ ] Test on mobile devices
-- [ ] Verify Core Web Vitals
+# Optimize build cache
+docker-compose build --no-cache --parallel
+```
 
-### 3. AdSense Setup (if using)
-- [ ] Replace placeholder publisher ID
-- [ ] Create ad units in AdSense dashboard
-- [ ] Update slot IDs in `lib/adConfig.ts`
-- [ ] Test ad display
+### 2. Nginx Optimization
+- Gzip compression enabled
+- Static file caching
+- SSL/TLS optimization
+- Rate limiting configured
 
-### 4. Monitoring
-- [ ] Set up Vercel Analytics
-- [ ] Configure Google Analytics (optional)
-- [ ] Set up error monitoring (Sentry, etc.)
-
-## Troubleshooting
-
-### Build Errors
-- Check Node.js version (18+)
-- Clear `.next` folder and rebuild
-- Check for TypeScript errors
-
-### Performance Issues
-- Enable compression in hosting provider
-- Verify image optimization is working
-- Check bundle size with `npm run build`
-
-### SEO Issues
-- Verify meta tags are rendering
-- Check sitemap accessibility
-- Ensure canonical URLs are correct
-
-## Scaling Considerations
-
-For high traffic:
-- Enable Vercel Pro for better performance
-- Consider CDN for static assets
-- Implement Redis caching for flight data
-- Add database for persistent storage
+### 3. Application Optimization
+- Next.js production build
+- Image optimization enabled
+- Font preloading
+- Code splitting automatic

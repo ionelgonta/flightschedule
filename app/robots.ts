@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/admin/'],
     },
-    sitemap: 'https://flight-schedule.vercel.app/sitemap.xml',
+    sitemap: 'https://anyway.ro/sitemap.xml',
   }
 }

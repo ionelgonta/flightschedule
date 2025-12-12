@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { MAJOR_AIRPORTS } from '@/lib/airports'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://flight-schedule.vercel.app'
+  const baseUrl = 'https://anyway.ro'
   
   // Static pages
   const staticPages = [
