@@ -147,7 +147,7 @@ class AdvancedFlightService {
         return sum + Math.max(0, (actual.getTime() - scheduled.getTime()) / (1000 * 60));
       }, 0);
 
-      const destinations = [...new Set(flights.map(f => f.arrival.airport.iata || f.arrival.airport.icao))];
+      const destinations = Array.from(new Set(flights.map(f => f.arrival.airport.iata || f.arrival.airport.icao)));
 
       return {
         airlineCode,
