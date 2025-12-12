@@ -132,7 +132,7 @@ class MCPService {
   /**
    * Apelează un tool MCP specific
    */
-  async callTool(toolName: string, arguments: Record<string, any>): Promise<any> {
+  async callTool(toolName: string, toolArguments: Record<string, any>): Promise<any> {
     if (!this.initialized) {
       throw new Error('MCP service not initialized. Call initialize() first.');
     }
@@ -144,7 +144,7 @@ class MCPService {
         method: "tools/call",
         params: {
           name: toolName,
-          arguments: arguments
+          arguments: toolArguments
         }
       };
 

@@ -38,7 +38,7 @@ export async function GET() {
 // POST - Apelează un tool MCP specific
 export async function POST(request: NextRequest) {
   try {
-    const { toolName, arguments: toolArgs, airport, type } = await request.json();
+    const { toolName, toolArguments, airport, type } = await request.json();
 
     if (!toolName) {
       return NextResponse.json({
@@ -57,13 +57,13 @@ export async function POST(request: NextRequest) {
     } 
     // Altfel, apelează tool-ul direct cu argumentele furnizate
     else {
-      result = await mcpService.callTool(toolName, toolArgs || {});
+      result = await mcpService.callTool(toolName, toolArguments || {});
     }
 
     return NextResponse.json({
       success: true,
       toolName,
-      arguments: toolArgs,
+      arguments: toolArguments,
       result
     });
 
