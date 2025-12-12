@@ -6,6 +6,7 @@
 'use client';
 
 import { RawFlightData } from '@/lib/flightApiService';
+import { formatDelayInRomanian } from '@/lib/demoFlightData';
 import { Plane, Clock, MapPin, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 
 interface FlightCardProps {
@@ -162,7 +163,7 @@ export function FlightCard({ flight, type, className = '' }: FlightCardProps) {
         <div className="mt-2 flex items-center space-x-1 text-orange-600 dark:text-orange-400">
           <AlertCircle className="h-4 w-4" />
           <span className="text-sm font-medium">
-            Întârziere: {flight.delay} minute
+            Întârziere: {formatDelayInRomanian(flight.delay)}
           </span>
         </div>
       )}

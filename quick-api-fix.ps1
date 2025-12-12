@@ -1,3 +1,11 @@
+# Quick fix pentru API validation - doar fisierul necesar
+$ServerIP = "23.88.113.154"
+$Password = "FlightSchedule2024!"
+
+Write-Host "Quick fix pentru API validation..." -ForegroundColor Cyan
+
+# Creaza fisierul API route actualizat
+$apiRouteContent = @'
 /**
  * API Route: /api/admin/api-key
  * Gestionează API key-ul pentru AeroDataBox
@@ -183,3 +191,21 @@ export async function DELETE() {
     );
   }
 }
+'@
+
+# Salveaza fisierul local
+$apiRouteContent | Out-File -FilePath "route-fixed.ts" -Encoding UTF8
+
+# Upload fisierul pe server
+Write-Host "Upload fisier API route pe server..." -ForegroundColor Yellow
+pscp -pw $Password "route-fixed.ts" root@${ServerIP}:/tmp/
+
+# Executa comanda de update pe server
+Write-Host "Actualizez fisierul pe server..." -ForegroundColor Yellow
+$updateCmd = "plink -ssh -pw $Password root@$ServerIP `"cd /opt/anyway-flight-schedule && cp /tmp/route-fixed.ts app/api/admin/api-key/route.ts && docker-compose restart flight-schedule`""
+Invoke-Expression $updateCmd
+
+# Curata fisierul temporar
+Remove-Item "route-fixed.ts" -ErrorAction SilentlyContinue
+
+Write-Host "Fix aplicat! Testeaza acum admin panel-ul." -ForegroundColor Green

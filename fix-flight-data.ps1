@@ -1,3 +1,11 @@
+# Fix Flight Data Loading - Environment Variables Issue
+$ServerIP = "23.88.113.154"
+$Password = "FlightSchedule2024!"
+
+Write-Host "Fixing flight data loading issue..." -ForegroundColor Cyan
+
+# Create updated flight repository with proper environment handling
+$flightRepoContent = @'
 /**
  * Flight Repository - Gestionează cache-ul local și logica de preluare date
  * Implementează cache în memorie cu fallback la localStorage pentru persistență
@@ -33,9 +41,19 @@ class FlightRepository {
   constructor() {
     // Inițializează API service cu configurația din environment
     const provider = (process.env.NEXT_PUBLIC_FLIGHT_API_PROVIDER || 'aerodatabox') as keyof typeof API_CONFIGS;
+    
+    // Get API key from environment - try multiple sources
+    const apiKey = process.env.NEXT_PUBLIC_FLIGHT_API_KEY || 
+                   process.env.FLIGHT_API_KEY || 
+                   'cmj2peefi0001la04p5rkbbcc'; // fallback to known working key
+    
+    console.log('FlightRepository: Initializing with provider:', provider);
+    console.log('FlightRepository: API key available:', !!apiKey);
+    console.log('FlightRepository: API key prefix:', apiKey.substring(0, 8) + '...');
+    
     const apiConfig = {
       ...API_CONFIGS[provider],
-      apiKey: process.env.NEXT_PUBLIC_FLIGHT_API_KEY || 'cmj2peefi0001la04p5rkbbcc'
+      apiKey: apiKey
     };
     
     this.apiService = new FlightApiService(apiConfig);
@@ -384,3 +402,21 @@ export function getFlightRepository(): FlightRepository {
 }
 
 export default FlightRepository;
+'@
+
+# Save the updated file
+$flightRepoContent | Out-File -FilePath "flightRepository-fixed.ts" -Encoding UTF8
+
+# Upload to server
+Write-Host "Uploading fixed flight repository..." -ForegroundColor Yellow
+pscp -pw $Password "flightRepository-fixed.ts" root@${ServerIP}:/tmp/
+
+# Update the file on server and restart
+Write-Host "Applying fix on server..." -ForegroundColor Yellow
+$updateCmd = "plink -ssh -pw $Password root@$ServerIP `"cd /opt/anyway-flight-schedule && cp /tmp/flightRepository-fixed.ts lib/flightRepository.ts && docker-compose restart flight-schedule`""
+Invoke-Expression $updateCmd
+
+# Clean up
+Remove-Item "flightRepository-fixed.ts" -ErrorAction SilentlyContinue
+
+Write-Host "Flight data fix applied! Testing..." -ForegroundColor Green

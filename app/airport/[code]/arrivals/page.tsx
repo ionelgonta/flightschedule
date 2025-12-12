@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getAirportByCode } from '@/lib/airports'
-import { getFlightRepository, FlightFilters } from '@/lib/flightRepository'
+import { getClientFlightService, ClientFlightFilters } from '@/lib/clientFlightService'
 import { RawFlightData } from '@/lib/flightApiService'
 import FlightList from '@/components/flights/FlightList'
 import { AdBanner } from '@/components/ads/AdBanner'
@@ -23,18 +23,18 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
   const [error, setError] = useState<string | null>(null)
 
   const airport = getAirportByCode(params.code.toUpperCase())
-  const flightRepository = getFlightRepository()
+  const clientFlightService = getClientFlightService()
 
   if (!airport) {
     notFound()
   }
 
-  const fetchFlights = async (filters?: FlightFilters) => {
+  const fetchFlights = async (filters?: ClientFlightFilters) => {
     try {
       setLoading(true)
       setError(null)
       
-      const response = await flightRepository.getArrivals(airport.code, filters)
+      const response = await clientFlightService.getArrivals(airport.code, filters)
       
       if (response.success) {
         setFlights(response.data)
@@ -71,7 +71,7 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
     fetchFlights()
   }
 
-  const handleFiltersChange = (filters: FlightFilters) => {
+  const handleFiltersChange = (filters: any) => {
     // Filtrele sunt aplicate local în FlightList
     // Aici putem adăuga logică suplimentară dacă e necesar
   }
