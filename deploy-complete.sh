@@ -10,7 +10,7 @@ echo "=================================================="
 
 # Configurații
 PROJECT_DIR="/opt/anyway-flight-schedule"
-API_KEY="cmj2k3c1p000djy044wbqprap"
+API_KEY="cmj2m39qs0001k00404cmwu75"
 BACKUP_DIR="/tmp/anyway-backup-$(date +%Y%m%d_%H%M%S)"
 
 # Verifică că suntem în directorul corect

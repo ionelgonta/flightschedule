@@ -3,6 +3,8 @@
  * Suportă AeroDataBox, FlightLabs și alte API-uri
  */
 
+import { getIcaoCode } from './icaoMapping';
+
 export interface FlightApiConfig {
   provider: 'aerodatabox' | 'flightlabs' | 'aviationstack';
   apiKey: string;
@@ -215,12 +217,16 @@ class FlightApiService {
     
     switch (this.config.provider) {
       case 'aerodatabox':
-        return `${this.config.baseUrl}/flights/airports/icao/${airportCode}/${type}/${today}T00:00/${today}T23:59`;
+        // AeroDataBox folosește coduri ICAO
+        const icaoCode = getIcaoCode(airportCode);
+        return `${this.config.baseUrl}/flights/airports/icao/${icaoCode}/${type}/${today}T00:00/${today}T23:59`;
       
       case 'flightlabs':
+        // FlightLabs folosește coduri IATA
         return `${this.config.baseUrl}/schedules?dep_iata=${type === 'departures' ? airportCode : ''}&arr_iata=${type === 'arrivals' ? airportCode : ''}`;
       
       case 'aviationstack':
+        // AviationStack folosește coduri IATA
         return `${this.config.baseUrl}/flights?${type === 'arrivals' ? 'arr_iata' : 'dep_iata'}=${airportCode}`;
       
       default:

@@ -1,123 +1,102 @@
-# Deploy API Update Script pentru anyway.ro
-# Actualizează aplicația cu integrarea API.Market
+# Deploy API Update Script pentru anyway.ro (PowerShell)
+# Actualizează codul cu noua implementare API și ICAO mapping
 
-Write-Host "🚀 Starting API.Market deployment for anyway.ro..." -ForegroundColor Green
+Write-Host "🚀 Starting API update deployment for anyway.ro..." -ForegroundColor Green
 
-# Configurații
-$PROJECT_DIR = "/opt/anyway-flight-schedule"
-$API_KEY = "cmj2k3c1p000djy044wbqprap"
-
-# Navighează la directorul proiectului
-Set-Location $PROJECT_DIR
-Write-Host "📁 Current directory: $(Get-Location)" -ForegroundColor Blue
-
-# Backup configurația existentă
-if (Test-Path ".env.local") {
-    Write-Host "💾 Backing up existing .env.local..." -ForegroundColor Yellow
-    $backupName = ".env.local.backup.$(Get-Date -Format 'yyyyMMdd_HHmmss')"
-    Copy-Item ".env.local" $backupName
+# Verifică dacă suntem pe server (adaptează pentru Windows dacă e necesar)
+if (-not (Test-Path "C:\opt\anyway-flight-schedule" -ErrorAction SilentlyContinue)) {
+    if (-not (Test-Path "/opt/anyway-flight-schedule" -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ Error: Not on production server. Run this script on 23.88.113.154" -ForegroundColor Red
+        exit 1
+    }
+    $projectPath = "/opt/anyway-flight-schedule"
+} else {
+    $projectPath = "C:\opt\anyway-flight-schedule"
 }
 
-# Creează configurația pentru API.Market
-Write-Host "⚙️ Creating API.Market configuration..." -ForegroundColor Blue
+Set-Location $projectPath
 
-$envContent = @"
-# API.Market Configuration pentru AeroDataBox
-NEXT_PUBLIC_FLIGHT_API_KEY=$API_KEY
+Write-Host "📦 Backing up current deployment..." -ForegroundColor Yellow
+$backupName = "anyway-flight-schedule-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+try {
+    Copy-Item -Path "." -Destination "../$backupName" -Recurse -ErrorAction SilentlyContinue
+    Write-Host "✅ Backup created: $backupName" -ForegroundColor Green
+} catch {
+    Write-Host "⚠️ Backup failed, continuing..." -ForegroundColor Yellow
+}
+
+Write-Host "🔄 Pulling latest code..." -ForegroundColor Cyan
+git pull origin main
+
+Write-Host "🔧 Setting up environment variables..." -ForegroundColor Cyan
+if (-not (Test-Path ".env.local")) {
+    Write-Host "Creating .env.local with API configuration..." -ForegroundColor Yellow
+    
+    $envContent = @"
+# API.Market Configuration
+NEXT_PUBLIC_FLIGHT_API_KEY=cmj2m39qs0001k00404cmwu75
 NEXT_PUBLIC_FLIGHT_API_PROVIDER=aerodatabox
 NEXT_PUBLIC_CACHE_DURATION=600000
 NEXT_PUBLIC_AUTO_REFRESH_INTERVAL=600000
 NEXT_PUBLIC_API_RATE_LIMIT=150
 NEXT_PUBLIC_PRIORITY_AIRPORTS=OTP,CLJ,TSR,IAS,CND,KIV,SBZ,CRA,BCM,BAY
-NEXT_PUBLIC_SCHEDULER_ENABLED=true
-NEXT_PUBLIC_MAX_CONCURRENT_REQUESTS=3
 NEXT_PUBLIC_DEBUG_FLIGHTS=false
-
-# Google AdSense (dacă este configurat)
-NEXT_PUBLIC_ADSENSE_CLIENT_ID=ca-pub-your-id-here
 "@
-
-$envContent | Out-File -FilePath ".env.local" -Encoding UTF8
-Write-Host "✅ Configuration created successfully" -ForegroundColor Green
-
-# Pull ultimele modificări din Git
-Write-Host "📥 Pulling latest changes from Git..." -ForegroundColor Blue
-try {
-    git pull origin main
-} catch {
-    Write-Host "⚠️ Git pull failed, continuing with local changes..." -ForegroundColor Yellow
+    
+    Set-Content -Path ".env.local" -Value $envContent
+    Write-Host "✅ Created .env.local with API configuration" -ForegroundColor Green
+} else {
+    Write-Host "✅ .env.local already exists" -ForegroundColor Green
 }
 
-# Rebuild aplicația cu noua configurație
-Write-Host "🔨 Building application with new API configuration..." -ForegroundColor Blue
-$buildResult = docker-compose build --no-cache app
+Write-Host "🏗️ Building application with new API integration..." -ForegroundColor Cyan
+docker-compose build --no-cache
 
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ Build failed! Restoring backup..." -ForegroundColor Red
-    $backupFiles = Get-ChildItem ".env.local.backup.*" | Sort-Object LastWriteTime -Descending
-    if ($backupFiles.Count -gt 0) {
-        Copy-Item $backupFiles[0].FullName ".env.local"
-    }
-    exit 1
-}
-
-# Restart serviciile
-Write-Host "🔄 Restarting services..." -ForegroundColor Blue
+Write-Host "🔄 Restarting services..." -ForegroundColor Cyan
+docker-compose down
 docker-compose up -d
 
-# Verifică statusul serviciilor
-Write-Host "🔍 Checking service status..." -ForegroundColor Blue
-Start-Sleep 10
+Write-Host "⏳ Waiting for services to start..." -ForegroundColor Yellow
+Start-Sleep -Seconds 10
+
+Write-Host "🔍 Checking service status..." -ForegroundColor Cyan
 docker-compose ps
 
-# Test API endpoint
-Write-Host "🧪 Testing API endpoints..." -ForegroundColor Blue
-Start-Sleep 5
-
-# Test local API
-Write-Host "Testing local API..." -ForegroundColor Cyan
-try {
-    $response = Invoke-WebRequest -Uri "http://localhost:8080/api/flights/OTP/arrivals" -TimeoutSec 10
-    Write-Host "API Response: $($response.StatusCode)" -ForegroundColor Green
-} catch {
-    Write-Host "API test failed: $($_.Exception.Message)" -ForegroundColor Red
-}
-
-# Test aplicația
-Write-Host "Testing application..." -ForegroundColor Cyan
-try {
-    $response = Invoke-WebRequest -Uri "http://localhost:8080/" -TimeoutSec 10
-    Write-Host "App Response: $($response.StatusCode)" -ForegroundColor Green
-} catch {
-    Write-Host "App test failed: $($_.Exception.Message)" -ForegroundColor Red
-}
-
-# Afișează logs pentru debugging
-Write-Host "📋 Recent application logs:" -ForegroundColor Blue
+Write-Host "📊 Checking application logs..." -ForegroundColor Cyan
 docker-compose logs app --tail=20
+
+Write-Host "🧪 Testing API integration..." -ForegroundColor Cyan
+Start-Sleep -Seconds 5
+
+# Test API endpoint
+Write-Host "Testing OTP arrivals endpoint..." -ForegroundColor Yellow
+try {
+    $response = Invoke-WebRequest -Uri "http://localhost:3000/api/flights/OTP/arrivals" -UseBasicParsing -TimeoutSec 10
+    if ($response.StatusCode -eq 200) {
+        Write-Host "✅ API endpoint test passed" -ForegroundColor Green
+    } else {
+        Write-Host "⚠️ API endpoint returned: $($response.StatusCode)" -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "❌ API endpoint test failed: $($_.Exception.Message)" -ForegroundColor Red
+}
 
 Write-Host ""
 Write-Host "✅ Deployment completed!" -ForegroundColor Green
 Write-Host ""
-Write-Host "🌐 Application URLs:" -ForegroundColor Cyan
-Write-Host "   - Local: http://localhost:8080"
-Write-Host "   - Public: https://anyway.ro (port 8080)"
-Write-Host "   - SSL: https://anyway.ro:8443"
+Write-Host "🌐 Application should be available at:" -ForegroundColor Cyan
+Write-Host "   - https://anyway.ro" -ForegroundColor White
+Write-Host "   - https://anyway.ro/airport/OTP/arrivals" -ForegroundColor White
+Write-Host "   - https://anyway.ro/airport/CLJ/departures" -ForegroundColor White
 Write-Host ""
-Write-Host "🔧 API Configuration:" -ForegroundColor Cyan
-Write-Host "   - Provider: AeroDataBox via API.Market"
-Write-Host "   - Rate Limit: 150 requests/minute"
-Write-Host "   - Cache Duration: 10 minutes"
-Write-Host "   - Auto Refresh: 10 minutes"
+Write-Host "📋 Next steps:" -ForegroundColor Cyan
+Write-Host "1. Test flight data loading on website" -ForegroundColor White
+Write-Host "2. Check browser console for any errors" -ForegroundColor White
+Write-Host "3. Verify API key is working (check for 404 errors)" -ForegroundColor White
+Write-Host "4. Monitor logs: docker-compose logs app -f" -ForegroundColor White
 Write-Host ""
-Write-Host "📊 Monitoring:" -ForegroundColor Cyan
-Write-Host "   - Logs: docker-compose logs app -f"
-Write-Host "   - Status: docker-compose ps"
-Write-Host "   - API Test: curl http://localhost:8080/api/flights/OTP/arrivals"
-Write-Host ""
-Write-Host "🎯 Next Steps:" -ForegroundColor Yellow
-Write-Host "1. Test flight data loading on https://anyway.ro/airport/OTP/arrivals"
-Write-Host "2. Monitor logs for API errors: docker-compose logs app -f"
-Write-Host "3. Check browser console for any JavaScript errors"
-Write-Host "4. Verify scheduler is running and updating cache"
-Write-Host ""
+Write-Host "🔑 If API key returns 404 errors:" -ForegroundColor Yellow
+Write-Host "1. Check API.Market dashboard for key validity" -ForegroundColor White
+Write-Host "2. Verify credits/subscription status" -ForegroundColor White
+Write-Host "3. Update API key in .env.local if needed" -ForegroundColor White
+Write-Host "4. Restart: docker-compose restart" -ForegroundColor White

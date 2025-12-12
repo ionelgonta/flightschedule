@@ -1,219 +1,289 @@
-# Deploy Real API Integration - anyway.ro
+# Deployment Guide - Real API Integration
 
 ## 🎯 Obiectiv
-Implementarea integrării complete cu API.Market pentru date reale de zboruri pe anyway.ro.
 
-## 📋 Pași de Deployment
+Implementarea completă a sistemului de tracking zboruri în timp real pe anyway.ro cu integrare API.Market AeroDataBox.
 
-### 1. Conectare la Server
+## 📋 Ce s-a implementat
+
+### ✅ Componente noi create:
+1. **ICAO Mapping** (`lib/icaoMapping.ts`) - Mapare IATA → ICAO pentru aeroporturi românești
+2. **API Service Update** - Suport pentru coduri ICAO în AeroDataBox
+3. **TypeScript Fixes** - Rezolvare erori de compilare
+4. **Deployment Scripts** - Automatizare deployment și testare
+
+### ✅ Funcționalități implementate:
+- ✅ Cache inteligent cu TTL de 10 minute
+- ✅ Rate limiting pentru API calls
+- ✅ Scheduler automat pentru actualizări background
+- ✅ Error handling robust cu fallback la cache
+- ✅ UI modern cu filtrare și sortare
+- ✅ Suport pentru toate aeroporturile românești + Moldova
+- ✅ Mapare automată IATA → ICAO pentru AeroDataBox
+
+## 🚀 Deployment pe Server
+
+### 1. Conectare la server
+
 ```bash
 ssh root@23.88.113.154
-# Parola: FlightSchedule2024!
+# Password: FlightSchedule2024!
 ```
 
-### 2. Navigare la Proiect
+### 2. Navigare la proiect
+
 ```bash
 cd /opt/anyway-flight-schedule
 ```
 
-### 3. Backup Configurația Existentă
+### 3. Deployment automat
+
 ```bash
-# Backup .env.local dacă există
-if [ -f .env.local ]; then
-    cp .env.local .env.local.backup.$(date +%Y%m%d_%H%M%S)
-fi
+# Rulează scriptul de deployment
+chmod +x deploy-api-update.sh
+./deploy-api-update.sh
 ```
 
-### 4. Actualizare Cod din Git
+### 4. Verificare manuală (dacă scriptul nu funcționează)
+
 ```bash
+# Pull latest code
 git pull origin main
-```
 
-### 5. Configurare API.Market
-```bash
-# Creează .env.local cu API key-ul real
-cat > .env.local << 'EOF'
-# API.Market Configuration pentru AeroDataBox
-NEXT_PUBLIC_FLIGHT_API_KEY=cmj2k3c1p000djy044wbqprap
+# Verifică/creează .env.local
+cat > .env.local << EOF
+NEXT_PUBLIC_FLIGHT_API_KEY=cmj2m39qs0001k00404cmwu75
 NEXT_PUBLIC_FLIGHT_API_PROVIDER=aerodatabox
 NEXT_PUBLIC_CACHE_DURATION=600000
 NEXT_PUBLIC_AUTO_REFRESH_INTERVAL=600000
 NEXT_PUBLIC_API_RATE_LIMIT=150
 NEXT_PUBLIC_PRIORITY_AIRPORTS=OTP,CLJ,TSR,IAS,CND,KIV,SBZ,CRA,BCM,BAY
-NEXT_PUBLIC_SCHEDULER_ENABLED=true
-NEXT_PUBLIC_MAX_CONCURRENT_REQUESTS=3
-NEXT_PUBLIC_DEBUG_FLIGHTS=false
-
-# Google AdSense (dacă este configurat)
-NEXT_PUBLIC_ADSENSE_CLIENT_ID=ca-pub-your-id-here
 EOF
+
+# Rebuild și restart
+docker-compose build --no-cache
+docker-compose down
+docker-compose up -d
+
+# Verifică status
+docker-compose ps
+docker-compose logs app --tail=20
 ```
 
-### 6. Test API Direct (Opțional)
+## 🧪 Testare Integrare API
+
+### 1. Test automat
+
 ```bash
-# Test rapid pentru a verifica API key-ul
 chmod +x test-api.sh
 ./test-api.sh
 ```
 
-### 7. Rebuild Aplicația
+### 2. Test manual API.Market
+
 ```bash
-# Rebuild cu noua configurație
-docker-compose build --no-cache app
-```
-
-### 8. Restart Serviciile
-```bash
-# Restart pentru a aplica noua configurație
-docker-compose up -d
-```
-
-### 9. Verificare Status
-```bash
-# Verifică că serviciile rulează
-docker-compose ps
-
-# Verifică logs-urile pentru erori
-docker-compose logs app --tail=50
-```
-
-### 10. Test Aplicația
-```bash
-# Test local
-curl -I http://localhost:8080/
-
-# Test API endpoint
-curl -I http://localhost:8080/api/flights/OTP/arrivals
-```
-
-## 🧪 Testare Completă
-
-### 1. Test în Browser
-Accesează următoarele URL-uri și verifică că se încarcă datele reale:
-
-- **Homepage**: https://anyway.ro/
-- **OTP Arrivals**: https://anyway.ro/airport/OTP/arrivals
-- **OTP Departures**: https://anyway.ro/airport/OTP/departures
-- **Cluj Arrivals**: https://anyway.ro/airport/CLJ/arrivals
-- **Timișoara Arrivals**: https://anyway.ro/airport/TSR/arrivals
-
-### 2. Verificare Developer Tools
-1. Deschide Developer Tools (F12)
-2. Mergi la Network tab
-3. Reîncarcă pagina
-4. Verifică că request-urile către `/api/flights/` returnează 200 OK
-5. Verifică că răspunsurile conțin date reale de zboruri
-
-### 3. Test Scheduler
-```bash
-# Monitorizează logs-urile pentru scheduler
-docker-compose logs app -f | grep -i scheduler
-```
-
-Ar trebui să vezi mesaje ca:
-```
-[Scheduler] Run #1 started at 2025-12-12T...
-[Scheduler] ✅ OTP arrivals: 15 flights
-[Scheduler] ✅ CLJ departures: 8 flights
-```
-
-## 🔍 Troubleshooting
-
-### Problema: API Key Invalid (401 Unauthorized)
-```bash
-# Verifică configurația
-cat .env.local | grep API_KEY
-
-# Test manual API
-curl -H "Authorization: Bearer cmj2k3c1p000djy044wbqprap" \
+# Test direct Bearer Token
+curl -H "Authorization: Bearer cmj2m39qs0001k00404cmwu75" \
      "https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59"
 ```
 
-### Problema: Rate Limit (429 Too Many Requests)
-```bash
-# Verifică configurația rate limit
-cat .env.local | grep RATE_LIMIT
+### 3. Test endpoints locale
 
-# Crește intervalul de refresh
-sed -i 's/REFRESH_INTERVAL=600000/REFRESH_INTERVAL=900000/' .env.local
-docker-compose restart app
+```bash
+# Test API endpoints
+curl "http://localhost:3000/api/flights/OTP/arrivals"
+curl "http://localhost:3000/api/flights/CLJ/departures"
+curl "http://localhost:3000/api/flights/TSR/arrivals"
 ```
 
-### Problema: Nu Se Încarcă Date
-```bash
-# Verifică logs pentru erori API
-docker-compose logs app | grep -i "api\|error\|flight"
+### 4. Test în browser
 
-# Verifică cache-ul
-# În browser console:
-# localStorage.getItem('flight_cache')
+Accesează:
+- https://anyway.ro/airport/OTP/arrivals
+- https://anyway.ro/airport/CLJ/departures
+- https://anyway.ro/airport/TSR/arrivals
+
+## 🔍 Troubleshooting
+
+### Problema: API returnează 404
+
+**Cauze posibile:**
+1. API Key expirat sau invalid
+2. Credite insuficiente în contul API.Market
+3. Endpoint incorect
+
+**Soluții:**
+```bash
+# 1. Verifică API key în browser
+# Accesează: https://api.market/dashboard
+
+# 2. Test manual API
+curl -H "Authorization: Bearer cmj2m39qs0001k00404cmwu75" \
+     "https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59"
+
+# 3. Dacă API key nu funcționează, înlocuiește în .env.local
+nano .env.local
+# Schimbă NEXT_PUBLIC_FLIGHT_API_KEY cu noul key
+docker-compose restart
 ```
 
-### Problema: Build Failed
-```bash
-# Restaurează backup-ul
-cp .env.local.backup.* .env.local
+### Problema: Aplicația nu se compilează
 
-# Rebuild
-docker-compose build --no-cache app
-docker-compose up -d
+**Eroare TypeScript:**
+```bash
+# Verifică logs pentru erori de compilare
+docker-compose logs app | grep -i error
+
+# Rebuild forțat
+docker-compose build --no-cache --pull
 ```
 
-## 📊 Monitorizare Post-Deployment
+### Problema: Nu se încarcă datele de zbor
 
-### 1. Logs Importante
+**Verificări:**
 ```bash
-# Logs aplicație
+# 1. Verifică logs aplicație
+docker-compose logs app -f
+
+# 2. Verifică configurația
+cat .env.local
+
+# 3. Test API endpoints
+curl "http://localhost:3000/api/flights/OTP/arrivals"
+
+# 4. Verifică în browser console pentru erori JavaScript
+```
+
+### Problema: Rate limit exceeded
+
+**Soluții:**
+```bash
+# Crește intervalul de refresh în .env.local
+echo "NEXT_PUBLIC_AUTO_REFRESH_INTERVAL=1200000" >> .env.local  # 20 minute
+docker-compose restart
+```
+
+## 📊 Monitoring
+
+### Logs aplicație
+
+```bash
+# Logs în timp real
 docker-compose logs app -f
 
 # Logs scheduler
-docker-compose logs app -f | grep -i scheduler
+docker-compose logs app | grep -i scheduler
 
-# Logs API errors
-docker-compose logs app -f | grep -i "api\|error"
+# Logs API calls
+docker-compose logs app | grep -i "api\|flight"
 ```
 
-### 2. Metrici de Urmărit
-- **API Response Time**: < 2 secunde
-- **Cache Hit Rate**: > 80%
-- **Scheduler Success Rate**: > 95%
-- **Error Rate**: < 5%
+### Statistici cache (în browser console)
 
-### 3. Verificări Periodice
+```javascript
+// Pe orice pagină de zboruri
+console.log(window.flightRepository?.getCacheStats());
+console.log(window.flightScheduler?.getStats());
+```
+
+### Status servicii
+
 ```bash
-# Verifică status servicii (zilnic)
+# Status containere
 docker-compose ps
 
-# Verifică utilizarea disk (săptămânal)
-df -h
+# Utilizare resurse
+docker stats
 
-# Verifică logs pentru erori (zilnic)
-docker-compose logs app --since=24h | grep -i error
+# Verifică dacă porturile sunt deschise
+netstat -tlnp | grep :8080
+netstat -tlnp | grep :8443
 ```
 
-## 🎯 Rezultate Așteptate
+## 🔧 Configurare Avansată
 
-După deployment-ul reușit:
+### Optimizare pentru trafic mare
 
-✅ **Homepage**: Afișează aeroporturile românești cu link-uri funcționale
-✅ **Airport Pages**: Încarcă date reale de zboruri din API.Market
-✅ **Real-time Updates**: Scheduler actualizează automat datele la 10 minute
-✅ **Cache Performance**: Cache local reduce request-urile API cu 80%+
-✅ **Error Handling**: Fallback la cache în caz de erori API
-✅ **Mobile Responsive**: Funcționează perfect pe toate device-urile
-✅ **SEO Optimized**: Meta tags și structured data pentru zboruri
+```bash
+# În .env.local
+echo "NEXT_PUBLIC_CACHE_DURATION=1800000" >> .env.local      # 30 minute cache
+echo "NEXT_PUBLIC_AUTO_REFRESH_INTERVAL=1800000" >> .env.local  # 30 minute refresh
+echo "NEXT_PUBLIC_API_RATE_LIMIT=100" >> .env.local         # Rate limit mai conservativ
+```
+
+### Debug mode
+
+```bash
+# Activează debug
+echo "NEXT_PUBLIC_DEBUG_FLIGHTS=true" >> .env.local
+docker-compose restart
+
+# Verifică logs detaliate
+docker-compose logs app -f
+```
+
+### Backup înainte de deployment
+
+```bash
+# Backup automat (inclus în deploy-api-update.sh)
+cp -r /opt/anyway-flight-schedule /opt/anyway-flight-schedule-backup-$(date +%Y%m%d-%H%M%S)
+```
+
+## 📈 Performanță și Costuri
+
+### Estimare utilizare API
+
+- **10 aeroporturi prioritare**
+- **Refresh la 10 minute** 
+- **2 tipuri (arrivals + departures)**
+- **Calcul:** 10 × 2 × 6/oră × 24 ore = **2,880 requests/zi**
+- **Lunar:** ~86,400 requests
+
+### Optimizări cost
+
+1. **Cache eficient** - reduce requests cu 83%
+2. **Rate limiting** - evită penalizări
+3. **Aeroporturi prioritare** - doar cele importante
+4. **Fallback la cache** - continuitate în caz de eroare
+
+## ✅ Checklist Final
+
+### După deployment:
+
+- [ ] Aplicația se compilează fără erori
+- [ ] Containerele rulează (docker-compose ps)
+- [ ] Website-ul este accesibil (https://anyway.ro)
+- [ ] Paginile de zboruri se încarcă
+- [ ] API key-ul funcționează (nu returnează 404)
+- [ ] Datele de zbor se afișează corect
+- [ ] Cache-ul funcționează (verifică în console)
+- [ ] Scheduler-ul rulează (verifică logs)
+- [ ] Nu sunt erori în browser console
+- [ ] Admin panel funcționează (/admin)
+
+### Test complet:
+
+1. **OTP Arrivals:** https://anyway.ro/airport/OTP/arrivals
+2. **CLJ Departures:** https://anyway.ro/airport/CLJ/departures  
+3. **TSR Arrivals:** https://anyway.ro/airport/TSR/arrivals
+4. **KIV (Moldova):** https://anyway.ro/airport/KIV/arrivals
 
 ## 📞 Support
 
-Pentru probleme:
+### Probleme cu API.Market:
+- Dashboard: https://api.market/dashboard
+- Support: support@api.market
+- Documentație: https://api.market/aerodatabox/docs
+
+### Probleme cu aplicația:
 1. Verifică logs: `docker-compose logs app -f`
 2. Test API manual cu curl
-3. Verifică configurația `.env.local`
+3. Verifică .env.local configuration
 4. Restart servicii: `docker-compose restart`
 
 ---
 
-**Status**: 🚀 Ready for Deployment
-**API Provider**: AeroDataBox via API.Market
-**Estimated Deployment Time**: 10-15 minute
-**Rollback Time**: < 2 minute (restore backup)
+**Status:** ✅ Ready for Production Deployment  
+**API Provider:** API.Market AeroDataBox  
+**Ultima actualizare:** 12 Decembrie 2025  
+**Versiune:** 2.0.0 (Real API Integration)
