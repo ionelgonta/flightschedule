@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getAirportByCode } from '@/lib/airports'
-import { AirportsService } from '@/lib/airportsService'
-import { Flight, FlightFilters } from '@/types/flight'
-import { FlightDisplay } from '@/components/flights/FlightDisplay'
+import { getFlightRepository, FlightFilters } from '@/lib/flightRepository'
+import { RawFlightData } from '@/lib/flightApiService'
+import FlightList from '@/components/flights/FlightList'
 import { AdBanner } from '@/components/ads/AdBanner'
 import { ArrowLeft, RefreshCw, Plane } from 'lucide-react'
 
@@ -17,13 +17,13 @@ interface ArrivalsPageProps {
 }
 
 export default function ArrivalsPage({ params }: ArrivalsPageProps) {
-  const [flights, setFlights] = useState<Flight[]>([])
+  const [flights, setFlights] = useState<RawFlightData[]>([])
   const [loading, setLoading] = useState(true)
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const airport = getAirportByCode(params.code.toUpperCase())
-  const airportsService = AirportsService.getInstance()
+  const flightRepository = getFlightRepository()
 
   if (!airport) {
     notFound()
@@ -33,16 +33,24 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
     try {
       setLoading(true)
       setError(null)
-      const response = await airportsService.getArrivals(airport.code, filters)
       
-      if (response.error) {
-        setError(response.error)
-      } else {
+      const response = await flightRepository.getArrivals(airport.code, filters)
+      
+      if (response.success) {
         setFlights(response.data)
-        setLastUpdated(new Date())
+        setLastUpdated(response.last_updated)
+        setError(null)
+      } else {
+        setError(response.error || 'Nu am putut încărca datele zborurilor')
+        // Păstrează datele existente dacă sunt din cache
+        if (response.data.length > 0) {
+          setFlights(response.data)
+          setLastUpdated(response.last_updated)
+        }
       }
     } catch (err) {
-      setError('Failed to fetch flight data')
+      setError('Eroare la încărcarea datelor de zbor')
+      console.error('Error fetching arrivals:', err)
     } finally {
       setLoading(false)
     }
@@ -51,10 +59,10 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
   useEffect(() => {
     fetchFlights()
     
-    // Auto-refresh every 5 minutes
+    // Auto-refresh every 10 minutes
     const interval = setInterval(() => {
       fetchFlights()
-    }, 5 * 60 * 1000)
+    }, 10 * 60 * 1000)
 
     return () => clearInterval(interval)
   }, [airport.code])
@@ -64,7 +72,8 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
   }
 
   const handleFiltersChange = (filters: FlightFilters) => {
-    fetchFlights(filters)
+    // Filtrele sunt aplicate local în FlightList
+    // Aici putem adăuga logică suplimentară dacă e necesar
   }
 
   return (
@@ -141,28 +150,15 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
               </button>
             </div>
 
-            {error ? (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
-                <div className="text-red-600 dark:text-red-400 mb-2">
-                  <Plane className="h-12 w-12 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold">Unable to Load Flight Data</h3>
-                  <p className="text-sm">{error}</p>
-                </div>
-                <button
-                  onClick={handleRefresh}
-                  className="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  Try Again
-                </button>
-              </div>
-            ) : (
-              <FlightDisplay
-                flights={flights}
-                loading={loading}
-                type="arrivals"
-                onFiltersChange={handleFiltersChange}
-              />
-            )}
+            <FlightList
+              flights={flights}
+              type="arrivals"
+              loading={loading}
+              error={error}
+              lastUpdated={lastUpdated}
+              onRefresh={handleRefresh}
+              onFiltersChange={handleFiltersChange}
+            />
           </div>
 
           {/* Sidebar */}
@@ -197,27 +193,27 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
             {/* Flight Statistics */}
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Arrival Statistics
+                Statistici Sosiri
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Total Flights</span>
+                  <span className="text-gray-600 dark:text-gray-400">Total Zboruri</span>
                   <span className="font-semibold text-gray-900 dark:text-white">{flights.length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">On Time</span>
+                  <span className="text-gray-600 dark:text-gray-400">La timp</span>
                   <span className="font-semibold text-green-600 dark:text-green-400">
-                    {flights.filter(f => f.status === 'scheduled' || f.status === 'landed').length}
+                    {flights.filter(f => f.status === 'scheduled' || f.status === 'landed' || f.status === 'arrived').length}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Delayed</span>
+                  <span className="text-gray-600 dark:text-gray-400">Întârziate</span>
                   <span className="font-semibold text-orange-600 dark:text-orange-400">
                     {flights.filter(f => f.status === 'delayed').length}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Cancelled</span>
+                  <span className="text-gray-600 dark:text-gray-400">Anulate</span>
                   <span className="font-semibold text-red-600 dark:text-red-400">
                     {flights.filter(f => f.status === 'cancelled').length}
                   </span>

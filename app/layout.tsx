@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/ThemeProvider'
 import { Navbar } from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import { AdSenseScript } from '@/components/ads/AdSenseScript'
+import { FlightSchedulerProvider } from '@/components/FlightSchedulerProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -68,13 +69,15 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <ThemeProvider>
-          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-            <Navbar />
-            <main className="pt-16">
-              {children}
-            </main>
-            <Footer />
-          </div>
+          <FlightSchedulerProvider>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+              <Navbar />
+              <main className="pt-16">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </FlightSchedulerProvider>
         </ThemeProvider>
       </body>
     </html>
