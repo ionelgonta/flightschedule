@@ -88,7 +88,7 @@ echo "-----------------------------"
 # Test rapid API key
 echo "Testing API key with OTP airport..."
 API_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-  -H "Authorization: Bearer cmj2m39qs0001k00404cmwu75" \
+  -H "x-magicapi-key: cmj2m39qs0001k00404cmwu75" \
   -H "Content-Type: application/json" \
   "https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59")
 
@@ -245,7 +245,7 @@ else
     echo "1. Check API.Market dashboard: https://api.market/dashboard"
     echo "2. Verify subscription is active"
     echo "3. Check application logs: docker-compose logs app -f"
-    echo "4. Test API manually: curl -H 'Authorization: Bearer cmj2m39qs0001k00404cmwu75' 'https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59'"
+    echo "4. Test API manually: curl -H 'x-magicapi-key: cmj2m39qs0001k00404cmwu75' 'https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59'"
 fi
 
 echo ""

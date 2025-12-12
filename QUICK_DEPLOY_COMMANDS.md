@@ -55,7 +55,7 @@ chmod +x deploy-final.sh
 ### Test API Key Manually
 ```bash
 # Test current key
-curl -H "Authorization: Bearer cmj2m39qs0001k00404cmwu75" \
+curl -H "x-magicapi-key: cmj2m39qs0001k00404cmwu75" \
   "https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59"
 
 # Should return HTTP 200 with flight data

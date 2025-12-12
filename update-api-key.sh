@@ -27,7 +27,7 @@ echo "Testing new API key: $NEW_API_KEY"
 API_TEST_URL="https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59"
 
 response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-  -H "Authorization: Bearer $NEW_API_KEY" \
+  -H "x-magicapi-key: $NEW_API_KEY" \
   -H "Content-Type: application/json" \
   "$API_TEST_URL")
 

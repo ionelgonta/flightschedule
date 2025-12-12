@@ -61,7 +61,7 @@ echo "✅ Configuration created"
 # Test API key înainte de build
 echo "🧪 Testing API key..."
 API_TEST_URL="https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59"
-API_RESPONSE=$(curl -s -w "%{http_code}" -H "Authorization: Bearer $API_KEY" "$API_TEST_URL" -o /dev/null)
+API_RESPONSE=$(curl -s -w "%{http_code}" -H "x-magicapi-key: $API_KEY" "$API_TEST_URL" -o /dev/null)
 
 if [ "$API_RESPONSE" = "200" ]; then
     echo "✅ API key is valid"

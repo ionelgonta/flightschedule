@@ -137,7 +137,7 @@ class FlightApiService {
 
       // Configurează headers în funcție de provider
       if (this.config.baseUrl.includes('api.market')) {
-        headers['Authorization'] = `Bearer ${this.config.apiKey}`;
+        headers['x-magicapi-key'] = this.config.apiKey;
       } else if (this.config.baseUrl.includes('rapidapi.com')) {
         headers['X-RapidAPI-Key'] = this.config.apiKey;
         headers['X-RapidAPI-Host'] = 'aerodatabox.p.rapidapi.com';
@@ -223,7 +223,7 @@ class FlightApiService {
 
       // Configurează headers în funcție de provider
       if (this.config.baseUrl.includes('api.market')) {
-        headers['Authorization'] = `Bearer ${this.config.apiKey}`;
+        headers['x-magicapi-key'] = this.config.apiKey;
       } else if (this.config.baseUrl.includes('rapidapi.com')) {
         headers['X-RapidAPI-Key'] = this.config.apiKey;
         headers['X-RapidAPI-Host'] = 'aerodatabox.p.rapidapi.com';

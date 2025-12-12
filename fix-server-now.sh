@@ -72,7 +72,7 @@ echo "Testing API key: $API_KEY"
 echo "URL: $TEST_URL"
 
 response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-  -H "Authorization: Bearer $API_KEY" \
+  -H "x-magicapi-key: $API_KEY" \
   -H "Content-Type: application/json" \
   "$TEST_URL")
 

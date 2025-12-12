@@ -116,7 +116,7 @@ TEST_URL="https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/
 print_status "INFO" "Testing API key: $API_KEY"
 
 response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-  -H "Authorization: Bearer $API_KEY" \
+  -H "x-magicapi-key: $API_KEY" \
   -H "Content-Type: application/json" \
   "$TEST_URL")
 

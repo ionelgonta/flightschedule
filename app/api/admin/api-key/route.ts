@@ -17,7 +17,7 @@ async function testApiKey(apiKey: string): Promise<{ valid: boolean; error?: str
     
     const response = await fetch(testUrl, {
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'x-magicapi-key': apiKey,
         'Content-Type': 'application/json'
       }
     });

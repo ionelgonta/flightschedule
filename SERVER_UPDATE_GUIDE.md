@@ -86,7 +86,7 @@ NEXT_PUBLIC_DEBUG_FLIGHTS=false
 
 ```bash
 # Test manual API key
-curl -H "Authorization: Bearer cmj2m39qs0001k00404cmwu75" \
+curl -H "x-magicapi-key: cmj2m39qs0001k00404cmwu75" \
      "https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59"
 ```
 
@@ -170,7 +170,7 @@ docker-compose logs app | grep -i "api\|flight"
 # Accesează: https://api.market/dashboard
 
 # 2. Test manual API key
-curl -H "Authorization: Bearer cmj2m39qs0001k00404cmwu75" \
+curl -H "x-magicapi-key: cmj2m39qs0001k00404cmwu75" \
      "https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59"
 
 # 3. Dacă API key nu funcționează, înlocuiește în .env.local

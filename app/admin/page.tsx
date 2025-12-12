@@ -17,6 +17,13 @@ export default function AdminPage() {
   const [apiKeyError, setApiKeyError] = useState('')
   const [apiKeySaved, setApiKeySaved] = useState(false)
 
+  // MCP Integration State
+  const [mcpInitialized, setMcpInitialized] = useState(false)
+  const [mcpTools, setMcpTools] = useState<any[]>([])
+  const [mcpTesting, setMcpTesting] = useState(false)
+  const [mcpError, setMcpError] = useState('')
+  const [mcpTestResult, setMcpTestResult] = useState<any>(null)
+
   const handleToggleZone = (zone: keyof typeof adConfig.zones) => {
     toggleAdZone(zone, !config.zones[zone].active)
     setConfig({ ...adConfig })
@@ -164,6 +171,93 @@ export default function AdminPage() {
     setApiKeyError('')
   }
 
+  // MCP Integration Functions
+  const loadMCPStatus = async () => {
+    try {
+      const response = await fetch('/api/mcp/flights')
+      const data = await response.json()
+      
+      if (data.success) {
+        setMcpInitialized(data.initialized)
+        setMcpTools(data.tools || [])
+        setMcpError('')
+      } else {
+        setMcpError(data.error || 'Eroare la încărcarea statusului MCP')
+        setMcpInitialized(false)
+        setMcpTools([])
+      }
+    } catch (error) {
+      setMcpError('Eroare de conexiune la MCP')
+      setMcpInitialized(false)
+      setMcpTools([])
+    }
+  }
+
+  const testMCPConnection = async () => {
+    setMcpTesting(true)
+    setMcpError('')
+    setMcpTestResult(null)
+
+    try {
+      const response = await fetch('/api/mcp/flights', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          airport: 'OTP',
+          type: 'arrivals'
+        })
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        setMcpTestResult(data.result)
+        setMcpError('')
+      } else {
+        setMcpError(data.error || 'Eroare la testarea MCP')
+        setMcpTestResult(null)
+      }
+    } catch (error) {
+      setMcpError('Eroare de conexiune la MCP')
+      setMcpTestResult(null)
+    } finally {
+      setMcpTesting(false)
+    }
+  }
+
+  const reinitializeMCP = async () => {
+    setMcpTesting(true)
+    setMcpError('')
+
+    try {
+      const response = await fetch('/api/mcp/flights', {
+        method: 'PUT'
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        await loadMCPStatus()
+        setMcpError('')
+      } else {
+        setMcpError(data.error || 'Eroare la reinițializarea MCP')
+      }
+    } catch (error) {
+      setMcpError('Eroare de conexiune la MCP')
+    } finally {
+      setMcpTesting(false)
+    }
+  }
+
+  // Load MCP status on component mount
+  useEffect(() => {
+    if (activeTab === 'mcp') {
+      loadMCPStatus()
+    }
+  }, [activeTab])
+
   const adZones = [
     { key: 'header-banner', name: 'Header Banner', size: '728x90', description: 'Banner în partea de sus a paginii' },
     { key: 'sidebar-right', name: 'Sidebar Dreapta', size: '300x600', description: 'Banner în sidebar-ul din dreapta' },
@@ -239,6 +333,17 @@ export default function AdminPage() {
               >
                 <Key className="h-4 w-4 inline mr-2" />
                 API Management
+              </button>
+              <button
+                onClick={() => setActiveTab('mcp')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'mcp'
+                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                <TestTube className="h-4 w-4 inline mr-2" />
+                MCP Integration
               </button>
             </nav>
           </div>
@@ -583,6 +688,151 @@ export default function AdminPage() {
                     <li>Copiază key-ul și testează-l aici</li>
                     <li>Salvează key-ul pentru a activa datele de zboruri</li>
                   </ol>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'mcp' && (
+              <div className="space-y-6">
+                {/* MCP Status */}
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                    🔗 MCP Integration Status
+                  </h3>
+                  <div className="flex items-center space-x-4">
+                    <div className={`flex items-center space-x-2 ${mcpInitialized ? 'text-green-600' : 'text-red-600'}`}>
+                      {mcpInitialized ? <CheckCircle className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
+                      <span className="font-medium">
+                        {mcpInitialized ? 'Conectat' : 'Deconectat'}
+                      </span>
+                    </div>
+                    <div className="text-gray-600 dark:text-gray-400">
+                      Tools disponibile: {mcpTools.length}
+                    </div>
+                  </div>
+                </div>
+
+                {/* MCP Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <button
+                    onClick={loadMCPStatus}
+                    disabled={mcpTesting}
+                    className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <TestTube className="h-4 w-4" />
+                    <span>Verifică Status</span>
+                  </button>
+
+                  <button
+                    onClick={testMCPConnection}
+                    disabled={mcpTesting}
+                    className="flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <TestTube className="h-4 w-4" />
+                    <span>{mcpTesting ? 'Testez...' : 'Test Conexiune'}</span>
+                  </button>
+
+                  <button
+                    onClick={reinitializeMCP}
+                    disabled={mcpTesting}
+                    className="flex items-center justify-center space-x-2 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Reinițializează</span>
+                  </button>
+                </div>
+
+                {/* MCP Error Display */}
+                {mcpError && (
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 text-red-600 dark:text-red-400">
+                      <XCircle className="h-5 w-5" />
+                      <span className="font-medium">Eroare MCP</span>
+                    </div>
+                    <p className="text-red-700 dark:text-red-300 mt-2">{mcpError}</p>
+                  </div>
+                )}
+
+                {/* MCP Test Results */}
+                {mcpTestResult && (
+                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                    <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+                      ✅ Test Rezultat
+                    </h4>
+                    <pre className="text-sm text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/40 p-3 rounded overflow-x-auto">
+                      {JSON.stringify(mcpTestResult, null, 2)}
+                    </pre>
+                  </div>
+                )}
+
+                {/* Available Tools */}
+                {mcpTools.length > 0 && (
+                  <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
+                      🛠️ Tools Disponibile ({mcpTools.length})
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {mcpTools.map((tool, index) => (
+                        <div key={index} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                          <h5 className="font-medium text-gray-900 dark:text-white mb-2">
+                            {tool.name}
+                          </h5>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            {tool.description}
+                          </p>
+                          <div className="text-xs text-gray-500 dark:text-gray-500">
+                            Parametri: {Object.keys(tool.inputSchema?.properties || {}).join(', ') || 'Niciunul'}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* MCP Information */}
+                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                  <h5 className="font-medium text-gray-900 dark:text-white mb-4">
+                    📊 Informații MCP
+                  </h5>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <h6 className="font-medium text-gray-900 dark:text-white mb-2">Protocol</h6>
+                      <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                        <li>• <strong>Versiune:</strong> 2024-11-05</li>
+                        <li>• <strong>Transport:</strong> HTTP/JSON-RPC</li>
+                        <li>• <strong>Endpoint:</strong> API.Market MCP</li>
+                        <li>• <strong>Autentificare:</strong> x-api-market-key</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h6 className="font-medium text-gray-900 dark:text-white mb-2">Capabilități</h6>
+                      <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                        <li>• Acces direct la AeroDataBox tools</li>
+                        <li>• Execuție contextuală de funcții</li>
+                        <li>• Gestionare automată de erori</li>
+                        <li>• Cache și optimizare</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Help Section */}
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                  <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
+                    💡 Despre MCP Integration
+                  </h4>
+                  <div className="text-yellow-700 dark:text-yellow-300 text-sm space-y-2">
+                    <p>
+                      <strong>Model Context Protocol (MCP)</strong> oferă acces direct la funcționalitățile AeroDataBox 
+                      prin intermediul unui protocol standardizat, permițând execuția de funcții complexe și contextuale.
+                    </p>
+                    <p>
+                      <strong>Avantaje:</strong> Acces la funcții avansate, execuție optimizată, gestionare automată de erori, 
+                      și integrare seamless cu serviciile API.Market.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

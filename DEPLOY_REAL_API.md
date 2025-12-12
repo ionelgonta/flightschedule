@@ -82,8 +82,8 @@ chmod +x test-api.sh
 ### 2. Test manual API.Market
 
 ```bash
-# Test direct Bearer Token
-curl -H "Authorization: Bearer cmj2m39qs0001k00404cmwu75" \
+# Test direct x-magicapi-key
+curl -H "x-magicapi-key: cmj2m39qs0001k00404cmwu75" \
      "https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59"
 ```
 
@@ -118,7 +118,7 @@ Accesează:
 # Accesează: https://api.market/dashboard
 
 # 2. Test manual API
-curl -H "Authorization: Bearer cmj2m39qs0001k00404cmwu75" \
+curl -H "x-magicapi-key: cmj2m39qs0001k00404cmwu75" \
      "https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59"
 
 # 3. Dacă API key nu funcționează, înlocuiește în .env.local

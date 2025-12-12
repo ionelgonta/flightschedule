@@ -16,7 +16,7 @@ echo "--------------------------------------"
 # Test direct API call pentru OTP (București)
 echo "Testing OTP (București) arrivals..."
 response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-  -H "Authorization: Bearer $API_KEY" \
+  -H "x-magicapi-key: $API_KEY" \
   -H "Content-Type: application/json" \
   "$BASE_URL/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59")
 
@@ -64,7 +64,7 @@ for airport in "${airports[@]}"; do
     echo "Testing $iata ($city) - ICAO: $icao..."
     
     response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-      -H "Authorization: Bearer $API_KEY" \
+      -H "x-magicapi-key: $API_KEY" \
       "$BASE_URL/flights/airports/icao/$icao/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59")
     
     http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
@@ -86,7 +86,7 @@ echo "-----------------------------------"
 # Test airport info
 echo "Testing airport info endpoint..."
 response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-  -H "Authorization: Bearer $API_KEY" \
+  -H "x-magicapi-key: $API_KEY" \
   "$BASE_URL/airports/icao/LROP")
 
 http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
@@ -99,7 +99,7 @@ fi
 # Test flight search
 echo "Testing flight search endpoint..."
 response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-  -H "Authorization: Bearer $API_KEY" \
+  -H "x-magicapi-key: $API_KEY" \
   "$BASE_URL/flights/number/RO123/$(date +%Y-%m-%d)")
 
 http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)

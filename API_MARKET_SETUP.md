@@ -57,7 +57,7 @@ docker-compose logs app -f
 
 ```bash
 # Test direct cu curl
-curl -H "Authorization: Bearer am_your_token" \
+curl -H "x-magicapi-key: am_your_token" \
      "https://api.market/aerodatabox/v1/flights/airports/icao/LROP/arrivals/2025-12-12T00:00/2025-12-12T23:59"
 ```
 

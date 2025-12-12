@@ -10,13 +10,13 @@ API_KEY="cmj2m39qs0001k00404cmwu75"
 BASE_URL="https://api.market/aerodatabox/v1"
 
 echo ""
-echo "1. Testing API.Market Bearer Token Authentication..."
-echo "---------------------------------------------------"
+echo "1. Testing API.Market x-magicapi-key Authentication..."
+echo "-----------------------------------------------------"
 
 # Test direct API call
 echo "Testing direct API call to AeroDataBox..."
 response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-  -H "Authorization: Bearer $API_KEY" \
+  -H "x-magicapi-key: $API_KEY" \
   -H "Content-Type: application/json" \
   "$BASE_URL/flights/airports/icao/LROP/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59")
 
@@ -58,7 +58,7 @@ for airport in "${airports[@]}"; do
     echo "Testing $iata → $icao mapping..."
     
     response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-      -H "Authorization: Bearer $API_KEY" \
+      -H "x-magicapi-key: $API_KEY" \
       "$BASE_URL/flights/airports/icao/$icao/arrivals/$(date +%Y-%m-%d)T00:00/$(date +%Y-%m-%d)T23:59")
     
     http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)

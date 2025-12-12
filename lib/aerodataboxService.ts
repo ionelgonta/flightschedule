@@ -151,7 +151,7 @@ class AeroDataBoxService {
 
     const response = await fetch(`${this.config.baseUrl}${endpoint}`, {
       headers: {
-        'Authorization': `Bearer ${this.config.apiKey}`,
+        'x-magicapi-key': this.config.apiKey,
         'Content-Type': 'application/json'
       }
     });

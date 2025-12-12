@@ -72,7 +72,7 @@ print_status "INFO" "Testing API key: $API_KEY"
 print_status "INFO" "Endpoint: $TEST_ENDPOINT"
 
 response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-  -H "Authorization: Bearer $API_KEY" \
+  -H "x-magicapi-key: $API_KEY" \
   -H "Content-Type: application/json" \
   "$TEST_ENDPOINT")
 
