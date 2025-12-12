@@ -1,8 +1,8 @@
 import Script from 'next/script'
 
 export function AdSenseScript() {
-  // Replace with your actual AdSense publisher ID
-  const ADSENSE_PUBLISHER_ID = 'ca-pub-XXXXXXXXXXXXXXXX'
+  // AdSense Publisher ID for site verification and ads
+  const ADSENSE_PUBLISHER_ID = 'ca-pub-2305349540791838'
   
   return (
     <Script

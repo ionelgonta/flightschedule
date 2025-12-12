@@ -20,8 +20,8 @@ interface AdConfig {
 }
 
 export const adConfig: AdConfig = {
-  // Replace with your actual AdSense publisher ID
-  publisherId: 'ca-pub-XXXXXXXXXXXXXXXX',
+  // AdSense Publisher ID for site verification and ads
+  publisherId: 'ca-pub-2305349540791838',
   
   zones: {
     'header-banner': {
