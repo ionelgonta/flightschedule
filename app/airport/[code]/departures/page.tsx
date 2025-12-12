@@ -112,7 +112,7 @@ export default function DeparturesPage({ params }: DeparturesPageProps) {
               <div className="text-right">
                 {lastUpdated && (
                   <p className="text-sm text-blue-100">
-                    Last updated: {lastUpdated.toLocaleTimeString()}
+                    Last updated: {new Date(lastUpdated).toLocaleTimeString()}
                   </p>
                 )}
                 <button
@@ -137,7 +137,7 @@ export default function DeparturesPage({ params }: DeparturesPageProps) {
             <div className="md:hidden mb-6 flex items-center justify-between">
               {lastUpdated && (
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Updated: {lastUpdated.toLocaleTimeString()}
+                  Updated: {new Date(lastUpdated).toLocaleTimeString()}
                 </p>
               )}
               <button
