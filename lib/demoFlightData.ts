@@ -58,11 +58,11 @@ const AIRCRAFT_TYPES = ['Boeing 737-800', 'Airbus A320', 'Airbus A321', 'Boeing 
 /**
  * Formatează întârzierea din minute în format românesc
  * @param minutes Numărul de minute de întârziere
- * @returns String formatat în română (ex: "1 ora 43 min", "25 min")
+ * @returns String formatat în română (ex: "1 ora 43 minute", "25 minute")
  */
 export function formatDelayInRomanian(minutes: number): string {
   if (minutes < 60) {
-    return `${minutes} min`;
+    return `${minutes} minute`;
   }
   
   const hours = Math.floor(minutes / 60);
@@ -73,26 +73,36 @@ export function formatDelayInRomanian(minutes: number): string {
   }
   
   const hourText = hours === 1 ? '1 ora' : `${hours} ore`;
-  return `${hourText} ${remainingMinutes} min`;
+  const minuteText = remainingMinutes.toString().padStart(2, '0');
+  return `${hourText} ${minuteText} minute`;
 }
 
 /**
- * Generează date demo pentru sosiri
+ * Generează date demo pentru sosiri - Enhanced with time-based realism
  */
 export function generateDemoArrivals(airportCode: string, count: number = 15): RawFlightData[] {
   const flights: RawFlightData[] = [];
   const now = new Date();
   
+  // Use current time as seed for consistent but changing data throughout the day
+  const timeSeed = Math.floor(now.getTime() / (1000 * 60 * 10)); // Changes every 10 minutes
+  
   // Generează zboruri pentru următoarele 12 ore
   for (let i = 0; i < count; i++) {
-    const airline = AIRLINES[Math.floor(Math.random() * AIRLINES.length)];
+    // Use seeded random for consistent but changing data
+    const seededRandom = (seed: number) => {
+      const x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    };
+    
+    const airline = AIRLINES[Math.floor(seededRandom(timeSeed + i) * AIRLINES.length)];
     const originCodes = Object.keys(AIRPORTS).filter(code => code !== airportCode);
-    const originCode = originCodes[Math.floor(Math.random() * originCodes.length)];
+    const originCode = originCodes[Math.floor(seededRandom(timeSeed + i + 100) * originCodes.length)];
     const origin = AIRPORTS[originCode as keyof typeof AIRPORTS];
     const destination = AIRPORTS[airportCode as keyof typeof AIRPORTS];
     
-    // Generează o oră în următoarele 12 ore
-    const scheduledTime = new Date(now.getTime() + (Math.random() * 12 * 60 * 60 * 1000));
+    // Generează o oră în următoarele 12 ore (seeded for consistency)
+    const scheduledTime = new Date(now.getTime() + (seededRandom(timeSeed + i + 200) * 12 * 60 * 60 * 1000));
     
     // Status bazat pe timpul programat
     let status = 'scheduled';

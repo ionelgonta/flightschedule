@@ -55,7 +55,7 @@ export async function GET(
     headers.set('X-Last-Updated', result.last_updated);
 
     return NextResponse.json(result, { 
-      status: result.success ? 200 : 500,
+      status: 200, // Always return 200, let the client handle success/error based on result.success
       headers 
     });
 

@@ -4,6 +4,7 @@
  */
 
 import { getIcaoCode, getIataCode } from './icaoMapping';
+import { getAirportByCode } from './airports';
 
 export interface AeroDataBoxConfig {
   apiKey: string;
@@ -149,10 +150,13 @@ class AeroDataBoxService {
 
     this.requestCount++;
 
-    const response = await fetch(`${this.config.baseUrl}${endpoint}`, {
+    // Use correct API.Market AeroDataBox URL structure
+    const url = `https://prod.api.market/api/v1/aedbx/aerodatabox${endpoint}`;
+    
+    const response = await fetch(url, {
       headers: {
         'x-api-market-key': this.config.apiKey,
-        'Content-Type': 'application/json'
+        'accept': 'application/json'
       }
     });
 
@@ -173,11 +177,9 @@ class AeroDataBoxService {
     toTime?: string
   ): Promise<Flight[]> {
     const icaoCode = getIcaoCode(airportCode);
-    const today = new Date().toISOString().split('T')[0];
-    const from = fromTime || `${today}T00:00`;
-    const to = toTime || `${today}T23:59`;
     
-    const endpoint = `/flights/airports/icao/${icaoCode}/${type}/${from}/${to}`;
+    // Use correct API.Market AeroDataBox endpoint - returns both arrivals and departures
+    const endpoint = `/flights/airports/Icao/${icaoCode}`;
     const response = await this.makeRequest<FlightResponse>(endpoint);
     
     return type === 'arrivals' ? (response.arrivals || []) : (response.departures || []);
@@ -188,7 +190,8 @@ class AeroDataBoxService {
    */
   async getAirportInfo(airportCode: string): Promise<Airport> {
     const icaoCode = getIcaoCode(airportCode);
-    const endpoint = `/airports/icao/${icaoCode}`;
+    // Use correct API.Market endpoint structure (note: Icao with capital I)
+    const endpoint = `/airports/Icao/${icaoCode}?withRunways=false&withTime=false`;
     return this.makeRequest<Airport>(endpoint);
   }
 
@@ -290,46 +293,86 @@ class AeroDataBoxService {
   }
 
   /**
-   * Convertește Flight în formatul nostru standard
+   * Convertește Flight în formatul nostru standard - API.Market AeroDataBox structure
    */
-  convertToStandardFormat(flight: Flight, type: 'arrivals' | 'departures') {
-    const movement = type === 'arrivals' ? flight.arrival : flight.departure;
-    const otherMovement = type === 'arrivals' ? flight.departure : flight.arrival;
-
-    return {
-      flight_number: flight.number.iata || flight.number.icao || 'N/A',
-      airline: {
-        name: flight.airline.name,
-        code: flight.airline.iata || flight.airline.icao || 'XX',
-        logo: undefined
-      },
-      origin: {
-        airport: flight.departure.airport.name,
-        code: flight.departure.airport.iata || flight.departure.airport.icao,
-        city: flight.departure.airport.municipalityName
-      },
-      destination: {
-        airport: flight.arrival.airport.name,
-        code: flight.arrival.airport.iata || flight.arrival.airport.icao,
-        city: flight.arrival.airport.municipalityName
-      },
-      scheduled_time: movement.scheduledTime.local,
-      estimated_time: movement.estimatedTime?.local,
-      actual_time: movement.actualTime?.local,
-      status: this.normalizeStatus(flight.status.text),
-      gate: movement.gate,
-      terminal: movement.terminal,
-      aircraft: flight.aircraft?.model,
-      delay: this.calculateDelay(movement),
-      // Informații suplimentare disponibile în AeroDataBox
-      callSign: flight.callSign,
-      isCargo: flight.isCargo,
-      baggageBelt: movement.baggageBelt,
-      runway: movement.runway,
-      registration: flight.aircraft?.reg,
-      quality: movement.quality,
-      lastUpdated: flight.lastUpdatedUtc
-    };
+  convertToStandardFormat(flight: any, type: 'arrivals' | 'departures', currentAirportCode?: string) {
+    // Handle API.Market AeroDataBox structure - CORRECTED based on actual API response
+    try {
+      // Extract basic flight info - flight number is directly in 'number' field
+      const flightNumber = flight.number || 'N/A';
+      const airlineName = flight.airline?.name || 'Unknown';
+      const airlineCode = flight.airline?.iata || flight.airline?.icao || 'XX';
+      const status = flight.status || 'unknown';
+      
+      // Movement contains the OTHER airport (origin for arrivals, destination for departures)
+      const movement = flight.movement || {};
+      const otherAirport = movement.airport || {};
+      
+      // Time handling - use revisedTime if available, otherwise scheduledTime
+      const scheduledTime = movement.scheduledTime || {};
+      const revisedTime = movement.revisedTime || {}; // This is the estimated/actual time
+      
+      // Get current airport info dynamically
+      const currentAirport = currentAirportCode ? getAirportByCode(currentAirportCode) : null;
+      const currentAirportInfo = {
+        airport: currentAirport?.name || 'Unknown Airport',
+        code: currentAirportCode || 'XXX',
+        city: currentAirport?.city || 'Unknown City'
+      };
+      
+      // For arrivals: movement.airport = origin, current airport = destination
+      // For departures: movement.airport = destination, current airport = origin
+      const origin = type === 'arrivals' ? {
+        airport: otherAirport.name || 'Unknown',
+        code: otherAirport.iata || otherAirport.icao || 'XXX',
+        city: otherAirport.name || 'Unknown' // API doesn't provide city separately
+      } : currentAirportInfo;
+      
+      const destination = type === 'departures' ? {
+        airport: otherAirport.name || 'Unknown',
+        code: otherAirport.iata || otherAirport.icao || 'XXX',
+        city: otherAirport.name || 'Unknown'
+      } : currentAirportInfo;
+      
+      return {
+        flight_number: flightNumber,
+        airline: {
+          name: airlineName,
+          code: airlineCode,
+          logo: undefined
+        },
+        origin,
+        destination,
+        scheduled_time: scheduledTime.local || scheduledTime.utc || new Date().toISOString(),
+        estimated_time: revisedTime.local || revisedTime.utc,
+        actual_time: revisedTime.local || revisedTime.utc, // revisedTime is the actual/estimated time
+        status: this.normalizeStatus(status),
+        gate: movement.gate,
+        terminal: movement.terminal,
+        aircraft: flight.aircraft?.model || flight.aircraft?.reg,
+        delay: this.calculateDelayFromMovement(movement),
+        // Additional info
+        callSign: flight.callSign,
+        isCargo: flight.isCargo || false,
+        baggageBelt: movement.baggageBelt,
+        runway: movement.runway,
+        registration: flight.aircraft?.reg,
+        quality: movement.quality || [],
+        lastUpdated: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('Error converting flight data:', error);
+      // Return a safe fallback structure
+      return {
+        flight_number: 'N/A',
+        airline: { name: 'Unknown', code: 'XX' },
+        origin: { airport: 'Unknown', code: 'XXX', city: 'Unknown' },
+        destination: { airport: 'Unknown', code: 'XXX', city: 'Unknown' },
+        scheduled_time: new Date().toISOString(),
+        status: 'unknown',
+        delay: undefined
+      };
+    }
   }
 
   private calculateDelay(movement: Movement): number | undefined {
@@ -339,6 +382,27 @@ class AeroDataBoxService {
     const actual = new Date(movement.actualTime.utc);
     
     return Math.round((actual.getTime() - scheduled.getTime()) / (1000 * 60)); // minutes
+  }
+
+  private calculateDelayFromMovement(movement: any): number | undefined {
+    try {
+      if (!movement.scheduledTime || !movement.revisedTime) return undefined;
+      
+      const scheduledTime = movement.scheduledTime.utc || movement.scheduledTime.local;
+      const revisedTime = movement.revisedTime.utc || movement.revisedTime.local;
+      
+      if (!scheduledTime || !revisedTime) return undefined;
+      
+      const scheduled = new Date(scheduledTime);
+      const revised = new Date(revisedTime);
+      
+      const delayMinutes = Math.round((revised.getTime() - scheduled.getTime()) / (1000 * 60));
+      
+      // Only return positive delays (negative means early, which we don't show as delay)
+      return delayMinutes > 0 ? delayMinutes : undefined;
+    } catch (error) {
+      return undefined;
+    }
   }
 
   private normalizeStatus(status: string): string {

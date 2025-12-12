@@ -1,15 +1,16 @@
 /**
- * Flight API Service - Returns demo flight data
- * Temporary implementation while API integration is being fixed
+ * Flight API Service - REAL-TIME AeroDataBox via API.Market
+ * No demo data - only live flight information
  */
 
-import { generateDemoArrivals, generateDemoDepartures } from './demoFlightData';
+import AeroDataBoxService from './aerodataboxService';
+import { formatDelayInRomanian } from './demoFlightData';
 
 export interface FlightApiConfig {
-  provider: 'aerodatabox' | 'flightlabs' | 'aviationstack';
+  provider: 'aerodatabox';
   apiKey: string;
   baseUrl: string;
-  rateLimit: number; // requests per minute
+  rateLimit: number;
 }
 
 export interface RawFlightData {
@@ -55,62 +56,125 @@ export interface FlightApiResponse {
   last_updated: string;
   airport_code: string;
   type: 'arrivals' | 'departures';
+  source?: string;
 }
 
 class FlightApiService {
-  private config: FlightApiConfig;
+  private aeroDataBoxService: AeroDataBoxService;
 
   constructor(config: FlightApiConfig) {
-    this.config = config;
+    // Initialize AeroDataBox service with correct API.Market configuration
+    this.aeroDataBoxService = new AeroDataBoxService({
+      apiKey: config.apiKey,
+      baseUrl: config.baseUrl,
+      rateLimit: config.rateLimit
+    });
   }
 
   /**
-   * Fetch arrivals pentru un aeroport
+   * Fetch arrivals pentru un aeroport - REAL-TIME AeroDataBox
    */
   async getArrivals(airportCode: string): Promise<FlightApiResponse> {
-    console.log(`Generating demo arrivals for ${airportCode}`);
+    console.log(`Fetching REAL-TIME arrivals for ${airportCode} from AeroDataBox`);
     
-    const demoData = generateDemoArrivals(airportCode, 15);
-    
-    return {
-      success: true,
-      data: demoData,
-      error: 'Using demo data - API integration in progress',
-      cached: false,
-      last_updated: new Date().toISOString(),
-      airport_code: airportCode,
-      type: 'arrivals'
-    };
+    try {
+      // Get real-time data from AeroDataBox via API.Market
+      const flights = await this.aeroDataBoxService.getFlights(airportCode, 'arrivals');
+      
+      // Convert to our standard format with Romanian delay formatting
+      const convertedFlights = flights.map(flight => {
+        const converted = this.aeroDataBoxService.convertToStandardFormat(flight, 'arrivals', airportCode);
+        return {
+          ...converted,
+          delay: converted.delay ? converted.delay : undefined
+        };
+      });
+
+      console.log(`Successfully fetched ${convertedFlights.length} real arrivals for ${airportCode}`);
+      
+      return {
+        success: true,
+        data: convertedFlights,
+        cached: false,
+        last_updated: new Date().toISOString(),
+        airport_code: airportCode,
+        type: 'arrivals',
+        source: 'AeroDataBox'
+      };
+      
+    } catch (error) {
+      console.error(`AeroDataBox API failed for ${airportCode} arrivals:`, error);
+      
+      // NO DEMO DATA - Return error if real-time fails
+      return {
+        success: false,
+        data: [],
+        error: `Real-time data unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        cached: false,
+        last_updated: new Date().toISOString(),
+        airport_code: airportCode,
+        type: 'arrivals'
+      };
+    }
   }
 
   /**
-   * Fetch departures pentru un aeroport
+   * Fetch departures pentru un aeroport - REAL-TIME AeroDataBox
    */
   async getDepartures(airportCode: string): Promise<FlightApiResponse> {
-    console.log(`Generating demo departures for ${airportCode}`);
+    console.log(`Fetching REAL-TIME departures for ${airportCode} from AeroDataBox`);
     
-    const demoData = generateDemoDepartures(airportCode, 15);
-    
-    return {
-      success: true,
-      data: demoData,
-      error: 'Using demo data - API integration in progress',
-      cached: false,
-      last_updated: new Date().toISOString(),
-      airport_code: airportCode,
-      type: 'departures'
-    };
+    try {
+      // Get real-time data from AeroDataBox via API.Market
+      const flights = await this.aeroDataBoxService.getFlights(airportCode, 'departures');
+      
+      // Convert to our standard format with Romanian delay formatting
+      const convertedFlights = flights.map(flight => {
+        const converted = this.aeroDataBoxService.convertToStandardFormat(flight, 'departures', airportCode);
+        return {
+          ...converted,
+          delay: converted.delay ? converted.delay : undefined
+        };
+      });
+
+      console.log(`Successfully fetched ${convertedFlights.length} real departures for ${airportCode}`);
+      
+      return {
+        success: true,
+        data: convertedFlights,
+        cached: false,
+        last_updated: new Date().toISOString(),
+        airport_code: airportCode,
+        type: 'departures',
+        source: 'AeroDataBox'
+      };
+      
+    } catch (error) {
+      console.error(`AeroDataBox API failed for ${airportCode} departures:`, error);
+      
+      // NO DEMO DATA - Return error if real-time fails
+      return {
+        success: false,
+        data: [],
+        error: `Real-time data unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        cached: false,
+        last_updated: new Date().toISOString(),
+        airport_code: airportCode,
+        type: 'departures'
+      };
+    }
   }
 
 
 }
 
-// Configurații pentru demo
+// AeroDataBox via API.Market configuration - REAL-TIME DATA ONLY
 export const API_CONFIGS = {
   aerodatabox: {
     provider: 'aerodatabox' as const,
-    baseUrl: 'demo',
-    rateLimit: 150
+    baseUrl: 'https://prod.api.market/api/v1/aedbx/aerodatabox',
+    apiKey: 'cmj2m39qs0001k00404cmwu75', // Updated working API key
+    rateLimit: 150 // requests per minute
   }
 };
 

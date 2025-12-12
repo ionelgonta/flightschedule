@@ -31,12 +31,10 @@ class FlightRepository {
   private readonly STORAGE_KEY = 'flight_cache';
 
   constructor() {
-    // Inițializează API service cu configurația din environment
-    const provider = (process.env.NEXT_PUBLIC_FLIGHT_API_PROVIDER || 'aerodatabox') as keyof typeof API_CONFIGS;
-    const apiConfig = {
-      ...API_CONFIGS[provider],
-      apiKey: process.env.NEXT_PUBLIC_FLIGHT_API_KEY || 'cmj2peefi0001la04p5rkbbcc'
-    };
+    // Initialize AeroDataBox API service - REAL-TIME DATA ONLY
+    const apiConfig = API_CONFIGS.aerodatabox;
+    
+    console.log('Initializing AeroDataBox service with API.Market');
     
     this.apiService = new FlightApiService(apiConfig);
     this.loadCacheFromStorage();
