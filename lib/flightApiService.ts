@@ -4,6 +4,7 @@
  */
 
 import { getIcaoCode } from './icaoMapping';
+import AeroDataBoxService from './aerodataboxService';
 
 export interface FlightApiConfig {
   provider: 'aerodatabox' | 'flightlabs' | 'aviationstack';
@@ -37,6 +38,14 @@ export interface RawFlightData {
   terminal?: string;
   aircraft?: string;
   delay?: number;
+  // Câmpuri suplimentare din AeroDataBox
+  callSign?: string;
+  isCargo?: boolean;
+  baggageBelt?: string;
+  runway?: string;
+  registration?: string;
+  quality?: string[];
+  lastUpdated?: string;
 }
 
 export interface FlightApiResponse {
@@ -53,9 +62,19 @@ class FlightApiService {
   private config: FlightApiConfig;
   private requestCount: number = 0;
   private lastReset: number = Date.now();
+  private aeroDataBoxService?: AeroDataBoxService;
 
   constructor(config: FlightApiConfig) {
     this.config = config;
+    
+    // Inițializează AeroDataBox service dacă este provider-ul selectat
+    if (config.provider === 'aerodatabox') {
+      this.aeroDataBoxService = new AeroDataBoxService({
+        apiKey: config.apiKey,
+        baseUrl: config.baseUrl,
+        rateLimit: config.rateLimit
+      });
+    }
   }
 
   /**
@@ -92,6 +111,24 @@ class FlightApiService {
     try {
       this.requestCount++;
       
+      // Folosește AeroDataBox service dacă este disponibil
+      if (this.config.provider === 'aerodatabox' && this.aeroDataBoxService) {
+        const flights = await this.aeroDataBoxService.getFlights(airportCode, 'arrivals');
+        const processedData = flights.map(flight => 
+          this.aeroDataBoxService!.convertToStandardFormat(flight, 'arrivals')
+        );
+
+        return {
+          success: true,
+          data: processedData,
+          cached: false,
+          last_updated: new Date().toISOString(),
+          airport_code: airportCode,
+          type: 'arrivals'
+        };
+      }
+
+      // Fallback la implementarea originală pentru alți provideri
       const url = this.buildUrl(airportCode, 'arrivals');
       
       const headers: Record<string, string> = {
@@ -160,6 +197,24 @@ class FlightApiService {
     try {
       this.requestCount++;
       
+      // Folosește AeroDataBox service dacă este disponibil
+      if (this.config.provider === 'aerodatabox' && this.aeroDataBoxService) {
+        const flights = await this.aeroDataBoxService.getFlights(airportCode, 'departures');
+        const processedData = flights.map(flight => 
+          this.aeroDataBoxService!.convertToStandardFormat(flight, 'departures')
+        );
+
+        return {
+          success: true,
+          data: processedData,
+          cached: false,
+          last_updated: new Date().toISOString(),
+          airport_code: airportCode,
+          type: 'departures'
+        };
+      }
+
+      // Fallback la implementarea originală pentru alți provideri
       const url = this.buildUrl(airportCode, 'departures');
       
       const headers: Record<string, string> = {

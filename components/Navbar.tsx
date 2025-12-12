@@ -42,6 +42,12 @@ export function Navbar() {
               Airports
             </Link>
             <Link 
+              href="/search" 
+              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            >
+              Search
+            </Link>
+            <Link 
               href="/admin" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors text-sm"
             >
