@@ -136,10 +136,10 @@ export const AIRPORT_CITY_MAPPING: { [key: string]: string } = {
  * Get airline full name from IATA/ICAO code
  */
 export function getAirlineName(code: string): string {
-  if (!code) return 'Companie Necunoscută'
+  if (!code) return 'XX'
   
   const upperCode = code.toUpperCase().trim()
-  return AIRLINE_MAPPING[upperCode] || code
+  return AIRLINE_MAPPING[upperCode] || upperCode
 }
 
 /**

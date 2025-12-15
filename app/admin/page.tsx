@@ -38,11 +38,18 @@ export default function AdminPage() {
   // Cache Management State
   const [analyticsInterval, setAnalyticsInterval] = useState(30) // days
   const [realtimeInterval, setRealtimeInterval] = useState(60) // minutes
-  const [cacheStats, setCacheStats] = useState<{size: number, keys: string[]} | null>(null)
+  const [cacheStats, setCacheStats] = useState<{
+    size: number, 
+    keys: string[], 
+    lastApiCall: string | null,
+    cacheEntries: Array<{key: string, timestamp: string, ttl: number, expired: boolean}>
+  } | null>(null)
   const [cacheSaving, setCacheSaving] = useState(false)
   const [cacheClearing, setCacheClearing] = useState(false)
   const [cacheSaved, setCacheSaved] = useState(false)
   const [cacheCleared, setCacheCleared] = useState(false)
+  const [statsRefreshing, setStatsRefreshing] = useState(false)
+  const [statsRefreshed, setStatsRefreshed] = useState(false)
 
 
 
@@ -402,15 +409,20 @@ export default function AdminPage() {
 
   // Cache Management Functions
   const loadCacheStats = async () => {
+    setStatsRefreshing(true)
     try {
       const response = await fetch('/api/admin/cache-stats')
       const data = await response.json()
       
       if (data.success) {
         setCacheStats(data.stats)
+        setStatsRefreshed(true)
+        setTimeout(() => setStatsRefreshed(false), 3000)
       }
     } catch (error) {
       console.error('Error loading cache stats:', error)
+    } finally {
+      setStatsRefreshing(false)
     }
   }
 
@@ -1085,10 +1097,11 @@ export default function AdminPage() {
                     
                     <button
                       onClick={loadCacheStats}
-                      className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                      disabled={statsRefreshing}
+                      className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <TestTube className="h-4 w-4 mr-2" />
-                      Reîmprospătează Statistici
+                      {statsRefreshing ? 'Reîmprospătez...' : 'Reîmprospătează Statistici'}
                     </button>
                   </div>
 
@@ -1110,6 +1123,15 @@ export default function AdminPage() {
                       </p>
                     </div>
                   )}
+
+                  {statsRefreshed && (
+                    <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <p className="text-green-700 dark:text-green-400 text-sm flex items-center">
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Statisticile au fost reîmprospătate cu succes!
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Cache Statistics */}
@@ -1119,7 +1141,7 @@ export default function AdminPage() {
                       📊 Statistici Cache
                     </h4>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                       <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                         <div className="text-2xl font-bold text-gray-900 dark:text-white">
                           {cacheStats.size}
@@ -1144,6 +1166,18 @@ export default function AdminPage() {
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
                           Cache Program
+                        </div>
+                      </div>
+
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                        <div className="text-sm font-bold text-blue-900 dark:text-blue-100">
+                          {cacheStats.lastApiCall 
+                            ? new Date(cacheStats.lastApiCall).toLocaleString('ro-RO')
+                            : 'Niciodată'
+                          }
+                        </div>
+                        <div className="text-xs text-blue-600 dark:text-blue-400">
+                          Ultima Interogare API
                         </div>
                       </div>
                     </div>
