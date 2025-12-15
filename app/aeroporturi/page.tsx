@@ -5,12 +5,12 @@ import { AdBanner } from '@/components/ads/AdBanner'
 import { MapPin, Plane, Search } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Aeroporturi - Program Zboruri',
-  description: 'Explorează toate aeroporturile majore din lume. Obține informații în timp real despre zboruri, sosiri și plecări de la aeroporturi internaționale.',
-  keywords: ['aeroporturi', 'aeroporturi internaționale', 'informații zboruri', 'coduri aeroporturi', 'aviație'],
+  title: 'Aeroporturi România și Moldova - Program Zboruri',
+  description: 'Explorează toate aeroporturile din România și Moldova. Obține informații în timp real despre zboruri, sosiri și plecări de la aeroporturile naționale.',
+  keywords: ['aeroporturi România', 'aeroporturi Moldova', 'informații zboruri', 'coduri aeroporturi', 'aviație România'],
   openGraph: {
-    title: 'Aeroporturi - Program Zboruri',
-    description: 'Explorează toate aeroporturile majore din lume cu informații în timp real despre zboruri.',
+    title: 'Aeroporturi România și Moldova - Program Zboruri',
+    description: 'Explorează toate aeroporturile din România și Moldova cu informații în timp real despre zboruri.',
     type: 'website',
   },
   alternates: {
@@ -20,17 +20,15 @@ export const metadata: Metadata = {
 
 export default function AirportsPage() {
   const airportsByRegion = {
-    'Romania & Moldova': MAJOR_AIRPORTS.filter(a => ['Romania', 'Moldova'].includes(a.country)),
-    'Western Europe': MAJOR_AIRPORTS.filter(a => ['United Kingdom', 'France', 'Germany', 'Austria', 'Italy'].includes(a.country)),
-    'Middle East & Turkey': MAJOR_AIRPORTS.filter(a => ['United Arab Emirates', 'Turkey'].includes(a.country)),
-    'Other Regions': MAJOR_AIRPORTS.filter(a => !['Romania', 'Moldova', 'United Kingdom', 'France', 'Germany', 'Austria', 'Italy', 'United Arab Emirates', 'Turkey'].includes(a.country))
+    'România': MAJOR_AIRPORTS.filter(a => a.country === 'România'),
+    'Moldova': MAJOR_AIRPORTS.filter(a => a.country === 'Moldova')
   }
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    name: 'Airports - Flight Schedule',
-    description: 'Browse all major airports worldwide with real-time flight information.',
+    name: 'Aeroporturi România și Moldova - Program Zboruri',
+    description: 'Explorează toate aeroporturile din România și Moldova cu informații în timp real despre zboruri.',
     url: 'https://anyway.ro/aeroporturi',
   }
 
@@ -64,8 +62,8 @@ export default function AirportsPage() {
                 Director Aeroporturi
               </h1>
               <p className="text-xl text-primary-100 mb-8 max-w-3xl mx-auto">
-                Explorează aeroporturi majore din întreaga lume și accesează informații în timp real despre zboruri, 
-                sosiri și plecări de la hub-uri internaționale de aviație.
+                Explorează toate aeroporturile din România și Moldova și accesează informații în timp real despre zboruri, 
+                sosiri și plecări de la aeroporturile naționale.
               </p>
             </div>
           </div>
@@ -85,7 +83,7 @@ export default function AirportsPage() {
                     </h2>
                   </div>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Caută după codul aeroportului, numele orașului sau țara pentru a găsi informații despre zboruri.
+                    Caută după codul aeroportului sau numele orașului pentru a găsi informații despre zboruri din România și Moldova.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -96,7 +94,7 @@ export default function AirportsPage() {
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                       <div className="text-2xl font-bold text-primary-600 dark:text-primary-400 mb-1">
-                        50+
+                        2
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Țări</div>
                     </div>
@@ -168,14 +166,14 @@ export default function AirportsPage() {
               {/* SEO Content */}
               <section className="prose prose-gray dark:prose-invert max-w-none">
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                  Rețeaua Globală de Aeroporturi
+                  Aeroporturile din România și Moldova
                 </h2>
                 <div className="text-gray-600 dark:text-gray-400 space-y-4">
                   <p>
                     Directorul nostru cuprinzător de aeroporturi oferă acces la informații în timp real despre zboruri 
-                    de la aeroporturi internaționale majore din întreaga lume. Fie că urmărești sosiri, 
+                    de la toate aeroporturile din România și Moldova. Fie că urmărești sosiri, 
                     monitorizezi plecări sau îți planifici călătoria, platforma noastră oferă date detaliate 
-                    despre zboruri de la sute de aeroporturi de pe șase continente.
+                    despre zboruri de la toate aeroporturile naționale și regionale.
                   </p>
                   <p>
                     Fiecare pagină de aeroport oferă informații cuprinzătoare incluzând statusul zborurilor în timp real, 
@@ -184,9 +182,9 @@ export default function AirportsPage() {
                     compania aeriană, statusul zborului, destinația și intervalul de timp.
                   </p>
                   <p>
-                    De la hub-uri majore precum Aeroportul Internațional Henri Coandă (OTP) din București 
-                    și London Heathrow (LHR) la aeroporturi regionale care deservesc milioane de pasageri 
-                    anual, baza noastră de date acoperă cele mai aglomerate și importante facilități de aviație din lume.
+                    De la hub-ul principal Aeroportul Internațional Henri Coandă (OTP) din București 
+                    la aeroporturi regionale precum Cluj-Napoca, Timișoara, Iași și Chișinău, 
+                    baza noastră de date acoperă toate facilitățile de aviație importante din România și Moldova.
                   </p>
                 </div>
               </section>

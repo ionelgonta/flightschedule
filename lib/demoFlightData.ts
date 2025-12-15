@@ -24,33 +24,27 @@ const AIRLINES = [
   { name: 'SAS', code: 'SK', country: 'Scandinavia' }
 ];
 
-// Aeroporturi europene comune pentru zboruri
+// Aeroporturi din România și Moldova pentru zboruri
 const AIRPORTS = {
   // România
   'OTP': { name: 'Aeroportul Internațional Henri Coandă', city: 'București', country: 'România' },
+  'BBU': { name: 'Aeroportul Internațional Aurel Vlaicu', city: 'București', country: 'România' },
   'CLJ': { name: 'Aeroportul Internațional Cluj-Napoca', city: 'Cluj-Napoca', country: 'România' },
   'TSR': { name: 'Aeroportul Internațional Timișoara Traian Vuia', city: 'Timișoara', country: 'România' },
   'IAS': { name: 'Aeroportul Internațional Iași', city: 'Iași', country: 'România' },
   'CND': { name: 'Aeroportul Internațional Mihail Kogălniceanu', city: 'Constanța', country: 'România' },
+  'SBZ': { name: 'Aeroportul Internațional Sibiu', city: 'Sibiu', country: 'România' },
+  'CRA': { name: 'Aeroportul Craiova', city: 'Craiova', country: 'România' },
+  'BCM': { name: 'Aeroportul Bacău', city: 'Bacău', country: 'România' },
+  'BAY': { name: 'Aeroportul Baia Mare', city: 'Baia Mare', country: 'România' },
+  'OMR': { name: 'Aeroportul Internațional Oradea', city: 'Oradea', country: 'România' },
+  'SCV': { name: 'Aeroportul Suceava Ștefan cel Mare', city: 'Suceava', country: 'România' },
+  'TGM': { name: 'Aeroportul Târgu Mureș Transilvania', city: 'Târgu Mureș', country: 'România' },
+  'ARW': { name: 'Aeroportul Arad', city: 'Arad', country: 'România' },
+  'STU': { name: 'Aeroportul Satu Mare', city: 'Satu Mare', country: 'România' },
   
-  // Europa
-  'FRA': { name: 'Frankfurt Airport', city: 'Frankfurt', country: 'Germany' },
-  'MUC': { name: 'Munich Airport', city: 'Munich', country: 'Germany' },
-  'VIE': { name: 'Aeroportul Internațional Viena', city: 'Viena', country: 'Austria' },
-  'IST': { name: 'Istanbul Airport', city: 'Istanbul', country: 'Turkey' },
-  'CDG': { name: 'Charles de Gaulle Airport', city: 'Paris', country: 'France' },
-  'AMS': { name: 'Amsterdam Airport Schiphol', city: 'Amsterdam', country: 'Netherlands' },
-  'LHR': { name: 'London Heathrow Airport', city: 'London', country: 'UK' },
-  'FCO': { name: 'Leonardo da Vinci Airport', city: 'Rome', country: 'Italy' },
-  'MAD': { name: 'Adolfo Suárez Madrid-Barajas Airport', city: 'Madrid', country: 'Spain' },
-  'BCN': { name: 'Barcelona-El Prat Airport', city: 'Barcelona', country: 'Spain' },
-  'DUB': { name: 'Dublin Airport', city: 'Dublin', country: 'Ireland' },
-  'BRU': { name: 'Brussels Airport', city: 'Brussels', country: 'Belgium' },
-  'ZUR': { name: 'Zurich Airport', city: 'Zurich', country: 'Switzerland' },
-  'CPH': { name: 'Copenhagen Airport', city: 'Copenhagen', country: 'Denmark' },
-  'ARN': { name: 'Stockholm Arlanda Airport', city: 'Stockholm', country: 'Sweden' },
-  'DXB': { name: 'Aeroportul Internațional Dubai', city: 'Dubai', country: 'EAU' },
-  'DOH': { name: 'Aeroportul Internațional Hamad', city: 'Doha', country: 'Qatar' }
+  // Moldova
+  'RMO': { name: 'Aeroportul Internațional Chișinău', city: 'Chișinău', country: 'Moldova' }
 };
 
 const AIRCRAFT_TYPES = ['Boeing 737-800', 'Airbus A320', 'Airbus A321', 'Boeing 777-300', 'Airbus A330', 'ATR 72'];
