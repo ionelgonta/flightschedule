@@ -70,81 +70,89 @@ export default function AnalyzePage() {
                 Tipuri de Analize Disponibile
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg border border-green-200 dark:border-green-700 p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="p-3 bg-green-600 rounded-lg">
-                      <Building className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-green-800 dark:text-green-200 mb-2">
-                        Statistici Aeroporturi
-                      </h3>
-                      <p className="text-sm text-green-700 dark:text-green-300 mb-3">
-                        Indice întârzieri, performanță la timp, ore de vârf și distribuția statusurilor pentru fiecare aeroport
-                      </p>
-                      <div className="text-xs text-green-600 dark:text-green-400 font-medium">
-                        Disponibil pentru toate aeroporturile →
+                <Link href="/aeroport/bucuresti-henri-coanda/statistici" className="block">
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg border border-green-200 dark:border-green-700 p-6 hover:shadow-md transition-all duration-200 hover:scale-105">
+                    <div className="flex items-start space-x-4">
+                      <div className="p-3 bg-green-600 rounded-lg">
+                        <Building className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-green-800 dark:text-green-200 mb-2">
+                          Statistici Aeroporturi
+                        </h3>
+                        <p className="text-sm text-green-700 dark:text-green-300 mb-3">
+                          Indice întârzieri, performanță la timp, ore de vârf și distribuția statusurilor pentru fiecare aeroport
+                        </p>
+                        <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+                          Disponibil pentru toate aeroporturile →
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
 
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg border border-blue-200 dark:border-blue-700 p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="p-3 bg-blue-600 rounded-lg">
-                      <Clock className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-blue-800 dark:text-blue-200 mb-2">
-                        Program Zboruri
-                      </h3>
-                      <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
-                        Calendar interactiv cu filtre pentru zboruri: dată, companie aeriană, destinație și status
-                      </p>
-                      <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                        Filtrare avansată disponibilă →
+                <Link href="/aeroport/bucuresti-henri-coanda/program-zboruri" className="block">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg border border-blue-200 dark:border-blue-700 p-6 hover:shadow-md transition-all duration-200 hover:scale-105">
+                    <div className="flex items-start space-x-4">
+                      <div className="p-3 bg-blue-600 rounded-lg">
+                        <Clock className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-blue-800 dark:text-blue-200 mb-2">
+                          Program Zboruri
+                        </h3>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                          Calendar interactiv cu filtre pentru zboruri: dată, companie aeriană, destinație și status
+                        </p>
+                        <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                          Filtrare avansată disponibilă →
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
 
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg border border-purple-200 dark:border-purple-700 p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="p-3 bg-purple-600 rounded-lg">
-                      <TrendingUp className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-purple-800 dark:text-purple-200 mb-2">
-                        Analize Istorice
-                      </h3>
-                      <p className="text-sm text-purple-700 dark:text-purple-300 mb-3">
-                        Tendințe și evoluție în timp: volum trafic, întârzieri medii și performanță pe perioade
-                      </p>
-                      <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
-                        Până la 365 de zile istoric →
+                <Link href="/aeroport/bucuresti-henri-coanda/istoric-zboruri" className="block">
+                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg border border-purple-200 dark:border-purple-700 p-6 hover:shadow-md transition-all duration-200 hover:scale-105">
+                    <div className="flex items-start space-x-4">
+                      <div className="p-3 bg-purple-600 rounded-lg">
+                        <TrendingUp className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-purple-800 dark:text-purple-200 mb-2">
+                          Analize Istorice
+                        </h3>
+                        <p className="text-sm text-purple-700 dark:text-purple-300 mb-3">
+                          Tendințe și evoluție în timp: volum trafic, întârzieri medii și performanță pe perioade
+                        </p>
+                        <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                          Până la 365 de zile istoric →
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
 
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg border border-orange-200 dark:border-orange-700 p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="p-3 bg-orange-600 rounded-lg">
-                      <Plane className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-orange-800 dark:text-orange-200 mb-2">
-                        Analize Rute
-                      </h3>
-                      <p className="text-sm text-orange-700 dark:text-orange-300 mb-3">
-                        Rute frecvente, companii aeriene, punctualitate pe destinații și analize comparative
-                      </p>
-                      <div className="text-xs text-orange-600 dark:text-orange-400 font-medium">
-                        Top destinații și companii →
+                <Link href="/aeroport/bucuresti-henri-coanda/analize-zboruri" className="block">
+                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg border border-orange-200 dark:border-orange-700 p-6 hover:shadow-md transition-all duration-200 hover:scale-105">
+                    <div className="flex items-start space-x-4">
+                      <div className="p-3 bg-orange-600 rounded-lg">
+                        <Plane className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-orange-800 dark:text-orange-200 mb-2">
+                          Analize Rute
+                        </h3>
+                        <p className="text-sm text-orange-700 dark:text-orange-300 mb-3">
+                          Rute frecvente, companii aeriene, punctualitate pe destinații și analize comparative
+                        </p>
+                        <div className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                          Top destinații și companii →
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               </div>
             </section>
 
