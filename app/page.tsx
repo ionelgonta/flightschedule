@@ -4,10 +4,10 @@ import { MAJOR_AIRPORTS, generateAirportSlug } from '@/lib/airports'
 import { AdBanner } from '@/components/ads/AdBanner'
 
 export default function HomePage() {
-  // Feature Romanian airports first, then major international ones
-  const romanianAirports = MAJOR_AIRPORTS.filter(a => a.country === 'Romania' || a.country === 'Moldova')
-  const internationalAirports = MAJOR_AIRPORTS.filter(a => a.country !== 'Romania' && a.country !== 'Moldova')
-  const featuredAirports = [...romanianAirports.slice(0, 6), ...internationalAirports.slice(0, 2)]
+  // Feature Romanian and Moldovan airports
+  const romanianAirports = MAJOR_AIRPORTS.filter(a => a.country === 'România')
+  const moldovanAirports = MAJOR_AIRPORTS.filter(a => a.country === 'Moldova')
+  const featuredAirports = [...romanianAirports.slice(0, 2), ...moldovanAirports.slice(0, 1)]
 
   return (
     <div className="min-h-screen">
@@ -140,6 +140,122 @@ export default function HomePage() {
                     </div>
                   </Link>
                 ))}
+                
+                {/* Vezi toate aeroporturile card */}
+                <Link
+                  href="/aeroporturi"
+                  className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 rounded-lg shadow-sm border-2 border-primary-200 dark:border-primary-700 p-6 hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600 transition-all group"
+                >
+                  <div className="text-center">
+                    <div className="flex justify-center mb-3">
+                      <div className="p-2 bg-primary-600 rounded-full">
+                        <MapPin className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-primary-700 dark:text-primary-300 mb-2 group-hover:text-primary-800 dark:group-hover:text-primary-200 transition-colors">
+                      Vezi toate aeroporturile
+                    </h3>
+                    <p className="text-sm text-primary-600 dark:text-primary-400">
+                      Explorează toate cele {MAJOR_AIRPORTS.length} aeroporturi din România și Moldova
+                    </p>
+                  </div>
+                </Link>
+              </div>
+            </section>
+
+            {/* Analytics Section */}
+            <section>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+                Analize și Statistici Zboruri
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Link
+                  href="/analize"
+                  className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg shadow-sm border border-green-200 dark:border-green-700 p-6 hover:shadow-md hover:border-green-300 dark:hover:border-green-600 transition-all group"
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-green-600 rounded-lg">
+                      <TrendingUp className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-green-800 dark:text-green-200 mb-2 group-hover:text-green-900 dark:group-hover:text-green-100 transition-colors">
+                        Statistici Aeroporturi
+                      </h3>
+                      <p className="text-sm text-green-700 dark:text-green-300 mb-3">
+                        Analizează performanța tuturor aeroporturilor: indice întârzieri, punctualitate și ore de vârf
+                      </p>
+                      <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+                        Alege aeroportul →
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/analize"
+                  className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg shadow-sm border border-blue-200 dark:border-blue-700 p-6 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all group"
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-blue-600 rounded-lg">
+                      <Clock className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-blue-800 dark:text-blue-200 mb-2 group-hover:text-blue-900 dark:group-hover:text-blue-100 transition-colors">
+                        Program Zboruri
+                      </h3>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                        Calendar interactiv pentru toate aeroporturile: filtrează după dată, companie aeriană și destinație
+                      </p>
+                      <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                        Alege aeroportul →
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/analize"
+                  className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg shadow-sm border border-purple-200 dark:border-purple-700 p-6 hover:shadow-md hover:border-purple-300 dark:hover:border-purple-600 transition-all group"
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-purple-600 rounded-lg">
+                      <TrendingUp className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-purple-800 dark:text-purple-200 mb-2 group-hover:text-purple-900 dark:group-hover:text-purple-100 transition-colors">
+                        Analize Istorice
+                      </h3>
+                      <p className="text-sm text-purple-700 dark:text-purple-300 mb-3">
+                        Tendințe și evoluție pentru toate aeroporturile: volum trafic, întârzieri și performanță în timp
+                      </p>
+                      <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                        Alege aeroportul →
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/aeronave"
+                  className="bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-900/20 dark:to-cyan-800/20 rounded-lg shadow-sm border border-cyan-200 dark:border-cyan-700 p-6 hover:shadow-md hover:border-cyan-300 dark:hover:border-cyan-600 transition-all group"
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-cyan-600 rounded-lg">
+                      <Plane className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-cyan-800 dark:text-cyan-200 mb-2 group-hover:text-cyan-900 dark:group-hover:text-cyan-100 transition-colors">
+                        Catalog Aeronave
+                      </h3>
+                      <p className="text-sm text-cyan-700 dark:text-cyan-300 mb-3">
+                        Căutare aeronave după ICAO24 sau înmatriculare, istoric zboruri și statistici
+                      </p>
+                      <div className="text-xs text-cyan-600 dark:text-cyan-400 font-medium">
+                        Explorează catalogul →
+                      </div>
+                    </div>
+                  </div>
+                </Link>
               </div>
             </section>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { adConfig } from '@/lib/adConfig'
-import { Save, Settings, Key, TestTube, CheckCircle, XCircle } from 'lucide-react'
+import { Save, Settings, Key, TestTube, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react'
 
 export default function AdminPage() {
   const [config, setConfig] = useState(adConfig)
@@ -34,6 +34,15 @@ export default function AdminPage() {
   const [mcpTesting, setMcpTesting] = useState(false)
   const [mcpError, setMcpError] = useState('')
   const [mcpTestResult, setMcpTestResult] = useState<any>(null)
+
+  // Cache Management State
+  const [analyticsInterval, setAnalyticsInterval] = useState(30) // days
+  const [realtimeInterval, setRealtimeInterval] = useState(60) // minutes
+  const [cacheStats, setCacheStats] = useState<{size: number, keys: string[]} | null>(null)
+  const [cacheSaving, setCacheSaving] = useState(false)
+  const [cacheClearing, setCacheClearing] = useState(false)
+  const [cacheSaved, setCacheSaved] = useState(false)
+  const [cacheCleared, setCacheCleared] = useState(false)
 
 
 
@@ -89,6 +98,23 @@ export default function AdminPage() {
         console.error('Error loading demo ads state:', error)
       }
     }
+
+    // Load cache configuration
+    const loadCacheConfig = async () => {
+      try {
+        const response = await fetch('/api/admin/cache-config')
+        const data = await response.json()
+        
+        if (data.success) {
+          setAnalyticsInterval(data.config.analyticsInterval)
+          setRealtimeInterval(data.config.realtimeInterval)
+        }
+      } catch (error) {
+        console.error('Error loading cache config:', error)
+      }
+    }
+
+    loadCacheConfig()
   }, [])
 
   // Test API Key function
@@ -374,9 +400,76 @@ export default function AdminPage() {
     }
   }
 
+  // Cache Management Functions
+  const loadCacheStats = async () => {
+    try {
+      const response = await fetch('/api/admin/cache-stats')
+      const data = await response.json()
+      
+      if (data.success) {
+        setCacheStats(data.stats)
+      }
+    } catch (error) {
+      console.error('Error loading cache stats:', error)
+    }
+  }
+
+  const saveCacheConfig = async () => {
+    setCacheSaving(true)
+    
+    try {
+      const response = await fetch('/api/admin/cache-config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          analyticsInterval,
+          realtimeInterval
+        })
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        setCacheSaved(true)
+        setTimeout(() => setCacheSaved(false), 3000)
+      }
+    } catch (error) {
+      console.error('Error saving cache config:', error)
+    } finally {
+      setCacheSaving(false)
+    }
+  }
+
+  const clearCache = async () => {
+    setCacheClearing(true)
+    
+    try {
+      const response = await fetch('/api/admin/cache-clear', {
+        method: 'POST'
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        setCacheCleared(true)
+        setTimeout(() => setCacheCleared(false), 3000)
+        // Reload stats after clearing
+        await loadCacheStats()
+      }
+    } catch (error) {
+      console.error('Error clearing cache:', error)
+    } finally {
+      setCacheClearing(false)
+    }
+  }
+
   useEffect(() => {
     if (activeTab === 'mcp') {
       loadMCPStatus()
+    } else if (activeTab === 'cache') {
+      loadCacheStats()
     }
   }, [activeTab])
 
@@ -454,6 +547,17 @@ export default function AdminPage() {
               >
                 <TestTube className="h-4 w-4 inline mr-2" />
                 MCP Integration
+              </button>
+              <button
+                onClick={() => setActiveTab('cache')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'cache'
+                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                <Settings className="h-4 w-4 inline mr-2" />
+                Cache Management
               </button>
             </nav>
           </div>
@@ -870,6 +974,231 @@ export default function AdminPage() {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {activeTab === 'cache' && (
+              <div className="space-y-6">
+                {/* Cache Configuration Header */}
+                <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-2">
+                    🗄️ Cache Management System
+                  </h3>
+                  <p className="text-purple-700 dark:text-purple-300 text-sm">
+                    Configurează intervalele de cache pentru date live și analize. Sistemul folosește cronjobs automate pentru reîmprospătare.
+                  </p>
+                </div>
+
+                {/* Cache Configuration */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Analytics Cache */}
+                  <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <TrendingUp className="h-5 w-5 mr-2 text-purple-600" />
+                      Cache Analize
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Interval Cache (zile)
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="90"
+                          value={analyticsInterval}
+                          onChange={(e) => setAnalyticsInterval(parseInt(e.target.value) || 30)}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Datele de analize se păstrează în cache pentru {analyticsInterval} zile
+                        </p>
+                      </div>
+                      
+                      <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
+                        <p className="text-sm text-purple-700 dark:text-purple-300">
+                          <strong>Acoperă:</strong> Statistici aeroporturi, analize istorice, analize rute, catalog aeronave
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Real-time Cache */}
+                  <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <Clock className="h-5 w-5 mr-2 text-blue-600" />
+                      Cache Timp Real
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Interval Cache (minute)
+                        </label>
+                        <input
+                          type="number"
+                          min="5"
+                          max="1440"
+                          value={realtimeInterval}
+                          onChange={(e) => setRealtimeInterval(parseInt(e.target.value) || 60)}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Datele live se reîmprospătează la fiecare {realtimeInterval} minute
+                        </p>
+                      </div>
+                      
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          <strong>Acoperă:</strong> Sosiri/plecări aeroporturi, program zboruri recent
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cache Actions */}
+                <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
+                    Acțiuni Cache
+                  </h4>
+                  
+                  <div className="flex flex-wrap gap-4">
+                    <button
+                      onClick={saveCacheConfig}
+                      disabled={cacheSaving}
+                      className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {cacheSaving ? 'Salvez...' : 'Salvează Configurația'}
+                    </button>
+                    
+                    <button
+                      onClick={clearCache}
+                      disabled={cacheClearing}
+                      className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      {cacheClearing ? 'Șterg...' : 'Șterge Tot Cache-ul'}
+                    </button>
+                    
+                    <button
+                      onClick={loadCacheStats}
+                      className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                    >
+                      <TestTube className="h-4 w-4 mr-2" />
+                      Reîmprospătează Statistici
+                    </button>
+                  </div>
+
+                  {/* Success Messages */}
+                  {cacheSaved && (
+                    <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <p className="text-green-700 dark:text-green-400 text-sm flex items-center">
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Configurația cache a fost salvată cu succes!
+                      </p>
+                    </div>
+                  )}
+
+                  {cacheCleared && (
+                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                      <p className="text-blue-700 dark:text-blue-400 text-sm flex items-center">
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Cache-ul a fost șters complet!
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Cache Statistics */}
+                {cacheStats && (
+                  <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
+                      📊 Statistici Cache
+                    </h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {cacheStats.size}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Intrări în Cache
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {cacheStats.keys.filter(k => k.startsWith('stats:')).length}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Cache Analize
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {cacheStats.keys.filter(k => k.startsWith('schedules:')).length}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Cache Program
+                        </div>
+                      </div>
+                    </div>
+
+                    {cacheStats.keys.length > 0 && (
+                      <div>
+                        <h5 className="font-medium text-gray-900 dark:text-white mb-2">
+                          Chei Cache Active (primele 10):
+                        </h5>
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                          <div className="text-xs font-mono text-gray-600 dark:text-gray-400 space-y-1">
+                            {cacheStats.keys.slice(0, 10).map((key, index) => (
+                              <div key={index}>{key}</div>
+                            ))}
+                            {cacheStats.keys.length > 10 && (
+                              <div className="text-gray-500 dark:text-gray-500">
+                                ... și încă {cacheStats.keys.length - 10} chei
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Cronjob Information */}
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
+                  <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-3">
+                    ⏰ Cronjobs Automate
+                  </h4>
+                  
+                  <div className="space-y-3 text-sm text-yellow-800 dark:text-yellow-200">
+                    <div className="flex items-start space-x-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                      <div>
+                        <strong>Cache Analize:</strong> Se reîmprospătează automat la fiecare {analyticsInterval} zile
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                      <div>
+                        <strong>Cache Timp Real:</strong> Se reîmprospătează automat la fiecare {realtimeInterval} minute
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                      <div>
+                        <strong>Sistem Automat:</strong> Cronjobs rulează în background pentru menținerea datelor fresh
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>

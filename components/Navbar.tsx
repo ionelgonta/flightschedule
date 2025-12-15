@@ -1,13 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useTheme } from './ThemeProvider'
-import { Plane, Moon, Sun, Menu, X } from 'lucide-react'
+import { Plane, Moon, Sun, Menu, X, ChevronDown, BarChart3 } from 'lucide-react'
 
 export function Navbar() {
   const { theme, setTheme } = useTheme()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false)
+  const analyticsRef = useRef<HTMLDivElement>(null)
+
+  // Close analytics dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (analyticsRef.current && !analyticsRef.current.contains(event.target as Node)) {
+        setIsAnalyticsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark')
@@ -41,6 +57,65 @@ export function Navbar() {
             >
               Aeroporturi
             </Link>
+            
+            {/* Analytics Dropdown */}
+            <div className="relative" ref={analyticsRef}>
+              <button
+                onClick={() => setIsAnalyticsOpen(!isAnalyticsOpen)}
+                className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span>Analize</span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${isAnalyticsOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isAnalyticsOpen && (
+                <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+                  <Link
+                    href="/analize"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    onClick={() => setIsAnalyticsOpen(false)}
+                  >
+                    <div className="font-medium">Statistici Aeroporturi</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Toate aeroporturile</div>
+                  </Link>
+                  <Link
+                    href="/analize"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    onClick={() => setIsAnalyticsOpen(false)}
+                  >
+                    <div className="font-medium">Program Zboruri</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Toate aeroporturile</div>
+                  </Link>
+                  <Link
+                    href="/analize"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    onClick={() => setIsAnalyticsOpen(false)}
+                  >
+                    <div className="font-medium">Analize Istorice</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Toate aeroporturile</div>
+                  </Link>
+                  <Link
+                    href="/analize"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    onClick={() => setIsAnalyticsOpen(false)}
+                  >
+                    <div className="font-medium">Analize Rute</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Toate aeroporturile</div>
+                  </Link>
+                  <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                  <Link
+                    href="/aeronave"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    onClick={() => setIsAnalyticsOpen(false)}
+                  >
+                    <div className="font-medium">Catalog Aeronave</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Căutare ICAO24 și înmatriculare</div>
+                  </Link>
+                </div>
+              )}
+            </div>
+            
             <Link 
               href="/cautare" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
@@ -117,6 +192,50 @@ export function Navbar() {
               >
                 Aeroporturi
               </Link>
+              
+              {/* Mobile Analytics Section */}
+              <div className="border-l-2 border-primary-200 dark:border-primary-700 pl-4 space-y-2">
+                <div className="text-sm font-medium text-primary-600 dark:text-primary-400 flex items-center">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Analize
+                </div>
+                <Link 
+                  href="/analize" 
+                  className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Statistici Aeroporturi
+                </Link>
+                <Link 
+                  href="/analize" 
+                  className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Program Zboruri
+                </Link>
+                <Link 
+                  href="/analize" 
+                  className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Analize Istorice
+                </Link>
+                <Link 
+                  href="/analize" 
+                  className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Analize Rute
+                </Link>
+                <Link 
+                  href="/aeronave" 
+                  className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Catalog Aeronave
+                </Link>
+              </div>
+              
               <Link 
                 href="/cautare" 
                 className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
