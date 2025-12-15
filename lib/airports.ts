@@ -213,3 +213,46 @@ export const searchAirports = (query: string): Airport[] => {
     airport.country.toLowerCase().includes(searchTerm)
   )
 }
+
+// Generează slug din oraș și numele aeroportului
+export const generateAirportSlug = (airport: Airport): string => {
+  const citySlug = airport.city
+    .toLowerCase()
+    .replace(/ă/g, 'a')
+    .replace(/â/g, 'a')
+    .replace(/î/g, 'i')
+    .replace(/ș/g, 's')
+    .replace(/ț/g, 't')
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+  
+  const airportSlug = airport.name
+    .toLowerCase()
+    .replace(/ă/g, 'a')
+    .replace(/â/g, 'a')
+    .replace(/î/g, 'i')
+    .replace(/ș/g, 's')
+    .replace(/ț/g, 't')
+    .replace(/international|airport|aeroportul/g, '')
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+  
+  return `${citySlug}-${airportSlug}`
+}
+
+// Găsește aeroport după slug
+export const getAirportBySlug = (slug: string): Airport | undefined => {
+  return MAJOR_AIRPORTS.find(airport => generateAirportSlug(airport) === slug)
+}
+
+// Mapare pentru compatibilitate cu codurile vechi
+export const getAirportByCodeOrSlug = (identifier: string): Airport | undefined => {
+  // Încearcă mai întâi să găsească după slug
+  const bySlug = getAirportBySlug(identifier)
+  if (bySlug) return bySlug
+  
+  // Dacă nu găsește, încearcă după cod (pentru compatibilitate)
+  return getAirportByCode(identifier)
+}

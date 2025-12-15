@@ -1,5 +1,7 @@
+type AdMode = 'active' | 'inactive'
+
 interface AdZone {
-  active: boolean
+  mode: AdMode
   slotId: string
   size: string
   customHtml?: string
@@ -25,52 +27,49 @@ export const adConfig: AdConfig = {
   
   zones: {
     'header-banner': {
-      active: true,
+      mode: 'active',
       slotId: '1234567890',
       size: '728x90',
       customHtml: undefined
     },
     'sidebar-right': {
-      active: true,
+      mode: 'active',
       slotId: '1234567891',
       size: '300x600',
       customHtml: undefined
     },
     'sidebar-square': {
-      active: true,
+      mode: 'active',
       slotId: '1234567892',
       size: '300x250',
       customHtml: undefined
     },
     'inline-banner': {
-      active: true,
+      mode: 'active',
       slotId: '1234567893',
       size: '728x90',
       customHtml: undefined
     },
     'footer-banner': {
-      active: true,
+      mode: 'active',
       slotId: '1234567894',
       size: '970x90',
       customHtml: undefined
     },
     'mobile-banner': {
-      active: true,
+      mode: 'active',
       slotId: '1234567895',
       size: '320x50',
       customHtml: undefined
     },
-    // Partner banner zones (can be activated with custom HTML)
     'partner-banner-1': {
-      active: false,
+      mode: 'inactive',
       slotId: '',
       size: '728x90',
       customHtml: undefined
-      // Example custom HTML:
-      // customHtml: '<a href="https://partner.com" target="_blank"><img src="/partner-banner.jpg" alt="Partner" class="w-full h-auto" /></a>'
     },
     'partner-banner-2': {
-      active: false,
+      mode: 'inactive',
       slotId: '',
       size: '300x250',
       customHtml: undefined
@@ -78,9 +77,18 @@ export const adConfig: AdConfig = {
   }
 }
 
-// Helper function to toggle ad zones
+// Helper function to set ad zone mode
+export const setAdZoneMode = (zone: keyof typeof adConfig.zones, mode: AdMode): void => {
+  adConfig.zones[zone].mode = mode
+  // Salvează în localStorage pentru persistență
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('adConfig', JSON.stringify(adConfig))
+  }
+}
+
+// Helper function to toggle ad zones (backward compatibility)
 export const toggleAdZone = (zone: keyof typeof adConfig.zones, active: boolean): void => {
-  adConfig.zones[zone].active = active
+  adConfig.zones[zone].mode = active ? 'active' : 'inactive'
   // Salvează în localStorage pentru persistență
   if (typeof window !== 'undefined') {
     localStorage.setItem('adConfig', JSON.stringify(adConfig))
@@ -90,7 +98,7 @@ export const toggleAdZone = (zone: keyof typeof adConfig.zones, active: boolean)
 // Helper function to set custom HTML for partner banners
 export const setCustomBanner = (zone: keyof typeof adConfig.zones, html: string): void => {
   adConfig.zones[zone].customHtml = html
-  adConfig.zones[zone].active = html.length > 0
+  adConfig.zones[zone].mode = html.length > 0 ? 'active' : 'inactive'
   // Salvează în localStorage pentru persistență
   if (typeof window !== 'undefined') {
     localStorage.setItem('adConfig', JSON.stringify(adConfig))

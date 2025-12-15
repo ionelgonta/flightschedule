@@ -1,68 +1,27 @@
-# Simple Deploy to Server - PowerShell Script
-# Connects to Hetzner server and deploys updates
+#!/usr/bin/env pwsh
 
-Write-Host "🚀 Deploy to Server - MCP Integration" -ForegroundColor Green
-Write-Host "=====================================" -ForegroundColor Green
-Write-Host ""
+Write-Host "🚀 Deploying URL structure and translation updates..." -ForegroundColor Green
 
-# Configuration
-$ServerIP = "23.88.113.154"
-$ServerUser = "root"
+# Copy key files that were updated
+Write-Host "📁 Copying updated files..." -ForegroundColor Yellow
 
-Write-Host "📋 Connecting to: $ServerUser@$ServerIP" -ForegroundColor Cyan
-Write-Host ""
+# Copy the main application files
+scp app/page.tsx root@anyway.ro:/var/www/anyway.ro/app/
+scp app/airports/page.tsx root@anyway.ro:/var/www/anyway.ro/app/airports/
+scp "app/airport/[code]/page.tsx" root@anyway.ro:/var/www/anyway.ro/app/airport/[code]/
+scp "app/airport/[code]/arrivals/page.tsx" root@anyway.ro:/var/www/anyway.ro/app/airport/[code]/arrivals/
+scp "app/airport/[code]/departures/page.tsx" root@anyway.ro:/var/www/anyway.ro/app/airport/[code]/departures/
 
-# SSH command to execute on server
-$deployCommand = @"
-cd /opt/anyway-flight-schedule && 
-echo '📥 Pulling latest changes...' && 
-git pull origin main && 
-echo '🔧 Making scripts executable...' && 
-chmod +x *.sh && 
-echo '🔄 Restarting services...' && 
-docker-compose down && 
-docker-compose build --no-cache && 
-docker-compose up -d && 
-echo '⏳ Waiting for startup...' && 
-sleep 15 && 
-echo '🧪 Testing endpoints...' && 
-curl -s -o /dev/null -w 'Main site: %{http_code}\n' https://anyway.ro && 
-curl -s -o /dev/null -w 'Admin panel: %{http_code}\n' https://anyway.ro/admin && 
-curl -s -o /dev/null -w 'Flight data: %{http_code}\n' https://anyway.ro/airport/OTP/arrivals && 
-echo '✅ Deployment completed!'
-"@
+# Copy components
+scp components/Navbar.tsx root@anyway.ro:/var/www/anyway.ro/components/
+scp components/Footer.tsx root@anyway.ro:/var/www/anyway.ro/components/
 
-Write-Host "Executing deployment commands..." -ForegroundColor Yellow
+# Copy lib files
+scp lib/airports.ts root@anyway.ro:/var/www/anyway.ro/lib/
 
-# Try different SSH methods
-if (Get-Command ssh -ErrorAction SilentlyContinue) {
-    Write-Host "Using OpenSSH..." -ForegroundColor Gray
-    ssh -o StrictHostKeyChecking=no $ServerUser@$ServerIP $deployCommand
-} elseif (Get-Command plink -ErrorAction SilentlyContinue) {
-    Write-Host "Using PuTTY plink..." -ForegroundColor Gray
-    echo $deployCommand | plink -ssh -batch -pw "FlightSchedule2024!" $ServerUser@$ServerIP
-} else {
-    Write-Host "❌ No SSH client found!" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Manual deployment steps:" -ForegroundColor Yellow
-    Write-Host "1. Open SSH client (PuTTY, Windows Terminal, etc.)" -ForegroundColor White
-    Write-Host "2. Connect: ssh root@23.88.113.154" -ForegroundColor White
-    Write-Host "3. Password: FlightSchedule2024!" -ForegroundColor White
-    Write-Host "4. Run commands:" -ForegroundColor White
-    Write-Host "   cd /opt/anyway-flight-schedule" -ForegroundColor Gray
-    Write-Host "   git pull origin main" -ForegroundColor Gray
-    Write-Host "   chmod +x *.sh" -ForegroundColor Gray
-    Write-Host "   docker-compose restart" -ForegroundColor Gray
-    Write-Host ""
-    Write-Host "Or use Windows Subsystem for Linux (WSL)" -ForegroundColor Yellow
-}
+# Rebuild on server
+Write-Host "🔨 Rebuilding on server..." -ForegroundColor Yellow
+ssh root@anyway.ro "cd /var/www/anyway.ro && npm run build && pm2 restart anyway-app"
 
-Write-Host ""
-Write-Host "🌐 After deployment, test these URLs:" -ForegroundColor Cyan
-Write-Host "• Main site: https://anyway.ro" -ForegroundColor White
-Write-Host "• Admin panel: https://anyway.ro/admin" -ForegroundColor White
-Write-Host "• Flight data: https://anyway.ro/airport/OTP/arrivals" -ForegroundColor White
-Write-Host ""
-Write-Host "🔗 New MCP features in Admin Panel:" -ForegroundColor Cyan
-Write-Host "• Go to Admin → MCP Integration tab" -ForegroundColor White
-Write-Host "• Test MCP connection and tools" -ForegroundColor White
+Write-Host "✅ Deployment complete!" -ForegroundColor Green
+Write-Host "🌍 Changes live at https://anyway.ro" -ForegroundColor Cyan

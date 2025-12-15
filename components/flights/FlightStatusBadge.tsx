@@ -14,37 +14,37 @@ interface FlightStatusBadgeProps {
 
 const statusConfig = {
   scheduled: {
-    label: 'Scheduled',
+    label: 'Programat',
     icon: Clock,
     className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
   },
   active: {
-    label: 'In Flight',
+    label: 'În Zbor',
     icon: Plane,
     className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
   },
   landed: {
-    label: 'Landed',
+    label: 'Aterizat',
     icon: CheckCircle,
     className: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
   },
   cancelled: {
-    label: 'Cancelled',
+    label: 'Anulat',
     icon: XCircle,
     className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
   },
   delayed: {
-    label: 'Delayed',
+    label: 'Întârziat',
     icon: AlertTriangle,
     className: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
   },
   diverted: {
-    label: 'Diverted',
+    label: 'Deviat',
     icon: Navigation,
     className: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
   },
   unknown: {
-    label: 'Unknown',
+    label: 'Necunoscut',
     icon: Clock,
     className: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
   }

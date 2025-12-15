@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { adConfig, toggleAdZone, setCustomBanner } from '@/lib/adConfig'
-import { Save, Eye, EyeOff, Upload, Trash2, Settings, Key, TestTube, CheckCircle, XCircle } from 'lucide-react'
+import { adConfig } from '@/lib/adConfig'
+import { Save, Settings, Key, TestTube, CheckCircle, XCircle } from 'lucide-react'
 
 export default function AdminPage() {
   const [config, setConfig] = useState(adConfig)
@@ -17,6 +17,17 @@ export default function AdminPage() {
   const [apiKeyError, setApiKeyError] = useState('')
   const [apiKeySaved, setApiKeySaved] = useState(false)
 
+  // AdSense Management State
+  const [adsensePublisherId, setAdsensePublisherId] = useState('')
+  const [currentAdsensePublisherId, setCurrentAdsensePublisherId] = useState('')
+  const [adsenseTesting, setAdsenseTesting] = useState(false)
+  const [adsenseValid, setAdsenseValid] = useState<boolean | null>(null)
+  const [adsenseError, setAdsenseError] = useState('')
+  const [adsenseSaved, setAdsenseSaved] = useState(false)
+
+  // Demo Ads State
+  const [demoAdsEnabled, setDemoAdsEnabled] = useState(false)
+
   // MCP Integration State
   const [mcpInitialized, setMcpInitialized] = useState(false)
   const [mcpTools, setMcpTools] = useState<any[]>([])
@@ -24,24 +35,16 @@ export default function AdminPage() {
   const [mcpError, setMcpError] = useState('')
   const [mcpTestResult, setMcpTestResult] = useState<any>(null)
 
-  const handleToggleZone = (zone: keyof typeof adConfig.zones) => {
-    toggleAdZone(zone, !config.zones[zone].active)
-    setConfig({ ...adConfig })
-  }
 
-  const handleCustomBanner = (zone: keyof typeof adConfig.zones, html: string) => {
-    setCustomBanner(zone, html)
-    setConfig({ ...adConfig })
-  }
 
   const handleSave = () => {
-    // În producție, aici ai salva în baza de date
     localStorage.setItem('adConfig', JSON.stringify(config))
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
 
-  // Load current API key on component mount
+
+  // Load current API key and AdSense config on component mount
   useEffect(() => {
     const loadCurrentApiKey = async () => {
       try {
@@ -49,20 +52,43 @@ export default function AdminPage() {
         const data = await response.json()
         
         if (data.success && data.hasKey) {
-          setCurrentApiKey(data.apiKey) // This is masked for security
-          // Don't set the full key in the input field for security
+          setCurrentApiKey(data.apiKey)
         }
       } catch (error) {
         console.error('Error loading API key:', error)
-        // Fallback to environment variable
         const envKey = process.env.NEXT_PUBLIC_FLIGHT_API_KEY || ''
         if (envKey) {
           setCurrentApiKey(`${envKey.substring(0, 8)}...${envKey.substring(envKey.length - 8)}`)
         }
       }
     }
+
+    const loadCurrentAdsenseConfig = async () => {
+      try {
+        const response = await fetch('/api/admin/adsense')
+        const data = await response.json()
+        
+        if (data.success && data.hasPublisherId) {
+          setCurrentAdsensePublisherId(data.publisherId)
+        }
+      } catch (error) {
+        console.error('Error loading AdSense config:', error)
+        setCurrentAdsensePublisherId(config.publisherId)
+      }
+    }
     
     loadCurrentApiKey()
+    loadCurrentAdsenseConfig()
+    
+    // Load demo ads state
+    const savedDemoState = localStorage.getItem('demoAdsEnabled')
+    if (savedDemoState) {
+      try {
+        setDemoAdsEnabled(JSON.parse(savedDemoState))
+      } catch (error) {
+        console.error('Error loading demo ads state:', error)
+      }
+    }
   }, [])
 
   // Test API Key function
@@ -111,7 +137,6 @@ export default function AdminPage() {
       setApiKeyTesting(false)
     }
   }
-
   // Save API Key function
   const saveApiKey = async () => {
     if (!apiKey.trim()) {
@@ -142,13 +167,10 @@ export default function AdminPage() {
         setApiKeyValid(true)
         setApiKeyError('')
         
-        // Show success message
         setTimeout(() => setApiKeySaved(false), 3000)
         
-        // Ask to restart application
         setTimeout(() => {
           if (confirm('API key salvat cu succes! Pentru a aplica modificările, aplicația trebuie repornită. Continuați?')) {
-            // În producție, aici ai putea face un restart automat sau notifica administratorul
             alert('API key-ul a fost salvat în fișierul de configurare. Reporniți aplicația pentru a aplica modificările.')
           }
         }, 1000)
@@ -164,11 +186,113 @@ export default function AdminPage() {
     }
   }
 
-  // Handle API key input change
   const handleApiKeyChange = (value: string) => {
     setApiKey(value)
     setApiKeyValid(null)
     setApiKeyError('')
+  }
+
+  // AdSense Management Functions
+  const testAdsensePublisherId = async (publisherIdToTest: string) => {
+    if (!publisherIdToTest.trim()) {
+      setAdsenseError('Introduceți un Publisher ID')
+      return false
+    }
+
+    setAdsenseTesting(true)
+    setAdsenseError('')
+    setAdsenseValid(null)
+
+    try {
+      const response = await fetch('/api/admin/adsense', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          publisherId: publisherIdToTest,
+          action: 'test'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setAdsenseValid(data.valid)
+        if (!data.valid) {
+          setAdsenseError(data.error || 'Publisher ID invalid')
+        } else {
+          setAdsenseError('')
+        }
+        return data.valid
+      } else {
+        setAdsenseValid(false)
+        setAdsenseError(data.error || 'Eroare la testarea Publisher ID-ului')
+        return false
+      }
+    } catch (error) {
+      setAdsenseValid(false)
+      setAdsenseError('Eroare de conexiune')
+      return false
+    } finally {
+      setAdsenseTesting(false)
+    }
+  }
+  const saveAdsensePublisherId = async () => {
+    if (!adsensePublisherId.trim()) {
+      setAdsenseError('Introduceți un Publisher ID')
+      return
+    }
+
+    setAdsenseTesting(true)
+    setAdsenseError('')
+
+    try {
+      const response = await fetch('/api/admin/adsense', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          publisherId: adsensePublisherId,
+          action: 'save'
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setCurrentAdsensePublisherId(adsensePublisherId)
+        setAdsenseSaved(true)
+        setAdsenseValid(true)
+        setAdsenseError('')
+        
+        config.publisherId = adsensePublisherId
+        setConfig({ ...config })
+        
+        setTimeout(() => setAdsenseSaved(false), 3000)
+        
+        setTimeout(() => {
+          if (confirm('Publisher ID AdSense salvat cu succes! Pentru a aplica modificările, aplicația trebuie repornită. Continuați?')) {
+            alert('Publisher ID-ul AdSense a fost salvat în fișierul de configurare. Reporniți aplicația pentru a aplica modificările.')
+          }
+        }, 1000)
+      } else {
+        setAdsenseError(data.error || 'Eroare la salvarea Publisher ID-ului')
+        setAdsenseValid(false)
+      }
+    } catch (error) {
+      setAdsenseError('Eroare de conexiune la server')
+      setAdsenseValid(false)
+    } finally {
+      setAdsenseTesting(false)
+    }
+  }
+
+  const handleAdsensePublisherIdChange = (value: string) => {
+    setAdsensePublisherId(value)
+    setAdsenseValid(null)
+    setAdsenseError('')
   }
 
   // MCP Integration Functions
@@ -226,7 +350,6 @@ export default function AdminPage() {
       setMcpTesting(false)
     }
   }
-
   const reinitializeMCP = async () => {
     setMcpTesting(true)
     setMcpError('')
@@ -251,7 +374,6 @@ export default function AdminPage() {
     }
   }
 
-  // Load MCP status on component mount
   useEffect(() => {
     if (activeTab === 'mcp') {
       loadMCPStatus()
@@ -277,10 +399,10 @@ export default function AdminPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                🎯 Admin Publicitate
+                🎯 Admin Complet - AdSense, API & MCP
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Gestionează bannerele publicitare și AdSense pentru website-ul de zboruri
+                Gestionează AdSense Toggle, API Keys (AeroDataBox) și MCP Integration
               </p>
             </div>
             <button
@@ -296,7 +418,6 @@ export default function AdminPage() {
             </button>
           </div>
         </div>
-
         {/* Tabs */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
           <div className="border-b border-gray-200 dark:border-gray-700">
@@ -310,18 +431,7 @@ export default function AdminPage() {
                 }`}
               >
                 <Settings className="h-4 w-4 inline mr-2" />
-                Google AdSense
-              </button>
-              <button
-                onClick={() => setActiveTab('partners')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'partners'
-                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-              >
-                <Upload className="h-4 w-4 inline mr-2" />
-                Bannere Parteneri
+                AdSense Toggle
               </button>
               <button
                 onClick={() => setActiveTab('api')}
@@ -351,23 +461,82 @@ export default function AdminPage() {
           <div className="p-6">
             {activeTab === 'adsense' && (
               <div className="space-y-6">
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                    Configurare Google AdSense
-                  </h3>
-                  <p className="text-blue-700 dark:text-blue-300 text-sm mb-4">
-                    Pentru a activa AdSense, actualizează Publisher ID-ul în fișierul de configurare.
-                  </p>
-                  <div className="bg-white dark:bg-gray-800 rounded p-3 font-mono text-sm">
-                    <span className="text-gray-500">Publisher ID actual:</span> 
-                    <span className="text-primary-600 dark:text-primary-400 ml-2">
-                      {config.publisherId}
-                    </span>
+                {/* Simple Demo Toggle */}
+                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        Demo Ads
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                        Activează/dezactivează anunțuri demo
+                      </p>
+                    </div>
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={demoAdsEnabled}
+                        onChange={(e) => {
+                          const enabled = e.target.checked
+                          setDemoAdsEnabled(enabled)
+                          localStorage.setItem('demoAdsEnabled', JSON.stringify(enabled))
+                        }}
+                        className="sr-only"
+                      />
+                      <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        demoAdsEnabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+                      }`}>
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          demoAdsEnabled ? 'translate-x-6' : 'translate-x-1'
+                        }`} />
+                      </div>
+                      <span className="ml-3 text-sm font-medium text-gray-900 dark:text-white">
+                        {demoAdsEnabled ? 'Activat' : 'Dezactivat'}
+                      </span>
+                    </label>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {adZones.filter(zone => !zone.key.includes('partner')).map((zone) => (
+                {/* AdSense Toggle Instructions */}
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+                  <h2 className="text-xl font-semibold text-blue-900 dark:text-blue-100 mb-4">
+                    🎯 Sistem Toggle AdSense (2 Moduri)
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-green-100 dark:bg-green-900/20 p-4 rounded-lg">
+                      <h3 className="font-semibold text-green-800 dark:text-green-200 mb-2">🟢 Activ</h3>
+                      <p className="text-green-700 dark:text-green-300 text-sm">
+                        AdSense real cu Publisher ID: {config.publisherId}
+                      </p>
+                    </div>
+                    
+                    <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">⚫ Inactiv</h3>
+                      <p className="text-gray-700 dark:text-gray-300 text-sm">
+                        Ascunde complet bannerele
+                      </p>
+                    </div>
+                    
+
+                  </div>
+
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
+                      📋 Instrucțiuni Console Script
+                    </h4>
+                    <ol className="list-decimal list-inside space-y-2 text-gray-700 dark:text-gray-300 text-sm">
+                      <li>Deschide <strong>Developer Console</strong> (F12)</li>
+                      <li>Selectează tab-ul <strong>Console</strong></li>
+                      <li>Copiază scriptul din <code>ADSENSE_TOGGLE_CONSOLE.md</code></li>
+                      <li>Execută scriptul pentru interfața completă</li>
+                      <li>Controlează toate zonele cu butoane</li>
+                    </ol>
+                  </div>
+                </div>
+                {/* Zone Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {adZones.map((zone) => (
                     <div key={zone.key} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div>
@@ -378,134 +547,19 @@ export default function AdminPage() {
                             {zone.size} - {zone.description}
                           </p>
                         </div>
-                        <button
-                          onClick={() => handleToggleZone(zone.key)}
-                          className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
-                            config.zones[zone.key].active
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                          }`}
-                        >
-                          {config.zones[zone.key].active ? (
-                            <>
-                              <Eye className="h-4 w-4" />
-                              <span>Activ</span>
-                            </>
-                          ) : (
-                            <>
-                              <EyeOff className="h-4 w-4" />
-                              <span>Inactiv</span>
-                            </>
-                          )}
-                        </button>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          config.zones[zone.key].mode === 'active'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                        }`}>
+                          {config.zones[zone.key].mode === 'active' ? 'Activ' : 'Inactiv'}
+                        </span>
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Slot ID: {config.zones[zone.key].slotId || 'Nu este configurat'}
+                        Mod curent: {config.zones[zone.key].mode}
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'partners' && (
-              <div className="space-y-6">
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">
-                    Bannere Parteneri Personalizate
-                  </h3>
-                  <p className="text-green-700 dark:text-green-300 text-sm">
-                    Adaugă HTML personalizat pentru bannerele partenerilor. Poți include imagini, linkuri și cod de tracking.
-                  </p>
-                </div>
-
-                {adZones.filter(zone => zone.key.includes('partner')).map((zone) => (
-                  <div key={zone.key} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {zone.name}
-                        </h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Dimensiune recomandată: {zone.size}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleToggleZone(zone.key)}
-                          className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
-                            config.zones[zone.key].active
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                          }`}
-                        >
-                          {config.zones[zone.key].active ? (
-                            <>
-                              <Eye className="h-4 w-4" />
-                              <span>Activ</span>
-                            </>
-                          ) : (
-                            <>
-                              <EyeOff className="h-4 w-4" />
-                              <span>Inactiv</span>
-                            </>
-                          )}
-                        </button>
-                        {config.zones[zone.key].customHtml && (
-                          <button
-                            onClick={() => handleCustomBanner(zone.key, '')}
-                            className="flex items-center space-x-1 px-2 py-1 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 rounded text-sm"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                            <span>Șterge</span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          HTML Personalizat
-                        </label>
-                        <textarea
-                          rows={6}
-                          placeholder={`Exemplu:
-<a href="https://partener.com" target="_blank">
-  <img src="/banner-partener.jpg" alt="Partener" style="width:100%;height:auto;" />
-</a>`}
-                          value={config.zones[zone.key].customHtml || ''}
-                          onChange={(e) => handleCustomBanner(zone.key, e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        />
-                      </div>
-
-                      {config.zones[zone.key].customHtml && (
-                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Preview:
-                          </h5>
-                          <div 
-                            className="border border-gray-200 dark:border-gray-600 rounded p-2 bg-white dark:bg-gray-800"
-                            dangerouslySetInnerHTML={{ __html: config.zones[zone.key].customHtml || '' }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                  <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
-                    💡 Sfaturi pentru Bannere Parteneri
-                  </h4>
-                  <ul className="text-yellow-700 dark:text-yellow-300 text-sm space-y-1">
-                    <li>• Folosește imagini optimizate (WebP, dimensiuni corecte)</li>
-                    <li>• Adaugă target="_blank" pentru linkuri externe</li>
-                    <li>• Include cod de tracking pentru măsurarea performanței</li>
-                    <li>• Testează pe dispozitive mobile</li>
-                    <li>• Respectă dimensiunile recomandate pentru fiecare zonă</li>
-                  </ul>
                 </div>
               </div>
             )}
@@ -533,7 +587,7 @@ export default function AdminPage() {
                     <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <span className="text-sm text-gray-600 dark:text-gray-400">API Key:</span>
                       <span className="font-mono text-sm text-gray-900 dark:text-white">
-                        {currentApiKey ? `${currentApiKey.substring(0, 8)}...${currentApiKey.substring(-8)}` : 'Nu este configurat'}
+                        {currentApiKey || 'Nu este configurat'}
                       </span>
                     </div>
                     
@@ -571,7 +625,6 @@ export default function AdminPage() {
                     </div>
                   </div>
                 </div>
-
                 {/* API Key Management */}
                 <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
                   <h5 className="font-medium text-gray-900 dark:text-white mb-4">
@@ -646,52 +699,81 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {/* API Information */}
-                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                {/* AdSense Publisher ID Management */}
+                <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
                   <h5 className="font-medium text-gray-900 dark:text-white mb-4">
-                    📊 Informații API
+                    🎯 AdSense Publisher ID Management
                   </h5>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="space-y-4">
                     <div>
-                      <h6 className="font-medium text-gray-900 dark:text-white mb-2">Provider</h6>
-                      <ul className="space-y-1 text-gray-600 dark:text-gray-400">
-                        <li>• <strong>Serviciu:</strong> AeroDataBox</li>
-                        <li>• <strong>Platform:</strong> API.Market</li>
-                        <li>• <strong>Rate Limit:</strong> 150 requests/minute</li>
-                        <li>• <strong>Autentificare:</strong> Bearer Token</li>
-                      </ul>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Publisher ID AdSense
+                      </label>
+                      <input
+                        type="text"
+                        value={adsensePublisherId}
+                        onChange={(e) => handleAdsensePublisherIdChange(e.target.value)}
+                        placeholder="ca-pub-2305349540791838"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm"
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Publisher ID curent: <strong>{currentAdsensePublisherId || 'Nu este configurat'}</strong>
+                      </p>
                     </div>
-                    
-                    <div>
-                      <h6 className="font-medium text-gray-900 dark:text-white mb-2">Funcționalități</h6>
-                      <ul className="space-y-1 text-gray-600 dark:text-gray-400">
-                        <li>• Zboruri în timp real (sosiri/plecări)</li>
-                        <li>• Căutare zboruri după număr</li>
-                        <li>• Informații detaliate aeroporturi</li>
-                        <li>• Statistici și analize</li>
-                      </ul>
+
+                    {/* AdSense Validation Status */}
+                    {adsenseError && (
+                      <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <p className="text-red-700 dark:text-red-400 text-sm flex items-center">
+                          <XCircle className="h-4 w-4 mr-2" />
+                          {adsenseError}
+                        </p>
+                      </div>
+                    )}
+
+                    {adsenseValid === true && (
+                      <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                        <p className="text-green-700 dark:text-green-400 text-sm flex items-center">
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Publisher ID valid și funcțional!
+                        </p>
+                      </div>
+                    )}
+
+                    {adsenseSaved && (
+                      <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <p className="text-blue-700 dark:text-blue-400 text-sm flex items-center">
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Publisher ID AdSense salvat cu succes!
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => testAdsensePublisherId(adsensePublisherId)}
+                        disabled={adsenseTesting || !adsensePublisherId.trim()}
+                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <TestTube className="h-4 w-4 mr-2" />
+                        {adsenseTesting ? 'Testare...' : 'Testează Publisher ID'}
+                      </button>
+                      
+                      <button
+                        onClick={saveAdsensePublisherId}
+                        disabled={!adsensePublisherId.trim() || adsenseTesting}
+                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Salvează Publisher ID
+                      </button>
                     </div>
                   </div>
                 </div>
-
-                {/* Help Section */}
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                  <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
-                    💡 Cum să obții un API Key
-                  </h4>
-                  <ol className="text-yellow-700 dark:text-yellow-300 text-sm space-y-1 list-decimal list-inside">
-                    <li>Vizitează <a href="https://api.market/dashboard" target="_blank" rel="noopener noreferrer" className="underline">API.Market Dashboard</a></li>
-                    <li>Creează un cont sau autentifică-te</li>
-                    <li>Abonează-te la serviciul AeroDataBox</li>
-                    <li>Generează un nou API key din dashboard</li>
-                    <li>Copiază key-ul și testează-l aici</li>
-                    <li>Salvează key-ul pentru a activa datele de zboruri</li>
-                  </ol>
-                </div>
               </div>
             )}
-
             {activeTab === 'mcp' && (
               <div className="space-y-6">
                 {/* MCP Status */}
@@ -788,85 +870,8 @@ export default function AdminPage() {
                     </div>
                   </div>
                 )}
-
-                {/* MCP Information */}
-                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-                  <h5 className="font-medium text-gray-900 dark:text-white mb-4">
-                    📊 Informații MCP
-                  </h5>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <h6 className="font-medium text-gray-900 dark:text-white mb-2">Protocol</h6>
-                      <ul className="space-y-1 text-gray-600 dark:text-gray-400">
-                        <li>• <strong>Versiune:</strong> 2024-11-05</li>
-                        <li>• <strong>Transport:</strong> HTTP/JSON-RPC</li>
-                        <li>• <strong>Endpoint:</strong> API.Market MCP</li>
-                        <li>• <strong>Autentificare:</strong> x-api-market-key</li>
-                      </ul>
-                    </div>
-                    
-                    <div>
-                      <h6 className="font-medium text-gray-900 dark:text-white mb-2">Capabilități</h6>
-                      <ul className="space-y-1 text-gray-600 dark:text-gray-400">
-                        <li>• Acces direct la AeroDataBox tools</li>
-                        <li>• Execuție contextuală de funcții</li>
-                        <li>• Gestionare automată de erori</li>
-                        <li>• Cache și optimizare</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Help Section */}
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                  <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
-                    💡 Despre MCP Integration
-                  </h4>
-                  <div className="text-yellow-700 dark:text-yellow-300 text-sm space-y-2">
-                    <p>
-                      <strong>Model Context Protocol (MCP)</strong> oferă acces direct la funcționalitățile AeroDataBox 
-                      prin intermediul unui protocol standardizat, permițând execuția de funcții complexe și contextuale.
-                    </p>
-                    <p>
-                      <strong>Avantaje:</strong> Acces la funcții avansate, execuție optimizată, gestionare automată de erori, 
-                      și integrare seamless cu serviciile API.Market.
-                    </p>
-                  </div>
-                </div>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Zone de Plasare */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            📍 Zone de Plasare Disponibile
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {adZones.map((zone) => (
-              <div key={zone.key} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-gray-900 dark:text-white">
-                    {zone.name}
-                  </h4>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    config.zones[zone.key].active
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                  }`}>
-                    {config.zones[zone.key].active ? 'Activ' : 'Inactiv'}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                  {zone.description}
-                </p>
-                <div className="text-xs text-gray-400 dark:text-gray-500">
-                  Dimensiune: {zone.size}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>

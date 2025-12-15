@@ -23,7 +23,7 @@ export function Navbar() {
               <Plane className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold text-gray-900 dark:text-white">
-              Flight Schedule
+              Program Zboruri
             </span>
           </Link>
 
@@ -33,19 +33,19 @@ export function Navbar() {
               href="/" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             >
-              Home
+              Acasă
             </Link>
             <Link 
               href="/airports" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             >
-              Airports
+              Aeroporturi
             </Link>
             <Link 
               href="/search" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             >
-              Search
+              Căutare
             </Link>
             <Link 
               href="/admin" 
@@ -102,14 +102,14 @@ export function Navbar() {
                 className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Home
+                Acasă
               </Link>
               <Link 
                 href="/airports" 
                 className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Airports
+                Aeroporturi
               </Link>
               <Link 
                 href="/admin" 

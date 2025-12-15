@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getAirportByCode } from '@/lib/airports'
+import { getAirportByCodeOrSlug, generateAirportSlug } from '@/lib/airports'
 import { getClientFlightService, ClientFlightFilters } from '@/lib/clientFlightService'
 import { RawFlightData } from '@/lib/flightApiService'
 import FlightList from '@/components/flights/FlightList'
@@ -22,7 +22,7 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const airport = getAirportByCode(params.code.toUpperCase())
+  const airport = getAirportByCodeOrSlug(params.code)
   const clientFlightService = getClientFlightService()
 
   if (!airport) {
@@ -92,27 +92,27 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-4 mb-6">
             <Link
-              href={`/airport/${airport.code}`}
+              href={`/airport/${generateAirportSlug(airport)}`}
               className="flex items-center space-x-2 text-green-100 hover:text-white transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
-              <span>Back to {airport.code}</span>
+              <span>Înapoi la {airport.city}</span>
             </Link>
           </div>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                Arrivals - {airport.name}
+                Sosiri - {airport.city}
               </h1>
               <p className="text-green-100 text-lg">
-                {airport.city}, {airport.country} ({airport.code})
+                {airport.city} - {airport.name}, {airport.country}
               </p>
             </div>
             <div className="hidden md:flex items-center space-x-4">
               <div className="text-right">
                 {lastUpdated && (
                   <p className="text-sm text-green-100">
-                    Last updated: {new Date(lastUpdated).toLocaleTimeString()}
+                    Actualizat: {new Date(lastUpdated).toLocaleTimeString()}
                   </p>
                 )}
                 <button
@@ -121,7 +121,7 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
                   className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
                 >
                   <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                  <span>Refresh</span>
+                  <span>Actualizează</span>
                 </button>
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
             <div className="md:hidden mb-6 flex items-center justify-between">
               {lastUpdated && (
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Updated: {new Date(lastUpdated).toLocaleTimeString()}
+                  Actualizat: {new Date(lastUpdated).toLocaleTimeString()}
                 </p>
               )}
               <button
@@ -146,7 +146,7 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
                 className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
+                <span>Actualizează</span>
               </button>
             </div>
 
@@ -172,20 +172,20 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
             {/* Quick Links */}
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Quick Links
+                Linkuri Rapide
               </h3>
               <div className="space-y-3">
                 <Link
-                  href={`/airport/${airport.code}/departures`}
+                  href={`/airport/${generateAirportSlug(airport)}/departures`}
                   className="block w-full text-left px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
                 >
-                  View Departures
+                  Vezi Plecări
                 </Link>
                 <Link
-                  href={`/airport/${airport.code}`}
+                  href={`/airport/${generateAirportSlug(airport)}`}
                   className="block w-full text-left px-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                 >
-                  Airport Overview
+                  Prezentare Aeroport
                 </Link>
               </div>
             </div>

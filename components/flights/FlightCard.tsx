@@ -102,7 +102,7 @@ export function FlightCard({ flight, type, className = '' }: FlightCardProps) {
             {type === 'arrivals' ? 'Din' : 'Spre'}
           </span>
           <span className="text-gray-600 dark:text-gray-400">
-            {relevantAirport.city} ({relevantAirport.code})
+            {relevantAirport.city} - {relevantAirport.airport}
           </span>
         </div>
       </div>

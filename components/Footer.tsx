@@ -22,34 +22,34 @@ export function Footer() {
               <div className="p-2 bg-primary-600 rounded-lg">
                 <Plane className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold">Flight Schedule</span>
+              <span className="text-xl font-bold">Program Zboruri</span>
             </div>
             <p className="text-gray-400 mb-4 max-w-md">
-              Finding reliable, real-time flight information is essential for every traveler. 
-              Our platform offers continuous updates on arrivals and departures from major airports worldwide.
+              Găsirea informațiilor de zbor în timp real este esențială pentru fiecare călător. 
+              Platforma noastră oferă actualizări continue despre sosiri și plecări de la aeroporturi majore din întreaga lume.
             </p>
             <p className="text-sm text-gray-500">
-              © 2024 Flight Schedule. All rights reserved.
+              © 2024 Program Zboruri. Toate drepturile rezervate.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-4">Linkuri Rapide</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/" className="text-gray-400 hover:text-white transition-colors">
-                  Home
+                  Acasă
                 </Link>
               </li>
               <li>
                 <Link href="/airports" className="text-gray-400 hover:text-white transition-colors">
-                  Airports
+                  Aeroporturi
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-gray-400 hover:text-white transition-colors">
-                  About
+                <Link href="/despre" className="text-gray-400 hover:text-white transition-colors">
+                  Despre
                 </Link>
               </li>
               <li>
@@ -62,26 +62,26 @@ export function Footer() {
 
           {/* Popular Airports */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Romanian Airports</h3>
+            <h3 className="text-lg font-semibold mb-4">Aeroporturi România</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/airport/OTP" className="text-gray-400 hover:text-white transition-colors">
-                  OTP - Bucharest
+                <Link href="/airport/bucuresti-henri-coanda" className="text-gray-400 hover:text-white transition-colors">
+                  București - Henri Coandă
                 </Link>
               </li>
               <li>
-                <Link href="/airport/CLJ" className="text-gray-400 hover:text-white transition-colors">
-                  CLJ - Cluj-Napoca
+                <Link href="/airport/cluj-napoca-cluj-napoca" className="text-gray-400 hover:text-white transition-colors">
+                  Cluj-Napoca
                 </Link>
               </li>
               <li>
-                <Link href="/airport/TSR" className="text-gray-400 hover:text-white transition-colors">
-                  TSR - Timișoara
+                <Link href="/airport/timisoara-timisoara-traian-vuia" className="text-gray-400 hover:text-white transition-colors">
+                  Timișoara - Traian Vuia
                 </Link>
               </li>
               <li>
-                <Link href="/airport/RMO" className="text-gray-400 hover:text-white transition-colors">
-                  RMO - Chișinău
+                <Link href="/airport/chisinau-chisinau" className="text-gray-400 hover:text-white transition-colors">
+                  Chișinău
                 </Link>
               </li>
             </ul>
@@ -90,8 +90,8 @@ export function Footer() {
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
           <p className="text-sm">
-            Flight information is provided for informational purposes only. 
-            Please verify with airlines for the most current information.
+            Informațiile despre zboruri sunt furnizate doar în scop informativ. 
+            Vă rugăm să verificați cu companiile aeriene pentru cele mai recente informații.
           </p>
         </div>
       </div>

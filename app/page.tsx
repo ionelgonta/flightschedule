@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Plane, Clock, MapPin, TrendingUp } from 'lucide-react'
-import { MAJOR_AIRPORTS } from '@/lib/airports'
+import { MAJOR_AIRPORTS, generateAirportSlug } from '@/lib/airports'
 import { AdBanner } from '@/components/ads/AdBanner'
 
 export default function HomePage() {
@@ -41,13 +41,13 @@ export default function HomePage() {
                 href="/airports"
                 className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
               >
-                Browse Airports
+                Explorează Aeroporturi
               </Link>
               <Link
                 href="#features"
                 className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors"
               >
-                Learn More
+                Află Mai Mult
               </Link>
             </div>
           </div>
@@ -61,7 +61,7 @@ export default function HomePage() {
             {/* Features Section */}
             <section id="features">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-                Why Choose Our Platform?
+                De Ce Să Alegi Platforma Noastră?
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="text-center">
@@ -71,10 +71,10 @@ export default function HomePage() {
                     </div>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    Real-Time Updates
+                    Actualizări în Timp Real
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Get continuous updates on flight status, delays, and gate changes as they happen.
+                    Primește actualizări continue despre statusul zborurilor, întârzieri și schimbări de poartă.
                   </p>
                 </div>
                 <div className="text-center">
@@ -84,10 +84,10 @@ export default function HomePage() {
                     </div>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    Global Coverage
+                    Acoperire Globală
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Track flights from major airports worldwide with detailed information and statistics.
+                    Urmărește zboruri de la aeroporturi majore din întreaga lume cu informații detaliate.
                   </p>
                 </div>
                 <div className="text-center">
@@ -97,10 +97,10 @@ export default function HomePage() {
                     </div>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    Detailed Analytics
+                    Analize Detaliate
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Access comprehensive flight data including terminals, gates, and airline information.
+                    Accesează date complete despre zboruri incluzând terminale, porți și informații despre companii aeriene.
                   </p>
                 </div>
               </div>
@@ -124,15 +124,15 @@ export default function HomePage() {
                 {featuredAirports.map((airport) => (
                   <Link
                     key={airport.code}
-                    href={`/airport/${airport.code}`}
+                    href={`/airport/${generateAirportSlug(airport)}`}
                     className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow group"
                   >
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-primary-600 dark:text-primary-400 mb-2">
-                        {airport.code}
+                      <div className="text-xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+                        {airport.city}
                       </div>
                       <h3 className="font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                        {airport.city}
+                        {airport.name}
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         {airport.country}
@@ -172,34 +172,34 @@ export default function HomePage() {
             {/* FAQ Section */}
             <section>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-                Frequently Asked Questions
+                Întrebări Frecvente
               </h2>
               <div className="space-y-6">
                 <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    How often is flight information updated?
+                    Cât de des sunt actualizate informațiile despre zboruri?
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Our flight information is updated in real-time, with data refreshed every few minutes to ensure 
-                    you have the most current information about flight status, delays, and gate changes.
+                    Informațiile despre zboruri sunt actualizate în timp real, cu date reîmprospătate la fiecare câteva minute 
+                    pentru a vă asigura că aveți cele mai recente informații despre statusul zborurilor, întârzieri și schimbări de poartă.
                   </p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    Which airports are covered?
+                    Ce aeroporturi sunt acoperite?
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    We cover major international airports worldwide, including hubs in North America, Europe, Asia, 
-                    and other regions. Our database includes detailed information for hundreds of airports globally.
+                    Acoperim aeroporturi internaționale majore din întreaga lume, incluzând hub-uri din America de Nord, Europa, Asia 
+                    și alte regiuni. Baza noastră de date include informații detaliate pentru sute de aeroporturi la nivel global.
                   </p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    Can I track specific flights?
+                    Pot urmări zboruri specifice?
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Yes, you can search for specific flights using the flight number or filter by airline, 
-                    destination, and other criteria to find the information you need quickly.
+                    Da, poți căuta zboruri specifice folosind numărul de zbor sau filtra după compania aeriană, 
+                    destinație și alte criterii pentru a găsi rapid informațiile de care ai nevoie.
                   </p>
                 </div>
               </div>
@@ -217,23 +217,23 @@ export default function HomePage() {
             {/* Quick Stats */}
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Platform Statistics
+                Statistici Platformă
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Airports Covered</span>
+                  <span className="text-gray-600 dark:text-gray-400">Aeroporturi Acoperite</span>
                   <span className="font-semibold text-gray-900 dark:text-white">500+</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Daily Flights</span>
+                  <span className="text-gray-600 dark:text-gray-400">Zboruri Zilnice</span>
                   <span className="font-semibold text-gray-900 dark:text-white">100K+</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Airlines</span>
+                  <span className="text-gray-600 dark:text-gray-400">Companii Aeriene</span>
                   <span className="font-semibold text-gray-900 dark:text-white">200+</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Countries</span>
+                  <span className="text-gray-600 dark:text-gray-400">Țări</span>
                   <span className="font-semibold text-gray-900 dark:text-white">150+</span>
                 </div>
               </div>

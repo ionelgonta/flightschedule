@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getAirportByCode } from '@/lib/airports'
+import { getAirportByCodeOrSlug, generateAirportSlug } from '@/lib/airports'
 import { Plane, ArrowRight, MapPin, Clock, Users, Building } from 'lucide-react'
 import { AdBanner } from '@/components/ads/AdBanner'
 
@@ -12,31 +12,31 @@ interface AirportPageProps {
 }
 
 export async function generateMetadata({ params }: AirportPageProps): Promise<Metadata> {
-  const airport = getAirportByCode(params.code.toUpperCase())
+  const airport = getAirportByCodeOrSlug(params.code)
   
   if (!airport) {
     return {
-      title: 'Airport Not Found'
+      title: 'Aeroport Negăsit'
     }
   }
 
   return {
-    title: `${airport.name} (${airport.code}) - Flight Schedule`,
-    description: `Real-time flight arrivals and departures for ${airport.name} in ${airport.city}, ${airport.country}. Track flights, check status, and get detailed information.`,
-    keywords: [`${airport.code} airport`, `${airport.city} flights`, `${airport.name}`, 'flight schedule', 'arrivals', 'departures'],
+    title: `${airport.name} (${airport.code}) - Programul Zborurilor`,
+    description: `Sosiri și plecări în timp real pentru ${airport.name} din ${airport.city}, ${airport.country}. Urmărește zborurile, verifică statusul și obține informații detaliate.`,
+    keywords: [`${airport.code} aeroport`, `${airport.city} zboruri`, `${airport.name}`, 'program zboruri', 'sosiri', 'plecări'],
     openGraph: {
-      title: `${airport.name} (${airport.code}) - Flight Schedule`,
-      description: `Real-time flight information for ${airport.name} in ${airport.city}, ${airport.country}`,
+      title: `${airport.name} (${airport.code}) - Programul Zborurilor`,
+      description: `Informații în timp real despre zboruri pentru ${airport.name} din ${airport.city}, ${airport.country}`,
       type: 'website',
     },
     alternates: {
-      canonical: `/airport/${airport.code}`,
+      canonical: `/airport/${generateAirportSlug(airport)}`,
     },
   }
 }
 
 export default function AirportPage({ params }: AirportPageProps) {
-  const airport = getAirportByCode(params.code.toUpperCase())
+  const airport = getAirportByCodeOrSlug(params.code)
 
   if (!airport) {
     notFound()
@@ -85,23 +85,23 @@ export default function AirportPage({ params }: AirportPageProps) {
               </h1>
               <div className="flex items-center justify-center space-x-2 text-xl text-primary-100 mb-8">
                 <MapPin className="h-5 w-5" />
-                <span>{airport.city}, {airport.country}</span>
+                <span>{airport.city} - {airport.name}</span>
                 <span className="mx-2">•</span>
-                <span className="font-mono font-bold">{airport.code}</span>
+                <span>{airport.country}</span>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href={`/airport/${airport.code}/arrivals`}
+                  href={`/airport/${generateAirportSlug(airport)}/arrivals`}
                   className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2"
                 >
-                  <span>View Arrivals</span>
+                  <span>Vezi Sosiri</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
-                  href={`/airport/${airport.code}/departures`}
+                  href={`/airport/${generateAirportSlug(airport)}/departures`}
                   className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors flex items-center justify-center space-x-2"
                 >
-                  <span>View Departures</span>
+                  <span>Vezi Plecări</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -116,7 +116,7 @@ export default function AirportPage({ params }: AirportPageProps) {
               {/* Quick Stats */}
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                  Airport Overview
+                  Prezentare Aeroport
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 text-center">
@@ -126,10 +126,10 @@ export default function AirportPage({ params }: AirportPageProps) {
                       </div>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      Real-Time Data
+                      Date în Timp Real
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      Live flight information updated every few minutes
+                      Informații live despre zboruri actualizate la fiecare câteva minute
                     </p>
                   </div>
                   <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 text-center">
@@ -139,10 +139,10 @@ export default function AirportPage({ params }: AirportPageProps) {
                       </div>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      Multiple Airlines
+                      Multiple Companii Aeriene
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      Comprehensive coverage of all major carriers
+                      Acoperire cuprinzătoare a tuturor companiilor majore
                     </p>
                   </div>
                   <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 text-center">
@@ -152,10 +152,10 @@ export default function AirportPage({ params }: AirportPageProps) {
                       </div>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      Terminal Info
+                      Informații Terminal
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      Detailed terminal and gate information
+                      Informații detaliate despre terminale și porți
                     </p>
                   </div>
                 </div>
@@ -173,86 +173,86 @@ export default function AirportPage({ params }: AirportPageProps) {
               {/* Airport Information */}
               <section className="prose prose-gray dark:prose-invert max-w-none">
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                  About {airport.name}
+                  Despre {airport.name}
                 </h2>
                 <div className="text-gray-600 dark:text-gray-400 space-y-4">
                   <p>
-                    {airport.name} ({airport.code}) is a major international airport serving {airport.city}, {airport.country}. 
-                    As one of the busiest airports in the region, it handles millions of passengers annually and serves as a 
-                    crucial hub for both domestic and international travel.
+                    {airport.name} ({airport.code}) este un aeroport internațional major care deservește {airport.city}, {airport.country}. 
+                    Ca unul dintre cele mai aglomerate aeroporturi din regiune, gestionează milioane de pasageri anual și servește ca 
+                    un hub crucial atât pentru călătoriile interne, cât și pentru cele internaționale.
                   </p>
                   <p>
-                    The airport features modern facilities and multiple terminals designed to accommodate the growing number 
-                    of travelers. With state-of-the-art technology and efficient operations, {airport.name} provides a seamless 
-                    travel experience for passengers from around the world.
+                    Aeroportul dispune de facilități moderne și terminale multiple concepute pentru a acomoda numărul crescând 
+                    de călători. Cu tehnologie de ultimă generație și operațiuni eficiente, {airport.name} oferă o experiență 
+                    de călătorie fără probleme pentru pasagerii din întreaga lume.
                   </p>
                   <p>
-                    Our real-time flight tracking system provides comprehensive information about all arrivals and departures 
-                    at {airport.name}, including flight status updates, gate assignments, terminal information, and estimated 
-                    arrival/departure times. Whether you're picking up passengers, catching a flight, or simply monitoring 
-                    flight activity, our platform keeps you informed with the latest information.
+                    Sistemul nostru de urmărire a zborurilor în timp real oferă informații cuprinzătoare despre toate sosirile și plecările 
+                    de la {airport.name}, incluzând actualizări de status ale zborurilor, atribuiri de porți, informații despre terminale și 
+                    timpii estimați de sosire/plecare. Fie că ridici pasageri, prinzi un zbor sau pur și simplu monitorizezi 
+                    activitatea zborurilor, platforma noastră te ține informat cu cele mai recente informații.
                   </p>
                 </div>
 
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">
-                  Airlines Operating at {airport.code}
+                  Companii Aeriene care Operează la {airport.code}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  {airport.name} serves as a hub for numerous international and domestic airlines, offering connections 
-                  to destinations worldwide. Major carriers operating from this airport include both full-service and 
-                  low-cost airlines, providing travelers with a wide range of options for their journey.
+                  {airport.name} servește ca hub pentru numeroase companii aeriene internaționale și interne, oferind conexiuni 
+                  către destinații din întreaga lume. Companiile majore care operează de la acest aeroport includ atât companii 
+                  cu servicii complete, cât și companii low-cost, oferind călătorilor o gamă largă de opțiuni pentru călătoria lor.
                 </p>
 
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">
-                  Terminal Facilities
+                  Facilități Terminal
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  The airport features multiple terminals equipped with modern amenities including restaurants, shops, 
-                  lounges, and business facilities. Each terminal is designed to provide comfort and convenience for 
-                  travelers, with clear signage and efficient passenger flow management.
+                  Aeroportul dispune de terminale multiple echipate cu facilități moderne incluzând restaurante, magazine, 
+                  lounge-uri și facilități de business. Fiecare terminal este conceput pentru a oferi confort și comoditate 
+                  călătorilor, cu semnalizare clară și gestionare eficientă a fluxului de pasageri.
                 </p>
 
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">
-                  Transportation and Access
+                  Transport și Acces
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  {airport.name} is well-connected to {airport.city} and surrounding areas through various transportation 
-                  options including public transit, taxis, ride-sharing services, and rental cars. The airport's strategic 
-                  location ensures easy access for both local and international travelers.
+                  {airport.name} este bine conectat la {airport.city} și zonele înconjurătoare prin diverse opțiuni de transport 
+                  incluzând transportul public, taxiuri, servicii de ride-sharing și închirieri auto. Locația strategică a aeroportului 
+                  asigură acces ușor atât pentru călătorii locali, cât și pentru cei internaționale.
                 </p>
               </section>
 
               {/* FAQ Section */}
               <section>
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-                  Frequently Asked Questions - {airport.code}
+                  Întrebări Frecvente - {airport.code}
                 </h2>
                 <div className="space-y-6">
                   <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      How do I check real-time flight status at {airport.code}?
+                      Cum verific statusul zborurilor în timp real la {airport.code}?
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      Use our arrivals and departures pages to get real-time flight information for {airport.name}. 
-                      You can filter by airline, flight status, or search for specific flights.
+                      Folosește paginile noastre de sosiri și plecări pentru a obține informații în timp real despre zboruri pentru {airport.name}. 
+                      Poți filtra după compania aeriană, statusul zborului sau căuta zboruri specifice.
                     </p>
                   </div>
                   <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      What information is available for each flight?
+                      Ce informații sunt disponibile pentru fiecare zbor?
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      Our system provides comprehensive flight details including airline, flight number, origin/destination, 
-                      scheduled and estimated times, current status, terminal, and gate information.
+                      Sistemul nostru oferă detalii cuprinzătoare despre zboruri incluzând compania aeriană, numărul zborului, originea/destinația, 
+                      timpii programați și estimați, statusul curent, terminalul și informațiile despre poartă.
                     </p>
                   </div>
                   <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      How often is the flight data updated?
+                      Cât de des sunt actualizate datele despre zboruri?
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      Flight information is updated in real-time, with data refreshed every few minutes to ensure 
-                      accuracy and provide the most current status updates.
+                      Informațiile despre zboruri sunt actualizate în timp real, cu date reîmprospătate la fiecare câteva minute pentru a asigura 
+                      acuratețea și pentru a oferi cele mai recente actualizări de status.
                     </p>
                   </div>
                 </div>
@@ -270,20 +270,20 @@ export default function AirportPage({ params }: AirportPageProps) {
               {/* Quick Links */}
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Quick Access
+                  Acces Rapid
                 </h3>
                 <div className="space-y-3">
                   <Link
-                    href={`/airport/${airport.code}/arrivals`}
+                    href={`/airport/${generateAirportSlug(airport)}/arrivals`}
                     className="block w-full text-left px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
                   >
-                    View Arrivals
+                    Vezi Sosiri
                   </Link>
                   <Link
-                    href={`/airport/${airport.code}/departures`}
+                    href={`/airport/${generateAirportSlug(airport)}/departures`}
                     className="block w-full text-left px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
                   >
-                    View Departures
+                    Vezi Plecări
                   </Link>
                 </div>
               </div>
@@ -291,23 +291,23 @@ export default function AirportPage({ params }: AirportPageProps) {
               {/* Airport Stats */}
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Airport Information
+                  Informații Aeroport
                 </h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Code</span>
+                    <span className="text-gray-600 dark:text-gray-400">Cod</span>
                     <span className="font-semibold text-gray-900 dark:text-white">{airport.code}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">City</span>
+                    <span className="text-gray-600 dark:text-gray-400">Oraș</span>
                     <span className="font-semibold text-gray-900 dark:text-white">{airport.city}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Country</span>
+                    <span className="text-gray-600 dark:text-gray-400">Țară</span>
                     <span className="font-semibold text-gray-900 dark:text-white">{airport.country}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Timezone</span>
+                    <span className="text-gray-600 dark:text-gray-400">Fus Orar</span>
                     <span className="font-semibold text-gray-900 dark:text-white">{airport.timezone}</span>
                   </div>
                 </div>

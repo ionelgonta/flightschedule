@@ -1,0 +1,236 @@
+/* Stiluri pentru bannerele demo AdSense */
+
+.demo-banner {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.demo-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.demo-banner a {
+  display: block;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.demo-banner a:hover {
+  transform: scale(1.02);
+}
+
+/* Animații pentru iconurile SVG */
+.demo-banner svg {
+  transition: transform 0.3s ease;
+}
+
+.demo-banner:hover svg {
+  transform: rotate(5deg) scale(1.1);
+}
+
+/* Efecte pentru butoanele CTA */
+.demo-banner [style*="background: rgba(255,255,255,0.2)"],
+.demo-banner [style*="background: #fff"],
+.demo-banner [style*="background: #333"] {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.demo-banner [style*="background: rgba(255,255,255,0.2)"]:hover {
+  background: rgba(255,255,255,0.3) !important;
+  transform: scale(1.05);
+}
+
+.demo-banner [style*="background: #fff"]:hover {
+  background: #f0f0f0 !important;
+  transform: scale(1.05);
+}
+
+.demo-banner [style*="background: #333"]:hover {
+  background: #555 !important;
+  transform: scale(1.05);
+}
+
+/* Responsive pentru bannere */
+@media (max-width: 768px) {
+  .demo-banner[style*="width: 728px"] {
+    width: 100% !important;
+    max-width: 728px;
+  }
+  
+  .demo-banner[style*="width: 970px"] {
+    width: 100% !important;
+    max-width: 970px;
+  }
+}
+
+@media (max-width: 480px) {
+  .demo-banner[style*="width: 300px"] {
+    width: 100% !important;
+    max-width: 300px;
+  }
+}
+
+/* Animații de loading pentru AdSense real */
+.adsense-banner {
+  position: relative;
+}
+
+.adsense-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 2s infinite;
+  border-radius: 4px;
+  z-index: 1;
+}
+
+.adsense-banner .adsbygoogle {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Ascunde animația de loading când AdSense s-a încărcat */
+.adsense-banner .adsbygoogle[data-ad-status="filled"]::before {
+  display: none;
+}
+
+/* Stiluri pentru zonele inactive */
+.ad-banner.inactive {
+  display: none !important;
+}
+
+/* Stiluri pentru mesajele de status în admin */
+.ad-status {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.ad-status.active {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.ad-status.inactive {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.ad-status.demo {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+/* Efecte hover pentru butoanele de toggle */
+.mode-toggle-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid;
+}
+
+.mode-toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.mode-toggle-btn.active {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.mode-toggle-btn.inactive {
+  background: #6b7280;
+  color: white;
+  border-color: #6b7280;
+}
+
+.mode-toggle-btn.demo {
+  background: #f59e0b;
+  color: white;
+  border-color: #f59e0b;
+}
+
+/* Animații pentru schimbarea modurilor */
+.ad-banner {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.ad-banner.mode-changing {
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+
+/* Stiluri pentru preview-ul bannerelor în admin */
+.banner-preview {
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+  background: #f9fafb;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.banner-preview.active {
+  border-color: #10b981;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.banner-preview.demo {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+/* Indicatori vizuali pentru tipul de banner */
+.ad-banner::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.ad-banner.adsense-banner::after {
+  background: #10b981;
+}
+
+.ad-banner.demo-banner::after {
+  background: #f59e0b;
+}
+
+.ad-banner.custom-banner::after {
+  background: #3b82f6;
+}
