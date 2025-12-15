@@ -5,7 +5,7 @@ export const MAJOR_AIRPORTS: Airport[] = [
   {
     code: 'OTP',
     name: 'Henri Coandă International Airport',
-    city: 'Bucharest',
+    city: 'București',
     country: 'Romania',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 44.5711, lng: 26.0850 }
@@ -13,7 +13,7 @@ export const MAJOR_AIRPORTS: Airport[] = [
   {
     code: 'BBU',
     name: 'Aurel Vlaicu International Airport',
-    city: 'Bucharest',
+    city: 'București',
     country: 'Romania',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 44.5032, lng: 26.1020 }

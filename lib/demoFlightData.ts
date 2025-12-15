@@ -27,7 +27,7 @@ const AIRLINES = [
 // Aeroporturi europene comune pentru zboruri
 const AIRPORTS = {
   // România
-  'OTP': { name: 'Henri Coandă International Airport', city: 'Bucharest', country: 'Romania' },
+  'OTP': { name: 'Henri Coandă International Airport', city: 'București', country: 'Romania' },
   'CLJ': { name: 'Cluj-Napoca International Airport', city: 'Cluj-Napoca', country: 'Romania' },
   'TSR': { name: 'Timișoara Traian Vuia International Airport', city: 'Timișoara', country: 'Romania' },
   'IAS': { name: 'Iași International Airport', city: 'Iași', country: 'Romania' },
