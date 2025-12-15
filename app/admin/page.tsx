@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { adConfig } from '@/lib/adConfig'
 import { Save, Settings, Key, TestTube, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react'
 
@@ -332,7 +332,7 @@ export default function AdminPage() {
   }
 
   // MCP Integration Functions
-  const loadMCPStatus = async () => {
+  const loadMCPStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/mcp/flights')
       const data = await response.json()
@@ -351,7 +351,7 @@ export default function AdminPage() {
       setMcpInitialized(false)
       setMcpTools([])
     }
-  }
+  }, [])
 
   const testMCPConnection = async () => {
     setMcpTesting(true)
@@ -411,7 +411,7 @@ export default function AdminPage() {
   }
 
   // Cache Management Functions
-  const loadCacheStats = async () => {
+  const loadCacheStats = useCallback(async () => {
     setStatsRefreshing(true)
     try {
       const response = await fetch('/api/admin/cache-stats')
@@ -427,7 +427,7 @@ export default function AdminPage() {
     } finally {
       setStatsRefreshing(false)
     }
-  }
+  }, [])
 
   const saveCacheConfig = async () => {
     setCacheSaving(true)
@@ -509,7 +509,7 @@ export default function AdminPage() {
     } else if (activeTab === 'cache') {
       loadCacheStats()
     }
-  }, [activeTab])
+  }, [activeTab, loadMCPStatus, loadCacheStats])
 
   const adZones = [
     { key: 'header-banner', name: 'Header Banner', size: '728x90', description: 'Banner în partea de sus a paginii' },
