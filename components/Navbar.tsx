@@ -36,13 +36,13 @@ export function Navbar() {
               Acasă
             </Link>
             <Link 
-              href="/airports" 
+              href="/aeroporturi" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             >
               Aeroporturi
             </Link>
             <Link 
-              href="/search" 
+              href="/cautare" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             >
               Căutare
@@ -105,11 +105,18 @@ export function Navbar() {
                 Acasă
               </Link>
               <Link 
-                href="/airports" 
+                href="/aeroporturi" 
                 className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Aeroporturi
+              </Link>
+              <Link 
+                href="/cautare" 
+                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Căutare
               </Link>
               <Link 
                 href="/admin" 

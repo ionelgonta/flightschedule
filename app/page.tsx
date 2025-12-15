@@ -38,7 +38,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/airports"
+                href="/aeroporturi"
                 className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
               >
                 Explorează Aeroporturi
@@ -124,7 +124,7 @@ export default function HomePage() {
                 {featuredAirports.map((airport) => (
                   <Link
                     key={airport.code}
-                    href={`/airport/${generateAirportSlug(airport)}`}
+                    href={`/aeroport/${generateAirportSlug(airport)}`}
                     className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow group"
                   >
                     <div className="text-center">
