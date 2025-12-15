@@ -104,6 +104,7 @@ export interface AircraftInfo {
 class FlightAnalyticsCache {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
   private lastApiCall: number | null = null
+  private apiRequestCount: number = 0
 
   set(key: string, data: any, ttl: number = ANALYTICS_CACHE_TTL): void {
     this.cache.set(key, {
@@ -132,12 +133,18 @@ class FlightAnalyticsCache {
 
   setLastApiCall(): void {
     this.lastApiCall = Date.now()
+    this.apiRequestCount++
+  }
+
+  resetApiRequestCount(): void {
+    this.apiRequestCount = 0
   }
 
   getStats(): { 
     size: number; 
     keys: string[]; 
     lastApiCall: string | null;
+    apiRequestCount: number;
     cacheEntries: Array<{key: string, timestamp: string, ttl: number, expired: boolean}>
   } {
     const entries = Array.from(this.cache.entries()).map(([key, value]) => ({
@@ -151,6 +158,7 @@ class FlightAnalyticsCache {
       size: this.cache.size,
       keys: Array.from(this.cache.keys()),
       lastApiCall: this.lastApiCall ? new Date(this.lastApiCall).toISOString() : null,
+      apiRequestCount: this.apiRequestCount,
       cacheEntries: entries
     }
   }
@@ -709,8 +717,21 @@ export class FlightAnalyticsService {
   /**
    * Get cache statistics
    */
-  getCacheStats(): { size: number; keys: string[] } {
+  getCacheStats(): { 
+    size: number; 
+    keys: string[]; 
+    lastApiCall: string | null;
+    apiRequestCount: number;
+    cacheEntries: Array<{key: string, timestamp: string, ttl: number, expired: boolean}>
+  } {
     return analyticsCache.getStats()
+  }
+
+  /**
+   * Reset API request counter
+   */
+  resetApiRequestCount(): void {
+    analyticsCache.resetApiRequestCount()
   }
 
   // Helper methods for live data conversion

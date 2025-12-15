@@ -42,6 +42,7 @@ export default function AdminPage() {
     size: number, 
     keys: string[], 
     lastApiCall: string | null,
+    apiRequestCount: number,
     cacheEntries: Array<{key: string, timestamp: string, ttl: number, expired: boolean}>
   } | null>(null)
   const [cacheSaving, setCacheSaving] = useState(false)
@@ -50,6 +51,8 @@ export default function AdminPage() {
   const [cacheCleared, setCacheCleared] = useState(false)
   const [statsRefreshing, setStatsRefreshing] = useState(false)
   const [statsRefreshed, setStatsRefreshed] = useState(false)
+  const [apiCounterResetting, setApiCounterResetting] = useState(false)
+  const [apiCounterReset, setApiCounterReset] = useState(false)
 
 
 
@@ -474,6 +477,29 @@ export default function AdminPage() {
       console.error('Error clearing cache:', error)
     } finally {
       setCacheClearing(false)
+    }
+  }
+
+  const resetApiCounter = async () => {
+    setApiCounterResetting(true)
+    
+    try {
+      const response = await fetch('/api/admin/cache-stats', {
+        method: 'POST'
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        setApiCounterReset(true)
+        setTimeout(() => setApiCounterReset(false), 3000)
+        // Reload stats after reset
+        await loadCacheStats()
+      }
+    } catch (error) {
+      console.error('Error resetting API counter:', error)
+    } finally {
+      setApiCounterResetting(false)
     }
   }
 
@@ -1103,6 +1129,15 @@ export default function AdminPage() {
                       <TestTube className="h-4 w-4 mr-2" />
                       {statsRefreshing ? 'Reîmprospătez...' : 'Reîmprospătează Statistici'}
                     </button>
+                    
+                    <button
+                      onClick={resetApiCounter}
+                      disabled={apiCounterResetting}
+                      className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      {apiCounterResetting ? 'Resetez...' : 'Resetează Contor API'}
+                    </button>
                   </div>
 
                   {/* Success Messages */}
@@ -1132,6 +1167,15 @@ export default function AdminPage() {
                       </p>
                     </div>
                   )}
+
+                  {apiCounterReset && (
+                    <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                      <p className="text-orange-700 dark:text-orange-400 text-sm flex items-center">
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Contorul de request-uri API a fost resetat!
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Cache Statistics */}
@@ -1141,7 +1185,7 @@ export default function AdminPage() {
                       📊 Statistici Cache
                     </h4>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                       <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                         <div className="text-2xl font-bold text-gray-900 dark:text-white">
                           {cacheStats.size}
@@ -1178,6 +1222,15 @@ export default function AdminPage() {
                         </div>
                         <div className="text-xs text-blue-600 dark:text-blue-400">
                           Ultima Interogare API
+                        </div>
+                      </div>
+
+                      <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-900 dark:text-orange-100">
+                          {cacheStats.apiRequestCount || 0}
+                        </div>
+                        <div className="text-xs text-orange-600 dark:text-orange-400">
+                          Request-uri API (Units)
                         </div>
                       </div>
                     </div>
