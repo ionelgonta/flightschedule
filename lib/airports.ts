@@ -4,121 +4,121 @@ export const MAJOR_AIRPORTS: Airport[] = [
   // Romanian Airports
   {
     code: 'OTP',
-    name: 'Henri Coandă International Airport',
+    name: 'Aeroportul Internațional Henri Coandă',
     city: 'București',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 44.5711, lng: 26.0850 }
   },
   {
     code: 'BBU',
-    name: 'Aurel Vlaicu International Airport',
+    name: 'Aeroportul Internațional Aurel Vlaicu',
     city: 'București',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 44.5032, lng: 26.1020 }
   },
   {
     code: 'CLJ',
-    name: 'Cluj-Napoca International Airport',
+    name: 'Aeroportul Internațional Cluj-Napoca',
     city: 'Cluj-Napoca',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 46.7852, lng: 23.6862 }
   },
   {
     code: 'TSR',
-    name: 'Timișoara Traian Vuia International Airport',
+    name: 'Aeroportul Internațional Timișoara Traian Vuia',
     city: 'Timișoara',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 45.8099, lng: 21.3379 }
   },
   {
     code: 'IAS',
-    name: 'Iași International Airport',
+    name: 'Aeroportul Internațional Iași',
     city: 'Iași',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 47.1785, lng: 27.6206 }
   },
   {
     code: 'CND',
-    name: 'Mihail Kogălniceanu International Airport',
+    name: 'Aeroportul Internațional Mihail Kogălniceanu',
     city: 'Constanța',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 44.3622, lng: 28.4883 }
   },
   {
     code: 'SBZ',
-    name: 'Sibiu International Airport',
+    name: 'Aeroportul Internațional Sibiu',
     city: 'Sibiu',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 45.7856, lng: 24.0913 }
   },
   {
     code: 'CRA',
-    name: 'Craiova Airport',
+    name: 'Aeroportul Craiova',
     city: 'Craiova',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 44.3181, lng: 23.8886 }
   },
   {
     code: 'BCM',
-    name: 'Bacău Airport',
+    name: 'Aeroportul Bacău',
     city: 'Bacău',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 46.5219, lng: 26.9103 }
   },
   {
     code: 'BAY',
-    name: 'Baia Mare Airport',
+    name: 'Aeroportul Baia Mare',
     city: 'Baia Mare',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 47.6584, lng: 23.4700 }
   },
   {
     code: 'OMR',
-    name: 'Oradea International Airport',
+    name: 'Aeroportul Internațional Oradea',
     city: 'Oradea',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 47.0253, lng: 21.9025 }
   },
   {
     code: 'SCV',
-    name: 'Suceava Stefan cel Mare Airport',
+    name: 'Aeroportul Suceava Ștefan cel Mare',
     city: 'Suceava',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 47.6875, lng: 26.3540 }
   },
   {
     code: 'TGM',
-    name: 'Târgu Mureș Transilvania Airport',
+    name: 'Aeroportul Târgu Mureș Transilvania',
     city: 'Târgu Mureș',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 46.4677, lng: 24.4125 }
   },
   {
     code: 'ARW',
-    name: 'Arad Airport',
+    name: 'Aeroportul Arad',
     city: 'Arad',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 46.1766, lng: 21.2619 }
   },
   {
     code: 'STU',
-    name: 'Satu Mare Airport',
+    name: 'Aeroportul Satu Mare',
     city: 'Satu Mare',
-    country: 'Romania',
+    country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 47.7033, lng: 22.8857 }
   },
@@ -126,7 +126,7 @@ export const MAJOR_AIRPORTS: Airport[] = [
   // Moldova Airport
   {
     code: 'RMO',
-    name: 'Chișinău International Airport',
+    name: 'Aeroportul Internațional Chișinău',
     city: 'Chișinău',
     country: 'Moldova',
     timezone: 'Europe/Chisinau',

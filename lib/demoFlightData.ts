@@ -7,7 +7,7 @@ import { RawFlightData } from './flightApiService';
 
 // Airlines românești și internaționale active (2024) - Blue Air (0B) removed (ceased operations 2022)
 const AIRLINES = [
-  { name: 'TAROM', code: 'RO', country: 'Romania' },
+  { name: 'TAROM', code: 'RO', country: 'România' },
   { name: 'Wizz Air', code: 'W6', country: 'Hungary' },
   { name: 'Ryanair', code: 'FR', country: 'Ireland' },
   { name: 'Lufthansa', code: 'LH', country: 'Germany' },
@@ -27,16 +27,16 @@ const AIRLINES = [
 // Aeroporturi europene comune pentru zboruri
 const AIRPORTS = {
   // România
-  'OTP': { name: 'Henri Coandă International Airport', city: 'București', country: 'Romania' },
-  'CLJ': { name: 'Cluj-Napoca International Airport', city: 'Cluj-Napoca', country: 'Romania' },
-  'TSR': { name: 'Timișoara Traian Vuia International Airport', city: 'Timișoara', country: 'Romania' },
-  'IAS': { name: 'Iași International Airport', city: 'Iași', country: 'Romania' },
-  'CND': { name: 'Mihail Kogălniceanu International Airport', city: 'Constanța', country: 'Romania' },
+  'OTP': { name: 'Aeroportul Internațional Henri Coandă', city: 'București', country: 'România' },
+  'CLJ': { name: 'Aeroportul Internațional Cluj-Napoca', city: 'Cluj-Napoca', country: 'România' },
+  'TSR': { name: 'Aeroportul Internațional Timișoara Traian Vuia', city: 'Timișoara', country: 'România' },
+  'IAS': { name: 'Aeroportul Internațional Iași', city: 'Iași', country: 'România' },
+  'CND': { name: 'Aeroportul Internațional Mihail Kogălniceanu', city: 'Constanța', country: 'România' },
   
   // Europa
   'FRA': { name: 'Frankfurt Airport', city: 'Frankfurt', country: 'Germany' },
   'MUC': { name: 'Munich Airport', city: 'Munich', country: 'Germany' },
-  'VIE': { name: 'Vienna International Airport', city: 'Vienna', country: 'Austria' },
+  'VIE': { name: 'Aeroportul Internațional Viena', city: 'Viena', country: 'Austria' },
   'IST': { name: 'Istanbul Airport', city: 'Istanbul', country: 'Turkey' },
   'CDG': { name: 'Charles de Gaulle Airport', city: 'Paris', country: 'France' },
   'AMS': { name: 'Amsterdam Airport Schiphol', city: 'Amsterdam', country: 'Netherlands' },
@@ -49,8 +49,8 @@ const AIRPORTS = {
   'ZUR': { name: 'Zurich Airport', city: 'Zurich', country: 'Switzerland' },
   'CPH': { name: 'Copenhagen Airport', city: 'Copenhagen', country: 'Denmark' },
   'ARN': { name: 'Stockholm Arlanda Airport', city: 'Stockholm', country: 'Sweden' },
-  'DXB': { name: 'Dubai International Airport', city: 'Dubai', country: 'UAE' },
-  'DOH': { name: 'Hamad International Airport', city: 'Doha', country: 'Qatar' }
+  'DXB': { name: 'Aeroportul Internațional Dubai', city: 'Dubai', country: 'EAU' },
+  'DOH': { name: 'Aeroportul Internațional Hamad', city: 'Doha', country: 'Qatar' }
 };
 
 const AIRCRAFT_TYPES = ['Boeing 737-800', 'Airbus A320', 'Airbus A321', 'Boeing 777-300', 'Airbus A330', 'ATR 72'];

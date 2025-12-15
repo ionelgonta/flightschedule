@@ -48,6 +48,12 @@ export function Navbar() {
               Căutare
             </Link>
             <Link 
+              href="/despre" 
+              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            >
+              Despre
+            </Link>
+            <Link 
               href="/admin" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors text-sm"
             >
@@ -117,6 +123,13 @@ export function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Căutare
+              </Link>
+              <Link 
+                href="/despre" 
+                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Despre
               </Link>
               <Link 
                 href="/admin" 
