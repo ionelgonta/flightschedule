@@ -118,4 +118,12 @@ Toate modificările sunt gata pentru deployment:
 - **Nume aeroporturi clare** fără duplicare
 - **Layout responsiv** pentru toate ecranele
 
-**Status: IMPLEMENTAT ✅ - GATA PENTRU DEPLOYMENT 🚀**
+**Status: IMPLEMENTAT ✅ - DEPLOYMENT COMPLET 🚀**
+
+## 🌐 LIVE pe server:
+- **URL**: https://anyway.ro
+- **Sosiri/Plecări**: Tabel compact optimizat pentru mobile
+- **Statusuri**: Toate traduse în română
+- **Aeroporturi**: Nume clare fără duplicare
+
+**DEPLOYMENT FINALIZAT CU SUCCES! ✅**
