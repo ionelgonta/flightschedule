@@ -42,6 +42,7 @@ function FlightTableRow({ flight, type }: { flight: RawFlightData; type: 'arriva
       scheduled: { label: 'Programat', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
       active: { label: 'În Zbor', className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
       landed: { label: 'Aterizat', className: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300' },
+      arrived: { label: 'Sosit', className: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300' },
       cancelled: { label: 'Anulat', className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' },
       delayed: { label: 'Întârziat', className: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' },
       diverted: { label: 'Deviat', className: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300' },
@@ -50,7 +51,7 @@ function FlightTableRow({ flight, type }: { flight: RawFlightData; type: 'arriva
       unknown: { label: 'Necunoscut', className: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300' }
     };
 
-    const config = statusConfig[status] || statusConfig.unknown;
+    const config = statusConfig[status.toLowerCase()] || statusConfig.unknown;
     
     return (
       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.className}`}>
@@ -98,7 +99,9 @@ function FlightTableRow({ flight, type }: { flight: RawFlightData; type: 'arriva
           {relevantLocation.city}
         </div>
         <div className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
-          {relevantLocation.airport}
+          {relevantLocation.airport && relevantLocation.airport !== relevantLocation.city 
+            ? relevantLocation.airport 
+            : relevantLocation.code}
         </div>
       </td>
       
