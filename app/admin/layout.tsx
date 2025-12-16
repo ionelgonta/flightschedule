@@ -13,8 +13,8 @@ export default function AdminLayout({
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
 
-  // Parolă simplă pentru demo - în producție folosește autentificare reală
-  const ADMIN_PASSWORD = 'admin123'
+  // Parolă admin pentru accesul la panoul de administrare
+  const ADMIN_PASSWORD = 'FlightSchedule2024!'
 
   useEffect(() => {
     // Verifică dacă utilizatorul este deja autentificat
@@ -53,10 +53,10 @@ export default function AdminLayout({
               </div>
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Admin Publicitate
+              Admin Dashboard
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Introdu parola pentru a accesa panoul de administrare
+              Introduceți parola pentru a accesa panoul de administrare
             </p>
           </div>
 
@@ -97,11 +97,18 @@ export default function AdminLayout({
             </button>
           </form>
 
-          <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
-              <strong>Demo:</strong> Parola este "admin123"<br />
-              În producție, folosește autentificare securizată
-            </p>
+          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-start space-x-3">
+              <Lock className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+              <div className="text-sm text-blue-800 dark:text-blue-200">
+                <p className="font-medium mb-1">Securitate</p>
+                <ul className="space-y-1 text-xs">
+                  <li>• Acces restricționat cu parolă</li>
+                  <li>• Sesiunea expiră la închiderea browser-ului</li>
+                  <li>• Toate acțiunile sunt monitorizate</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -116,7 +123,7 @@ export default function AdminLayout({
           <div className="flex items-center space-x-3">
             <Lock className="h-5 w-5 text-primary-600 dark:text-primary-400" />
             <span className="font-medium text-gray-900 dark:text-white">
-              Panou Admin - Publicitate
+              Panou Admin - Flight Schedule
             </span>
           </div>
           <button

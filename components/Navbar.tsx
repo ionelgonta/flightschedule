@@ -118,16 +118,16 @@ export function Navbar() {
             </div>
             
             <Link 
+              href="/planificator-zboruri" 
+              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            >
+              ✈️ Planificator Zboruri
+            </Link>
+            <Link 
               href="/program-saptamanal" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             >
               📅 Program Săptămânal
-            </Link>
-            <Link 
-              href="/cautare" 
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-            >
-              Căutare
             </Link>
             <Link 
               href="/parcari-otopeni" 
@@ -140,12 +140,6 @@ export function Navbar() {
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             >
               Despre
-            </Link>
-            <Link 
-              href="/admin" 
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors text-sm"
-            >
-              Admin
             </Link>
             <button
               onClick={toggleTheme}
@@ -258,18 +252,18 @@ export function Navbar() {
               </div>
               
               <Link 
+                href="/planificator-zboruri" 
+                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                ✈️ Planificator Zboruri
+              </Link>
+              <Link 
                 href="/program-saptamanal" 
                 className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 📅 Program Săptămânal
-              </Link>
-              <Link 
-                href="/cautare" 
-                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Căutare
               </Link>
               <Link 
                 href="/parcari-otopeni" 
@@ -284,13 +278,6 @@ export function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Despre
-              </Link>
-              <Link 
-                href="/admin" 
-                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Admin
               </Link>
             </div>
           </div>

@@ -1,35 +1,11 @@
 /**
  * Enhanced Flight Analytics Service
- * Provides comprehensive flight data analysis with caching
- * Uses LIVE AeroDataBox API data - NO DEMO DATA
+ * Folosește noul sistem de cache centralizat - NU mai face request-uri API direct
  */
 
 import { RawFlightData } from './flightApiService'
-import FlightApiService, { API_CONFIGS } from './flightApiService'
-import AeroDataBoxService from './aerodataboxService'
+import { cacheManager } from './cacheManager'
 import { getAirlineName, getCityName, formatAirportDisplay, formatAirlineDisplay } from './airlineMapping'
-
-// Cache configuration - configurable via admin
-let ANALYTICS_CACHE_TTL = 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
-let REALTIME_CACHE_TTL = 60 * 60 * 1000 // 1 hour for real-time data
-
-// Cache configuration management
-export interface CacheConfig {
-  analyticsInterval: number // days
-  realtimeInterval: number // minutes
-}
-
-export function updateCacheConfig(config: CacheConfig) {
-  ANALYTICS_CACHE_TTL = config.analyticsInterval * 24 * 60 * 60 * 1000
-  REALTIME_CACHE_TTL = config.realtimeInterval * 60 * 1000
-}
-
-export function getCacheConfig(): CacheConfig {
-  return {
-    analyticsInterval: ANALYTICS_CACHE_TTL / (24 * 60 * 60 * 1000),
-    realtimeInterval: REALTIME_CACHE_TTL / (60 * 1000)
-  }
-}
 
 // Types for analytics
 export interface FlightSchedule {
@@ -100,93 +76,49 @@ export interface AircraftInfo {
   averageDelay: number
 }
 
-// Cache management
-class FlightAnalyticsCache {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
-  private lastApiCall: number | null = null
-  private apiRequestCount: number = 0
+// Cache configuration management pentru compatibilitate
+export interface CacheConfig {
+  analyticsInterval: number // days
+  realtimeInterval: number // minutes
+}
 
-  set(key: string, data: any, ttl: number = ANALYTICS_CACHE_TTL): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      ttl
-    })
-  }
-
-  get<T>(key: string): T | null {
-    const cached = this.cache.get(key)
-    if (!cached) return null
-
-    const isExpired = Date.now() - cached.timestamp > cached.ttl
-    if (isExpired) {
-      this.cache.delete(key)
-      return null
+export function updateCacheConfig(config: CacheConfig) {
+  // Delegăm la noul cache manager
+  cacheManager.updateConfig({
+    flightData: {
+      cronInterval: config.realtimeInterval,
+      cacheUntilNext: true
+    },
+    analytics: {
+      cronInterval: config.analyticsInterval,
+      cacheMaxAge: 360
+    },
+    aircraft: {
+      cronInterval: 360,
+      cacheMaxAge: 360
     }
+  }).catch(console.error)
+}
 
-    return cached.data as T
-  }
-
-  clear(): void {
-    this.cache.clear()
-  }
-
-  clearPattern(pattern: string): void {
-    const keysToDelete = Array.from(this.cache.keys()).filter(key => key.includes(pattern))
-    keysToDelete.forEach(key => this.cache.delete(key))
-    console.log(`Cleared ${keysToDelete.length} cache entries matching pattern: ${pattern}`)
-  }
-
-  setLastApiCall(): void {
-    this.lastApiCall = Date.now()
-    this.apiRequestCount++
-  }
-
-  resetApiRequestCount(): void {
-    this.apiRequestCount = 0
-  }
-
-  getStats(): { 
-    size: number; 
-    keys: string[]; 
-    lastApiCall: string | null;
-    apiRequestCount: number;
-    cacheEntries: Array<{key: string, timestamp: string, ttl: number, expired: boolean}>
-  } {
-    const entries = Array.from(this.cache.entries()).map(([key, value]) => ({
-      key,
-      timestamp: new Date(value.timestamp).toISOString(),
-      ttl: value.ttl,
-      expired: Date.now() - value.timestamp > value.ttl
-    }))
-
-    return {
-      size: this.cache.size,
-      keys: Array.from(this.cache.keys()),
-      lastApiCall: this.lastApiCall ? new Date(this.lastApiCall).toISOString() : null,
-      apiRequestCount: this.apiRequestCount,
-      cacheEntries: entries
-    }
+export function getCacheConfig(): CacheConfig {
+  const stats = cacheManager.getCacheStats()
+  return {
+    analyticsInterval: stats.config?.analytics.cacheMaxAge || 30,
+    realtimeInterval: stats.config?.flightData.cronInterval || 60
   }
 }
 
-const analyticsCache = new FlightAnalyticsCache()
-
 /**
- * Flight Analytics Service - LIVE DATA ONLY
+ * Flight Analytics Service - Folosește DOAR cache-ul centralizat
  */
 export class FlightAnalyticsService {
-  private flightApiService: FlightApiService
-  private aeroDataBoxService: AeroDataBoxService
-
   constructor() {
-    // Initialize with live API services
-    this.flightApiService = new FlightApiService(API_CONFIGS.aerodatabox)
-    this.aeroDataBoxService = new AeroDataBoxService(API_CONFIGS.aerodatabox)
+    // Inițializează cache manager-ul
+    cacheManager.initialize().catch(console.error)
   }
   
   /**
-   * Get flight schedules for a specific airport and date range - LIVE DATA
+   * Get flight schedules for a specific airport and date range - DOAR din cache
    */
   async getFlightSchedules(
     airportCode: string,
@@ -194,66 +126,51 @@ export class FlightAnalyticsService {
     fromDate: string,
     toDate: string
   ): Promise<FlightSchedule[]> {
-    const cacheKey = `schedules:${airportCode}:${type}:${fromDate}:${toDate}`
+    const cacheKey = `schedules_${airportCode}_${type}_${fromDate}_${toDate}`
     
-    // Check cache first
-    const cached = analyticsCache.get<FlightSchedule[]>(cacheKey)
-    if (cached) {
-      console.log(`Cache hit for schedules: ${cacheKey}`)
-      return cached
-    }
-
     try {
-      console.log(`Fetching LIVE flight schedules for ${airportCode} ${type} from ${fromDate} to ${toDate}`)
+      // Citește DOAR din cache - nu face request-uri API
+      const cachedData = await cacheManager.getCachedData<FlightSchedule[]>('analytics', cacheKey)
       
-      // Mark API call timestamp
-      analyticsCache.setLastApiCall()
+      if (cachedData && cachedData.length > 0) {
+        console.log(`Cache hit for schedules: ${cacheKey}`)
+        return cachedData
+      }
+
+      // Nu există date în cache - returnează array gol
+      console.log(`No cached schedules for ${airportCode} ${type}`)
+      return []
       
-      // Get live data from AeroDataBox API
-      const schedules = await this.fetchLiveFlightSchedules(airportCode, type, fromDate, toDate)
-      
-      // Cache with appropriate TTL based on date range
-      const isRecent = new Date(toDate) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-      const ttl = isRecent ? REALTIME_CACHE_TTL : ANALYTICS_CACHE_TTL
-      
-      analyticsCache.set(cacheKey, schedules, ttl)
-      console.log(`Cached ${schedules.length} schedules for ${airportCode} with TTL: ${ttl}ms`)
-      
-      return schedules
     } catch (error) {
-      console.error('Error fetching live flight schedules:', error)
-      // Return empty array instead of demo data
+      console.error('Error getting cached flight schedules:', error)
       return []
     }
   }
 
   /**
-   * Get airport statistics - LIVE DATA
+   * Get airport statistics - DOAR din cache
    */
   async getAirportStatistics(
     airportCode: string,
     period: 'daily' | 'weekly' | 'monthly' = 'monthly'
   ): Promise<AirportStatistics> {
-    const cacheKey = `stats:${airportCode}:${period}`
+    const cacheKey = `analytics_${airportCode}`
     
-    const cached = analyticsCache.get<AirportStatistics>(cacheKey)
-    if (cached) {
-      console.log(`Cache hit for statistics: ${cacheKey}`)
-      return cached
-    }
-
     try {
-      console.log(`Calculating LIVE airport statistics for ${airportCode} (${period})`)
+      // Citește DOAR din cache - nu face request-uri API
+      const cachedData = await cacheManager.getCachedData<AirportStatistics>('analytics', cacheKey)
       
-      // Mark API call timestamp
-      analyticsCache.setLastApiCall()
+      if (cachedData) {
+        console.log(`Cache hit for statistics: ${cacheKey}`)
+        return cachedData
+      }
+
+      // Nu există date în cache - aruncă eroare
+      console.log(`No cached statistics for ${airportCode}`)
+      throw new Error('Nu sunt disponibile statistici pentru acest aeroport. Cache-ul se actualizează automat.')
       
-      const stats = await this.calculateLiveAirportStatistics(airportCode, period)
-      analyticsCache.set(cacheKey, stats, ANALYTICS_CACHE_TTL)
-      console.log(`Cached statistics for ${airportCode} with TTL: ${ANALYTICS_CACHE_TTL}ms`)
-      return stats
     } catch (error) {
-      console.error('Error calculating live airport statistics:', error)
+      console.error('Error getting cached airport statistics:', error)
       throw error
     }
   }
@@ -311,27 +228,26 @@ export class FlightAnalyticsService {
   }
 
   /**
-   * Get aircraft information - LIVE DATA
+   * Get aircraft information - DOAR din cache
    */
   async getAircraftInfo(icao24: string): Promise<AircraftInfo | null> {
-    const cacheKey = `aircraft:${icao24}`
+    const cacheKey = `aircraft_${icao24}`
     
-    const cached = analyticsCache.get<AircraftInfo>(cacheKey)
-    if (cached) {
-      console.log(`Cache hit for aircraft info: ${cacheKey}`)
-      return cached
-    }
-
     try {
-      console.log(`Fetching LIVE aircraft info for ${icao24}`)
-      const aircraft = await this.fetchLiveAircraftInfo(icao24)
-      if (aircraft) {
-        analyticsCache.set(cacheKey, aircraft, ANALYTICS_CACHE_TTL)
-        console.log(`Cached aircraft info for ${icao24} with TTL: ${ANALYTICS_CACHE_TTL}ms`)
+      // Citește DOAR din cache - nu face request-uri API
+      const cachedData = await cacheManager.getCachedData<AircraftInfo>('aircraft', cacheKey)
+      
+      if (cachedData) {
+        console.log(`Cache hit for aircraft info: ${cacheKey}`)
+        return cachedData
       }
-      return aircraft
+
+      // Nu există date în cache
+      console.log(`No cached aircraft info for ${icao24}`)
+      return null
+      
     } catch (error) {
-      console.error('Error fetching live aircraft info:', error)
+      console.error('Error getting cached aircraft info:', error)
       return null
     }
   }
@@ -761,58 +677,26 @@ export class FlightAnalyticsService {
   }
 
   /**
-   * Clear all cached data (for admin use)
+   * Refresh manual pentru analytics
    */
-  clearCache(): void {
-    analyticsCache.clear()
+  async refreshAnalytics(airportCode?: string): Promise<void> {
+    console.log(`Manual analytics refresh triggered${airportCode ? ` for ${airportCode}` : ''}`)
+    await cacheManager.manualRefresh('analytics', airportCode)
   }
 
   /**
-   * Clear cache entries matching a pattern (for admin use)
+   * Refresh manual pentru aircraft
    */
-  clearCachePattern(pattern: string): void {
-    analyticsCache.clearPattern(pattern)
+  async refreshAircraft(aircraftId?: string): Promise<void> {
+    console.log(`Manual aircraft refresh triggered${aircraftId ? ` for ${aircraftId}` : ''}`)
+    await cacheManager.manualRefresh('aircraft', aircraftId)
   }
 
   /**
-   * Get cache statistics
+   * Get cache statistics din cache manager
    */
-  getCacheStats(): { 
-    size: number; 
-    keys: string[]; 
-    lastApiCall: string | null;
-    apiRequestCount: number;
-    cacheEntries: Array<{key: string, timestamp: string, ttl: number, expired: boolean}>
-  } {
-    return analyticsCache.getStats()
-  }
-
-  /**
-   * Reset API request counter
-   */
-  resetApiRequestCount(): void {
-    analyticsCache.resetApiRequestCount()
-  }
-
-  /**
-   * Get cached data by key
-   */
-  getCachedData<T>(key: string): T | null {
-    return analyticsCache.get<T>(key)
-  }
-
-  /**
-   * Set cached data with TTL
-   */
-  setCachedData(key: string, data: any, ttl?: number): void {
-    analyticsCache.set(key, data, ttl)
-  }
-
-  /**
-   * Mark that an API call was made
-   */
-  markApiCall(): void {
-    analyticsCache.setLastApiCall()
+  getCacheStats() {
+    return cacheManager.getCacheStats()
   }
 
   // Helper methods for live data conversion

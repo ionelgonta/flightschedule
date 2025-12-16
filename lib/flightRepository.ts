@@ -1,19 +1,10 @@
 /**
- * Flight Repository - Gestionează cache-ul local și logica de preluare date
- * Implementează cache în memorie cu fallback la localStorage pentru persistență
+ * Flight Repository - Folosește noul sistem de cache centralizat
+ * NU mai face request-uri API direct - doar citește din cache
  */
 
-import FlightApiService, { FlightApiResponse, RawFlightData, API_CONFIGS } from './flightApiService';
-
-export interface CachedFlightData {
-  airport_code: string;
-  type: 'arrivals' | 'departures';
-  data: RawFlightData[];
-  updated_at: string;
-  expires_at: string;
-  success: boolean;
-  error?: string;
-}
+import { cacheManager } from './cacheManager';
+import { RawFlightData } from './flightApiService';
 
 export interface FlightFilters {
   airline?: string;
@@ -24,76 +15,20 @@ export interface FlightFilters {
   };
 }
 
+export interface FlightApiResponse {
+  success: boolean;
+  data: RawFlightData[];
+  error?: string;
+  cached: boolean;
+  last_updated?: string;
+  airport_code: string;
+  type: 'arrivals' | 'departures';
+}
+
 class FlightRepository {
-  private cache: Map<string, CachedFlightData> = new Map();
-  private apiService: FlightApiService;
-  private cacheDuration = 10 * 60 * 1000; // Default 10 minutes, will be updated from admin settings
-  private readonly STORAGE_KEY = 'flight_cache';
-
   constructor() {
-    // Initialize AeroDataBox API service - REAL-TIME DATA ONLY
-    const apiConfig = API_CONFIGS.aerodatabox;
-    
-    console.log('Initializing AeroDataBox service with API.Market');
-    
-    this.apiService = new FlightApiService(apiConfig);
-    this.loadCacheFromStorage();
-    this.loadCacheConfigFromAdmin();
-  }
-
-  /**
-   * Încarcă configurația de cache din admin
-   */
-  private async loadCacheConfigFromAdmin(): Promise<void> {
-    try {
-      // Only run on server side or when fetch is available
-      if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
-      
-      const response = await fetch('/api/admin/cache-config');
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.config.realtimeInterval) {
-          // Convert minutes to milliseconds
-          this.cacheDuration = data.config.realtimeInterval * 60 * 1000;
-          console.log(`Cache duration updated from admin: ${data.config.realtimeInterval} minutes`);
-        }
-      }
-    } catch (error) {
-      console.warn('Could not load cache config from admin, using default:', error);
-    }
-  }
-
-  /**
-   * Încarcă cache-ul din localStorage la inițializare
-   */
-  private loadCacheFromStorage(): void {
-    if (typeof window === 'undefined') return;
-    
-    try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        const parsedCache = JSON.parse(stored);
-        Object.entries(parsedCache).forEach(([key, value]) => {
-          this.cache.set(key, value as CachedFlightData);
-        });
-      }
-    } catch (error) {
-      console.error('Error loading cache from storage:', error);
-    }
-  }
-
-  /**
-   * Salvează cache-ul în localStorage
-   */
-  private saveCacheToStorage(): void {
-    if (typeof window === 'undefined') return;
-    
-    try {
-      const cacheObject = Object.fromEntries(this.cache);
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(cacheObject));
-    } catch (error) {
-      console.error('Error saving cache to storage:', error);
-    }
+    // Inițializează cache manager-ul
+    cacheManager.initialize().catch(console.error);
   }
 
   /**
@@ -104,82 +39,48 @@ class FlightRepository {
   }
 
   /**
-   * Verifică dacă datele din cache sunt valide
-   */
-  private isCacheValid(cachedData: CachedFlightData): boolean {
-    const now = new Date();
-    const expiresAt = new Date(cachedData.expires_at);
-    return now < expiresAt;
-  }
-
-  /**
-   * Obține sosirile pentru un aeroport (cu cache)
+   * Obține sosirile pentru un aeroport (DOAR din cache)
    */
   async getArrivals(airportCode: string, filters?: FlightFilters): Promise<FlightApiResponse> {
     const cacheKey = this.getCacheKey(airportCode, 'arrivals');
-    const cachedData = this.cache.get(cacheKey);
-
-    // Verifică cache-ul
-    if (cachedData && this.isCacheValid(cachedData)) {
-      console.log(`Cache HIT for ${airportCode} arrivals`);
-      
-      return {
-        success: cachedData.success,
-        data: this.applyFilters(cachedData.data, filters),
-        error: cachedData.error,
-        cached: true,
-        last_updated: cachedData.updated_at,
-        airport_code: airportCode,
-        type: 'arrivals'
-      };
-    }
-
-    // Cache miss - fetch din API
-    console.log(`Cache MISS for ${airportCode} arrivals - fetching from API`);
     
     try {
-      const apiResponse = await this.apiService.getArrivals(airportCode);
+      // Citește DOAR din cache - nu face request-uri API
+      const cachedData = await cacheManager.getCachedData<RawFlightData[]>('flightData', cacheKey);
       
-      // Salvează în cache
-      const cacheData: CachedFlightData = {
-        airport_code: airportCode,
-        type: 'arrivals',
-        data: apiResponse.data,
-        updated_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + this.cacheDuration).toISOString(),
-        success: apiResponse.success,
-        error: apiResponse.error
-      };
-      
-      this.cache.set(cacheKey, cacheData);
-      this.saveCacheToStorage();
-
-      return {
-        ...apiResponse,
-        data: this.applyFilters(apiResponse.data, filters),
-        cached: false
-      };
-
-    } catch (error) {
-      console.error(`Error fetching arrivals for ${airportCode}:`, error);
-      
-      // Returnează cache expirat dacă există, altfel eroare
-      if (cachedData) {
+      if (cachedData && cachedData.length > 0) {
+        console.log(`Cache HIT for ${airportCode} arrivals`);
+        
         return {
-          success: false,
-          data: this.applyFilters(cachedData.data, filters),
-          error: 'API unavailable, showing cached data',
+          success: true,
+          data: this.applyFilters(cachedData, filters),
           cached: true,
-          last_updated: cachedData.updated_at,
+          last_updated: new Date().toISOString(),
           airport_code: airportCode,
           type: 'arrivals'
         };
       }
 
+      // Nu există date în cache
+      console.log(`No cached data for ${airportCode} arrivals`);
+      
       return {
         success: false,
         data: [],
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Nu sunt disponibile date pentru acest aeroport. Cache-ul se actualizează automat.',
+        cached: false,
+        last_updated: new Date().toISOString(),
+        airport_code: airportCode,
+        type: 'arrivals'
+      };
+
+    } catch (error) {
+      console.error(`Error getting cached arrivals for ${airportCode}:`, error);
+      
+      return {
+        success: false,
+        data: [],
+        error: 'Eroare la accesarea datelor din cache',
         cached: false,
         last_updated: new Date().toISOString(),
         airport_code: airportCode,
@@ -189,73 +90,48 @@ class FlightRepository {
   }
 
   /**
-   * Obține plecările pentru un aeroport (cu cache)
+   * Obține plecările pentru un aeroport (DOAR din cache)
    */
   async getDepartures(airportCode: string, filters?: FlightFilters): Promise<FlightApiResponse> {
     const cacheKey = this.getCacheKey(airportCode, 'departures');
-    const cachedData = this.cache.get(cacheKey);
-
-    // Verifică cache-ul
-    if (cachedData && this.isCacheValid(cachedData)) {
-      console.log(`Cache HIT for ${airportCode} departures`);
-      
-      return {
-        success: cachedData.success,
-        data: this.applyFilters(cachedData.data, filters),
-        error: cachedData.error,
-        cached: true,
-        last_updated: cachedData.updated_at,
-        airport_code: airportCode,
-        type: 'departures'
-      };
-    }
-
-    // Cache miss - fetch din API
-    console.log(`Cache MISS for ${airportCode} departures - fetching from API`);
     
     try {
-      const apiResponse = await this.apiService.getDepartures(airportCode);
+      // Citește DOAR din cache - nu face request-uri API
+      const cachedData = await cacheManager.getCachedData<RawFlightData[]>('flightData', cacheKey);
       
-      // Salvează în cache
-      const cacheData: CachedFlightData = {
-        airport_code: airportCode,
-        type: 'departures',
-        data: apiResponse.data,
-        updated_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + this.cacheDuration).toISOString(),
-        success: apiResponse.success,
-        error: apiResponse.error
-      };
-      
-      this.cache.set(cacheKey, cacheData);
-      this.saveCacheToStorage();
-
-      return {
-        ...apiResponse,
-        data: this.applyFilters(apiResponse.data, filters),
-        cached: false
-      };
-
-    } catch (error) {
-      console.error(`Error fetching departures for ${airportCode}:`, error);
-      
-      // Returnează cache expirat dacă există
-      if (cachedData) {
+      if (cachedData && cachedData.length > 0) {
+        console.log(`Cache HIT for ${airportCode} departures`);
+        
         return {
-          success: false,
-          data: this.applyFilters(cachedData.data, filters),
-          error: 'API unavailable, showing cached data',
+          success: true,
+          data: this.applyFilters(cachedData, filters),
           cached: true,
-          last_updated: cachedData.updated_at,
+          last_updated: new Date().toISOString(),
           airport_code: airportCode,
           type: 'departures'
         };
       }
 
+      // Nu există date în cache
+      console.log(`No cached data for ${airportCode} departures`);
+      
       return {
         success: false,
         data: [],
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Nu sunt disponibile date pentru acest aeroport. Cache-ul se actualizează automat.',
+        cached: false,
+        last_updated: new Date().toISOString(),
+        airport_code: airportCode,
+        type: 'departures'
+      };
+
+    } catch (error) {
+      console.error(`Error getting cached departures for ${airportCode}:`, error);
+      
+      return {
+        success: false,
+        data: [],
+        error: 'Eroare la accesarea datelor din cache',
         cached: false,
         last_updated: new Date().toISOString(),
         airport_code: airportCode,
@@ -301,111 +177,18 @@ class FlightRepository {
   }
 
   /**
-   * Preîncarcă datele pentru toate aeroporturile importante
+   * Refresh manual pentru un aeroport specific
    */
-  async preloadAirports(airportCodes: string[]): Promise<void> {
-    console.log('Preloading flight data for airports:', airportCodes);
-    
-    const promises = airportCodes.flatMap(code => [
-      this.getArrivals(code),
-      this.getDepartures(code)
-    ]);
-
-    try {
-      await Promise.allSettled(promises);
-      console.log('Airport data preloading completed');
-    } catch (error) {
-      console.error('Error during airport preloading:', error);
-    }
+  async refreshAirport(airportCode: string): Promise<void> {
+    console.log(`Manual refresh triggered for airport ${airportCode}`);
+    await cacheManager.manualRefresh('flightData', airportCode);
   }
 
   /**
-   * Curăță cache-ul expirat
+   * Obține statistici cache din cache manager
    */
-  cleanExpiredCache(): void {
-    const now = new Date();
-    let cleanedCount = 0;
-
-    this.cache.forEach((data, key) => {
-      if (new Date(data.expires_at) < now) {
-        this.cache.delete(key);
-        cleanedCount++;
-      }
-    });
-
-    if (cleanedCount > 0) {
-      console.log(`Cleaned ${cleanedCount} expired cache entries`);
-      this.saveCacheToStorage();
-    }
-  }
-
-  /**
-   * Obține statistici cache
-   */
-  getCacheStats(): {
-    totalEntries: number;
-    validEntries: number;
-    expiredEntries: number;
-    hitRate: number;
-  } {
-    const now = new Date();
-    let validEntries = 0;
-    let expiredEntries = 0;
-
-    this.cache.forEach((data) => {
-      if (new Date(data.expires_at) > now) {
-        validEntries++;
-      } else {
-        expiredEntries++;
-      }
-    });
-
-    return {
-      totalEntries: this.cache.size,
-      validEntries,
-      expiredEntries,
-      hitRate: validEntries / Math.max(this.cache.size, 1)
-    };
-  }
-
-  /**
-   * Invalidează cache-ul pentru un aeroport specific
-   */
-  invalidateAirport(airportCode: string): void {
-    const arrivalsKey = this.getCacheKey(airportCode, 'arrivals');
-    const departuresKey = this.getCacheKey(airportCode, 'departures');
-    
-    this.cache.delete(arrivalsKey);
-    this.cache.delete(departuresKey);
-    this.saveCacheToStorage();
-    
-    console.log(`Cache invalidated for airport ${airportCode}`);
-  }
-
-  /**
-   * Curăță complet cache-ul
-   */
-  clearCache(): void {
-    this.cache.clear();
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(this.STORAGE_KEY);
-    }
-    console.log('Flight cache cleared completely');
-  }
-
-  /**
-   * Actualizează configurația de cache din admin
-   */
-  async updateCacheConfig(realtimeIntervalMinutes: number): Promise<void> {
-    this.cacheDuration = realtimeIntervalMinutes * 60 * 1000;
-    console.log(`Cache duration updated to: ${realtimeIntervalMinutes} minutes`);
-  }
-
-  /**
-   * Obține configurația curentă de cache
-   */
-  getCacheDuration(): number {
-    return this.cacheDuration;
+  getCacheStats() {
+    return cacheManager.getCacheStats();
   }
 }
 
