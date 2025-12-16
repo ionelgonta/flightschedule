@@ -4,8 +4,13 @@
  */
 
 import { RawFlightData } from './flightApiService'
+import FlightApiService from './flightApiService'
+import AeroDataBoxService from './aerodataboxService'
 import { cacheManager } from './cacheManager'
 import { getAirlineName, getCityName, formatAirportDisplay, formatAirlineDisplay } from './airlineMapping'
+
+// Cache TTL constants
+const ANALYTICS_CACHE_TTL = 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
 
 // Types for analytics
 export interface FlightSchedule {
@@ -112,9 +117,26 @@ export function getCacheConfig(): CacheConfig {
  * Flight Analytics Service - Folosește DOAR cache-ul centralizat
  */
 export class FlightAnalyticsService {
+  private flightApiService: FlightApiService
+  private aeroDataBoxService: any
+
   constructor() {
     // Inițializează cache manager-ul
     cacheManager.initialize().catch(console.error)
+    // Inițializează flight API service pentru fallback
+    this.flightApiService = new FlightApiService({
+      provider: 'aerodatabox',
+      apiKey: process.env.AERODATABOX_API_KEY || '',
+      baseUrl: 'https://aerodatabox.p.rapidapi.com',
+      rateLimit: 100
+    })
+    
+    // Inițializează AeroDataBox service pentru fallback
+    this.aeroDataBoxService = new AeroDataBoxService({
+      apiKey: process.env.AERODATABOX_API_KEY || '',
+      baseUrl: 'https://aerodatabox.p.rapidapi.com',
+      rateLimit: 100
+    })
   }
   
   /**
@@ -130,7 +152,7 @@ export class FlightAnalyticsService {
     
     try {
       // Citește DOAR din cache - nu face request-uri API
-      const cachedData = await cacheManager.getCachedData<FlightSchedule[]>('analytics', cacheKey)
+      const cachedData = cacheManager.getCachedData<FlightSchedule[]>(cacheKey)
       
       if (cachedData && cachedData.length > 0) {
         console.log(`Cache hit for schedules: ${cacheKey}`)
@@ -158,7 +180,7 @@ export class FlightAnalyticsService {
     
     try {
       // Citește DOAR din cache - nu face request-uri API
-      const cachedData = await cacheManager.getCachedData<AirportStatistics>('analytics', cacheKey)
+      const cachedData = cacheManager.getCachedData<AirportStatistics>(cacheKey)
       
       if (cachedData) {
         console.log(`Cache hit for statistics: ${cacheKey}`)
@@ -185,7 +207,7 @@ export class FlightAnalyticsService {
   ): Promise<HistoricalData[]> {
     const cacheKey = `history:${airportCode}:${fromDate}:${toDate}`
     
-    const cached = analyticsCache.get<HistoricalData[]>(cacheKey)
+    const cached = cacheManager.getCachedData<HistoricalData[]>(cacheKey)
     if (cached) {
       console.log(`Cache hit for historical data: ${cacheKey}`)
       return cached
@@ -194,7 +216,7 @@ export class FlightAnalyticsService {
     try {
       console.log(`Fetching LIVE historical data for ${airportCode} from ${fromDate} to ${toDate}`)
       const historical = await this.fetchLiveHistoricalData(airportCode, fromDate, toDate)
-      analyticsCache.set(cacheKey, historical, ANALYTICS_CACHE_TTL)
+      cacheManager.setCachedData(cacheKey, historical, 'analytics', ANALYTICS_CACHE_TTL)
       console.log(`Cached historical data for ${airportCode} with TTL: ${ANALYTICS_CACHE_TTL}ms`)
       return historical
     } catch (error) {
@@ -209,7 +231,7 @@ export class FlightAnalyticsService {
   async getRouteAnalysis(airportCode: string): Promise<RouteAnalysis[]> {
     const cacheKey = `routes:${airportCode}`
     
-    const cached = analyticsCache.get<RouteAnalysis[]>(cacheKey)
+    const cached = cacheManager.getCachedData<RouteAnalysis[]>(cacheKey)
     if (cached) {
       console.log(`Cache hit for route analysis: ${cacheKey}`)
       return cached
@@ -218,7 +240,7 @@ export class FlightAnalyticsService {
     try {
       console.log(`Analyzing LIVE routes for ${airportCode}`)
       const routes = await this.analyzeLiveRoutes(airportCode)
-      analyticsCache.set(cacheKey, routes, ANALYTICS_CACHE_TTL)
+      cacheManager.setCachedData(cacheKey, routes, 'analytics', ANALYTICS_CACHE_TTL)
       console.log(`Cached route analysis for ${airportCode} with TTL: ${ANALYTICS_CACHE_TTL}ms`)
       return routes
     } catch (error) {
@@ -235,7 +257,7 @@ export class FlightAnalyticsService {
     
     try {
       // Citește DOAR din cache - nu face request-uri API
-      const cachedData = await cacheManager.getCachedData<AircraftInfo>('aircraft', cacheKey)
+      const cachedData = cacheManager.getCachedData<AircraftInfo>(cacheKey)
       
       if (cachedData) {
         console.log(`Cache hit for aircraft info: ${cacheKey}`)
@@ -258,7 +280,7 @@ export class FlightAnalyticsService {
   async searchAircraftByRegistration(registration: string): Promise<AircraftInfo[]> {
     const cacheKey = `aircraft:search:${registration}`
     
-    const cached = analyticsCache.get<AircraftInfo[]>(cacheKey)
+    const cached = cacheManager.getCachedData<AircraftInfo[]>(cacheKey)
     if (cached) {
       console.log(`Cache hit for aircraft search: ${cacheKey}`)
       return cached
@@ -267,7 +289,7 @@ export class FlightAnalyticsService {
     try {
       console.log(`Searching LIVE aircraft by registration: ${registration}`)
       const aircraft = await this.searchLiveAircraft(registration)
-      analyticsCache.set(cacheKey, aircraft, ANALYTICS_CACHE_TTL)
+      cacheManager.setCachedData(cacheKey, aircraft, 'aircraft', ANALYTICS_CACHE_TTL)
       console.log(`Cached aircraft search for ${registration} with TTL: ${ANALYTICS_CACHE_TTL}ms`)
       return aircraft
     } catch (error) {
@@ -309,7 +331,7 @@ export class FlightAnalyticsService {
       try {
         const flights = await this.aeroDataBoxService.getFlights(airportCode, type, fromDate, toDate)
         if (flights.length > 0) {
-          return flights.map(flight => this.convertAeroDataBoxToSchedule(flight, type, airportCode))
+          return flights.map((flight: any) => this.convertAeroDataBoxToSchedule(flight, type, airportCode))
         }
       } catch (historicalError) {
         console.warn(`Historical data failed for ${airportCode} ${type}:`, historicalError)
@@ -349,26 +371,26 @@ export class FlightAnalyticsService {
       const totalFlights = allFlights.length
       
       // Map various status formats to standard categories
-      const onTimeFlights = allFlights.filter(f => {
+      const onTimeFlights = allFlights.filter((f: any) => {
         const status = f.status?.toLowerCase() || ''
         return status === 'on-time' || status === 'scheduled' || status === 'landed' || 
                status === 'departed' || status === 'active' || status === 'en-route'
       }).length
       
-      const delayedFlights = allFlights.filter(f => {
+      const delayedFlights = allFlights.filter((f: any) => {
         const status = f.status?.toLowerCase() || ''
         return status === 'delayed' || (f.delay && f.delay > 15) // Consider 15+ min as delayed
       }).length
       
-      const cancelledFlights = allFlights.filter(f => {
+      const cancelledFlights = allFlights.filter((f: any) => {
         const status = f.status?.toLowerCase() || ''
         return status === 'cancelled' || status === 'canceled'
       }).length
       
       // Calculate average delay from flights with actual delay data
-      const flightsWithDelay = allFlights.filter(f => f.delay && f.delay > 0)
+      const flightsWithDelay = allFlights.filter((f: any) => f.delay && f.delay > 0)
       const averageDelay = flightsWithDelay.length > 0 
-        ? Math.round(flightsWithDelay.reduce((sum, f) => sum + (f.delay || 0), 0) / flightsWithDelay.length)
+        ? Math.round(flightsWithDelay.reduce((sum: number, f: any) => sum + (f.delay || 0), 0) / flightsWithDelay.length)
         : 0
       
       // Recalculate on-time percentage based on actual performance
@@ -434,17 +456,17 @@ export class FlightAnalyticsService {
           
           if (allFlights.length > 0) {
             const totalFlights = allFlights.length
-            const cancelledFlights = allFlights.filter(f => 
+            const cancelledFlights = allFlights.filter((f: any) => 
               f.status?.text?.toLowerCase().includes('cancelled')
             ).length
             
-            const onTimeFlights = allFlights.filter(f => {
+            const onTimeFlights = allFlights.filter((f: any) => {
               const status = f.status?.text?.toLowerCase() || ''
               return !status.includes('delayed') && !status.includes('cancelled')
             }).length
             
             // Calculate average delay
-            const delayedFlights = allFlights.filter(f => {
+            const delayedFlights = allFlights.filter((f: any) => {
               const scheduled = f.departure?.scheduledTime || f.arrival?.scheduledTime
               const actual = f.departure?.actualTime || f.arrival?.actualTime
               return scheduled && actual
@@ -556,7 +578,7 @@ export class FlightAnalyticsService {
         const flightCount = route.flights.length
         
         // Better status mapping for on-time calculation
-        const onTimeFlights = route.flights.filter(f => {
+        const onTimeFlights = route.flights.filter((f: any) => {
           const status = f.status?.toLowerCase() || ''
           const delay = f.delay || 0
           return (status === 'on-time' || status === 'scheduled' || status === 'landed' || 
@@ -564,7 +586,7 @@ export class FlightAnalyticsService {
                  delay <= 15 // Consider up to 15 minutes as on-time
         })
         
-        const delayedFlights = route.flights.filter(f => {
+        const delayedFlights = route.flights.filter((f: any) => {
           const status = f.status?.toLowerCase() || ''
           const delay = f.delay || 0
           return status === 'delayed' || delay > 15
@@ -614,7 +636,7 @@ export class FlightAnalyticsService {
         const flights = await this.aeroDataBoxService.getAircraftFlights(icao24)
         
         const totalFlights = flights.length
-        const delayedFlights = flights.filter(f => {
+        const delayedFlights = flights.filter((f: any) => {
           const departure = f.departure
           const arrival = f.arrival
           return (departure?.actualTime && departure?.scheduledTime) ||
@@ -623,7 +645,7 @@ export class FlightAnalyticsService {
         
         let averageDelay = 0
         if (delayedFlights.length > 0) {
-          const totalDelay = delayedFlights.reduce((sum, f) => {
+          const totalDelay = delayedFlights.reduce((sum: number, f: any) => {
             let delay = 0
             
             if (f.departure?.actualTime && f.departure?.scheduledTime) {
@@ -759,9 +781,47 @@ export class FlightAnalyticsService {
     return 'Unknown'
   }
 
+  /**
+   * Clear cache by pattern
+   */
+  clearCachePattern(pattern: string): void {
+    cacheManager.clearCacheByPattern(pattern)
+  }
 
+  /**
+   * Clear all cache
+   */
+  clearCache(): void {
+    cacheManager.clearAllCache()
+  }
 
+  /**
+   * Reset API request counter
+   */
+  resetApiRequestCount(): void {
+    cacheManager.resetRequestCounter()
+  }
 
+  /**
+   * Get cached data by key
+   */
+  getCachedData<T>(key: string): T | null {
+    return cacheManager.getCachedData<T>(key)
+  }
+
+  /**
+   * Set cached data
+   */
+  setCachedData<T>(key: string, data: T, ttlMs?: number): void {
+    cacheManager.setCachedData(key, data, 'analytics', ttlMs)
+  }
+
+  /**
+   * Mark API call
+   */
+  markApiCall(): void {
+    cacheManager.incrementRequestCounter('analytics')
+  }
 }
 
 // Export singleton instance

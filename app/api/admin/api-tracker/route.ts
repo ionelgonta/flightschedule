@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { persistentApiRequestTracker } from '@/lib/persistentApiTracker'
+// Server-side only import
+const { persistentApiRequestTracker } = require('@/lib/persistentApiTracker')
 
 export async function GET(request: NextRequest) {
   try {

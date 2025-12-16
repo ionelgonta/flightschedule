@@ -3,6 +3,11 @@
  * Păstrează datele în memorie cu backup periodic în fișier (doar server-side)
  */
 
+// Server-side only module
+if (typeof window !== 'undefined') {
+  throw new Error('PersistentApiTracker can only be used on server-side')
+}
+
 // Tipuri pentru tracking persistent
 export interface PersistentApiRequestLog {
   id: string
@@ -59,7 +64,7 @@ async function loadFromFile(): Promise<void> {
   
   try {
     // Doar pe server
-    if (typeof require === 'undefined') return
+    if (typeof window !== 'undefined') return
     
     const fs = require('fs')
     const path = require('path')
@@ -67,11 +72,11 @@ async function loadFromFile(): Promise<void> {
     
     // Creează directorul dacă nu există
     const dataDir = path.dirname(dbPath)
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true })
+    if (!fs?.existsSync(dataDir)) {
+      fs?.mkdirSync(dataDir, { recursive: true })
     }
     
-    if (fs.existsSync(dbPath)) {
+    if (fs?.existsSync(dbPath)) {
       const data = JSON.parse(fs.readFileSync(dbPath, 'utf-8'))
       
       // Verifică dacă trebuie resetat pentru luna nouă
@@ -123,7 +128,7 @@ async function saveToFile(): Promise<void> {
   if (now - lastSaveTime < 30000) return
   
   try {
-    if (typeof require === 'undefined') return
+    if (typeof window !== 'undefined') return
     
     const fs = require('fs')
     const path = require('path')
@@ -135,7 +140,7 @@ async function saveToFile(): Promise<void> {
       lastUpdated: new Date().toISOString()
     }
     
-    fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf-8')
+    fs?.writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf-8')
     lastSaveTime = now
   } catch (error) {
     console.error('[Persistent API Tracker] Could not save to file:', error)

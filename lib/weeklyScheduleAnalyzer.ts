@@ -5,8 +5,18 @@
  */
 
 import { MAJOR_AIRPORTS } from './airports';
-import { getFlightRepository, CachedFlightData } from './flightRepository';
+import { getFlightRepository } from './flightRepository';
 import { RawFlightData } from './flightApiService';
+
+// Local type for cached flight data
+interface CachedFlightData {
+  airport_code: string
+  type: 'arrivals' | 'departures'
+  data: RawFlightData[]
+  updated_at: string
+  expires_at: string
+  success: boolean
+}
 
 // Core Data Structures
 
@@ -134,10 +144,9 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
           airport_code: airportCode,
           type: 'arrivals',
           data: arrivalsResponse.data,
-          updated_at: arrivalsResponse.last_updated,
+          updated_at: arrivalsResponse.last_updated || new Date().toISOString(),
           expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          success: arrivalsResponse.success,
-          error: arrivalsResponse.error
+          success: arrivalsResponse.success
         });
       }
       
@@ -146,10 +155,9 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
           airport_code: airportCode,
           type: 'departures',
           data: departuresResponse.data,
-          updated_at: departuresResponse.last_updated,
+          updated_at: departuresResponse.last_updated || new Date().toISOString(),
           expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          success: departuresResponse.success,
-          error: departuresResponse.error
+          success: departuresResponse.success
         });
       }
     } catch (error) {

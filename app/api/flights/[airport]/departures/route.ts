@@ -52,7 +52,7 @@ export async function GET(
     const headers = new Headers();
     headers.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=600'); // 5 min cache
     headers.set('X-Cache-Status', result.cached ? 'HIT' : 'MISS');
-    headers.set('X-Last-Updated', result.last_updated);
+    headers.set('X-Last-Updated', result.last_updated || new Date().toISOString());
 
     return NextResponse.json(result, { 
       status: 200, // Always return 200, let the client handle success/error based on result.success

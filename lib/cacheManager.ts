@@ -3,8 +3,15 @@
  * Toate intervalele sunt configurabile din admin, fără valori hardcodate
  */
 
-import fs from 'fs/promises'
-import path from 'path'
+// Server-side only imports
+let fs: any = null
+let path: any = null
+
+// Initialize server-side modules only when running on server
+if (typeof window === 'undefined') {
+  fs = require('fs/promises')
+  path = require('path')
+}
 
 // Tipuri pentru configurația cache
 export interface CacheConfig {
@@ -43,17 +50,17 @@ export interface CacheEntry<T = any> {
   key: string // airport code, analysis type, aircraft id, etc.
   data: T
   createdAt: string
-  expiresAt: string
+  expiresAt: string | null
   lastAccessed: string
   source: 'cron' | 'manual'
   success: boolean
   error?: string
 }
 
-// Paths pentru fișiere
-const CACHE_CONFIG_PATH = path.join(process.cwd(), 'data', 'cache-config.json')
-const REQUEST_COUNTER_PATH = path.join(process.cwd(), 'data', 'request-counter.json')
-const CACHE_DATA_PATH = path.join(process.cwd(), 'data', 'cache-data.json')
+// Paths pentru fișiere - doar pe server
+const getCacheConfigPath = () => path?.join(process.cwd(), 'data', 'cache-config.json')
+const getRequestCounterPath = () => path?.join(process.cwd(), 'data', 'request-counter.json')
+const getCacheDataPath = () => path?.join(process.cwd(), 'data', 'cache-data.json')
 
 class CacheManager {
   private static instance: CacheManager
@@ -75,6 +82,9 @@ class CacheManager {
    * Inițializează cache manager-ul
    */
   async initialize(): Promise<void> {
+    // Doar pe server-side
+    if (typeof window !== 'undefined') return
+    
     await this.ensureDataDirectory()
     await this.loadConfig()
     await this.loadRequestCounter()
@@ -86,6 +96,8 @@ class CacheManager {
    * Asigură că directorul data există
    */
   private async ensureDataDirectory(): Promise<void> {
+    if (!fs || !path) return
+    
     const dataDir = path.join(process.cwd(), 'data')
     try {
       await fs.access(dataDir)
@@ -98,8 +110,10 @@ class CacheManager {
    * Încarcă configurația cache (cu valori default dacă nu există)
    */
   private async loadConfig(): Promise<void> {
+    if (!fs) return
+    
     try {
-      const data = await fs.readFile(CACHE_CONFIG_PATH, 'utf-8')
+      const data = await fs.readFile(getCacheConfigPath(), 'utf-8')
       this.config = JSON.parse(data)
     } catch {
       // Configurație default - TOATE valorile sunt configurabile din admin
@@ -125,17 +139,19 @@ class CacheManager {
    * Salvează configurația cache
    */
   private async saveConfig(): Promise<void> {
-    if (this.config) {
-      await fs.writeFile(CACHE_CONFIG_PATH, JSON.stringify(this.config, null, 2))
-    }
+    if (!fs || !this.config) return
+    
+    await fs.writeFile(getCacheConfigPath(), JSON.stringify(this.config, null, 2))
   }
 
   /**
    * Încarcă contorul de request-uri
    */
   private async loadRequestCounter(): Promise<void> {
+    if (!fs) return
+    
     try {
-      const data = await fs.readFile(REQUEST_COUNTER_PATH, 'utf-8')
+      const data = await fs.readFile(getRequestCounterPath(), 'utf-8')
       this.requestCounter = JSON.parse(data)
     } catch {
       this.requestCounter = {
@@ -153,17 +169,19 @@ class CacheManager {
    * Salvează contorul de request-uri
    */
   private async saveRequestCounter(): Promise<void> {
-    if (this.requestCounter) {
-      await fs.writeFile(REQUEST_COUNTER_PATH, JSON.stringify(this.requestCounter, null, 2))
-    }
+    if (!fs || !this.requestCounter) return
+    
+    await fs.writeFile(getRequestCounterPath(), JSON.stringify(this.requestCounter, null, 2))
   }
 
   /**
    * Încarcă datele din cache
    */
   private async loadCacheData(): Promise<void> {
+    if (!fs) return
+    
     try {
-      const data = await fs.readFile(CACHE_DATA_PATH, 'utf-8')
+      const data = await fs.readFile(getCacheDataPath(), 'utf-8')
       const cacheArray: CacheEntry[] = JSON.parse(data)
       
       this.cacheData.clear()
@@ -181,8 +199,10 @@ class CacheManager {
    * Salvează datele cache
    */
   private async saveCacheData(): Promise<void> {
+    if (!fs) return
+    
     const cacheArray = Array.from(this.cacheData.values())
-    await fs.writeFile(CACHE_DATA_PATH, JSON.stringify(cacheArray, null, 2))
+    await fs.writeFile(getCacheDataPath(), JSON.stringify(cacheArray, null, 2))
   }
 
   /**
@@ -288,7 +308,7 @@ class CacheManager {
         : await apiService.getDepartures(airportCode)
 
       // Incrementează contorul
-      await this.incrementRequestCounter('flightData')
+      this.incrementRequestCounter('flightData')
 
       const cacheKey = `${airportCode}_${type}`
       const expiresAt = this.config!.flightData.cacheUntilNext 
@@ -324,7 +344,7 @@ class CacheManager {
       console.error(`Error fetching flight data for ${airportCode} ${type}:`, error)
       
       // Incrementează contorul chiar și pentru erori
-      await this.incrementRequestCounter('flightData')
+      this.incrementRequestCounter('flightData')
     }
   }
 
@@ -339,7 +359,7 @@ class CacheManager {
       const stats = await flightAnalyticsService.getAirportStatistics(airportCode, 'monthly')
       
       // Incrementează contorul
-      await this.incrementRequestCounter('analytics')
+      this.incrementRequestCounter('analytics')
 
       const cacheKey = `analytics_${airportCode}`
       const expiresAt = new Date(Date.now() + this.config!.analytics.cacheMaxAge * 24 * 60 * 60 * 1000).toISOString()
@@ -369,7 +389,7 @@ class CacheManager {
 
     } catch (error) {
       console.error(`Error fetching analytics for ${airportCode}:`, error)
-      await this.incrementRequestCounter('analytics')
+      this.incrementRequestCounter('analytics')
     }
   }
 
@@ -384,7 +404,7 @@ class CacheManager {
       const aircraftInfo = await flightAnalyticsService.getAircraftInfo(aircraftId)
       
       // Incrementează contorul
-      await this.incrementRequestCounter('aircraft')
+      this.incrementRequestCounter('aircraft')
 
       if (aircraftInfo) {
         const cacheKey = `aircraft_${aircraftId}`
@@ -416,52 +436,13 @@ class CacheManager {
 
     } catch (error) {
       console.error(`Error fetching aircraft data for ${aircraftId}:`, error)
-      await this.incrementRequestCounter('aircraft')
+      this.incrementRequestCounter('aircraft')
     }
   }
 
-  /**
-   * Incrementează contorul de request-uri pentru o categorie
-   */
-  private async incrementRequestCounter(category: 'flightData' | 'analytics' | 'aircraft'): Promise<void> {
-    if (!this.requestCounter) return
 
-    this.requestCounter[category]++
-    this.requestCounter.totalRequests++
-    await this.saveRequestCounter()
-  }
 
-  /**
-   * Obține datele din cache pentru o cheie specifică
-   */
-  async getCachedData<T>(category: 'flightData' | 'analytics' | 'aircraft', key: string): Promise<T | null> {
-    const entries = Array.from(this.cacheData.values()).filter(
-      entry => entry.category === category && entry.key === key
-    )
 
-    if (entries.length === 0) return null
-
-    // Sortează după data creării (cel mai recent primul)
-    entries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    const latestEntry = entries[0]
-
-    // Verifică dacă a expirat (doar pentru analytics și aircraft, flight data se păstrează până la următoarea actualizare)
-    if (category !== 'flightData') {
-      const now = new Date()
-      const expiresAt = new Date(latestEntry.expiresAt)
-      
-      if (now > expiresAt) {
-        console.log(`Cache expired for ${category}:${key}`)
-        return null
-      }
-    }
-
-    // Actualizează last accessed
-    latestEntry.lastAccessed = new Date().toISOString()
-    await this.saveCacheData()
-
-    return latestEntry.data as T
-  }
 
   /**
    * Refresh manual pentru o categorie specifică
@@ -509,20 +490,7 @@ class CacheManager {
     console.log('Cache configuration updated and cron jobs restarted')
   }
 
-  /**
-   * Resetează contorul de request-uri manual
-   */
-  async resetRequestCounter(): Promise<void> {
-    this.requestCounter = {
-      flightData: 0,
-      analytics: 0,
-      aircraft: 0,
-      lastReset: new Date().toISOString(),
-      totalRequests: 0
-    }
-    await this.saveRequestCounter()
-    console.log('Request counter reset manually')
-  }
+
 
   /**
    * Obține statistici cache
@@ -595,6 +563,8 @@ class CacheManager {
       // Nu șterge flight data (se păstrează până la următoarea actualizare)
       if (entry.category === 'flightData') continue
 
+      if (!entry.expiresAt) continue
+      
       const expiresAt = new Date(entry.expiresAt)
       if (now > expiresAt) {
         this.cacheData.delete(id)
@@ -608,6 +578,108 @@ class CacheManager {
     }
 
     return cleanedCount
+  }
+
+  /**
+   * Clear cache by pattern
+   */
+  clearCacheByPattern(pattern: string): void {
+    let deletedCount = 0
+    
+    for (const [key, entry] of this.cacheData.entries()) {
+      if (entry.key.includes(pattern) || entry.category.includes(pattern)) {
+        this.cacheData.delete(key)
+        deletedCount++
+      }
+    }
+    
+    if (deletedCount > 0) {
+      this.saveCacheData()
+      console.log(`Cleared ${deletedCount} cache entries matching pattern: ${pattern}`)
+    }
+  }
+
+  /**
+   * Clear all cache
+   */
+  clearAllCache(): void {
+    const totalEntries = this.cacheData.size
+    this.cacheData.clear()
+    
+    if (totalEntries > 0) {
+      this.saveCacheData()
+      console.log(`Cleared all ${totalEntries} cache entries`)
+    }
+  }
+
+  /**
+   * Reset request counter
+   */
+  resetRequestCounter(): void {
+    if (this.requestCounter) {
+      this.requestCounter.flightData = 0
+      this.requestCounter.analytics = 0
+      this.requestCounter.aircraft = 0
+      this.requestCounter.totalRequests = 0
+      this.requestCounter.lastReset = new Date().toISOString()
+      
+      this.saveRequestCounter()
+      console.log('API request counter reset')
+    }
+  }
+
+  /**
+   * Check if cache entry is expired
+   */
+  private isExpired(entry: CacheEntry): boolean {
+    if (!entry.expiresAt) return false
+    return new Date() > new Date(entry.expiresAt)
+  }
+
+  /**
+   * Get cached data by key (simple version)
+   */
+  getCachedData<T>(key: string): T | null {
+    for (const entry of this.cacheData.values()) {
+      if (entry.key === key && !this.isExpired(entry)) {
+        return entry.data as T
+      }
+    }
+    return null
+  }
+
+  /**
+   * Set cached data (simple version)
+   */
+  setCachedData<T>(key: string, data: T, category: 'flightData' | 'analytics' | 'aircraft', ttlMs?: number): void {
+    const now = new Date()
+    const expiresAt = ttlMs ? new Date(now.getTime() + ttlMs) : null
+
+    const entry: CacheEntry = {
+      id: `${category}_${key}_${now.getTime()}`,
+      category,
+      key,
+      data,
+      createdAt: now.toISOString(),
+      expiresAt: expiresAt?.toISOString() || null,
+      lastAccessed: now.toISOString(),
+      source: 'manual',
+      success: true
+    }
+
+    this.cacheData.set(entry.id, entry)
+    this.saveCacheData()
+  }
+
+  /**
+   * Increment request counter
+   */
+  incrementRequestCounter(category: 'flightData' | 'analytics' | 'aircraft'): void {
+    if (this.requestCounter) {
+      this.requestCounter[category]++
+      this.requestCounter.totalRequests++
+      this.saveRequestCounter()
+    }
   }
 }
 

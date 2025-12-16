@@ -5,7 +5,15 @@
 
 import { getIcaoCode, getIataCode } from './icaoMapping';
 import { getAirportByCode } from './airports';
-import { persistentApiRequestTracker } from './persistentApiTracker';
+// Server-side only import
+let persistentApiRequestTracker: any = null
+if (typeof window === 'undefined') {
+  try {
+    persistentApiRequestTracker = require('./persistentApiTracker').persistentApiRequestTracker
+  } catch (e) {
+    console.warn('Could not load persistentApiTracker:', e)
+  }
+}
 
 export interface AeroDataBoxConfig {
   apiKey: string;
@@ -170,7 +178,7 @@ class AeroDataBoxService {
 
       if (!response.ok) {
         // Log failed request
-        await persistentApiRequestTracker.logRequest(
+        await persistentApiRequestTracker?.logRequest(
           endpoint,
           'GET',
           requestType,
@@ -187,7 +195,7 @@ class AeroDataBoxService {
       const text = await response.text();
       if (!text || text.trim() === '') {
         // Log failed request
-        await persistentApiRequestTracker.logRequest(
+        await persistentApiRequestTracker?.logRequest(
           endpoint,
           'GET',
           requestType,
@@ -205,7 +213,7 @@ class AeroDataBoxService {
         const data = JSON.parse(text);
         
         // Log successful request
-        await persistentApiRequestTracker.logRequest(
+        await persistentApiRequestTracker?.logRequest(
           endpoint,
           'GET',
           requestType,
@@ -220,7 +228,7 @@ class AeroDataBoxService {
         console.error('JSON parse error for response:', text.substring(0, 200));
         
         // Log failed request
-        await persistentApiRequestTracker.logRequest(
+        await persistentApiRequestTracker?.logRequest(
           endpoint,
           'GET',
           requestType,
@@ -239,7 +247,7 @@ class AeroDataBoxService {
       // If not already logged, log the error
       if (!(error instanceof Error && error.message.includes('API Error'))) {
         const duration = Date.now() - startTime;
-        await persistentApiRequestTracker.logRequest(
+        await persistentApiRequestTracker?.logRequest(
           endpoint,
           'GET',
           requestType,

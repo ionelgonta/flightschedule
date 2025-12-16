@@ -9,11 +9,10 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       stats: {
-        size: stats.size,
-        keys: stats.keys,
-        lastApiCall: stats.lastApiCall,
-        apiRequestCount: stats.apiRequestCount,
+        config: stats.config,
+        requestCounter: stats.requestCounter,
         cacheEntries: stats.cacheEntries,
+        lastUpdated: stats.lastUpdated,
         timestamp: new Date().toISOString()
       }
     })

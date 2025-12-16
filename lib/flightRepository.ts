@@ -46,7 +46,7 @@ class FlightRepository {
     
     try {
       // Citește DOAR din cache - nu face request-uri API
-      const cachedData = await cacheManager.getCachedData<RawFlightData[]>('flightData', cacheKey);
+      const cachedData = cacheManager.getCachedData<RawFlightData[]>(cacheKey);
       
       if (cachedData && cachedData.length > 0) {
         console.log(`Cache HIT for ${airportCode} arrivals`);
@@ -97,7 +97,7 @@ class FlightRepository {
     
     try {
       // Citește DOAR din cache - nu face request-uri API
-      const cachedData = await cacheManager.getCachedData<RawFlightData[]>('flightData', cacheKey);
+      const cachedData = cacheManager.getCachedData<RawFlightData[]>(cacheKey);
       
       if (cachedData && cachedData.length > 0) {
         console.log(`Cache HIT for ${airportCode} departures`);
@@ -189,6 +189,26 @@ class FlightRepository {
    */
   getCacheStats() {
     return cacheManager.getCacheStats();
+  }
+
+  /**
+   * Update cache configuration
+   */
+  async updateCacheConfig(realtimeInterval: number): Promise<void> {
+    const currentStats = cacheManager.getCacheStats()
+    const currentConfig = currentStats.config || {
+      analytics: { cronInterval: 30, cacheMaxAge: 360 },
+      aircraft: { cronInterval: 360, cacheMaxAge: 360 }
+    }
+    
+    await cacheManager.updateConfig({
+      flightData: {
+        cronInterval: realtimeInterval,
+        cacheUntilNext: true
+      },
+      analytics: currentConfig.analytics,
+      aircraft: currentConfig.aircraft
+    })
   }
 }
 

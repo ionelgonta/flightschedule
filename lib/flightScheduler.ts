@@ -74,7 +74,7 @@ class FlightScheduler {
       const flightRepository = getFlightRepository();
       
       // Curăță cache-ul expirat înainte de actualizare
-      flightRepository.cleanExpiredCache();
+      // Note: Cache cleanup is handled by cacheManager automatically
 
       // Actualizează aeroporturile prioritare în batch-uri
       await this.updateAirportsInBatches(this.config.priorityAirports);
