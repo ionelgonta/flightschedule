@@ -224,7 +224,8 @@ export class DayPatternGeneratorImpl implements DayPatternGenerator {
 }
 
 export class ScheduleTableManagerImpl implements ScheduleTableManager {
-  private readonly STORAGE_KEY = 'weekly_schedule_table';
+  private readonly STORAGE_FILE = 'weekly_schedule_table.json';
+  private readonly STORAGE_DIR = '.cache';
 
   async createTable(): Promise<void> {
     // Initialize empty table structure
@@ -237,31 +238,88 @@ export class ScheduleTableManagerImpl implements ScheduleTableManager {
   }
 
   async getScheduleData(): Promise<WeeklyScheduleData[]> {
-    return this.loadFromStorage();
+    return await this.loadFromStorage();
   }
 
   async clearTable(): Promise<void> {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(this.STORAGE_KEY);
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const filePath = path.join(process.cwd(), this.STORAGE_DIR, this.STORAGE_FILE);
+      
+      try {
+        await fs.unlink(filePath);
+        console.log('Weekly schedule table cleared');
+      } catch (error) {
+        // File doesn't exist, which is fine
+        console.log('Weekly schedule table was already empty');
+      }
+    } catch (error) {
+      console.error('Error clearing weekly schedule table:', error);
     }
   }
 
   private async saveToStorage(data: WeeklyScheduleData[]): Promise<void> {
-    if (typeof window !== 'undefined') {
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      
+      const storageDir = path.join(process.cwd(), this.STORAGE_DIR);
+      const filePath = path.join(storageDir, this.STORAGE_FILE);
+      
+      // Ensure directory exists
       try {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+        await fs.mkdir(storageDir, { recursive: true });
       } catch (error) {
-        console.error('Error saving weekly schedule to storage:', error);
+        // Directory might already exist
       }
+      
+      // Save data with metadata
+      const dataWithMetadata = {
+        data,
+        metadata: {
+          savedAt: new Date().toISOString(),
+          count: data.length,
+          version: '1.0'
+        }
+      };
+      
+      await fs.writeFile(filePath, JSON.stringify(dataWithMetadata, null, 2), 'utf8');
+      console.log(`Weekly schedule saved: ${data.length} entries to ${filePath}`);
+    } catch (error) {
+      console.error('Error saving weekly schedule to storage:', error);
+      throw error;
     }
   }
 
-  private loadFromStorage(): WeeklyScheduleData[] {
-    if (typeof window === 'undefined') return [];
-    
+  private async loadFromStorage(): Promise<WeeklyScheduleData[]> {
     try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const filePath = path.join(process.cwd(), this.STORAGE_DIR, this.STORAGE_FILE);
+      
+      try {
+        const fileContent = await fs.readFile(filePath, 'utf8');
+        const parsed = JSON.parse(fileContent);
+        
+        // Handle both old format (array) and new format (object with data/metadata)
+        if (Array.isArray(parsed)) {
+          console.log(`Weekly schedule loaded: ${parsed.length} entries (legacy format)`);
+          return parsed;
+        } else if (parsed.data && Array.isArray(parsed.data)) {
+          console.log(`Weekly schedule loaded: ${parsed.data.length} entries (saved: ${parsed.metadata?.savedAt})`);
+          return parsed.data;
+        } else {
+          console.warn('Invalid weekly schedule file format, returning empty array');
+          return [];
+        }
+      } catch (error: any) {
+        if (error.code === 'ENOENT') {
+          console.log('Weekly schedule file not found, returning empty array');
+          return [];
+        }
+        throw error;
+      }
     } catch (error) {
       console.error('Error loading weekly schedule from storage:', error);
       return [];
@@ -392,12 +450,18 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
   }
 
   async updateScheduleTable(): Promise<void> {
-    console.log('Updating weekly schedule table...');
+    console.log('=== Starting weekly schedule table update ===');
     
     const analysis = await this.analyzeFlightPatterns();
+    console.log(`Analysis completed: ${analysis.routes.length} routes found`);
+    console.log(`Total flights analyzed: ${analysis.summary.totalFlights}`);
+    console.log(`Airports analyzed: ${analysis.summary.airportsAnalyzed.join(', ')}`);
+    
     const scheduleData: WeeklyScheduleData[] = [];
 
-    analysis.routes.forEach(route => {
+    analysis.routes.forEach((route, routeIndex) => {
+      console.log(`Processing route ${routeIndex + 1}/${analysis.routes.length}: ${route.route.origin} → ${route.route.destination} (${route.schedule.length} flights)`);
+      
       // Group flights by airline and flight number
       const flightGroups = new Map<string, typeof route.schedule>();
       
@@ -409,13 +473,15 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
         flightGroups.get(key)!.push(flight);
       });
 
+      console.log(`  Found ${flightGroups.size} unique flight numbers for this route`);
+
       flightGroups.forEach((flights, key) => {
         const [airline, flightNumber] = key.split('-');
         const pattern = this.patternGenerator.generateWeeklyPattern(
           flights.map(f => ({ scheduled_time: f.scheduledTime } as RawFlightData))
         );
 
-        scheduleData.push({
+        const scheduleEntry = {
           airport: route.route.origin,
           destination: route.route.destination,
           airline,
@@ -431,13 +497,17 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
           },
           frequency: flights.length,
           lastUpdated: new Date().toISOString(),
-          dataSource: 'cache'
-        });
+          dataSource: 'cache' as const
+        };
+
+        scheduleData.push(scheduleEntry);
+        console.log(`    Added: ${airline} ${flightNumber} (${flights.length} flights)`);
       });
     });
 
+    console.log(`Generated ${scheduleData.length} schedule entries, saving to storage...`);
     await this.tableManager.updateTable(scheduleData);
-    console.log(`Weekly schedule table updated with ${scheduleData.length} entries`);
+    console.log(`=== Weekly schedule table updated successfully with ${scheduleData.length} entries ===`);
   }
 
   async exportSchedule(format: 'json' | 'csv'): Promise<string> {

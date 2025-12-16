@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, Download, Filter, RefreshCw, Trash2, BarChart3 } from 'lucide-react'
+import { Calendar, Filter, RefreshCw, BarChart3 } from 'lucide-react'
 import { WeeklyScheduleData } from '@/lib/weeklyScheduleAnalyzer'
 
 interface WeeklyScheduleViewProps {
@@ -13,7 +13,7 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
   const [filteredData, setFilteredData] = useState<WeeklyScheduleData[]>([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
-  const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(true)
+  const [autoUpdateEnabled] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
   // Filters
@@ -188,16 +188,7 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
   const uniqueDestinations = [...new Set(scheduleData.map(item => item.destination))].sort()
   const uniqueAirlines = [...new Set(scheduleData.map(item => item.airline))].sort()
 
-  // Day abbreviations
-  const dayAbbreviations = {
-    monday: 'L',
-    tuesday: 'M',
-    wednesday: 'M',
-    thursday: 'J',
-    friday: 'V',
-    saturday: 'S',
-    sunday: 'D'
-  }
+
 
   if (loading) {
     return (

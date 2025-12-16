@@ -1,0 +1,58 @@
+{
+  "requests": [
+    {
+      "id": "1765877341973-khnw11g",
+      "timestamp": "2025-12-16T09:29:01.973Z",
+      "endpoint": "/flights/airports/Icao/LROP",
+      "method": "GET",
+      "airportCode": "OTP",
+      "requestType": "arrivals",
+      "success": true,
+      "responseSize": 92259,
+      "duration": 13,
+      "month": "2025-12"
+    },
+    {
+      "id": "1765877396736-3azp3bq",
+      "timestamp": "2025-12-16T09:29:56.736Z",
+      "endpoint": "/flights/airports/Icao/LROP",
+      "method": "GET",
+      "airportCode": "OTP",
+      "requestType": "arrivals",
+      "success": true,
+      "responseSize": 121027,
+      "duration": 1943,
+      "month": "2025-12"
+    },
+    {
+      "id": "1765877524431-maq1n5c",
+      "timestamp": "2025-12-16T09:32:04.431Z",
+      "endpoint": "/flights/airports/Icao/LROP",
+      "method": "GET",
+      "airportCode": "OTP",
+      "requestType": "arrivals",
+      "success": true,
+      "responseSize": 121027,
+      "duration": 641,
+      "month": "2025-12"
+    }
+  ],
+  "stats": {
+    "totalRequests": 3,
+    "successfulRequests": 3,
+    "failedRequests": 0,
+    "requestsByType": {
+      "arrivals": 3
+    },
+    "requestsByAirport": {
+      "OTP": 3
+    },
+    "lastRequest": "2025-12-16T09:32:04.431Z",
+    "firstRequest": "2025-12-16T09:29:01.973Z",
+    "totalDuration": 2597,
+    "averageDuration": 865.6666666666666,
+    "currentMonth": "2025-12",
+    "monthlyStats": {}
+  },
+  "lastUpdated": "2025-12-16T09:32:04.432Z"
+}
