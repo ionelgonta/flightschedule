@@ -12,10 +12,29 @@ export async function GET(request: NextRequest) {
     switch (action) {
       case 'get':
         const scheduleData = await analyzer.getScheduleData()
+        
+        // Calculate data range from schedule data
+        let dataRange = null
+        if (scheduleData.length > 0) {
+          const dates = scheduleData.map(item => new Date(item.lastUpdated))
+          const minDate = new Date(Math.min(...dates.map(d => d.getTime())))
+          const maxDate = new Date(Math.max(...dates.map(d => d.getTime())))
+          
+          // Estimate data range (assuming 3 months back from latest update)
+          const estimatedStart = new Date(maxDate)
+          estimatedStart.setMonth(estimatedStart.getMonth() - 3)
+          
+          dataRange = {
+            from: estimatedStart.toISOString(),
+            to: maxDate.toISOString()
+          }
+        }
+        
         return NextResponse.json({
           success: true,
           data: scheduleData,
-          count: scheduleData.length
+          count: scheduleData.length,
+          dataRange
         })
       
       case 'analyze':

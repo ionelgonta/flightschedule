@@ -50,7 +50,7 @@ export default function WeeklySchedulePage() {
                   🔄 Actualizare Automată
                 </h3>
                 <p className="text-sm text-purple-700 dark:text-purple-300">
-                  Programul se actualizează pe baza datelor din cache
+                  Programul se actualizează automat la fiecare 30 de minute
                 </p>
               </div>
             </div>
@@ -72,10 +72,10 @@ export default function WeeklySchedulePage() {
                 📈 Sursa Datelor
               </h3>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li>• Datele sunt extrase din cache-ul local al aplicației</li>
                 <li>• Se analizează zborurile din ultimele 3 luni</li>
-                <li>• Nu se fac apeluri externe la API-uri în timp real</li>
                 <li>• Datele sunt grupate pe rute (origine → destinație)</li>
+                <li>• Programul se generează automat pe baza datelor disponibile</li>
+                <li>• Acoperă toate aeroporturile din România și Moldova</li>
               </ul>
             </div>
             

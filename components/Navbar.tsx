@@ -103,14 +103,7 @@ export function Navbar() {
                     <div className="font-medium">Analize Rute</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">Rute și companii aeriene</div>
                   </Link>
-                  <Link
-                    href="/program-saptamanal"
-                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                    onClick={() => setIsAnalyticsOpen(false)}
-                  >
-                    <div className="font-medium">Program Săptămânal</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Modele săptămânale de zboruri</div>
-                  </Link>
+
                   <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
                   <Link
                     href="/aeronave"

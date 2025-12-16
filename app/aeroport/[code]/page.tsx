@@ -254,6 +254,28 @@ export default function AirportPage({ params }: AirportPageProps) {
                       </div>
                     </div>
                   </Link>
+
+                  <Link
+                    href={`/program-saptamanal?airport=${airport.city} (${airport.code})`}
+                    className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 rounded-lg border border-indigo-200 dark:border-indigo-700 p-6 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-600 transition-all group"
+                  >
+                    <div className="flex items-start space-x-4">
+                      <div className="p-3 bg-indigo-600 rounded-lg">
+                        <TrendingUp className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-indigo-800 dark:text-indigo-200 mb-2 group-hover:text-indigo-900 dark:group-hover:text-indigo-100 transition-colors">
+                          Program Săptămânal
+                        </h3>
+                        <p className="text-sm text-indigo-700 dark:text-indigo-300 mb-3">
+                          Modele săptămânale de zboruri pentru {airport.city}
+                        </p>
+                        <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                          Vezi programul →
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
                 </div>
               </section>
 
@@ -417,6 +439,13 @@ export default function AirportPage({ params }: AirportPageProps) {
                   >
                     <div className="font-medium">Analize Rute</div>
                     <div className="text-xs text-orange-600 dark:text-orange-400">Companii și destinații</div>
+                  </Link>
+                  <Link
+                    href={`/program-saptamanal?airport=${airport.city} (${airport.code})`}
+                    className="block w-full text-left px-3 py-2 text-sm bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
+                  >
+                    <div className="font-medium">Program Săptămânal</div>
+                    <div className="text-xs text-indigo-600 dark:text-indigo-400">Modele săptămânale</div>
                   </Link>
                 </div>
               </div>

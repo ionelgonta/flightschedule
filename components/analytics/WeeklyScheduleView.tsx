@@ -3,25 +3,39 @@
 import { useState, useEffect } from 'react'
 import { Calendar, Filter, RefreshCw, BarChart3 } from 'lucide-react'
 import { WeeklyScheduleData } from '@/lib/weeklyScheduleAnalyzer'
+import { MAJOR_AIRPORTS } from '@/lib/airports'
 
 interface WeeklyScheduleViewProps {
   className?: string
+  initialAirportFilter?: string
 }
 
-export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleViewProps) {
+export default function WeeklyScheduleView({ className = '', initialAirportFilter = '' }: WeeklyScheduleViewProps) {
   const [scheduleData, setScheduleData] = useState<WeeklyScheduleData[]>([])
   const [filteredData, setFilteredData] = useState<WeeklyScheduleData[]>([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [autoUpdateEnabled] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [dataRange, setDataRange] = useState<{ from: string; to: string } | null>(null)
   
   // Filters
-  const [airportFilter, setAirportFilter] = useState('')
+  const [airportFilter, setAirportFilter] = useState(initialAirportFilter)
   const [destinationFilter, setDestinationFilter] = useState('')
   const [airlineFilter, setAirlineFilter] = useState('')
   const [sortBy, setSortBy] = useState<'airport' | 'destination' | 'airline' | 'frequency'>('airport')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+
+  // Helper function to convert airport codes to display names
+  const getAirportDisplayName = (code: string): string => {
+    const airport = MAJOR_AIRPORTS.find(a => a.code === code)
+    return airport ? `${airport.city} (${airport.code})` : code
+  }
+
+  // Get Romanian and Moldovan airports for filters
+  const romanianMoldovanAirports = MAJOR_AIRPORTS.filter(airport => 
+    airport.country === 'România' || airport.country === 'Moldova'
+  )
 
   // Load schedule data
   const loadScheduleData = async () => {
@@ -33,8 +47,20 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
       const data = await response.json()
       
       if (data.success) {
-        setScheduleData(data.data)
-        setFilteredData(data.data)
+        // Convert airport codes to city names
+        const processedData = data.data.map((item: WeeklyScheduleData) => ({
+          ...item,
+          airport: getAirportDisplayName(item.airport),
+          destination: getAirportDisplayName(item.destination)
+        }))
+        
+        setScheduleData(processedData)
+        setFilteredData(processedData)
+        
+        // Set data range if available
+        if (data.dataRange) {
+          setDataRange(data.dataRange)
+        }
       } else {
         setError(data.error || 'Failed to load schedule data')
       }
@@ -131,6 +157,17 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
     setFilteredData(filtered)
   }, [scheduleData, airportFilter, destinationFilter, airlineFilter, sortBy, sortOrder])
 
+  // Handle URL parameters for pre-filtering
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const airportParam = urlParams.get('airport')
+      if (airportParam && airportParam !== airportFilter) {
+        setAirportFilter(airportParam)
+      }
+    }
+  }, [])
+
   // Load data on component mount and set up auto-update
   useEffect(() => {
     loadScheduleData()
@@ -183,9 +220,17 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
     return () => clearInterval(interval)
   }, [autoUpdateEnabled])
 
-  // Get unique values for filter dropdowns
-  const uniqueAirports = [...new Set(scheduleData.map(item => item.airport))].sort()
-  const uniqueDestinations = [...new Set(scheduleData.map(item => item.destination))].sort()
+  // Get unique values for filter dropdowns from Romanian and Moldovan airports
+  const departureAirports = romanianMoldovanAirports
+    .filter(airport => scheduleData.some(item => item.airport.includes(airport.code)))
+    .map(airport => `${airport.city} (${airport.code})`)
+    .sort()
+  
+  const arrivalAirports = romanianMoldovanAirports
+    .filter(airport => scheduleData.some(item => item.destination.includes(airport.code)))
+    .map(airport => `${airport.city} (${airport.code})`)
+    .sort()
+  
   const uniqueAirlines = [...new Set(scheduleData.map(item => item.airline))].sort()
 
 
@@ -205,24 +250,20 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
     <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
       {/* Header */}
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Calendar className="h-6 w-6 text-blue-600" />
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Program Săptămânal Zboruri
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Analiză bazată pe datele din cache (ultimele 3 luni) - {filteredData.length} rute
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center px-3 py-2 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 rounded-lg">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Actualizare Automată
-            </div>
+        <div className="flex items-center space-x-3">
+          <Calendar className="h-6 w-6 text-blue-600" />
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Program Săptămânal Zboruri
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {filteredData.length} rute
+              {dataRange && (
+                <span className="ml-2">
+                  • Perioada: {new Date(dataRange.from).toLocaleDateString('ro-RO')} - {new Date(dataRange.to).toLocaleDateString('ro-RO')}
+                </span>
+              )}
+            </p>
           </div>
         </div>
       </div>
@@ -244,7 +285,7 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Aeroport Origine
+              Plecări din România/Moldova
             </label>
             <select
               value={airportFilter}
@@ -252,7 +293,7 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
               className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             >
               <option value="">Toate aeroporturile</option>
-              {uniqueAirports.map(airport => (
+              {departureAirports.map(airport => (
                 <option key={airport} value={airport}>{airport}</option>
               ))}
             </select>
@@ -260,7 +301,7 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
           
           <div>
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Destinație
+              Sosiri în România/Moldova
             </label>
             <select
               value={destinationFilter}
@@ -268,8 +309,8 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
               className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             >
               <option value="">Toate destinațiile</option>
-              {uniqueDestinations.map(destination => (
-                <option key={destination} value={destination}>{destination}</option>
+              {arrivalAirports.map(airport => (
+                <option key={airport} value={airport}>{airport}</option>
               ))}
             </select>
           </div>
@@ -325,7 +366,7 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
               Se generează programul săptămânal...
             </h4>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Sistemul procesează automat datele din cache pentru a genera programul săptămânal.
+              Sistemul procesează automat datele pentru a genera programul săptămânal.
             </p>
           </div>
         ) : (
@@ -339,25 +380,25 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
                   Zbor
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  L
+                  Lun
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  M
+                  Mar
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  M
+                  Mie
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  J
+                  Joi
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  V
+                  Vin
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  S
+                  Sam
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  D
+                  Dum
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Frecvență

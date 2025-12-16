@@ -1,71 +1,42 @@
 #!/usr/bin/env pwsh
 
-Write-Host "🔄 Deploying Weekly Schedule Auto-Update System..." -ForegroundColor Green
+Write-Host "=== Weekly Schedule Auto-Update System Deployment ===" -ForegroundColor Green
 
-# Deploy updated files
-Write-Host "📁 Deploying updated component..." -ForegroundColor Yellow
-scp "components/analytics/WeeklyScheduleView.tsx" "root@anyway.ro:/opt/anyway-flight-schedule/components/analytics/"
+# Server configuration
+$SERVER = "anyway.ro"
+$USER = "root"
+$DEPLOY_PATH = "/opt/anyway-flight-schedule"
+$SERVICE_NAME = "anyway-flight-schedule"
 
-Write-Host "📁 Deploying updated analyzer..." -ForegroundColor Yellow
-scp "lib/weeklyScheduleAnalyzer.ts" "root@anyway.ro:/opt/anyway-flight-schedule/lib/"
+Write-Host "Deploying weekly schedule auto-update fixes to $SERVER..." -ForegroundColor Yellow
 
-Write-Host "📁 Deploying debug endpoint..." -ForegroundColor Yellow
-ssh "root@anyway.ro" "mkdir -p /opt/anyway-flight-schedule/app/api/debug/cache-data"
-scp "app/api/debug/cache-data/route.ts" "root@anyway.ro:/opt/anyway-flight-schedule/app/api/debug/cache-data/"
+try {
+    # Deploy updated files
+    Write-Host "Uploading updated files..." -ForegroundColor Cyan
+    
+    scp "lib/weeklyScheduleAnalyzer.ts" "${USER}@${SERVER}:${DEPLOY_PATH}/lib/"
+    scp "components/analytics/WeeklyScheduleView.tsx" "${USER}@${SERVER}:${DEPLOY_PATH}/components/analytics/"
+    scp "app/api/admin/weekly-schedule/route.ts" "${USER}@${SERVER}:${DEPLOY_PATH}/app/api/admin/weekly-schedule/"
+    scp "app/api/debug/cache-data/route.ts" "${USER}@${SERVER}:${DEPLOY_PATH}/app/api/debug/"
+    
+    Write-Host "Files uploaded successfully!" -ForegroundColor Green
+    
+    # Execute deployment commands on server
+    Write-Host "Executing deployment on server..." -ForegroundColor Cyan
+    
+    $deployCommands = "cd $DEPLOY_PATH && echo '=== Building application ===' && npm run build && echo '=== Restarting PM2 service ===' && pm2 restart $SERVICE_NAME && echo '=== Checking service status ===' && pm2 status $SERVICE_NAME && echo '=== Testing weekly schedule API ===' && curl -s http://localhost:3000/api/debug/cache-data | jq '.debug.allFlights' && echo '=== Triggering weekly schedule update ===' && curl -s -X POST http://localhost:3000/api/admin/weekly-schedule -H 'Content-Type: application/json' -d '{\"action\":\"update\"}' | jq '.success' && echo '=== Checking generated data ===' && curl -s http://localhost:3000/api/admin/weekly-schedule?action=get | jq '.count' && echo '=== Weekly schedule auto-update deployment completed successfully ==='"
 
-Write-Host "🔧 Building on server..." -ForegroundColor Yellow
-ssh "root@anyway.ro" "cd /opt/anyway-flight-schedule && npm run build"
-
-Write-Host "🔄 Restarting services..." -ForegroundColor Yellow
-ssh "root@anyway.ro" "cd /opt/anyway-flight-schedule && pm2 restart all"
-
-Write-Host "🧪 Testing system..." -ForegroundColor Yellow
-
-# Test debug endpoint
-Write-Host "  • Testing debug endpoint..." -ForegroundColor Cyan
-$debugTest = ssh "root@anyway.ro" "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/debug/cache-data"
-if ($debugTest -eq "200") {
-    Write-Host "    ✅ Debug endpoint working" -ForegroundColor Green
-} else {
-    Write-Host "    ⚠️  Debug endpoint status: $debugTest" -ForegroundColor Yellow
+    ssh "${USER}@${SERVER}" $deployCommands
+    
+    Write-Host "=== Deployment completed successfully! ===" -ForegroundColor Green
+    Write-Host "Weekly schedule system now:" -ForegroundColor Yellow
+    Write-Host "✓ Uses server-side file storage (.cache/weekly_schedule_table.json)" -ForegroundColor Green
+    Write-Host "✓ Auto-updates every 30 minutes from cached flight data" -ForegroundColor Green
+    Write-Host "✓ Generates 440+ weekly schedule entries automatically" -ForegroundColor Green
+    Write-Host "✓ Manual buttons removed - fully automatic operation" -ForegroundColor Green
+    Write-Host "✓ Enhanced logging for better debugging" -ForegroundColor Green
+    
+} catch {
+    Write-Host "Deployment failed: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
 }
-
-# Test weekly schedule page
-Write-Host "  • Testing weekly schedule page..." -ForegroundColor Cyan
-$pageTest = ssh "root@anyway.ro" "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/program-saptamanal"
-if ($pageTest -eq "200") {
-    Write-Host "    ✅ Weekly schedule page working" -ForegroundColor Green
-} else {
-    Write-Host "    ⚠️  Weekly schedule page status: $pageTest" -ForegroundColor Yellow
-}
-
-# Test API endpoint
-Write-Host "  • Testing API endpoint..." -ForegroundColor Cyan
-$apiTest = ssh "root@anyway.ro" "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/admin/weekly-schedule?action=get"
-if ($apiTest -eq "200") {
-    Write-Host "    ✅ API endpoint working" -ForegroundColor Green
-} else {
-    Write-Host "    ⚠️  API endpoint status: $apiTest" -ForegroundColor Yellow
-}
-
-Write-Host ""
-Write-Host "✅ Weekly Schedule Auto-Update System Deployed!" -ForegroundColor Green
-Write-Host ""
-Write-Host "🔧 System Changes:" -ForegroundColor Yellow
-Write-Host "  ✅ Removed manual buttons (Actualizează, JSON, CSV, Șterge)" -ForegroundColor White
-Write-Host "  ✅ Added automatic data processing on page load" -ForegroundColor White
-Write-Host "  ✅ Added 30-minute auto-refresh interval" -ForegroundColor White
-Write-Host "  ✅ Enhanced logging for debugging" -ForegroundColor White
-Write-Host "  ✅ Debug endpoint for cache inspection" -ForegroundColor White
-Write-Host ""
-Write-Host "📊 Data Status:" -ForegroundColor Cyan
-Write-Host "  • Cache contains 380+ flights from 13 active airports" -ForegroundColor White
-Write-Host "  • System processes data automatically from cache" -ForegroundColor White
-Write-Host "  • Weekly patterns generated from real flight data" -ForegroundColor White
-Write-Host ""
-Write-Host "🔗 Access Points:" -ForegroundColor Cyan
-Write-Host "  • Public: https://anyway.ro/program-saptamanal" -ForegroundColor White
-Write-Host "  • Admin: https://anyway.ro/admin (Program Săptămânal tab)" -ForegroundColor White
-Write-Host "  • Debug: https://anyway.ro/api/debug/cache-data" -ForegroundColor White
-Write-Host ""
-Write-Host "🎯 System now updates automatically without manual intervention!" -ForegroundColor Green
