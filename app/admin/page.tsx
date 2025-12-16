@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { adConfig } from '@/lib/adConfig'
-import { Save, Settings, Key, TestTube, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react'
+import WeeklyScheduleView from '@/components/analytics/WeeklyScheduleView'
+import { Save, Settings, Key, TestTube, CheckCircle, XCircle, Clock, TrendingUp, Calendar } from 'lucide-react'
 
 export default function AdminPage() {
-  const [config, setConfig] = useState(adConfig)
-  const [activeTab, setActiveTab] = useState('adsense')
-  const [saved, setSaved] = useState(false)
+
+  const [activeTab, setActiveTab] = useState('api')
   
   // API Key Management State
   const [apiKey, setApiKey] = useState('')
@@ -16,14 +15,6 @@ export default function AdminPage() {
   const [apiKeyValid, setApiKeyValid] = useState<boolean | null>(null)
   const [apiKeyError, setApiKeyError] = useState('')
   const [apiKeySaved, setApiKeySaved] = useState(false)
-
-  // AdSense Management State
-  const [adsensePublisherId, setAdsensePublisherId] = useState('')
-  const [currentAdsensePublisherId, setCurrentAdsensePublisherId] = useState('')
-  const [adsenseTesting, setAdsenseTesting] = useState(false)
-  const [adsenseValid, setAdsenseValid] = useState<boolean | null>(null)
-  const [adsenseError, setAdsenseError] = useState('')
-  const [adsenseSaved, setAdsenseSaved] = useState(false)
 
   // Demo Ads State
   const [demoAdsEnabled, setDemoAdsEnabled] = useState(false)
@@ -54,16 +45,20 @@ export default function AdminPage() {
   const [apiCounterResetting, setApiCounterResetting] = useState(false)
   const [apiCounterReset, setApiCounterReset] = useState(false)
 
+  // API Tracker State
+  const [apiTrackerStats, setApiTrackerStats] = useState<any>(null)
+  const [recentRequests, setRecentRequests] = useState<any[]>([])
+  const [topAirports, setTopAirports] = useState<Array<{airport: string, count: number}>>([])
+  const [requestsByHour, setRequestsByHour] = useState<Record<string, number>>({})
+  const [monthlyHistory, setMonthlyHistory] = useState<Array<{month: string, requests: number, lastReset: string}>>([])
+  const [trackerLoading, setTrackerLoading] = useState(false)
 
 
-  const handleSave = () => {
-    localStorage.setItem('adConfig', JSON.stringify(config))
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
 
 
-  // Load current API key and AdSense config on component mount
+
+
+  // Load current API key on component mount
   useEffect(() => {
     const loadCurrentApiKey = async () => {
       try {
@@ -82,22 +77,7 @@ export default function AdminPage() {
       }
     }
 
-    const loadCurrentAdsenseConfig = async () => {
-      try {
-        const response = await fetch('/api/admin/adsense')
-        const data = await response.json()
-        
-        if (data.success && data.hasPublisherId) {
-          setCurrentAdsensePublisherId(data.publisherId)
-        }
-      } catch (error) {
-        console.error('Error loading AdSense config:', error)
-        setCurrentAdsensePublisherId(config.publisherId)
-      }
-    }
-    
     loadCurrentApiKey()
-    loadCurrentAdsenseConfig()
     
     // Load demo ads state
     const savedDemoState = localStorage.getItem('demoAdsEnabled')
@@ -228,108 +208,7 @@ export default function AdminPage() {
     setApiKeyError('')
   }
 
-  // AdSense Management Functions
-  const testAdsensePublisherId = async (publisherIdToTest: string) => {
-    if (!publisherIdToTest.trim()) {
-      setAdsenseError('Introduceți un Publisher ID')
-      return false
-    }
 
-    setAdsenseTesting(true)
-    setAdsenseError('')
-    setAdsenseValid(null)
-
-    try {
-      const response = await fetch('/api/admin/adsense', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          publisherId: publisherIdToTest,
-          action: 'test'
-        })
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        setAdsenseValid(data.valid)
-        if (!data.valid) {
-          setAdsenseError(data.error || 'Publisher ID invalid')
-        } else {
-          setAdsenseError('')
-        }
-        return data.valid
-      } else {
-        setAdsenseValid(false)
-        setAdsenseError(data.error || 'Eroare la testarea Publisher ID-ului')
-        return false
-      }
-    } catch (error) {
-      setAdsenseValid(false)
-      setAdsenseError('Eroare de conexiune')
-      return false
-    } finally {
-      setAdsenseTesting(false)
-    }
-  }
-  const saveAdsensePublisherId = async () => {
-    if (!adsensePublisherId.trim()) {
-      setAdsenseError('Introduceți un Publisher ID')
-      return
-    }
-
-    setAdsenseTesting(true)
-    setAdsenseError('')
-
-    try {
-      const response = await fetch('/api/admin/adsense', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          publisherId: adsensePublisherId,
-          action: 'save'
-        })
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        setCurrentAdsensePublisherId(adsensePublisherId)
-        setAdsenseSaved(true)
-        setAdsenseValid(true)
-        setAdsenseError('')
-        
-        config.publisherId = adsensePublisherId
-        setConfig({ ...config })
-        
-        setTimeout(() => setAdsenseSaved(false), 3000)
-        
-        setTimeout(() => {
-          if (confirm('Publisher ID AdSense salvat cu succes! Pentru a aplica modificările, aplicația trebuie repornită. Continuați?')) {
-            alert('Publisher ID-ul AdSense a fost salvat în fișierul de configurare. Reporniți aplicația pentru a aplica modificările.')
-          }
-        }, 1000)
-      } else {
-        setAdsenseError(data.error || 'Eroare la salvarea Publisher ID-ului')
-        setAdsenseValid(false)
-      }
-    } catch (error) {
-      setAdsenseError('Eroare de conexiune la server')
-      setAdsenseValid(false)
-    } finally {
-      setAdsenseTesting(false)
-    }
-  }
-
-  const handleAdsensePublisherIdChange = (value: string) => {
-    setAdsensePublisherId(value)
-    setAdsenseValid(null)
-    setAdsenseError('')
-  }
 
   // MCP Integration Functions
   const loadMCPStatus = useCallback(async () => {
@@ -429,6 +308,54 @@ export default function AdminPage() {
     }
   }, [])
 
+  // API Tracker Functions
+  const loadApiTrackerStats = useCallback(async () => {
+    setTrackerLoading(true)
+    try {
+      const response = await fetch('/api/admin/api-tracker?action=detailed')
+      const data = await response.json()
+      
+      if (data.success) {
+        setApiTrackerStats(data.stats)
+        setRecentRequests(data.recentRequests)
+        setTopAirports(data.topAirports)
+        setRequestsByHour(data.requestsByHour)
+        setMonthlyHistory(data.monthlyHistory || [])
+      }
+    } catch (error) {
+      console.error('Error loading API tracker stats:', error)
+    } finally {
+      setTrackerLoading(false)
+    }
+  }, [])
+
+  const resetApiTracker = async () => {
+    setApiCounterResetting(true)
+    
+    try {
+      const response = await fetch('/api/admin/api-tracker', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action: 'reset' })
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        setApiCounterReset(true)
+        setTimeout(() => setApiCounterReset(false), 3000)
+        // Reload stats after reset
+        await loadApiTrackerStats()
+      }
+    } catch (error) {
+      console.error('Error resetting API tracker:', error)
+    } finally {
+      setApiCounterResetting(false)
+    }
+  }
+
   const saveCacheConfig = async () => {
     setCacheSaving(true)
     
@@ -503,24 +430,52 @@ export default function AdminPage() {
     }
   }
 
+  const refreshStatistics = async () => {
+    setStatsRefreshing(true)
+    
+    try {
+      // Clear the statistics cache first
+      const clearResponse = await fetch('/api/admin/cache-clear', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          pattern: 'airport-statistics'
+        })
+      })
+
+      if (clearResponse.ok) {
+        // Force refresh statistics by calling the API
+        const statsResponse = await fetch('/api/statistici-aeroporturi?force=true', {
+          method: 'GET',
+          cache: 'no-cache'
+        })
+
+        if (statsResponse.ok) {
+          setStatsRefreshed(true)
+          setTimeout(() => setStatsRefreshed(false), 3000)
+          // Reload cache stats to show updated info
+          await loadCacheStats()
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing statistics:', error)
+    } finally {
+      setStatsRefreshing(false)
+    }
+  }
+
   useEffect(() => {
     if (activeTab === 'mcp') {
       loadMCPStatus()
     } else if (activeTab === 'cache') {
       loadCacheStats()
+      loadApiTrackerStats()
     }
-  }, [activeTab, loadMCPStatus, loadCacheStats])
+  }, [activeTab, loadMCPStatus, loadCacheStats, loadApiTrackerStats])
 
-  const adZones = [
-    { key: 'header-banner', name: 'Header Banner', size: '728x90', description: 'Banner în partea de sus a paginii' },
-    { key: 'sidebar-right', name: 'Sidebar Dreapta', size: '300x600', description: 'Banner în sidebar-ul din dreapta' },
-    { key: 'sidebar-square', name: 'Sidebar Pătrat', size: '300x250', description: 'Banner pătrat în sidebar' },
-    { key: 'inline-banner', name: 'Banner Inline', size: '728x90', description: 'Banner între secțiuni' },
-    { key: 'footer-banner', name: 'Footer Banner', size: '970x90', description: 'Banner în footer' },
-    { key: 'mobile-banner', name: 'Banner Mobil', size: '320x50', description: 'Banner pentru dispozitive mobile' },
-    { key: 'partner-banner-1', name: 'Banner Partener 1', size: '728x90', description: 'Banner personalizat partener' },
-    { key: 'partner-banner-2', name: 'Banner Partener 2', size: '300x250', description: 'Banner personalizat partener' },
-  ] as const
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
@@ -530,40 +485,19 @@ export default function AdminPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                🎯 Admin Complet - AdSense, API & MCP
+                🎯 Admin Complet - API & MCP
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Gestionează AdSense Toggle, API Keys (AeroDataBox) și MCP Integration
+                Gestionează API Keys (AeroDataBox) și MCP Integration
               </p>
             </div>
-            <button
-              onClick={handleSave}
-              className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
-                saved 
-                  ? 'bg-green-600 text-white' 
-                  : 'bg-primary-600 hover:bg-primary-700 text-white'
-              }`}
-            >
-              <Save className="h-5 w-5" />
-              <span>{saved ? 'Salvat!' : 'Salvează Configurația'}</span>
-            </button>
+
           </div>
         </div>
         {/* Tabs */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
           <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="flex space-x-8 px-6">
-              <button
-                onClick={() => setActiveTab('adsense')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'adsense'
-                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-              >
-                <Settings className="h-4 w-4 inline mr-2" />
-                AdSense Toggle
-              </button>
               <button
                 onClick={() => setActiveTab('api')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
@@ -597,114 +531,22 @@ export default function AdminPage() {
                 <Settings className="h-4 w-4 inline mr-2" />
                 Cache Management
               </button>
+              <button
+                onClick={() => setActiveTab('weekly-schedule')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'weekly-schedule'
+                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                <Calendar className="h-4 w-4 inline mr-2" />
+                Program Săptămânal
+              </button>
             </nav>
           </div>
 
           <div className="p-6">
-            {activeTab === 'adsense' && (
-              <div className="space-y-6">
-                {/* Simple Demo Toggle */}
-                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                        Demo Ads
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">
-                        Activează/dezactivează anunțuri demo
-                      </p>
-                    </div>
-                    <label className="flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={demoAdsEnabled}
-                        onChange={(e) => {
-                          const enabled = e.target.checked
-                          setDemoAdsEnabled(enabled)
-                          localStorage.setItem('demoAdsEnabled', JSON.stringify(enabled))
-                        }}
-                        className="sr-only"
-                      />
-                      <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        demoAdsEnabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
-                      }`}>
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          demoAdsEnabled ? 'translate-x-6' : 'translate-x-1'
-                        }`} />
-                      </div>
-                      <span className="ml-3 text-sm font-medium text-gray-900 dark:text-white">
-                        {demoAdsEnabled ? 'Activat' : 'Dezactivat'}
-                      </span>
-                    </label>
-                  </div>
-                </div>
 
-                {/* AdSense Toggle Instructions */}
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-                  <h2 className="text-xl font-semibold text-blue-900 dark:text-blue-100 mb-4">
-                    🎯 Sistem Toggle AdSense (2 Moduri)
-                  </h2>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-green-100 dark:bg-green-900/20 p-4 rounded-lg">
-                      <h3 className="font-semibold text-green-800 dark:text-green-200 mb-2">🟢 Activ</h3>
-                      <p className="text-green-700 dark:text-green-300 text-sm">
-                        AdSense real cu Publisher ID: {config.publisherId}
-                      </p>
-                    </div>
-                    
-                    <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">⚫ Inactiv</h3>
-                      <p className="text-gray-700 dark:text-gray-300 text-sm">
-                        Ascunde complet bannerele
-                      </p>
-                    </div>
-                    
-
-                  </div>
-
-                  <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
-                      📋 Instrucțiuni Console Script
-                    </h4>
-                    <ol className="list-decimal list-inside space-y-2 text-gray-700 dark:text-gray-300 text-sm">
-                      <li>Deschide <strong>Developer Console</strong> (F12)</li>
-                      <li>Selectează tab-ul <strong>Console</strong></li>
-                      <li>Copiază scriptul din <code>ADSENSE_TOGGLE_CONSOLE.md</code></li>
-                      <li>Execută scriptul pentru interfața completă</li>
-                      <li>Controlează toate zonele cu butoane</li>
-                    </ol>
-                  </div>
-                </div>
-                {/* Zone Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {adZones.map((zone) => (
-                    <div key={zone.key} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">
-                            {zone.name}
-                          </h4>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {zone.size} - {zone.description}
-                          </p>
-                        </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          config.zones[zone.key].mode === 'active'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                        }`}>
-                          {config.zones[zone.key].mode === 'active' ? 'Activ' : 'Inactiv'}
-                        </span>
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Mod curent: {config.zones[zone.key].mode}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {activeTab === 'api' && (
               <div className="space-y-6">
@@ -841,79 +683,7 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {/* AdSense Publisher ID Management */}
-                <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
-                  <h5 className="font-medium text-gray-900 dark:text-white mb-4">
-                    🎯 AdSense Publisher ID Management
-                  </h5>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Publisher ID AdSense
-                      </label>
-                      <input
-                        type="text"
-                        value={adsensePublisherId}
-                        onChange={(e) => handleAdsensePublisherIdChange(e.target.value)}
-                        placeholder="ca-pub-2305349540791838"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm"
-                      />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Publisher ID curent: <strong>{currentAdsensePublisherId || 'Nu este configurat'}</strong>
-                      </p>
-                    </div>
 
-                    {/* AdSense Validation Status */}
-                    {adsenseError && (
-                      <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                        <p className="text-red-700 dark:text-red-400 text-sm flex items-center">
-                          <XCircle className="h-4 w-4 mr-2" />
-                          {adsenseError}
-                        </p>
-                      </div>
-                    )}
-
-                    {adsenseValid === true && (
-                      <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                        <p className="text-green-700 dark:text-green-400 text-sm flex items-center">
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Publisher ID valid și funcțional!
-                        </p>
-                      </div>
-                    )}
-
-                    {adsenseSaved && (
-                      <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                        <p className="text-blue-700 dark:text-blue-400 text-sm flex items-center">
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Publisher ID AdSense salvat cu succes!
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => testAdsensePublisherId(adsensePublisherId)}
-                        disabled={adsenseTesting || !adsensePublisherId.trim()}
-                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <TestTube className="h-4 w-4 mr-2" />
-                        {adsenseTesting ? 'Testare...' : 'Testează Publisher ID'}
-                      </button>
-                      
-                      <button
-                        onClick={saveAdsensePublisherId}
-                        disabled={!adsensePublisherId.trim() || adsenseTesting}
-                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <Save className="h-4 w-4 mr-2" />
-                        Salvează Publisher ID
-                      </button>
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
             {activeTab === 'mcp' && (
@@ -1122,7 +892,7 @@ export default function AdminPage() {
                     </button>
                     
                     <button
-                      onClick={loadCacheStats}
+                      onClick={refreshStatistics}
                       disabled={statsRefreshing}
                       className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
@@ -1137,6 +907,15 @@ export default function AdminPage() {
                     >
                       <XCircle className="h-4 w-4 mr-2" />
                       {apiCounterResetting ? 'Resetez...' : 'Resetează Contor API'}
+                    </button>
+                    
+                    <button
+                      onClick={resetApiTracker}
+                      disabled={apiCounterResetting}
+                      className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      {apiCounterResetting ? 'Resetez...' : 'Resetează Tracker API'}
                     </button>
                   </div>
 
@@ -1257,6 +1036,224 @@ export default function AdminPage() {
                   </div>
                 )}
 
+                {/* API Tracker Statistics */}
+                {apiTrackerStats && (
+                  <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
+                      🎯 Statistici API Tracker - Request-uri Exacte AeroDataBox (Persistent)
+                    </h4>
+                    
+                    {/* Info despre sistemul persistent */}
+                    <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+                      <div className="text-sm text-green-800 dark:text-green-200">
+                        ✅ <strong>Sistem Persistent:</strong> Datele se păstrează în baza de date și NU se resetează la deploy/restart.
+                        Reset automat: prima zi a fiecărei luni la 00:00.
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                        <div className="text-3xl font-bold text-green-900 dark:text-green-100">
+                          {apiTrackerStats.totalRequests}
+                        </div>
+                        <div className="text-sm text-green-600 dark:text-green-400">
+                          Total Request-uri API
+                        </div>
+                      </div>
+                      
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                        <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">
+                          {apiTrackerStats.successfulRequests}
+                        </div>
+                        <div className="text-sm text-blue-600 dark:text-blue-400">
+                          Request-uri Reușite
+                        </div>
+                      </div>
+                      
+                      <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                        <div className="text-3xl font-bold text-red-900 dark:text-red-100">
+                          {apiTrackerStats.failedRequests}
+                        </div>
+                        <div className="text-sm text-red-600 dark:text-red-400">
+                          Request-uri Eșuate
+                        </div>
+                      </div>
+
+                      <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                        <div className="text-sm font-bold text-purple-900 dark:text-purple-100">
+                          {apiTrackerStats.lastRequest 
+                            ? new Date(apiTrackerStats.lastRequest).toLocaleString('ro-RO')
+                            : 'Niciodată'
+                          }
+                        </div>
+                        <div className="text-xs text-purple-600 dark:text-purple-400">
+                          Ultimul Request API
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Request-uri pe tip */}
+                    <div className="mb-6">
+                      <h5 className="font-medium text-gray-900 dark:text-white mb-3">
+                        Request-uri pe Tip:
+                      </h5>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        {Object.entries(apiTrackerStats.requestsByType).map(([type, count]) => (
+                          <div key={type} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-center">
+                            <div className="text-lg font-bold text-gray-900 dark:text-white">
+                              {count as number}
+                            </div>
+                            <div className="text-xs text-gray-600 dark:text-gray-400 capitalize">
+                              {type}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Toate aeroporturile - 16 aeroporturi cu 2 request-uri fiecare = 32 total */}
+                    <div className="mb-6">
+                      <h5 className="font-medium text-gray-900 dark:text-white mb-3">
+                        Toate Aeroporturile (16 aeroporturi × 2 request-uri = 32 total așteptat):
+                      </h5>
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
+                        {['OTP', 'BBU', 'CLJ', 'TSR', 'IAS', 'CND', 'SBZ', 'CRA', 'BCM', 'BAY', 'OMR', 'SCV', 'TGM', 'ARW', 'SUJ', 'RMO'].map((airportCode) => {
+                          const count = apiTrackerStats.requestsByAirport[airportCode] || 0;
+                          const expected = 2; // arrivals + departures
+                          const isComplete = count >= expected;
+                          return (
+                            <div key={airportCode} className={`p-2 rounded-lg text-center border-2 ${
+                              isComplete 
+                                ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700' 
+                                : count > 0 
+                                  ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700'
+                                  : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700'
+                            }`}>
+                              <div className={`text-sm font-bold ${
+                                isComplete 
+                                  ? 'text-green-900 dark:text-green-100' 
+                                  : count > 0 
+                                    ? 'text-yellow-900 dark:text-yellow-100'
+                                    : 'text-red-900 dark:text-red-100'
+                              }`}>
+                                {count}/{expected}
+                              </div>
+                              <div className="text-xs text-gray-600 dark:text-gray-400 font-mono">
+                                {airportCode}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                        <span className="inline-flex items-center mr-4">
+                          <span className="w-3 h-3 bg-green-200 dark:bg-green-700 rounded mr-1"></span>
+                          Complet (2/2)
+                        </span>
+                        <span className="inline-flex items-center mr-4">
+                          <span className="w-3 h-3 bg-yellow-200 dark:bg-yellow-700 rounded mr-1"></span>
+                          Parțial (1/2)
+                        </span>
+                        <span className="inline-flex items-center">
+                          <span className="w-3 h-3 bg-red-200 dark:bg-red-700 rounded mr-1"></span>
+                          Lipsă (0/2)
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Top aeroporturi */}
+                    {topAirports.length > 0 && (
+                      <div className="mb-6">
+                        <h5 className="font-medium text-gray-900 dark:text-white mb-3">
+                          Top Aeroporturi (Request-uri):
+                        </h5>
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                          {topAirports.slice(0, 10).map((airport) => (
+                            <div key={airport.airport} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-center">
+                              <div className="text-lg font-bold text-gray-900 dark:text-white">
+                                {airport.count}
+                              </div>
+                              <div className="text-xs text-gray-600 dark:text-gray-400 font-mono">
+                                {airport.airport}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Request-uri recente */}
+                    {recentRequests.length > 0 && (
+                      <div>
+                        <h5 className="font-medium text-gray-900 dark:text-white mb-3">
+                          Request-uri Recente (ultimele 10):
+                        </h5>
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                          <div className="space-y-2">
+                            {recentRequests.slice(0, 10).map((request, index) => (
+                              <div key={index} className="flex items-center justify-between text-xs">
+                                <div className="flex items-center space-x-2">
+                                  <span className={`w-2 h-2 rounded-full ${request.success ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                                  <span className="font-mono text-gray-600 dark:text-gray-400">
+                                    {new Date(request.timestamp).toLocaleTimeString('ro-RO')}
+                                  </span>
+                                  <span className="text-gray-900 dark:text-white capitalize">
+                                    {request.requestType}
+                                  </span>
+                                  {request.airportCode && (
+                                    <span className="text-blue-600 dark:text-blue-400 font-mono">
+                                      {request.airportCode}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-gray-500 dark:text-gray-500">
+                                  {request.duration}ms
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Istoric Lunar */}
+                    {monthlyHistory.length > 0 && (
+                      <div className="mt-6">
+                        <h5 className="font-medium text-gray-900 dark:text-white mb-3">
+                          📊 Istoric Lunar (Reset Automat Prima Zi a Lunii):
+                        </h5>
+                        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {monthlyHistory.slice(0, 6).map((month) => (
+                              <div key={month.month} className="bg-white dark:bg-gray-700 p-3 rounded-lg border">
+                                <div className="text-lg font-bold text-gray-900 dark:text-white">
+                                  {month.requests}
+                                </div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                  {month.month}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-500">
+                                  Reset: {new Date(month.lastReset).toLocaleDateString('ro-RO')}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          {apiTrackerStats?.currentMonth && (
+                            <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                              <div className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                                📅 Luna Curentă: {apiTrackerStats.currentMonth}
+                              </div>
+                              <div className="text-xs text-blue-600 dark:text-blue-400">
+                                Request-uri curente: {apiTrackerStats.totalRequests} (se resetează automat pe 1 {new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toLocaleDateString('ro-RO', { month: 'long' })})
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Cronjob Information */}
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
                   <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-3">
@@ -1282,6 +1279,99 @@ export default function AdminPage() {
                       <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
                       <div>
                         <strong>Sistem Automat:</strong> Cronjobs rulează în background pentru menținerea datelor fresh
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'weekly-schedule' && (
+              <div className="space-y-6">
+                {/* Weekly Schedule Analysis Header */}
+                <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-indigo-900 dark:text-indigo-100 mb-2">
+                    📅 Analiză Program Săptămânal Zboruri
+                  </h3>
+                  <p className="text-indigo-700 dark:text-indigo-300 text-sm">
+                    Sistem de analiză offline bazat pe datele din cache (ultimele 3 luni). Generează programe săptămânale pentru toate rutele de zbor fără apeluri externe la API.
+                  </p>
+                </div>
+
+                {/* Key Features */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                        <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">Offline Complet</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Doar date din cache local</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                        <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">Programe Săptămânale</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Modele pe zile ale săptămânii</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
+                        <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">Export Flexibil</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">JSON și CSV disponibile</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Weekly Schedule Component */}
+                <WeeklyScheduleView />
+
+                {/* System Information */}
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
+                  <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-3">
+                    ℹ️ Informații Sistem
+                  </h4>
+                  
+                  <div className="space-y-3 text-sm text-yellow-800 dark:text-yellow-200">
+                    <div className="flex items-start space-x-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                      <div>
+                        <strong>Sursa Datelor:</strong> Cache local din ultimele 3 luni (fără apeluri externe la AeroDataBox)
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                      <div>
+                        <strong>Aeroporturi Analizate:</strong> Toate cele 16 aeroporturi românești și moldovenești
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                      <div>
+                        <strong>Actualizare:</strong> Manuală prin butonul "Actualizează" - procesează datele din cache
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                      <div>
+                        <strong>Persistență:</strong> Datele se păstrează în localStorage și supraviețuiesc restart-urilor
                       </div>
                     </div>
                   </div>

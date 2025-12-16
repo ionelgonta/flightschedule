@@ -6,7 +6,7 @@ import { useTheme } from './ThemeProvider'
 import { Plane, Moon, Sun, Menu, X, ChevronDown, BarChart3 } from 'lucide-react'
 
 export function Navbar() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, mounted } = useTheme()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false)
   const analyticsRef = useRef<HTMLDivElement>(null)
@@ -72,36 +72,44 @@ export function Navbar() {
               {isAnalyticsOpen && (
                 <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
                   <Link
-                    href="/analize"
+                    href="/statistici-aeroporturi"
                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                     onClick={() => setIsAnalyticsOpen(false)}
                   >
                     <div className="font-medium">Statistici Aeroporturi</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Toate aeroporturile</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Performanță și punctualitate</div>
                   </Link>
                   <Link
-                    href="/analize"
+                    href="/program-zboruri"
                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                     onClick={() => setIsAnalyticsOpen(false)}
                   >
                     <div className="font-medium">Program Zboruri</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Toate aeroporturile</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Calendar interactiv</div>
                   </Link>
                   <Link
-                    href="/analize"
+                    href="/analize-istorice"
                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                     onClick={() => setIsAnalyticsOpen(false)}
                   >
                     <div className="font-medium">Analize Istorice</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Toate aeroporturile</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Tendințe și evoluție</div>
                   </Link>
                   <Link
-                    href="/analize"
+                    href="/analize-rute"
                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                     onClick={() => setIsAnalyticsOpen(false)}
                   >
                     <div className="font-medium">Analize Rute</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Toate aeroporturile</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Rute și companii aeriene</div>
+                  </Link>
+                  <Link
+                    href="/program-saptamanal"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    onClick={() => setIsAnalyticsOpen(false)}
+                  >
+                    <div className="font-medium">Program Săptămânal</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Modele săptămânale de zboruri</div>
                   </Link>
                   <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
                   <Link
@@ -123,6 +131,12 @@ export function Navbar() {
               Căutare
             </Link>
             <Link 
+              href="/parcari-otopeni" 
+              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            >
+              🅿️ Parcări Otopeni
+            </Link>
+            <Link 
               href="/despre" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             >
@@ -139,8 +153,12 @@ export function Navbar() {
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? (
-                <Sun className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              {mounted ? (
+                theme === 'dark' ? (
+                  <Sun className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                ) : (
+                  <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                )
               ) : (
                 <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
               )}
@@ -154,8 +172,12 @@ export function Navbar() {
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? (
-                <Sun className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              {mounted ? (
+                theme === 'dark' ? (
+                  <Sun className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                ) : (
+                  <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                )
               ) : (
                 <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
               )}
@@ -200,28 +222,28 @@ export function Navbar() {
                   Analize
                 </div>
                 <Link 
-                  href="/analize" 
+                  href="/statistici-aeroporturi" 
                   className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Statistici Aeroporturi
                 </Link>
                 <Link 
-                  href="/analize" 
+                  href="/program-zboruri" 
                   className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Program Zboruri
                 </Link>
                 <Link 
-                  href="/analize" 
+                  href="/analize-istorice" 
                   className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Analize Istorice
                 </Link>
                 <Link 
-                  href="/analize" 
+                  href="/analize-rute" 
                   className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -242,6 +264,13 @@ export function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Căutare
+              </Link>
+              <Link 
+                href="/parcari-otopeni" 
+                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                🅿️ Parcări Otopeni
               </Link>
               <Link 
                 href="/despre" 
