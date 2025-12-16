@@ -13,6 +13,7 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
   const [filteredData, setFilteredData] = useState<WeeklyScheduleData[]>([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
+  const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
   // Filters
@@ -45,7 +46,7 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
     }
   }
 
-  // Update schedule table from cache
+  // Auto-update schedule table from cache (runs automatically)
   const updateScheduleTable = async () => {
     try {
       setUpdating(true)
@@ -69,63 +70,6 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
       console.error('Error updating schedule table:', err)
     } finally {
       setUpdating(false)
-    }
-  }
-
-  // Clear schedule table
-  const clearScheduleTable = async () => {
-    if (!confirm('Sigur doriți să ștergeți toate datele din tabelul de programe săptămânale?')) {
-      return
-    }
-    
-    try {
-      setLoading(true)
-      setError(null)
-      
-      const response = await fetch('/api/admin/weekly-schedule', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'clear' })
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        setScheduleData([])
-        setFilteredData([])
-      } else {
-        setError(data.error || 'Failed to clear schedule table')
-      }
-    } catch (err) {
-      setError('Network error clearing schedule table')
-      console.error('Error clearing schedule table:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Export schedule data
-  const exportSchedule = async (format: 'json' | 'csv') => {
-    try {
-      const response = await fetch(`/api/admin/weekly-schedule?action=export&format=${format}`)
-      
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `weekly-schedule.${format}`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-      } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Failed to export schedule data')
-      }
-    } catch (err) {
-      setError('Network error exporting schedule data')
-      console.error('Error exporting schedule data:', err)
     }
   }
 
@@ -187,10 +131,57 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
     setFilteredData(filtered)
   }, [scheduleData, airportFilter, destinationFilter, airlineFilter, sortBy, sortOrder])
 
-  // Load data on component mount
+  // Load data on component mount and set up auto-update
   useEffect(() => {
     loadScheduleData()
-  }, [])
+    
+    // Auto-update schedule table on first load if no data exists
+    const autoUpdate = async () => {
+      try {
+        const response = await fetch('/api/admin/weekly-schedule?action=get')
+        const data = await response.json()
+        
+        if (data.success && data.count === 0) {
+          console.log('No schedule data found, auto-updating from cache...')
+          setUpdating(true)
+          
+          const updateResponse = await fetch('/api/admin/weekly-schedule', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'update' })
+          })
+          
+          const updateData = await updateResponse.json()
+          
+          if (updateData.success) {
+            console.log('Schedule updated successfully, reloading data...')
+            await loadScheduleData()
+          } else {
+            console.error('Failed to update schedule:', updateData.error)
+            setError(updateData.error || 'Failed to auto-update schedule')
+          }
+          
+          setUpdating(false)
+        }
+      } catch (err) {
+        console.error('Auto-update error:', err)
+        setError('Failed to auto-update schedule data')
+        setUpdating(false)
+      }
+    }
+    
+    autoUpdate()
+    
+    // Set up periodic auto-update every 30 minutes
+    const interval = setInterval(() => {
+      if (autoUpdateEnabled) {
+        console.log('Auto-updating weekly schedule from cache...')
+        updateScheduleTable()
+      }
+    }, 30 * 60 * 1000) // 30 minutes
+    
+    return () => clearInterval(interval)
+  }, [autoUpdateEnabled])
 
   // Get unique values for filter dropdowns
   const uniqueAirports = [...new Set(scheduleData.map(item => item.airport))].sort()
@@ -237,38 +228,10 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
           </div>
           
           <div className="flex items-center space-x-2">
-            <button
-              onClick={updateScheduleTable}
-              disabled={updating}
-              className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${updating ? 'animate-spin' : ''}`} />
-              {updating ? 'Actualizez...' : 'Actualizează'}
-            </button>
-            
-            <button
-              onClick={() => exportSchedule('json')}
-              className="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              JSON
-            </button>
-            
-            <button
-              onClick={() => exportSchedule('csv')}
-              className="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              CSV
-            </button>
-            
-            <button
-              onClick={clearScheduleTable}
-              className="flex items-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Șterge
-            </button>
+            <div className="flex items-center px-3 py-2 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 rounded-lg">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Actualizare Automată
+            </div>
           </div>
         </div>
       </div>
@@ -368,10 +331,10 @@ export default function WeeklyScheduleView({ className = '' }: WeeklyScheduleVie
           <div className="p-12 text-center">
             <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Nu există date de program săptămânal
+              Se generează programul săptămânal...
             </h4>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Apăsați "Actualizează" pentru a genera programul pe baza datelor din cache.
+              Sistemul procesează automat datele din cache pentru a genera programul săptămânal.
             </p>
           </div>
         ) : (

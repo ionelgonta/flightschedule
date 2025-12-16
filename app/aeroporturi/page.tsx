@@ -3,15 +3,33 @@ import Link from 'next/link'
 import { MAJOR_AIRPORTS, generateAirportSlug } from '@/lib/airports'
 import { AdBanner } from '@/components/ads/AdBanner'
 import { MapPin, Plane, Search } from 'lucide-react'
+import { Breadcrumbs } from '@/components/seo/Breadcrumbs'
+import { StructuredData, generateBreadcrumbSchema } from '@/components/seo/StructuredData'
 
 export const metadata: Metadata = {
-  title: 'Aeroporturi România și Moldova - Program Zboruri',
-  description: 'Explorează toate aeroporturile din România și Moldova. Obține informații în timp real despre zboruri, sosiri și plecări de la aeroporturile naționale.',
-  keywords: ['aeroporturi România', 'aeroporturi Moldova', 'informații zboruri', 'coduri aeroporturi', 'aviație România'],
+  title: 'Toate Aeroporturile din România și Moldova - Director Complet',
+  description: 'Director complet cu toate aeroporturile din România și Moldova. Informații în timp real despre zboruri, sosiri și plecări de la OTP Otopeni, CLJ Cluj, TSR Timișoara, IAS Iași, RMO Chișinău și toate aeroporturile naționale. Coduri IATA, statistici și programe de zbor.',
+  keywords: [
+    'aeroporturi romania lista completa',
+    'aeroporturi moldova',
+    'director aeroporturi romania',
+    'coduri aeroporturi romania',
+    'OTP otopeni bucuresti',
+    'CLJ cluj napoca',
+    'TSR timisoara',
+    'IAS iasi',
+    'RMO chisinau moldova',
+    'CND constanta',
+    'SBZ sibiu',
+    'informatii aeroporturi romania',
+    'program zboruri aeroporturi',
+    'sosiri plecari aeroporturi romania'
+  ],
   openGraph: {
-    title: 'Aeroporturi România și Moldova - Program Zboruri',
-    description: 'Explorează toate aeroporturile din România și Moldova cu informații în timp real despre zboruri.',
+    title: 'Toate Aeroporturile din România și Moldova - Director Complet',
+    description: 'Director complet cu toate aeroporturile din România și Moldova. Informații în timp real despre zboruri de la toate aeroporturile naționale.',
     type: 'website',
+    url: 'https://anyway.ro/aeroporturi'
   },
   alternates: {
     canonical: '/aeroporturi',
@@ -24,20 +42,41 @@ export default function AirportsPage() {
     'Moldova': MAJOR_AIRPORTS.filter(a => a.country === 'Moldova')
   }
 
+  const breadcrumbItems = [
+    { name: 'Aeroporturi', href: '/aeroporturi' }
+  ]
+
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'WebPage',
-    name: 'Aeroporturi România și Moldova - Program Zboruri',
-    description: 'Explorează toate aeroporturile din România și Moldova cu informații în timp real despre zboruri.',
+    '@type': 'CollectionPage',
+    name: 'Toate Aeroporturile din România și Moldova',
+    description: 'Director complet cu toate aeroporturile din România și Moldova cu informații în timp real despre zboruri.',
     url: 'https://anyway.ro/aeroporturi',
+    mainEntity: {
+      '@type': 'ItemList',
+      name: 'Aeroporturi România și Moldova',
+      numberOfItems: MAJOR_AIRPORTS.length,
+      itemListElement: MAJOR_AIRPORTS.map((airport, index) => ({
+        '@type': 'Airport',
+        position: index + 1,
+        name: airport.name,
+        iataCode: airport.code,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: airport.city,
+          addressCountry: airport.country
+        }
+      }))
+    }
   }
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <StructuredData data={jsonLd} />
+      <StructuredData data={generateBreadcrumbSchema([
+        { name: 'Acasă', url: 'https://anyway.ro' },
+        { name: 'Aeroporturi', url: 'https://anyway.ro/aeroporturi' }
+      ])} />
       
       <div className="min-h-screen">
         {/* Header Banner Ad */}
@@ -70,6 +109,9 @@ export default function AirportsPage() {
         </section>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Breadcrumbs */}
+          <Breadcrumbs items={breadcrumbItems} className="mb-8" />
+          
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-3 space-y-12">

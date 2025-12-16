@@ -27,7 +27,7 @@ export interface FlightFilters {
 class FlightRepository {
   private cache: Map<string, CachedFlightData> = new Map();
   private apiService: FlightApiService;
-  private readonly CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+  private cacheDuration = 10 * 60 * 1000; // Default 10 minutes, will be updated from admin settings
   private readonly STORAGE_KEY = 'flight_cache';
 
   constructor() {
@@ -38,6 +38,29 @@ class FlightRepository {
     
     this.apiService = new FlightApiService(apiConfig);
     this.loadCacheFromStorage();
+    this.loadCacheConfigFromAdmin();
+  }
+
+  /**
+   * Încarcă configurația de cache din admin
+   */
+  private async loadCacheConfigFromAdmin(): Promise<void> {
+    try {
+      // Only run on server side or when fetch is available
+      if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
+      
+      const response = await fetch('/api/admin/cache-config');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.config.realtimeInterval) {
+          // Convert minutes to milliseconds
+          this.cacheDuration = data.config.realtimeInterval * 60 * 1000;
+          console.log(`Cache duration updated from admin: ${data.config.realtimeInterval} minutes`);
+        }
+      }
+    } catch (error) {
+      console.warn('Could not load cache config from admin, using default:', error);
+    }
   }
 
   /**
@@ -123,7 +146,7 @@ class FlightRepository {
         type: 'arrivals',
         data: apiResponse.data,
         updated_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + this.CACHE_DURATION).toISOString(),
+        expires_at: new Date(Date.now() + this.cacheDuration).toISOString(),
         success: apiResponse.success,
         error: apiResponse.error
       };
@@ -199,7 +222,7 @@ class FlightRepository {
         type: 'departures',
         data: apiResponse.data,
         updated_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + this.CACHE_DURATION).toISOString(),
+        expires_at: new Date(Date.now() + this.cacheDuration).toISOString(),
         success: apiResponse.success,
         error: apiResponse.error
       };
@@ -368,6 +391,21 @@ class FlightRepository {
       localStorage.removeItem(this.STORAGE_KEY);
     }
     console.log('Flight cache cleared completely');
+  }
+
+  /**
+   * Actualizează configurația de cache din admin
+   */
+  async updateCacheConfig(realtimeIntervalMinutes: number): Promise<void> {
+    this.cacheDuration = realtimeIntervalMinutes * 60 * 1000;
+    console.log(`Cache duration updated to: ${realtimeIntervalMinutes} minutes`);
+  }
+
+  /**
+   * Obține configurația curentă de cache
+   */
+  getCacheDuration(): number {
+    return this.cacheDuration;
   }
 }
 

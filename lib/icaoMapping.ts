@@ -107,8 +107,8 @@ export const AIRPORT_MAPPINGS: Record<string, AirportMapping> = {
     city: 'Arad',
     country: 'România'
   },
-  'STU': {
-    iata: 'STU',
+  'SUJ': {
+    iata: 'SUJ',
     icao: 'LRST',
     name: 'Satu Mare Airport',
     city: 'Satu Mare',

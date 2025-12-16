@@ -41,7 +41,7 @@ const AIRPORTS = {
   'SCV': { name: 'Aeroportul Suceava Ștefan cel Mare', city: 'Suceava', country: 'România' },
   'TGM': { name: 'Aeroportul Târgu Mureș Transilvania', city: 'Târgu Mureș', country: 'România' },
   'ARW': { name: 'Aeroportul Arad', city: 'Arad', country: 'România' },
-  'STU': { name: 'Aeroportul Satu Mare', city: 'Satu Mare', country: 'România' },
+  'SUJ': { name: 'Aeroportul Satu Mare', city: 'Satu Mare', country: 'România' },
   
   // Moldova
   'RMO': { name: 'Aeroportul Internațional Chișinău', city: 'Chișinău', country: 'Moldova' }

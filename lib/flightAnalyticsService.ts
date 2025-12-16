@@ -131,6 +131,12 @@ class FlightAnalyticsCache {
     this.cache.clear()
   }
 
+  clearPattern(pattern: string): void {
+    const keysToDelete = Array.from(this.cache.keys()).filter(key => key.includes(pattern))
+    keysToDelete.forEach(key => this.cache.delete(key))
+    console.log(`Cleared ${keysToDelete.length} cache entries matching pattern: ${pattern}`)
+  }
+
   setLastApiCall(): void {
     this.lastApiCall = Date.now()
     this.apiRequestCount++
@@ -369,18 +375,33 @@ export class FlightAnalyticsService {
       
       if (Math.abs(today.getTime() - requestDate.getTime()) <= 7 * 24 * 60 * 60 * 1000) {
         // Within 7 days - use real-time API
-        const response = type === 'arrivals' 
-          ? await this.flightApiService.getArrivals(airportCode)
-          : await this.flightApiService.getDepartures(airportCode)
-        
-        if (response.success) {
-          return response.data.map(flight => this.convertToFlightSchedule(flight))
+        try {
+          const response = type === 'arrivals' 
+            ? await this.flightApiService.getArrivals(airportCode)
+            : await this.flightApiService.getDepartures(airportCode)
+          
+          if (response.success && response.data.length > 0) {
+            return response.data.map(flight => this.convertToFlightSchedule(flight))
+          }
+        } catch (apiError) {
+          console.warn(`Real-time API failed for ${airportCode} ${type}:`, apiError)
+          // Continue to try historical data or return empty
         }
       }
       
-      // For historical dates, try to get historical data from AeroDataBox
-      const flights = await this.aeroDataBoxService.getFlights(airportCode, type, fromDate, toDate)
-      return flights.map(flight => this.convertAeroDataBoxToSchedule(flight, type, airportCode))
+      // For historical dates or if real-time failed, try to get historical data from AeroDataBox
+      try {
+        const flights = await this.aeroDataBoxService.getFlights(airportCode, type, fromDate, toDate)
+        if (flights.length > 0) {
+          return flights.map(flight => this.convertAeroDataBoxToSchedule(flight, type, airportCode))
+        }
+      } catch (historicalError) {
+        console.warn(`Historical data failed for ${airportCode} ${type}:`, historicalError)
+      }
+      
+      // If both real-time and historical fail, return empty array
+      console.warn(`No flight data available for ${airportCode} ${type} from ${fromDate} to ${toDate}`)
+      return []
       
     } catch (error) {
       console.error(`Error fetching live flight schedules for ${airportCode}:`, error)
@@ -403,7 +424,9 @@ export class FlightAnalyticsService {
       ]
       
       if (allFlights.length === 0) {
-        throw new Error('No live flight data available')
+        console.warn(`No live flight data available for ${airportCode}, generating demo statistics`)
+        // Generate demo statistics for airports without live data
+        return this.generateDemoAirportStatistics(airportCode, period)
       }
       
       // Calculate real statistics from live data with proper status mapping
@@ -556,6 +579,7 @@ export class FlightAnalyticsService {
       ]
       
       if (allFlights.length === 0) {
+        console.warn(`No live flight data available for route analysis of ${airportCode}, using demo routes`)
         // Generate demo routes if no live data available
         return this.generateDemoRoutes(airportCode)
       }
@@ -571,13 +595,35 @@ export class FlightAnalyticsService {
       allFlights.forEach(flight => {
         const origin = flight.origin.code
         const destination = flight.destination.code
-        const routeKey = `${origin}-${destination}`
+        
+        // Skip internal routes (same origin and destination) as they don't make sense
+        if (origin === destination) {
+          return
+        }
+        
+        // For the current airport, we want to show routes TO other destinations
+        // So we need to determine the "other" airport (not the current one)
+        let otherAirport: string
+        let routeKey: string
+        
+        if (origin === airportCode) {
+          // This is a departure, destination is the other airport
+          otherAirport = destination
+          routeKey = `${airportCode}-${destination}`
+        } else if (destination === airportCode) {
+          // This is an arrival, origin is the other airport  
+          otherAirport = origin
+          routeKey = `${origin}-${airportCode}`
+        } else {
+          // This flight doesn't involve our airport, skip it
+          return
+        }
         
         if (!routeMap.has(routeKey)) {
           routeMap.set(routeKey, {
             flights: [],
-            origin,
-            destination,
+            origin: origin === airportCode ? airportCode : origin,
+            destination: destination === airportCode ? airportCode : destination,
             airlines: new Set()
           })
         }
@@ -614,9 +660,16 @@ export class FlightAnalyticsService {
         
         const onTimePercentage = flightCount > 0 ? Math.round((onTimeFlights.length / flightCount) * 100) : 0
         
+        // For display purposes, show the "other" airport (not the current one)
+        const displayOrigin = route.origin === airportCode ? airportCode : route.origin
+        const displayDestination = route.destination === airportCode ? airportCode : route.destination
+        
+        // Determine which airport to show as the route destination (the "other" one)
+        const otherAirport = route.origin === airportCode ? route.destination : route.origin
+        
         routes.push({
-          origin: route.origin,
-          destination: route.destination,
+          origin: airportCode, // Always show current airport as origin for consistency
+          destination: otherAirport, // Show the other airport as destination
           flightCount,
           averageDelay,
           onTimePercentage,
@@ -715,6 +768,13 @@ export class FlightAnalyticsService {
   }
 
   /**
+   * Clear cache entries matching a pattern (for admin use)
+   */
+  clearCachePattern(pattern: string): void {
+    analyticsCache.clearPattern(pattern)
+  }
+
+  /**
    * Get cache statistics
    */
   getCacheStats(): { 
@@ -732,6 +792,27 @@ export class FlightAnalyticsService {
    */
   resetApiRequestCount(): void {
     analyticsCache.resetApiRequestCount()
+  }
+
+  /**
+   * Get cached data by key
+   */
+  getCachedData<T>(key: string): T | null {
+    return analyticsCache.get<T>(key)
+  }
+
+  /**
+   * Set cached data with TTL
+   */
+  setCachedData(key: string, data: any, ttl?: number): void {
+    analyticsCache.set(key, data, ttl)
+  }
+
+  /**
+   * Mark that an API call was made
+   */
+  markApiCall(): void {
+    analyticsCache.setLastApiCall()
   }
 
   // Helper methods for live data conversion
@@ -861,6 +942,42 @@ export class FlightAnalyticsService {
     }
     
     return data
+  }
+
+  private generateDemoAirportStatistics(airportCode: string, period: string): AirportStatistics {
+    // Generate seeded random data based on airport code
+    const seed = airportCode.charCodeAt(0) + airportCode.charCodeAt(1) + airportCode.charCodeAt(2)
+    
+    const totalFlights = 200 + (seed % 300) // 200-500 flights
+    const onTimeFlights = Math.round(totalFlights * (0.6 + (seed % 35) / 100)) // 60-95% on time
+    const delayedFlights = Math.round(totalFlights * (0.05 + (seed % 25) / 100)) // 5-30% delayed
+    const cancelledFlights = Math.round(totalFlights * (0.01 + (seed % 5) / 100)) // 1-6% cancelled
+    const averageDelay = 10 + (seed % 35) // 10-45 minutes average delay
+    const onTimePercentage = Math.round((onTimeFlights / totalFlights) * 100)
+    const delayIndex = Math.min(100, Math.round((delayedFlights / totalFlights) * 100 + (averageDelay / 60) * 10))
+    
+    // Generate peak delay hours
+    const peakDelayHours = [
+      6 + (seed % 3), // Morning rush: 6-8
+      12 + (seed % 2), // Lunch: 12-13
+      17 + (seed % 3), // Evening rush: 17-19
+      20 + (seed % 2), // Night: 20-21
+      22 + (seed % 2)  // Late night: 22-23
+    ].slice(0, 3) // Take top 3 hours
+    
+    return {
+      airportCode,
+      period,
+      totalFlights,
+      onTimeFlights,
+      delayedFlights,
+      cancelledFlights,
+      averageDelay,
+      onTimePercentage,
+      delayIndex,
+      peakDelayHours,
+      mostFrequentRoutes: this.generateDemoRoutes(airportCode)
+    }
   }
 
 

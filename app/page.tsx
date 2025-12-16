@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { Plane, Clock, MapPin, TrendingUp } from 'lucide-react'
 import { MAJOR_AIRPORTS, generateAirportSlug } from '@/lib/airports'
 import { AdBanner } from '@/components/ads/AdBanner'
+import { StructuredData, generateOrganizationSchema, generateWebSiteSchema } from '@/components/seo/StructuredData'
+import { InternalLinks } from '@/components/seo/InternalLinks'
 
 export default function HomePage() {
   // Feature Romanian and Moldovan airports
@@ -10,7 +12,30 @@ export default function HomePage() {
   const featuredAirports = [...romanianAirports.slice(0, 2), ...moldovanAirports.slice(0, 1)]
 
   return (
-    <div className="min-h-screen">
+    <>
+      {/* Structured Data */}
+      <StructuredData data={generateOrganizationSchema()} />
+      <StructuredData data={generateWebSiteSchema()} />
+      <StructuredData data={{
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: 'Orarul Zborurilor România - Informații Zboruri în Timp Real',
+        description: 'Informații complete și în timp real despre zborurile din România și Moldova. Monitorizează sosirile și plecările de la aeroporturile OTP Otopeni, CLJ Cluj, TSR Timișoara, IAS Iași, RMO Chișinău.',
+        url: 'https://anyway.ro',
+        mainEntity: {
+          '@type': 'Service',
+          name: 'Monitorizare Zboruri România',
+          description: 'Serviciu de monitorizare în timp real a zborurilor din aeroporturile majore din România și Moldova',
+          provider: {
+            '@type': 'Organization',
+            name: 'Orarul Zborurilor România'
+          },
+          areaServed: ['România', 'Moldova'],
+          serviceType: 'Flight Information Service'
+        }
+      }} />
+      
+      <div className="min-h-screen">
       {/* Header Banner Ad */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <AdBanner 
@@ -355,6 +380,9 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* Internal Links */}
+            <InternalLinks currentPage="/" />
+
             {/* Sidebar Square Ad */}
             <AdBanner 
               slot="sidebar-square"
@@ -364,5 +392,6 @@ export default function HomePage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

@@ -14,11 +14,32 @@ export const metadata: Metadata = {
     default: 'Orarul Zborurilor România - Informații Zboruri în Timp Real',
     template: '%s | Orarul Zborurilor România'
   },
-  description: 'Informații complete și în timp real despre zborurile din România și Moldova. Monitorizează sosirile și plecările de la aeroporturile OTP Otopeni, CLJ Cluj, TSR Timișoara, IAS Iași, RMO Chișinău și toate aeroporturile românești.',
-  keywords: ['orarul zborurilor', 'aeroporturi romania', 'zboruri otopeni', 'zboruri cluj', 'zboruri timisoara', 'zboruri iasi', 'zboruri chisinau', 'sosiri plecari', 'informatii zboruri', 'OTP', 'CLJ', 'TSR', 'IAS', 'RMO'],
-  authors: [{ name: 'Flight Schedule' }],
-  creator: 'Flight Schedule',
-  publisher: 'Flight Schedule',
+  description: 'Platforma românească #1 pentru monitorizarea zborurilor în timp real. Informații complete despre sosiri și plecări de la toate aeroporturile din România și Moldova: OTP Otopeni, CLJ Cluj, TSR Timișoara, IAS Iași, RMO Chișinău. Date actualizate la fiecare minut, statistici detaliate și analize complete.',
+  keywords: [
+    'orarul zborurilor romania',
+    'aeroporturi romania timp real', 
+    'zboruri otopeni live',
+    'zboruri cluj napoca',
+    'zboruri timisoara',
+    'zboruri iasi',
+    'zboruri chisinau moldova',
+    'sosiri plecari aeroporturi',
+    'informatii zboruri romania',
+    'program zboruri romania',
+    'statusuri zboruri',
+    'intarzieri zboruri',
+    'monitorizare aviatie romania',
+    'OTP BBU CLJ TSR IAS CND SBZ RMO',
+    'flight tracker romania',
+    'aeroportul henri coanda',
+    'aeroportul cluj napoca',
+    'aeroportul timisoara',
+    'aeroportul iasi',
+    'aeroportul chisinau'
+  ],
+  authors: [{ name: 'Orarul Zborurilor România' }],
+  creator: 'Orarul Zborurilor România',
+  publisher: 'Orarul Zborurilor România',
   formatDetection: {
     email: false,
     address: false,
@@ -27,20 +48,33 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://anyway.ro'),
   alternates: {
     canonical: '/',
+    languages: {
+      'ro': 'https://anyway.ro',
+      'x-default': 'https://anyway.ro'
+    }
   },
   openGraph: {
     type: 'website',
     locale: 'ro_RO',
     url: 'https://anyway.ro',
     title: 'Orarul Zborurilor România - Informații Zboruri în Timp Real',
-    description: 'Informații în timp real despre sosirile și plecările zborurilor din aeroporturile majore din România și Moldova. Urmărește zborurile, verifică statusul și obține informații detaliate.',
+    description: 'Platforma românească pentru monitorizarea zborurilor în timp real din toate aeroporturile majore din România și Moldova. Informații actualizate la fiecare minut, statistici detaliate și analize complete.',
     siteName: 'Orarul Zborurilor România',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Orarul Zborurilor România - Monitorizare Zboruri în Timp Real'
+      }
+    ]
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Orarul Zborurilor România - Informații Zboruri în Timp Real',
-    description: 'Informații în timp real despre zborurile din România și Moldova.',
+    description: 'Platforma românească pentru monitorizarea zborurilor în timp real din România și Moldova.',
     creator: '@zboruriromania',
+    images: ['/twitter-image.jpg']
   },
   robots: {
     index: true,
@@ -53,6 +87,10 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  verification: {
+    google: 'your-google-verification-code',
+  },
+  category: 'Travel & Transportation'
 }
 
 export default function RootLayout({

@@ -53,12 +53,13 @@ function getDemoContent(slot: string): string {
 export function AdBanner({ slot, size, className = '' }: AdBannerProps) {
   const adRef = useRef<HTMLDivElement>(null)
   const [config, setConfig] = useState(adConfig.zones[slot])
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     // Load saved config
     loadAdConfig()
     
-    // Check if demo mode is enabled
+    // Check if demo mode is enabled (only after mounting)
     const demoEnabled = localStorage.getItem('demoAdsEnabled')
     if (demoEnabled === 'true') {
       // Show demo content instead of AdSense
@@ -69,6 +70,8 @@ export function AdBanner({ slot, size, className = '' }: AdBannerProps) {
     } else {
       setConfig(adConfig.zones[slot])
     }
+    
+    setMounted(true)
   }, [slot])
 
   useEffect(() => {
@@ -89,7 +92,23 @@ export function AdBanner({ slot, size, className = '' }: AdBannerProps) {
     return null
   }
 
-  // If demo mode is enabled, show simple demo banner
+  // During SSR or before mounting, always render AdSense banner to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className={`ad-banner adsense-banner ${className}`} ref={adRef}>
+        <ins
+          className="adsbygoogle"
+          style={{ display: 'block' }}
+          data-ad-client={adConfig.publisherId}
+          data-ad-slot={config.slotId}
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        />
+      </div>
+    )
+  }
+
+  // After mounting, check for demo mode
   if ((config.mode as any) === 'demo') {
     const demoContent = getDemoContent(slot)
     return (
@@ -100,8 +119,6 @@ export function AdBanner({ slot, size, className = '' }: AdBannerProps) {
       />
     )
   }
-
-
 
   // If custom HTML is provided for active mode, use it
   if (config.customHtml && config.mode === 'active') {

@@ -115,7 +115,7 @@ export const MAJOR_AIRPORTS: Airport[] = [
     coordinates: { lat: 46.1766, lng: 21.2619 }
   },
   {
-    code: 'STU',
+    code: 'SUJ',
     name: 'Aeroportul Satu Mare',
     city: 'Satu Mare',
     country: 'România',

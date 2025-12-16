@@ -48,6 +48,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/parcari-otopeni" className="text-gray-400 hover:text-white transition-colors">
+                  🅿️ Parcări Otopeni
+                </Link>
+              </li>
+              <li>
                 <Link href="/despre" className="text-gray-400 hover:text-white transition-colors">
                   Despre
                 </Link>

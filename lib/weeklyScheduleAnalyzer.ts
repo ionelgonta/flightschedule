@@ -121,29 +121,33 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
     const flights: CachedFlightData[] = [];
     
     try {
-      // Get both arrivals and departures from cache
+      // Get both arrivals and departures from cache - force cache usage
       const arrivalsResponse = await this.flightRepository.getArrivals(airportCode);
       const departuresResponse = await this.flightRepository.getDepartures(airportCode);
       
-      if (arrivalsResponse.cached && arrivalsResponse.data.length > 0) {
+      console.log(`Airport ${airportCode} - Arrivals: ${arrivalsResponse.data.length} flights, Cached: ${arrivalsResponse.cached}`);
+      console.log(`Airport ${airportCode} - Departures: ${departuresResponse.data.length} flights, Cached: ${departuresResponse.cached}`);
+      
+      // Include data regardless of cache status if we have flights
+      if (arrivalsResponse.data.length > 0) {
         flights.push({
           airport_code: airportCode,
           type: 'arrivals',
           data: arrivalsResponse.data,
           updated_at: arrivalsResponse.last_updated,
-          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h from now
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           success: arrivalsResponse.success,
           error: arrivalsResponse.error
         });
       }
       
-      if (departuresResponse.cached && departuresResponse.data.length > 0) {
+      if (departuresResponse.data.length > 0) {
         flights.push({
           airport_code: airportCode,
           type: 'departures',
           data: departuresResponse.data,
           updated_at: departuresResponse.last_updated,
-          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h from now
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           success: departuresResponse.success,
           error: departuresResponse.error
         });
@@ -279,29 +283,52 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
   async analyzeFlightPatterns(): Promise<AggregatedSchedule> {
     console.log('Starting weekly flight pattern analysis...');
     
+    // First try to get all cached flights to see what's available
+    const allFlights = await this.cacheExtractor.getAllCachedFlights();
+    console.log(`Total cached flights found: ${allFlights.length}`);
+    
     // Get historical data from last 3 months
     const historicalData = await this.cacheExtractor.getHistoricalData(3);
+    console.log(`Historical data (3 months): ${historicalData.length} flight datasets`);
     
     if (historicalData.length === 0) {
       console.warn('No historical flight data found in cache');
-      return this.createEmptySchedule();
+      // Try to get any available data regardless of age
+      const anyData = await this.cacheExtractor.getAllCachedFlights();
+      console.log(`Fallback: Found ${anyData.length} flight datasets of any age`);
+      
+      if (anyData.length === 0) {
+        return this.createEmptySchedule();
+      }
+      
+      // Use any available data as fallback
+      return this.processFlightData(anyData);
     }
+    
+    return this.processFlightData(historicalData);
+  }
+  
+  private processFlightData(flightData: CachedFlightData[]): AggregatedSchedule {
 
     const routes: FlightPattern[] = [];
     const routeMap = new Map<string, RawFlightData[]>();
     
+    console.log(`Processing ${flightData.length} flight datasets...`);
+    
     // Group flights by route (origin-destination pair)
-    historicalData.forEach(flightData => {
-      flightData.data.forEach(flight => {
+    flightData.forEach(flightDataSet => {
+      console.log(`Processing ${flightDataSet.airport_code} ${flightDataSet.type}: ${flightDataSet.data.length} flights`);
+      
+      flightDataSet.data.forEach(flight => {
         let originCode: string;
         let destinationCode: string;
         
-        if (flightData.type === 'departures') {
-          originCode = flightData.airport_code;
+        if (flightDataSet.type === 'departures') {
+          originCode = flightDataSet.airport_code;
           destinationCode = typeof flight.destination === 'string' ? flight.destination : flight.destination?.code || '';
         } else {
           originCode = typeof flight.origin === 'string' ? flight.origin : flight.origin?.code || '';
-          destinationCode = flightData.airport_code;
+          destinationCode = flightDataSet.airport_code;
         }
         
         const routeKey = `${originCode}-${destinationCode}`;
@@ -320,6 +347,8 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
         routeMap.get(routeKey)!.push(processedFlight as any);
       });
     });
+    
+    console.log(`Generated ${routeMap.size} unique routes from flight data`);
 
     // Analyze each route
     routeMap.forEach((flights, routeKey) => {
@@ -347,14 +376,14 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
       });
     });
 
-    const airportsAnalyzed = [...new Set(historicalData.map(d => d.airport_code))];
-    const dateRange = this.calculateDateRange(historicalData);
+    const airportsAnalyzed = [...new Set(flightData.map(d => d.airport_code))];
+    const dateRange = this.calculateDateRange(flightData);
 
     return {
       routes,
       summary: {
         totalRoutes: routes.length,
-        totalFlights: historicalData.reduce((sum, d) => sum + d.data.length, 0),
+        totalFlights: flightData.reduce((sum, d) => sum + d.data.length, 0),
         airportsAnalyzed,
         dataRange: dateRange
       },

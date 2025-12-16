@@ -59,12 +59,42 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
   useEffect(() => {
     fetchFlights()
     
-    // Auto-refresh every 10 minutes
-    const interval = setInterval(() => {
-      fetchFlights()
-    }, 10 * 60 * 1000)
+    // Get cache config from admin and set auto-refresh interval
+    const setupAutoRefresh = async () => {
+      try {
+        const response = await fetch('/api/admin/cache-config')
+        if (response.ok) {
+          const data = await response.json()
+          const intervalMinutes = data.success && data.config.realtimeInterval 
+            ? data.config.realtimeInterval 
+            : 10 // fallback to 10 minutes
+          
+          console.log(`Setting auto-refresh interval to ${intervalMinutes} minutes`)
+          
+          const interval = setInterval(() => {
+            fetchFlights()
+          }, intervalMinutes * 60 * 1000)
 
-    return () => clearInterval(interval)
+          return interval
+        }
+      } catch (error) {
+        console.warn('Could not load cache config, using default 10 minutes:', error)
+      }
+      
+      // Fallback to 10 minutes if config loading fails
+      return setInterval(() => {
+        fetchFlights()
+      }, 10 * 60 * 1000)
+    }
+
+    let intervalId: NodeJS.Timeout
+    setupAutoRefresh().then(interval => {
+      intervalId = interval
+    })
+
+    return () => {
+      if (intervalId) clearInterval(intervalId)
+    }
   }, [airport.code])
 
   const handleRefresh = () => {

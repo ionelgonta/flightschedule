@@ -5,6 +5,7 @@
 
 import { getIcaoCode, getIataCode } from './icaoMapping';
 import { getAirportByCode } from './airports';
+import { persistentApiRequestTracker } from './persistentApiTracker';
 
 export interface AeroDataBoxConfig {
   apiKey: string;
@@ -126,6 +127,9 @@ class AeroDataBoxService {
   private config: AeroDataBoxConfig;
   private requestCount: number = 0;
   private lastReset: number = Date.now();
+  
+  // Airports that have been discovered to have limited or no data in AeroDataBox (dynamically populated)
+  private limitedDataAirports = new Set<string>();
 
   constructor(config: AeroDataBoxConfig) {
     this.config = config;
@@ -143,28 +147,112 @@ class AeroDataBoxService {
     return this.requestCount < this.config.rateLimit;
   }
 
-  private async makeRequest<T>(endpoint: string): Promise<T> {
+  private async makeRequest<T>(endpoint: string, requestType: 'arrivals' | 'departures' | 'statistics' | 'analytics' | 'aircraft' | 'routes' = 'statistics', airportCode?: string): Promise<T> {
     if (!this.canMakeRequest()) {
       throw new Error('Rate limit exceeded');
     }
 
     this.requestCount++;
+    const startTime = Date.now();
 
     // Use correct API.Market AeroDataBox URL structure
     const url = `https://prod.api.market/api/v1/aedbx/aerodatabox${endpoint}`;
     
-    const response = await fetch(url, {
-      headers: {
-        'x-api-market-key': this.config.apiKey,
-        'accept': 'application/json'
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'x-api-market-key': this.config.apiKey,
+          'accept': 'application/json'
+        }
+      });
+
+      const duration = Date.now() - startTime;
+
+      if (!response.ok) {
+        // Log failed request
+        await persistentApiRequestTracker.logRequest(
+          endpoint,
+          'GET',
+          requestType,
+          airportCode,
+          false,
+          duration,
+          0,
+          `API Error: ${response.status} ${response.statusText}`
+        );
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      // Check if response has content
+      const text = await response.text();
+      if (!text || text.trim() === '') {
+        // Log failed request
+        await persistentApiRequestTracker.logRequest(
+          endpoint,
+          'GET',
+          requestType,
+          airportCode,
+          false,
+          duration,
+          0,
+          'Empty response from API'
+        );
+        throw new Error('Empty response from API');
+      }
+
+      // Try to parse JSON
+      try {
+        const data = JSON.parse(text);
+        
+        // Log successful request
+        await persistentApiRequestTracker.logRequest(
+          endpoint,
+          'GET',
+          requestType,
+          airportCode,
+          true,
+          duration,
+          text.length
+        );
+        
+        return data;
+      } catch (parseError) {
+        console.error('JSON parse error for response:', text.substring(0, 200));
+        
+        // Log failed request
+        await persistentApiRequestTracker.logRequest(
+          endpoint,
+          'GET',
+          requestType,
+          airportCode,
+          false,
+          duration,
+          text.length,
+          `Invalid JSON response: ${parseError instanceof Error ? parseError.message : 'Parse failed'}`
+        );
+        
+        throw new Error(`Invalid JSON response: ${parseError instanceof Error ? parseError.message : 'Parse failed'}`);
+      }
+    } catch (error) {
+      console.error(`AeroDataBox API request failed for ${endpoint}:`, error);
+      
+      // If not already logged, log the error
+      if (!(error instanceof Error && error.message.includes('API Error'))) {
+        const duration = Date.now() - startTime;
+        await persistentApiRequestTracker.logRequest(
+          endpoint,
+          'GET',
+          requestType,
+          airportCode,
+          false,
+          duration,
+          0,
+          error instanceof Error ? error.message : 'Unknown error'
+        );
+      }
+      
+      throw error;
     }
-
-    return response.json();
   }
 
   /**
@@ -176,13 +264,39 @@ class AeroDataBoxService {
     fromTime?: string,
     toTime?: string
   ): Promise<Flight[]> {
-    const icaoCode = getIcaoCode(airportCode);
-    
-    // Use correct API.Market AeroDataBox endpoint - returns both arrivals and departures
-    const endpoint = `/flights/airports/Icao/${icaoCode}`;
-    const response = await this.makeRequest<FlightResponse>(endpoint);
-    
-    return type === 'arrivals' ? (response.arrivals || []) : (response.departures || []);
+    try {
+      const icaoCode = getIcaoCode(airportCode);
+      
+      // Always attempt the API request - track ALL requests regardless of expected data availability
+      // Use correct API.Market AeroDataBox endpoint - returns both arrivals and departures
+      const endpoint = `/flights/airports/Icao/${icaoCode}`;
+      const response = await this.makeRequest<FlightResponse>(endpoint, type, airportCode);
+      
+      const flights = type === 'arrivals' ? (response.arrivals || []) : (response.departures || []);
+      
+      // If no flights returned, add to limited data list for future reference but still track the request
+      if (flights.length === 0) {
+        console.warn(`Airport ${airportCode} returned no ${type} data - adding to limited data list`);
+        this.limitedDataAirports.add(airportCode);
+      }
+      
+      return flights;
+    } catch (error) {
+      console.error(`Failed to get ${type} for airport ${airportCode}:`, error);
+      
+      // Add this airport to the limited data list if it consistently fails
+      if (error instanceof Error && (
+        error.message.includes('Empty response') || 
+        error.message.includes('Invalid JSON') ||
+        error.message.includes('Unexpected end of JSON input')
+      )) {
+        console.warn(`Adding ${airportCode} to limited data airports list due to API issues`);
+        this.limitedDataAirports.add(airportCode);
+      }
+      
+      // Return empty array instead of throwing - this allows the system to continue
+      return [];
+    }
   }
 
   /**
@@ -192,7 +306,7 @@ class AeroDataBoxService {
     const icaoCode = getIcaoCode(airportCode);
     // Use correct API.Market endpoint structure (note: Icao with capital I)
     const endpoint = `/airports/Icao/${icaoCode}?withRunways=false&withTime=false`;
-    return this.makeRequest<Airport>(endpoint);
+    return this.makeRequest<Airport>(endpoint, 'statistics', airportCode);
   }
 
   /**
@@ -201,7 +315,7 @@ class AeroDataBoxService {
   async getAirportStats(airportCode: string): Promise<AirportStats> {
     const icaoCode = getIcaoCode(airportCode);
     const endpoint = `/airports/icao/${icaoCode}/stats`;
-    return this.makeRequest<AirportStats>(endpoint);
+    return this.makeRequest<AirportStats>(endpoint, 'statistics', airportCode);
   }
 
   /**
@@ -269,7 +383,7 @@ class AeroDataBoxService {
     const flightDate = date || new Date().toISOString().split('T')[0];
     
     const endpoint = `/flights/airports/icao/${depIcao}/${arrIcao}/${flightDate}`;
-    return this.makeRequest<Flight[]>(endpoint);
+    return this.makeRequest<Flight[]>(endpoint, 'routes', `${departureAirport}-${arrivalAirport}`);
   }
 
   /**
@@ -277,7 +391,7 @@ class AeroDataBoxService {
    */
   async getAircraftInfo(registration: string): Promise<Aircraft> {
     const endpoint = `/aircraft/reg/${registration}`;
-    return this.makeRequest<Aircraft>(endpoint);
+    return this.makeRequest<Aircraft>(endpoint, 'aircraft');
   }
 
   /**
@@ -290,6 +404,20 @@ class AeroDataBoxService {
     const flightDate = date || new Date().toISOString().split('T')[0];
     const endpoint = `/aircraft/reg/${registration}/flights/${flightDate}`;
     return this.makeRequest<Flight[]>(endpoint);
+  }
+
+  /**
+   * Check if an airport is known to have limited data
+   */
+  hasLimitedData(airportCode: string): boolean {
+    return this.limitedDataAirports.has(airportCode);
+  }
+
+  /**
+   * Get list of airports with limited data
+   */
+  getLimitedDataAirports(): string[] {
+    return Array.from(this.limitedDataAirports);
   }
 
   /**

@@ -13,11 +13,13 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme
   setTheme: (theme: Theme) => void
+  mounted: boolean
 }
 
 const initialState: ThemeProviderState = {
   theme: 'system',
   setTheme: () => null,
+  mounted: false,
 }
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
@@ -28,11 +30,21 @@ export function ThemeProvider({
   storageKey = 'flight-schedule-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (typeof window !== 'undefined' && localStorage.getItem(storageKey)) as Theme || defaultTheme
-  )
+  const [theme, setTheme] = useState<Theme>(defaultTheme)
+  const [mounted, setMounted] = useState(false)
+
+  // Initialize theme from localStorage after component mounts
+  useEffect(() => {
+    const storedTheme = localStorage.getItem(storageKey) as Theme
+    if (storedTheme) {
+      setTheme(storedTheme)
+    }
+    setMounted(true)
+  }, [storageKey])
 
   useEffect(() => {
+    if (!mounted) return
+
     const root = window.document.documentElement
 
     root.classList.remove('light', 'dark')
@@ -48,10 +60,11 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme)
-  }, [theme])
+  }, [theme, mounted])
 
   const value = {
     theme,
+    mounted,
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme)
       setTheme(theme)

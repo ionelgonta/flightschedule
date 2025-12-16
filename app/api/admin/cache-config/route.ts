@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updateCacheConfig, getCacheConfig } from '@/lib/flightAnalyticsService'
+import { getFlightRepository } from '@/lib/flightRepository'
 import fs from 'fs'
 import path from 'path'
 
@@ -100,6 +101,14 @@ export async function POST(request: NextRequest) {
       analyticsInterval,
       realtimeInterval
     })
+    
+    // Update the flight repository cache configuration
+    try {
+      const flightRepository = getFlightRepository()
+      await flightRepository.updateCacheConfig(realtimeInterval)
+    } catch (error) {
+      console.warn('Could not update flight repository cache config:', error)
+    }
     
     console.log(`Cache configuration updated: Analytics ${analyticsInterval} days, Realtime ${realtimeInterval} minutes`)
     

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Plane, Clock, AlertCircle, CheckCircle } from 'lucide-react'
 import { Airport } from '@/types/flight'
 import { FlightSchedule } from '@/lib/flightAnalyticsService'
-import { getAirlineName, getCityName, formatAirportDisplay } from '@/lib/airlineMapping'
+import { getAirlineName, formatAirportDisplay } from '@/lib/airlineMapping'
 
 interface Props {
   airport: Airport
@@ -139,8 +139,22 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
     })
   }
 
-  // Get status icon and color
-  const getStatusDisplay = (status: string, delay?: number) => {
+  // Get status icon and color with smart status detection
+  const getStatusDisplay = (status: string, scheduledTime: string, actualTime?: string, delay?: number) => {
+    const now = new Date()
+    const scheduled = new Date(scheduledTime)
+    const timeDiff = now.getTime() - scheduled.getTime()
+    const hoursDiff = timeDiff / (1000 * 60 * 60)
+    
+    // If flight was scheduled more than 2 hours ago and no specific status, assume departed/arrived
+    if (hoursDiff > 2 && (status === 'scheduled' || !status)) {
+      return {
+        icon: <CheckCircle className="h-4 w-4" />,
+        text: type === 'departures' ? 'Decolat' : 'Aterizat',
+        color: 'text-green-600 bg-green-100'
+      }
+    }
+    
     switch (status) {
       case 'on-time':
         return {
@@ -159,6 +173,18 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
           icon: <AlertCircle className="h-4 w-4" />,
           text: 'Anulat',
           color: 'text-red-600 bg-red-100'
+        }
+      case 'departed':
+        return {
+          icon: <CheckCircle className="h-4 w-4" />,
+          text: 'Decolat',
+          color: 'text-green-600 bg-green-100'
+        }
+      case 'arrived':
+        return {
+          icon: <CheckCircle className="h-4 w-4" />,
+          text: 'Aterizat',
+          color: 'text-green-600 bg-green-100'
         }
       default:
         return {
@@ -287,7 +313,7 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
             >
               <option value="">Toate companiile</option>
               {uniqueAirlines.map(airline => (
-                <option key={airline} value={airline}>{getAirlineName(airline)}</option>
+                <option key={airline} value={airline}>{airline}</option>
               ))}
             </select>
           </div>
@@ -347,19 +373,19 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredSchedules.map((schedule, index) => {
-              const statusDisplay = getStatusDisplay(schedule.status, schedule.delay)
+              const statusDisplay = getStatusDisplay(schedule.status, schedule.scheduledTime, schedule.actualTime, schedule.delay)
               const otherAirport = type === 'departures' ? schedule.destination : schedule.origin
               
               return (
-                <div key={`${schedule.flightNumber}-${index}`} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <div key={`${schedule.flightNumber}-${index}`} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center space-x-4 mb-2">
-                        <div className="font-semibold text-lg text-gray-900 dark:text-white">
+                      <div className="flex items-center space-x-3 mb-1">
+                        <div className="font-semibold text-base text-gray-900 dark:text-white">
                           {schedule.flightNumber}
                         </div>
-                        <div className="text-gray-600 dark:text-gray-400">
-                          {getAirlineName(schedule.airline.code)} ({schedule.airline.code})
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          {getAirlineName(schedule.airline.code)}
                         </div>
                         <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${statusDisplay.color}`}>
                           {statusDisplay.icon}
@@ -367,7 +393,7 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
                         <div>
                           <span className="font-medium">{type === 'departures' ? 'Către' : 'De la'}:</span>
                           <span className="ml-1">{formatAirportDisplay(otherAirport.code)}</span>

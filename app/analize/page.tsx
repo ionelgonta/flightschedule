@@ -1,24 +1,34 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { BarChart3, Clock, TrendingUp, Plane, MapPin, Building } from 'lucide-react'
+import { BarChart3, Clock, TrendingUp, Plane, Building } from 'lucide-react'
 import { MAJOR_AIRPORTS, generateAirportSlug } from '@/lib/airports'
 import { AdBanner } from '@/components/ads/AdBanner'
+import { Breadcrumbs } from '@/components/seo/Breadcrumbs'
+import { StructuredData, generateBreadcrumbSchema } from '@/components/seo/StructuredData'
 
 export const metadata: Metadata = {
-  title: 'Analize și Statistici Zboruri România - Toate Aeroporturile',
-  description: 'Analize complete și statistici detaliate pentru toate aeroporturile din România și Moldova. Statistici performanță, program zboruri, analize istorice și catalog aeronave.',
+  title: 'Analize și Statistici Complete Zboruri România - Toate Aeroporturile',
+  description: 'Analize avansate și statistici detaliate pentru toate aeroporturile din România și Moldova. Performanță zboruri, punctualitate, program complet, analize istorice, catalog aeronave și statistici comparative pentru OTP, CLJ, TSR, IAS, RMO și toate aeroporturile naționale.',
   keywords: [
-    'analize zboruri romania',
+    'analize zboruri romania complete',
     'statistici aeroporturi romania',
-    'performanta zboruri',
+    'performanta zboruri romania',
+    'punctualitate aeroporturi',
     'program zboruri romania',
-    'analize aviatie',
-    'statistici punctualitate'
+    'analize aviatie romania',
+    'statistici punctualitate zboruri',
+    'istoric zboruri romania',
+    'catalog aeronave romania',
+    'analize comparative aeroporturi',
+    'statistici OTP CLJ TSR IAS',
+    'performanta aeroporturi romania',
+    'tendinte aviatie romania'
   ],
   openGraph: {
-    title: 'Analize și Statistici Zboruri România - Toate Aeroporturile',
-    description: 'Analize complete și statistici detaliate pentru toate aeroporturile din România și Moldova.',
+    title: 'Analize și Statistici Complete Zboruri România - Toate Aeroporturile',
+    description: 'Analize avansate și statistici detaliate pentru toate aeroporturile din România și Moldova. Performanță, punctualitate și tendințe aviație.',
     type: 'website',
+    url: 'https://anyway.ro/analize'
   },
   alternates: {
     canonical: '/analize',
@@ -28,6 +38,45 @@ export const metadata: Metadata = {
 export default function AnalyzePage() {
   const romanianAirports = MAJOR_AIRPORTS.filter(a => a.country === 'România')
   const moldovanAirports = MAJOR_AIRPORTS.filter(a => a.country === 'Moldova')
+
+  const breadcrumbItems = [
+    { name: 'Analize și Statistici', href: '/analize' }
+  ]
+
+  const analyticsSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Analize și Statistici Zboruri România',
+    description: 'Analize complete și statistici detaliate pentru toate aeroporturile din România și Moldova',
+    url: 'https://anyway.ro/analize',
+    mainEntity: {
+      '@type': 'Service',
+      name: 'Servicii Analize Zboruri',
+      description: 'Analize avansate și statistici pentru monitorizarea performanței aeroporturilor',
+      provider: {
+        '@type': 'Organization',
+        name: 'Orarul Zborurilor România'
+      },
+      serviceType: 'Flight Analytics Service',
+      offers: [
+        {
+          '@type': 'Offer',
+          name: 'Statistici Aeroporturi',
+          description: 'Indice întârzieri, performanță la timp, ore de vârf'
+        },
+        {
+          '@type': 'Offer', 
+          name: 'Program Zboruri',
+          description: 'Calendar interactiv cu filtre avansate'
+        },
+        {
+          '@type': 'Offer',
+          name: 'Analize Istorice', 
+          description: 'Tendințe și evoluție în timp'
+        }
+      ]
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -61,6 +110,9 @@ export default function AnalyzePage() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Breadcrumbs */}
+        <Breadcrumbs items={breadcrumbItems} className="mb-8" />
+        
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-12">

@@ -72,6 +72,33 @@ export const AIRLINE_MAPPING: { [key: string]: string } = {
   'EK': 'Emirates',
   'UAE': 'Emirates',
   
+  // Additional Airlines
+  '5F': 'FlyOne',
+  'HV': 'Transavia',
+  'TRA': 'Transavia',
+  'EN': 'Air Dolomiti',
+  'DLA': 'Air Dolomiti',
+  'A3': 'Aegean Airlines',
+  'AEE': 'Aegean Airlines',
+  'JU': 'Air Serbia',
+  'ASL': 'Air Serbia',
+  'OU': 'Croatia Airlines',
+  'CTN': 'Croatia Airlines',
+  'JP': 'Adria Airways',
+  'ADR': 'Adria Airways',
+  'YM': 'Montenegro Airlines',
+  'MGX': 'Montenegro Airlines',
+  'FB': 'Bulgaria Air',
+  'LZB': 'Bulgaria Air',
+  'RJ': 'Royal Jordanian',
+  'RJA': 'Royal Jordanian',
+  'MS': 'EgyptAir',
+  'MSR': 'EgyptAir',
+  'SU': 'Aeroflot',
+  'AFL': 'Aeroflot',
+  'S7': 'S7 Airlines',
+  'SBI': 'S7 Airlines',
+  
   // Default fallback
   'XX': 'Companie Necunoscută'
 }
@@ -93,7 +120,7 @@ export const AIRPORT_CITY_MAPPING: { [key: string]: string } = {
   'SCV': 'Suceava',
   'TGM': 'Târgu Mureș',
   'ARW': 'Arad',
-  'STU': 'Satu Mare',
+  'SUJ': 'Satu Mare',
   
   // Moldovan Airports
   'RMO': 'Chișinău',
@@ -101,12 +128,18 @@ export const AIRPORT_CITY_MAPPING: { [key: string]: string } = {
   
   // Major European Airports
   'LHR': 'Londra',
+  'LGW': 'Londra',
+  'STN': 'Londra',
+  'LTN': 'Londra',
   'CDG': 'Paris',
+  'ORY': 'Paris',
   'FRA': 'Frankfurt',
   'MUC': 'München',
   'VIE': 'Viena',
   'FCO': 'Roma',
+  'CIA': 'Roma',
   'IST': 'Istanbul',
+  'SAW': 'Istanbul',
   'DXB': 'Dubai',
   'ATH': 'Atena',
   'BRU': 'Bruxelles',
@@ -128,6 +161,63 @@ export const AIRPORT_CITY_MAPPING: { [key: string]: string } = {
   'LJU': 'Ljubljana',
   'SKG': 'Salonic',
   
+  // Polish Airports
+  'KTW': 'Katowice',
+  'KRK': 'Cracovia',
+  'GDN': 'Gdansk',
+  'WRO': 'Wrocław',
+  'POZ': 'Poznań',
+  'SZZ': 'Szczecin',
+  
+  // German Airports
+  'DUS': 'Düsseldorf',
+  'CGN': 'Köln',
+  'HAM': 'Hamburg',
+  'STR': 'Stuttgart',
+  'NUE': 'Nürnberg',
+  'HAJ': 'Hannover',
+  'BER': 'Berlin',
+  'TXL': 'Berlin',
+  'SXF': 'Berlin',
+  
+  // Italian Airports
+  'MXP': 'Milano',
+  'LIN': 'Milano',
+  'BGY': 'Milano',
+  'VCE': 'Veneția',
+  'TSF': 'Veneția',
+  'NAP': 'Napoli',
+  'CTA': 'Catania',
+  'PMO': 'Palermo',
+  'BLQ': 'Bologna',
+  'FLR': 'Florența',
+  
+  // Spanish Airports
+  'VLC': 'Valencia',
+  'SVQ': 'Sevilla',
+  'BIO': 'Bilbao',
+  'LPA': 'Las Palmas',
+  'TFS': 'Tenerife',
+  'PMI': 'Palma de Mallorca',
+  
+  // French Airports
+  'LYS': 'Lyon',
+  'MRS': 'Marseille',
+  'NCE': 'Nice',
+  'TLS': 'Toulouse',
+  'BOD': 'Bordeaux',
+  'NTE': 'Nantes',
+  
+  // Other European
+  'DUB': 'Dublin',
+  'EDI': 'Edinburgh',
+  'MAN': 'Manchester',
+  'BHX': 'Birmingham',
+  'LIS': 'Lisabona',
+  'OPO': 'Porto',
+  'ZAZ': 'Zaragoza',
+  'VGO': 'Vigo',
+  
   // Default fallback
   'XXX': 'Oraș Necunoscut'
 }
@@ -146,10 +236,10 @@ export function getAirlineName(code: string): string {
  * Get city name from airport IATA/ICAO code
  */
 export function getCityName(airportCode: string): string {
-  if (!airportCode) return 'Oraș Necunoscut'
+  if (!airportCode) return 'Necunoscut'
   
   const upperCode = airportCode.toUpperCase().trim()
-  return AIRPORT_CITY_MAPPING[upperCode] || airportCode
+  return AIRPORT_CITY_MAPPING[upperCode] || upperCode
 }
 
 /**

@@ -1,16 +1,30 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { Plane, Clock, MapPin, Users, Shield, Zap, Globe, Heart } from 'lucide-react'
+import { Plane, Clock, MapPin, Zap, Globe, Heart } from 'lucide-react'
 import { AdBanner } from '@/components/ads/AdBanner'
+import { Breadcrumbs } from '@/components/seo/Breadcrumbs'
+import { StructuredData, generateBreadcrumbSchema } from '@/components/seo/StructuredData'
 
 export const metadata: Metadata = {
-  title: 'Despre Noi - Platforma de Monitorizare Zboruri România',
-  description: 'Descoperă povestea platformei noastre de monitorizare zboruri în timp real pentru România și Moldova. Informații complete despre misiunea noastră, tehnologia folosită și angajamentul față de călătorii români.',
-  keywords: ['despre noi', 'platforma zboruri romania', 'monitorizare zboruri', 'aeroporturi romania', 'tehnologie aviație', 'zboruri timp real', 'OTP', 'CLJ', 'TSR', 'IAS', 'RMO'],
+  title: 'Despre Noi - Platforma Românească de Monitorizare Zboruri',
+  description: 'Descoperă povestea platformei românești #1 pentru monitorizarea zborurilor în timp real. Misiunea noastră, tehnologia avansată și angajamentul față de călătorii din România și Moldova. Informații complete despre echipa și viziunea noastră pentru aviația românească.',
+  keywords: [
+    'despre orarul zborurilor romania',
+    'platforma romaneasca zboruri',
+    'monitorizare zboruri romania',
+    'echipa zboruri romania',
+    'misiune aviatie romania',
+    'tehnologie zboruri timp real',
+    'platforma aeroporturi romania',
+    'servicii aviatie romania',
+    'informatii companie zboruri',
+    'viziune aviatie romania'
+  ],
   openGraph: {
-    title: 'Despre Noi - Platforma de Monitorizare Zboruri România',
-    description: 'Platforma românească dedicată monitorizării zborurilor în timp real din aeroporturile majore din România și Moldova.',
+    title: 'Despre Noi - Platforma Românească de Monitorizare Zboruri',
+    description: 'Platforma românească dedicată monitorizării zborurilor în timp real din aeroporturile majore din România și Moldova. Descoperă misiunea și tehnologia noastră.',
     type: 'website',
+    url: 'https://anyway.ro/despre'
   },
   alternates: {
     canonical: '/despre',
@@ -18,23 +32,51 @@ export const metadata: Metadata = {
 }
 
 export default function AboutPage() {
-  const jsonLd = {
+  const breadcrumbItems = [
+    { name: 'Despre Noi', href: '/despre' }
+  ]
+
+  const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Program Zboruri România',
-    description: 'Platforma românească pentru monitorizarea zborurilor în timp real',
+    name: 'Orarul Zborurilor România',
+    alternateName: 'Program Zboruri România',
+    description: 'Platforma românească pentru monitorizarea zborurilor în timp real din aeroporturile majore din România și Moldova',
     url: 'https://anyway.ro',
+    logo: 'https://anyway.ro/logo.png',
     foundingDate: '2024',
-    areaServed: ['România', 'Moldova'],
+    areaServed: [
+      {
+        '@type': 'Country',
+        name: 'România'
+      },
+      {
+        '@type': 'Country',
+        name: 'Moldova'
+      }
+    ],
     serviceType: 'Monitorizare Zboruri în Timp Real',
+    knowsAbout: [
+      'Monitorizare zboruri',
+      'Aeroporturi România',
+      'Informații aviație',
+      'Statistici zboruri',
+      'Program zboruri'
+    ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer service',
+      availableLanguage: 'Romanian'
+    }
   }
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <StructuredData data={organizationSchema} />
+      <StructuredData data={generateBreadcrumbSchema([
+        { name: 'Acasă', url: 'https://anyway.ro' },
+        { name: 'Despre Noi', url: 'https://anyway.ro/despre' }
+      ])} />
       
       <div className="min-h-screen">
         {/* Header Banner Ad */}
@@ -68,6 +110,9 @@ export default function AboutPage() {
         </section>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Breadcrumbs */}
+          <Breadcrumbs items={breadcrumbItems} className="mb-8" />
+          
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-3 space-y-12">
