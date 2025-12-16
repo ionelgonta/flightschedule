@@ -48,6 +48,8 @@ export type FlightStatus =
   | 'cancelled'
   | 'delayed'
   | 'diverted'
+  | 'boarding'
+  | 'departed'
   | 'unknown'
 
 export interface Airport {

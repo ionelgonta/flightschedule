@@ -5,7 +5,9 @@ import {
   CheckCircle, 
   XCircle, 
   AlertTriangle, 
-  Navigation 
+  Navigation,
+  Users,
+  ArrowUp
 } from 'lucide-react'
 
 interface FlightStatusBadgeProps {
@@ -42,6 +44,16 @@ const statusConfig = {
     label: 'Deviat',
     icon: Navigation,
     className: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
+  },
+  boarding: {
+    label: 'Îmbarcare',
+    icon: Users,
+    className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+  },
+  departed: {
+    label: 'Plecat',
+    icon: ArrowUp,
+    className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
   },
   unknown: {
     label: 'Necunoscut',
