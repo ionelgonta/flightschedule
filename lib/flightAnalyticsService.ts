@@ -424,9 +424,9 @@ export class FlightAnalyticsService {
       ]
       
       if (allFlights.length === 0) {
-        console.warn(`No live flight data available for ${airportCode}, generating demo statistics`)
-        // Generate demo statistics for airports without live data
-        return this.generateDemoAirportStatistics(airportCode, period)
+        console.warn(`No live flight data available for ${airportCode}`)
+        // Return null statistics instead of demo data
+        throw new Error('Nu sunt suficiente date pentru a afișa această informație')
       }
       
       // Calculate real statistics from live data with proper status mapping
@@ -559,11 +559,11 @@ export class FlightAnalyticsService {
         }
       }
       
-      return data.length > 0 ? data : this.generateDemoHistoricalData(airportCode, fromDate, toDate)
+      return data
       
     } catch (error) {
       console.error(`Error fetching live historical data for ${airportCode}:`, error)
-      return this.generateDemoHistoricalData(airportCode, fromDate, toDate)
+      return []
     }
   }
 
@@ -579,9 +579,9 @@ export class FlightAnalyticsService {
       ]
       
       if (allFlights.length === 0) {
-        console.warn(`No live flight data available for route analysis of ${airportCode}, using demo routes`)
-        // Generate demo routes if no live data available
-        return this.generateDemoRoutes(airportCode)
+        console.warn(`No live flight data available for route analysis of ${airportCode}`)
+        // Return empty array instead of demo data
+        return []
       }
       
       // Group flights by route
@@ -875,110 +875,7 @@ export class FlightAnalyticsService {
     return 'Unknown'
   }
 
-  private generateDemoRoutes(airportCode: string): RouteAnalysis[] {
-    // Common European destinations from Romanian airports
-    const commonDestinations = [
-      { code: 'LHR', airlines: ['BA', 'RO'] },
-      { code: 'CDG', airlines: ['AF', 'RO'] },
-      { code: 'FRA', airlines: ['LH', 'RO'] },
-      { code: 'MUC', airlines: ['LH', 'W4'] },
-      { code: 'VIE', airlines: ['OS', 'RO'] },
-      { code: 'FCO', airlines: ['AZ', 'W4'] },
-      { code: 'IST', airlines: ['TK', 'RO'] },
-      { code: 'ATH', airlines: ['A3', 'RO'] },
-      { code: 'BRU', airlines: ['SN', 'RO'] },
-      { code: 'AMS', airlines: ['KL', 'RO'] },
-      { code: 'MAD', airlines: ['IB', 'W4'] },
-      { code: 'BCN', airlines: ['VY', 'W4'] },
-      { code: 'ZUR', airlines: ['LX', 'RO'] },
-      { code: 'CPH', airlines: ['SK', 'RO'] },
-      { code: 'WAW', airlines: ['LO', 'RO'] }
-    ]
 
-    // Generate seeded random data based on airport code
-    const seed = airportCode.charCodeAt(0) + airportCode.charCodeAt(1) + airportCode.charCodeAt(2)
-    
-    return commonDestinations.slice(0, 15).map((dest, index) => {
-      const routeSeed = seed + index
-      const flightCount = 5 + (routeSeed % 20) // 5-25 flights
-      const onTimePercentage = 60 + (routeSeed % 35) // 60-95%
-      const averageDelay = (routeSeed % 45) // 0-45 minutes
-      
-      return {
-        origin: airportCode,
-        destination: dest.code,
-        flightCount,
-        averageDelay,
-        onTimePercentage,
-        airlines: dest.airlines
-      }
-    }).sort((a, b) => b.flightCount - a.flightCount)
-  }
-
-  private generateDemoHistoricalData(airportCode: string, fromDate: string, toDate: string): HistoricalData[] {
-    const data: HistoricalData[] = []
-    const start = new Date(fromDate)
-    const end = new Date(toDate)
-    
-    // Generate seeded random data based on airport code
-    const seed = airportCode.charCodeAt(0) + airportCode.charCodeAt(1) + airportCode.charCodeAt(2)
-    
-    for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
-      const dateStr = date.toISOString().split('T')[0]
-      const dateSeed = seed + date.getDate() + date.getMonth()
-      
-      const totalFlights = 15 + (dateSeed % 25) // 15-40 flights per day
-      const cancelledFlights = dateSeed % 3 // 0-2 cancelled
-      const averageDelay = (dateSeed % 30) // 0-30 minutes
-      const onTimePercentage = 70 + (dateSeed % 25) // 70-95%
-      
-      data.push({
-        date: dateStr,
-        totalFlights,
-        averageDelay,
-        cancelledFlights,
-        onTimePercentage
-      })
-    }
-    
-    return data
-  }
-
-  private generateDemoAirportStatistics(airportCode: string, period: string): AirportStatistics {
-    // Generate seeded random data based on airport code
-    const seed = airportCode.charCodeAt(0) + airportCode.charCodeAt(1) + airportCode.charCodeAt(2)
-    
-    const totalFlights = 200 + (seed % 300) // 200-500 flights
-    const onTimeFlights = Math.round(totalFlights * (0.6 + (seed % 35) / 100)) // 60-95% on time
-    const delayedFlights = Math.round(totalFlights * (0.05 + (seed % 25) / 100)) // 5-30% delayed
-    const cancelledFlights = Math.round(totalFlights * (0.01 + (seed % 5) / 100)) // 1-6% cancelled
-    const averageDelay = 10 + (seed % 35) // 10-45 minutes average delay
-    const onTimePercentage = Math.round((onTimeFlights / totalFlights) * 100)
-    const delayIndex = Math.min(100, Math.round((delayedFlights / totalFlights) * 100 + (averageDelay / 60) * 10))
-    
-    // Generate peak delay hours
-    const peakDelayHours = [
-      6 + (seed % 3), // Morning rush: 6-8
-      12 + (seed % 2), // Lunch: 12-13
-      17 + (seed % 3), // Evening rush: 17-19
-      20 + (seed % 2), // Night: 20-21
-      22 + (seed % 2)  // Late night: 22-23
-    ].slice(0, 3) // Take top 3 hours
-    
-    return {
-      airportCode,
-      period,
-      totalFlights,
-      onTimeFlights,
-      delayedFlights,
-      cancelledFlights,
-      averageDelay,
-      onTimePercentage,
-      delayIndex,
-      peakDelayHours,
-      mostFrequentRoutes: this.generateDemoRoutes(airportCode)
-    }
-  }
 
 
 }

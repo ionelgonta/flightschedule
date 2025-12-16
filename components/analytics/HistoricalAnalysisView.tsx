@@ -44,7 +44,7 @@ export function HistoricalAnalysisView({ airport, initialFilters }: Props) {
       }
       
       const data = await response.json()
-      setHistoricalData(data.historical || [])
+      setHistoricalData(data.data || [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Eroare necunoscută')
     } finally {

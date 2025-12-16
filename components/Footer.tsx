@@ -48,6 +48,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/program-saptamanal" className="text-gray-400 hover:text-white transition-colors">
+                  📅 Program Săptămânal
+                </Link>
+              </li>
+              <li>
                 <Link href="/parcari-otopeni" className="text-gray-400 hover:text-white transition-colors">
                   🅿️ Parcări Otopeni
                 </Link>

@@ -118,6 +118,12 @@ export function Navbar() {
             </div>
             
             <Link 
+              href="/program-saptamanal" 
+              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            >
+              📅 Program Săptămânal
+            </Link>
+            <Link 
               href="/cautare" 
               className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             >
@@ -251,6 +257,13 @@ export function Navbar() {
                 </Link>
               </div>
               
+              <Link 
+                href="/program-saptamanal" 
+                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                📅 Program Săptămânal
+              </Link>
               <Link 
                 href="/cautare" 
                 className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
