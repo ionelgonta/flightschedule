@@ -2,28 +2,35 @@ import * as React from "react"
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
-  size?: 'default' | 'sm' | 'lg' | 'icon'
+  variant?: 'filled' | 'outlined' | 'text' | 'elevated' | 'tonal'
+  size?: 'default' | 'large' | 'small'
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'default', ...props }, ref) => {
-    const baseClasses = "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+  ({ className, variant = 'filled', size = 'default', ...props }, ref) => {
+    const baseClasses = "state-layer inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-38 relative overflow-hidden"
     
     const variants = {
-      default: "bg-primary text-primary-foreground hover:bg-primary/90",
-      destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-      outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-      ghost: "hover:bg-accent hover:text-accent-foreground",
-      link: "text-primary underline-offset-4 hover:underline",
+      // Filled Button (Primary Action)
+      filled: "bg-primary-40 text-on-primary shadow-elevation-0 hover:shadow-elevation-1 active:shadow-elevation-0",
+      
+      // Outlined Button (Secondary Action)
+      outlined: "border border-outline text-primary-40 bg-transparent hover:bg-primary-40/8 active:bg-primary-40/12",
+      
+      // Text Button (Low Emphasis)
+      text: "text-primary-40 bg-transparent hover:bg-primary-40/8 active:bg-primary-40/12",
+      
+      // Elevated Button (Alternative to Filled)
+      elevated: "bg-surface-container-low text-primary-40 shadow-elevation-1 hover:shadow-elevation-2 active:shadow-elevation-1",
+      
+      // Tonal Button (Medium Emphasis)
+      tonal: "bg-secondary-container text-on-secondary-container shadow-elevation-0 hover:shadow-elevation-1 active:shadow-elevation-0",
     }
     
     const sizes = {
-      default: "h-10 px-4 py-2",
-      sm: "h-9 rounded-md px-3",
-      lg: "h-11 rounded-md px-8",
-      icon: "h-10 w-10",
+      small: "h-10 px-3 rounded-lg label-medium min-w-16",
+      default: "h-12 px-6 rounded-xl label-large min-w-16",
+      large: "h-14 px-8 rounded-xl label-large min-w-16",
     }
     
     return (

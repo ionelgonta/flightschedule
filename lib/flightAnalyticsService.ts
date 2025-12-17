@@ -121,8 +121,7 @@ export class FlightAnalyticsService {
   private aeroDataBoxService: any
 
   constructor() {
-    // Inițializează cache manager-ul
-    cacheManager.initialize().catch(console.error)
+    // NU inițializa cache manager-ul aici - se inițializează automat la primul acces
     // Inițializează flight API service pentru fallback
     this.flightApiService = new FlightApiService({
       provider: 'aerodatabox',
@@ -307,38 +306,19 @@ export class FlightAnalyticsService {
     toDate: string
   ): Promise<FlightSchedule[]> {
     try {
-      // For current/recent dates, use real-time API
-      const today = new Date()
-      const requestDate = new Date(fromDate)
+      // NU MAI FACE REQUESTURI API DIRECTE - folosește doar cache-ul
+      console.log(`Getting cached flight schedules for ${airportCode} ${type}`)
       
-      if (Math.abs(today.getTime() - requestDate.getTime()) <= 7 * 24 * 60 * 60 * 1000) {
-        // Within 7 days - use real-time API
-        try {
-          const response = type === 'arrivals' 
-            ? await this.flightApiService.getArrivals(airportCode)
-            : await this.flightApiService.getDepartures(airportCode)
-          
-          if (response.success && response.data.length > 0) {
-            return response.data.map(flight => this.convertToFlightSchedule(flight))
-          }
-        } catch (apiError) {
-          console.warn(`Real-time API failed for ${airportCode} ${type}:`, apiError)
-          // Continue to try historical data or return empty
-        }
+      const cacheKey = `${airportCode}_${type}`
+      const cachedFlights = cacheManager.getCachedData<RawFlightData[]>(cacheKey) || []
+      
+      if (cachedFlights.length > 0) {
+        console.log(`Found ${cachedFlights.length} cached flights for ${airportCode} ${type}`)
+        return cachedFlights.map(flight => this.convertToFlightSchedule(flight))
       }
       
-      // For historical dates or if real-time failed, try to get historical data from AeroDataBox
-      try {
-        const flights = await this.aeroDataBoxService.getFlights(airportCode, type, fromDate, toDate)
-        if (flights.length > 0) {
-          return flights.map((flight: any) => this.convertAeroDataBoxToSchedule(flight, type, airportCode))
-        }
-      } catch (historicalError) {
-        console.warn(`Historical data failed for ${airportCode} ${type}:`, historicalError)
-      }
-      
-      // If both real-time and historical fail, return empty array
-      console.warn(`No flight data available for ${airportCode} ${type} from ${fromDate} to ${toDate}`)
+      // Nu există date în cache
+      console.warn(`No cached flight data available for ${airportCode} ${type}`)
       return []
       
     } catch (error) {
@@ -352,14 +332,16 @@ export class FlightAnalyticsService {
     period: string
   ): Promise<AirportStatistics> {
     try {
-      // Get live flight data for analysis
-      const arrivalsResponse = await this.flightApiService.getArrivals(airportCode)
-      const departuresResponse = await this.flightApiService.getDepartures(airportCode)
+      // NU MAI FACE REQUESTURI API DIRECTE - folosește doar cache-ul
+      console.log(`Getting cached flight data for statistics: ${airportCode}`)
       
-      const allFlights = [
-        ...(arrivalsResponse.success ? arrivalsResponse.data : []),
-        ...(departuresResponse.success ? departuresResponse.data : [])
-      ]
+      const arrivalsKey = `${airportCode}_arrivals`
+      const departuresKey = `${airportCode}_departures`
+      
+      const cachedArrivals = cacheManager.getCachedData<RawFlightData[]>(arrivalsKey) || []
+      const cachedDepartures = cacheManager.getCachedData<RawFlightData[]>(departuresKey) || []
+      
+      const allFlights = [...cachedArrivals, ...cachedDepartures]
       
       if (allFlights.length === 0) {
         console.warn(`No live flight data available for ${airportCode}`)
@@ -428,76 +410,53 @@ export class FlightAnalyticsService {
     toDate: string
   ): Promise<HistoricalData[]> {
     try {
-      const data: HistoricalData[] = []
-      const start = new Date(fromDate)
-      const end = new Date(toDate)
+      // NU MAI FACE REQUESTURI API DIRECTE - folosește doar cache-ul
+      console.log(`Getting cached historical data for ${airportCode} from ${fromDate} to ${toDate}`)
       
-      // For each day in the range, try to get historical data
-      for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
-        const dateStr = date.toISOString().split('T')[0]
-        
-        try {
-          // Try to get historical flights for this specific date
-          const flights = await this.aeroDataBoxService.getFlights(
-            airportCode, 
-            'arrivals', 
-            dateStr, 
-            dateStr
-          )
-          
-          const departureFlights = await this.aeroDataBoxService.getFlights(
-            airportCode, 
-            'departures', 
-            dateStr, 
-            dateStr
-          )
-          
-          const allFlights = [...flights, ...departureFlights]
-          
-          if (allFlights.length > 0) {
-            const totalFlights = allFlights.length
-            const cancelledFlights = allFlights.filter((f: any) => 
-              f.status?.text?.toLowerCase().includes('cancelled')
-            ).length
-            
-            const onTimeFlights = allFlights.filter((f: any) => {
-              const status = f.status?.text?.toLowerCase() || ''
-              return !status.includes('delayed') && !status.includes('cancelled')
-            }).length
-            
-            // Calculate average delay
-            const delayedFlights = allFlights.filter((f: any) => {
-              const scheduled = f.departure?.scheduledTime || f.arrival?.scheduledTime
-              const actual = f.departure?.actualTime || f.arrival?.actualTime
-              return scheduled && actual
-            })
-            
-            let averageDelay = 0
-            if (delayedFlights.length > 0) {
-              const totalDelay = delayedFlights.reduce((sum, f) => {
-                const scheduled = new Date(f.departure?.scheduledTime?.utc || f.arrival?.scheduledTime?.utc || '')
-                const actual = new Date(f.departure?.actualTime?.utc || f.arrival?.actualTime?.utc || '')
-                const delay = Math.max(0, (actual.getTime() - scheduled.getTime()) / (1000 * 60))
-                return sum + delay
-              }, 0)
-              averageDelay = Math.round(totalDelay / delayedFlights.length)
-            }
-            
-            data.push({
-              date: dateStr,
-              totalFlights,
-              averageDelay,
-              cancelledFlights,
-              onTimePercentage: Math.round((onTimeFlights / totalFlights) * 100)
-            })
-          }
-        } catch (dayError) {
-          console.warn(`No data available for ${airportCode} on ${dateStr}:`, dayError)
-          // Skip this day if no data available
-        }
+      // Pentru date istorice, returnează array gol dacă nu există în cache
+      // Cache-ul se populează automat prin cron jobs
+      const arrivalsKey = `${airportCode}_arrivals`
+      const departuresKey = `${airportCode}_departures`
+      
+      const cachedArrivals = cacheManager.getCachedData<RawFlightData[]>(arrivalsKey) || []
+      const cachedDepartures = cacheManager.getCachedData<RawFlightData[]>(departuresKey) || []
+      
+      if (cachedArrivals.length === 0 && cachedDepartures.length === 0) {
+        console.warn(`No cached historical data available for ${airportCode}`)
+        return []
       }
       
-      return data
+      // Simulează date istorice pe baza datelor curente din cache
+      // (în realitate, ar trebui să avem date istorice separate)
+      const allFlights = [...cachedArrivals, ...cachedDepartures]
+      const totalFlights = allFlights.length
+      
+      if (totalFlights === 0) return []
+      
+      // Creează o singură intrare pentru perioada solicitată
+      const cancelledFlights = allFlights.filter(f => 
+        f.status?.toLowerCase().includes('cancel')
+      ).length
+      
+      const onTimeFlights = allFlights.filter(f => {
+        const status = f.status?.toLowerCase() || ''
+        const delay = f.delay || 0
+        return (status === 'on-time' || status === 'scheduled' || status === 'landed' || 
+                status === 'departed') && delay <= 15
+      }).length
+      
+      const flightsWithDelay = allFlights.filter(f => f.delay && f.delay > 0)
+      const averageDelay = flightsWithDelay.length > 0 
+        ? Math.round(flightsWithDelay.reduce((sum, f) => sum + (f.delay || 0), 0) / flightsWithDelay.length)
+        : 0
+      
+      return [{
+        date: fromDate,
+        totalFlights,
+        averageDelay,
+        cancelledFlights,
+        onTimePercentage: Math.round((onTimeFlights / totalFlights) * 100)
+      }]
       
     } catch (error) {
       console.error(`Error fetching live historical data for ${airportCode}:`, error)
@@ -507,14 +466,16 @@ export class FlightAnalyticsService {
 
   private async analyzeLiveRoutes(airportCode: string): Promise<RouteAnalysis[]> {
     try {
-      // Get live flight data for route analysis
-      const arrivalsResponse = await this.flightApiService.getArrivals(airportCode)
-      const departuresResponse = await this.flightApiService.getDepartures(airportCode)
+      // NU MAI FACE REQUESTURI API DIRECTE - folosește doar cache-ul
+      console.log(`Getting cached flight data for route analysis: ${airportCode}`)
       
-      const allFlights = [
-        ...(arrivalsResponse.success ? arrivalsResponse.data : []),
-        ...(departuresResponse.success ? departuresResponse.data : [])
-      ]
+      const arrivalsKey = `${airportCode}_arrivals`
+      const departuresKey = `${airportCode}_departures`
+      
+      const cachedArrivals = cacheManager.getCachedData<RawFlightData[]>(arrivalsKey) || []
+      const cachedDepartures = cacheManager.getCachedData<RawFlightData[]>(departuresKey) || []
+      
+      const allFlights = [...cachedArrivals, ...cachedDepartures]
       
       if (allFlights.length === 0) {
         console.warn(`No live flight data available for route analysis of ${airportCode}`)
@@ -628,50 +589,18 @@ export class FlightAnalyticsService {
 
   private async fetchLiveAircraftInfo(icao24: string): Promise<AircraftInfo | null> {
     try {
-      // Try to get aircraft info from AeroDataBox
-      const aircraft = await this.aeroDataBoxService.getAircraftInfo(icao24)
+      // NU MAI FACE REQUESTURI API DIRECTE - folosește doar cache-ul
+      console.log(`Getting cached aircraft info for ${icao24}`)
       
-      if (aircraft) {
-        // Get flight history for statistics
-        const flights = await this.aeroDataBoxService.getAircraftFlights(icao24)
-        
-        const totalFlights = flights.length
-        const delayedFlights = flights.filter((f: any) => {
-          const departure = f.departure
-          const arrival = f.arrival
-          return (departure?.actualTime && departure?.scheduledTime) ||
-                 (arrival?.actualTime && arrival?.scheduledTime)
-        })
-        
-        let averageDelay = 0
-        if (delayedFlights.length > 0) {
-          const totalDelay = delayedFlights.reduce((sum: number, f: any) => {
-            let delay = 0
-            
-            if (f.departure?.actualTime && f.departure?.scheduledTime) {
-              const scheduled = new Date(f.departure.scheduledTime.utc)
-              const actual = new Date(f.departure.actualTime.utc)
-              delay = Math.max(0, (actual.getTime() - scheduled.getTime()) / (1000 * 60))
-            }
-            
-            return sum + delay
-          }, 0)
-          
-          averageDelay = Math.round(totalDelay / delayedFlights.length)
-        }
-        
-        return {
-          icao24,
-          registration: aircraft.reg || icao24,
-          model: aircraft.model || 'Unknown',
-          manufacturer: this.extractManufacturer(aircraft.model || ''),
-          operator: 'Unknown', // AeroDataBox doesn't provide operator in aircraft endpoint
-          firstFlightDate: undefined, // Not available in AeroDataBox
-          totalFlights,
-          averageDelay
-        }
+      const cacheKey = `aircraft_${icao24}`
+      const cachedAircraft = cacheManager.getCachedData<AircraftInfo>(cacheKey)
+      
+      if (cachedAircraft) {
+        console.log(`Found cached aircraft info for ${icao24}`)
+        return cachedAircraft
       }
       
+      console.warn(`No cached aircraft info available for ${icao24}`)
       return null
       
     } catch (error) {
@@ -682,15 +611,11 @@ export class FlightAnalyticsService {
 
   private async searchLiveAircraft(registration: string): Promise<AircraftInfo[]> {
     try {
-      // Search for aircraft by registration
-      const aircraft = await this.aeroDataBoxService.getAircraftInfo(registration)
+      // NU MAI FACE REQUESTURI API DIRECTE - caută în cache
+      console.log(`Searching cached aircraft by registration: ${registration}`)
       
-      if (aircraft) {
-        const aircraftInfo = await this.fetchLiveAircraftInfo(registration)
-        return aircraftInfo ? [aircraftInfo] : []
-      }
-      
-      return []
+      const aircraftInfo = await this.fetchLiveAircraftInfo(registration)
+      return aircraftInfo ? [aircraftInfo] : []
       
     } catch (error) {
       console.error(`Error searching live aircraft by registration ${registration}:`, error)

@@ -2,22 +2,32 @@ import * as React from "react"
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline'
+  variant?: 'success' | 'warning' | 'error' | 'info' | 'neutral'
 }
 
 const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
-  ({ className, variant = 'default', ...props }, ref) => {
+  ({ className, variant = 'neutral', ...props }, ref) => {
     const variants = {
-      default: "bg-primary text-primary-foreground hover:bg-primary/80",
-      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-      destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/80",
-      outline: "text-foreground border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+      // Success (On Time)
+      success: "bg-primary-container text-on-primary-container",
+      
+      // Warning (Delayed)
+      warning: "bg-tertiary-container text-on-tertiary-container",
+      
+      // Error (Cancelled)
+      error: "bg-error-container text-on-error-container",
+      
+      // Info (Boarding)
+      info: "bg-secondary-container text-on-secondary-container",
+      
+      // Neutral (Unknown/Default)
+      neutral: "bg-surface-container-high text-on-surface-variant",
     }
 
     return (
       <div
         ref={ref}
-        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${variants[variant]} ${className || ''}`}
+        className={`inline-flex items-center rounded-lg px-3 py-1 label-small font-medium transition-colors duration-200 ${variants[variant]} ${className || ''}`}
         {...props}
       />
     )
@@ -25,4 +35,45 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
 )
 Badge.displayName = "Badge"
 
-export { Badge }
+// Flight Status Badge with semantic colors
+export interface FlightStatusBadgeProps extends Omit<BadgeProps, 'variant'> {
+  status: 'on-time' | 'delayed' | 'cancelled' | 'boarding' | 'departed' | 'arrived' | 'unknown'
+}
+
+const FlightStatusBadge = React.forwardRef<HTMLDivElement, FlightStatusBadgeProps>(
+  ({ status, className, children, ...props }, ref) => {
+    const statusVariants = {
+      'on-time': 'success',
+      'delayed': 'warning',
+      'cancelled': 'error',
+      'boarding': 'info',
+      'departed': 'success',
+      'arrived': 'success',
+      'unknown': 'neutral',
+    } as const
+
+    const statusLabels = {
+      'on-time': 'La timp',
+      'delayed': 'Întârziat',
+      'cancelled': 'Anulat',
+      'boarding': 'Îmbarcare',
+      'departed': 'Plecat',
+      'arrived': 'Sosit',
+      'unknown': 'Necunoscut',
+    }
+
+    return (
+      <Badge
+        ref={ref}
+        variant={statusVariants[status]}
+        className={className}
+        {...props}
+      >
+        {children || statusLabels[status]}
+      </Badge>
+    )
+  }
+)
+FlightStatusBadge.displayName = "FlightStatusBadge"
+
+export { Badge, FlightStatusBadge }

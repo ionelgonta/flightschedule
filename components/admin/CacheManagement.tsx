@@ -450,7 +450,7 @@ export default function CacheManagement() {
                 <Clock className="h-4 w-4 inline mr-1" />
                 Ultimul reset: {formatDate(stats.requestCounter.lastReset)}
               </div>
-              <Button variant="outline" onClick={resetCounter}>
+              <Button variant="outlined" onClick={resetCounter}>
                 Reset Contor
               </Button>
             </div>
@@ -503,7 +503,7 @@ export default function CacheManagement() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
-              variant="outline"
+              variant="outlined"
               onClick={() => manualRefresh('flightData')}
               disabled={refreshing === 'flightData'}
               className="h-20 flex flex-col items-center justify-center"
@@ -518,7 +518,7 @@ export default function CacheManagement() {
             </Button>
 
             <Button
-              variant="outline"
+              variant="outlined"
               onClick={() => manualRefresh('analytics')}
               disabled={refreshing === 'analytics'}
               className="h-20 flex flex-col items-center justify-center"
@@ -533,7 +533,7 @@ export default function CacheManagement() {
             </Button>
 
             <Button
-              variant="outline"
+              variant="outlined"
               onClick={() => manualRefresh('aircraft')}
               disabled={refreshing === 'aircraft'}
               className="h-20 flex flex-col items-center justify-center"
@@ -555,7 +555,7 @@ export default function CacheManagement() {
               <AlertCircle className="h-4 w-4" />
               Refresh-ul manual va face request-uri API imediate
             </div>
-            <Button variant="outline" onClick={cleanExpired}>
+            <Button variant="outlined" onClick={cleanExpired}>
               Curăță Cache Expirat
             </Button>
           </div>
@@ -564,7 +564,7 @@ export default function CacheManagement() {
 
       {/* Refresh Button */}
       <div className="flex justify-center">
-        <Button onClick={loadStats} variant="outline">
+        <Button onClick={loadStats} variant="outlined">
           <RefreshCw className="h-4 w-4 mr-2" />
           Reîncarcă Statistici
         </Button>

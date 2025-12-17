@@ -28,25 +28,43 @@ interface AirportStatistics {
 const statisticsCache = new Map<string, { data: AirportStatistics[], timestamp: number }>()
 
 async function calculateAirportStatistics(airport: any): Promise<AirportStatistics> {
-  const aeroDataBox = new AeroDataBoxService(API_CONFIGS.aerodatabox)
-  
   try {
-    // Obține zboruri pentru ultimele 7 zile pentru a calcula statistici
-    const endDate = new Date()
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - 7)
+    // NU MAI FACE REQUESTURI API DIRECTE - folosește doar cache-ul centralizat
+    console.log(`Getting cached statistics for ${airport.code} from cache manager`)
     
-    const [arrivals, departures] = await Promise.allSettled([
-      aeroDataBox.getFlights(airport.code, 'arrivals', startDate.toISOString(), endDate.toISOString()),
-      aeroDataBox.getFlights(airport.code, 'departures', startDate.toISOString(), endDate.toISOString())
-    ])
+    // Încearcă să obții statistici din cache-ul centralizat
+    const cachedStats = flightAnalyticsService.getCachedData<any>(`analytics_${airport.code}`)
     
-    const allFlights = [
-      ...(arrivals.status === 'fulfilled' ? arrivals.value : []),
-      ...(departures.status === 'fulfilled' ? departures.value : [])
-    ]
+    if (cachedStats) {
+      console.log(`Using cached statistics for ${airport.code}`)
+      return {
+        code: airport.code,
+        name: airport.name,
+        city: airport.city,
+        country: airport.country,
+        statistics: {
+          totalFlights: cachedStats.totalFlights || 0,
+          onTimePercentage: cachedStats.onTimePercentage || 0,
+          averageDelay: cachedStats.averageDelay || 0,
+          dailyFlights: Math.round((cachedStats.totalFlights || 0) / 7),
+          cancelledFlights: cachedStats.cancelledFlights || 0,
+          delayedFlights: cachedStats.delayedFlights || 0,
+          lastUpdated: cachedStats.lastUpdated || new Date().toISOString()
+        }
+      }
+    }
+    
+    // Dacă nu există în cache, încearcă să obții date din flight repository (cache flight data)
+    const arrivalsKey = `${airport.code}_arrivals`
+    const departuresKey = `${airport.code}_departures`
+    
+    const cachedArrivals = flightAnalyticsService.getCachedData<any[]>(arrivalsKey) || []
+    const cachedDepartures = flightAnalyticsService.getCachedData<any[]>(departuresKey) || []
+    
+    const allFlights = [...cachedArrivals, ...cachedDepartures]
     
     if (allFlights.length === 0) {
+      console.log(`No cached flight data for ${airport.code}, returning placeholder`)
       // Returnează null pentru aeroporturi fără date suficiente
       return {
         code: airport.code,
@@ -58,57 +76,37 @@ async function calculateAirportStatistics(airport: any): Promise<AirportStatisti
       }
     }
     
-    // Calculează statistici reale
+    console.log(`Calculating statistics from ${allFlights.length} cached flights for ${airport.code}`)
+    
+    // Calculează statistici din datele cache-uite (format RawFlightData)
     const totalFlights = allFlights.length
+    
+    // Adaptează pentru formatul RawFlightData
     const onTimeFlights = allFlights.filter(flight => {
-      const scheduled = new Date(flight.departure?.scheduledTime?.utc || flight.arrival?.scheduledTime?.utc)
-      const actual = new Date(
-        flight.departure?.actualTime?.utc || 
-        flight.arrival?.actualTime?.utc || 
-        flight.departure?.estimatedTime?.utc || 
-        flight.arrival?.estimatedTime?.utc ||
-        flight.departure?.scheduledTime?.utc ||
-        flight.arrival?.scheduledTime?.utc
-      )
-      const delay = (actual.getTime() - scheduled.getTime()) / (1000 * 60) // în minute
-      return delay <= 15 // Considerat la timp dacă întârzierea <= 15 min
+      const status = flight.status?.toLowerCase() || ''
+      const delay = flight.delay || 0
+      return (status === 'on-time' || status === 'scheduled' || status === 'landed' || 
+              status === 'departed' || status === 'active') && delay <= 15
     }).length
     
     const delayedFlights = allFlights.filter(flight => {
-      const scheduled = new Date(flight.departure?.scheduledTime?.utc || flight.arrival?.scheduledTime?.utc)
-      const actual = new Date(
-        flight.departure?.actualTime?.utc || 
-        flight.arrival?.actualTime?.utc || 
-        flight.departure?.estimatedTime?.utc || 
-        flight.arrival?.estimatedTime?.utc ||
-        flight.departure?.scheduledTime?.utc ||
-        flight.arrival?.scheduledTime?.utc
-      )
-      const delay = (actual.getTime() - scheduled.getTime()) / (1000 * 60)
-      return delay > 15
+      const status = flight.status?.toLowerCase() || ''
+      const delay = flight.delay || 0
+      return status === 'delayed' || delay > 15
     }).length
     
-    const cancelledFlights = allFlights.filter(flight => 
-      flight.status?.text?.toLowerCase().includes('cancel') || 
-      flight.status?.type?.toLowerCase().includes('cancel')
-    ).length
+    const cancelledFlights = allFlights.filter(flight => {
+      const status = flight.status?.toLowerCase() || ''
+      return status.includes('cancel')
+    }).length
     
-    const totalDelayMinutes = allFlights.reduce((sum, flight) => {
-      const scheduled = new Date(flight.departure?.scheduledTime?.utc || flight.arrival?.scheduledTime?.utc)
-      const actual = new Date(
-        flight.departure?.actualTime?.utc || 
-        flight.arrival?.actualTime?.utc || 
-        flight.departure?.estimatedTime?.utc || 
-        flight.arrival?.estimatedTime?.utc ||
-        flight.departure?.scheduledTime?.utc ||
-        flight.arrival?.scheduledTime?.utc
-      )
-      const delay = Math.max(0, (actual.getTime() - scheduled.getTime()) / (1000 * 60))
-      return sum + delay
-    }, 0)
+    // Calculează întârzierea medie din câmpul delay
+    const flightsWithDelay = allFlights.filter(flight => flight.delay && flight.delay > 0)
+    const averageDelay = flightsWithDelay.length > 0 
+      ? Math.round(flightsWithDelay.reduce((sum, flight) => sum + (flight.delay || 0), 0) / flightsWithDelay.length)
+      : 0
     
     const onTimePercentage = totalFlights > 0 ? Math.round((onTimeFlights / totalFlights) * 100) : 0
-    const averageDelay = totalFlights > 0 ? Math.round(totalDelayMinutes / totalFlights) : 0
     const dailyFlights = Math.round(totalFlights / 7) // Media pe 7 zile
     
     return {

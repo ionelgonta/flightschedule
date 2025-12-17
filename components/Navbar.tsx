@@ -9,7 +9,17 @@ export function Navbar() {
   const { theme, setTheme, mounted } = useTheme()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const analyticsRef = useRef<HTMLDivElement>(null)
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 0)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Close analytics dropdown when clicking outside
   useEffect(() => {
@@ -30,30 +40,34 @@ export function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
+      scrolled 
+        ? 'bg-surface/95 backdrop-blur-md shadow-elevation-2' 
+        : 'bg-surface/80 backdrop-blur-sm'
+    }`}>
+      <div className="max-w-container mx-auto container-padding">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="p-2 bg-primary-600 rounded-lg group-hover:bg-primary-700 transition-colors">
-              <Plane className="h-6 w-6 text-white" />
+          <Link href="/" className="flex items-center space-x-3 state-layer rounded-lg p-2 -m-2">
+            <div className="p-2 bg-primary-40 rounded-lg transition-colors duration-200">
+              <Plane className="h-6 w-6 text-on-primary" />
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
+            <span className="title-large text-on-surface font-medium">
               Program Zboruri
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-2">
             <Link 
               href="/" 
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              className="state-layer px-4 py-2 rounded-lg label-large text-on-surface-variant hover:text-primary-40 transition-colors duration-200"
             >
               Acasă
             </Link>
             <Link 
               href="/aeroporturi" 
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              className="state-layer px-4 py-2 rounded-lg label-large text-on-surface-variant hover:text-primary-40 transition-colors duration-200"
             >
               Aeroporturi
             </Link>
@@ -62,56 +76,56 @@ export function Navbar() {
             <div className="relative" ref={analyticsRef}>
               <button
                 onClick={() => setIsAnalyticsOpen(!isAnalyticsOpen)}
-                className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                className="state-layer flex items-center space-x-1 px-4 py-2 rounded-lg label-large text-on-surface-variant hover:text-primary-40 transition-all duration-200"
               >
                 <BarChart3 className="h-4 w-4" />
                 <span>Analize</span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${isAnalyticsOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isAnalyticsOpen ? 'rotate-180' : ''}`} />
               </button>
               
               {isAnalyticsOpen && (
-                <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+                <div className="absolute top-full left-0 mt-2 w-72 bg-surface-container rounded-xl shadow-elevation-3 border border-outline-variant py-2 z-50 animate-fade-in">
                   <Link
                     href="/statistici-aeroporturi"
-                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    className="state-layer block px-4 py-3 text-on-surface hover:bg-surface-container-high transition-colors duration-200"
                     onClick={() => setIsAnalyticsOpen(false)}
                   >
-                    <div className="font-medium">Statistici Aeroporturi</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Performanță și punctualitate</div>
+                    <div className="label-large font-medium">Statistici Aeroporturi</div>
+                    <div className="body-small text-on-surface-variant">Performanță și punctualitate</div>
                   </Link>
                   <Link
                     href="/program-zboruri"
-                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    className="state-layer block px-4 py-3 text-on-surface hover:bg-surface-container-high transition-colors duration-200"
                     onClick={() => setIsAnalyticsOpen(false)}
                   >
-                    <div className="font-medium">Program Zboruri</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Calendar interactiv</div>
+                    <div className="label-large font-medium">Program Zboruri</div>
+                    <div className="body-small text-on-surface-variant">Calendar interactiv</div>
                   </Link>
                   <Link
                     href="/analize-istorice"
-                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    className="state-layer block px-4 py-3 text-on-surface hover:bg-surface-container-high transition-colors duration-200"
                     onClick={() => setIsAnalyticsOpen(false)}
                   >
-                    <div className="font-medium">Analize Istorice</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Tendințe și evoluție</div>
+                    <div className="label-large font-medium">Analize Istorice</div>
+                    <div className="body-small text-on-surface-variant">Tendințe și evoluție</div>
                   </Link>
                   <Link
                     href="/analize-rute"
-                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    className="state-layer block px-4 py-3 text-on-surface hover:bg-surface-container-high transition-colors duration-200"
                     onClick={() => setIsAnalyticsOpen(false)}
                   >
-                    <div className="font-medium">Analize Rute</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Rute și companii aeriene</div>
+                    <div className="label-large font-medium">Analize Rute</div>
+                    <div className="body-small text-on-surface-variant">Rute și companii aeriene</div>
                   </Link>
 
-                  <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                  <div className="border-t border-outline-variant my-2"></div>
                   <Link
                     href="/aeronave"
-                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    className="state-layer block px-4 py-3 text-on-surface hover:bg-surface-container-high transition-colors duration-200"
                     onClick={() => setIsAnalyticsOpen(false)}
                   >
-                    <div className="font-medium">Catalog Aeronave</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Căutare ICAO24 și înmatriculare</div>
+                    <div className="label-large font-medium">Catalog Aeronave</div>
+                    <div className="body-small text-on-surface-variant">Căutare ICAO24 și înmatriculare</div>
                   </Link>
                 </div>
               )}
@@ -119,71 +133,73 @@ export function Navbar() {
             
             <Link 
               href="/planificator-zboruri" 
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              className="state-layer px-4 py-2 rounded-lg label-large text-on-surface-variant hover:text-primary-40 transition-colors duration-200"
             >
-              ✈️ Planificator Zboruri
+              Planificator
             </Link>
             <Link 
               href="/program-saptamanal" 
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              className="state-layer px-4 py-2 rounded-lg label-large text-on-surface-variant hover:text-primary-40 transition-colors duration-200"
             >
-              📅 Program Săptămânal
+              Program
             </Link>
             <Link 
               href="/parcari-otopeni" 
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              className="state-layer px-4 py-2 rounded-lg label-large text-on-surface-variant hover:text-primary-40 transition-colors duration-200"
             >
-              🅿️ Parcări Otopeni
+              Parcări
             </Link>
             <Link 
               href="/despre" 
-              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              className="state-layer px-4 py-2 rounded-lg label-large text-on-surface-variant hover:text-primary-40 transition-colors duration-200"
             >
               Despre
             </Link>
+            
+            {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              aria-label="Toggle theme"
+              className="state-layer p-3 rounded-full bg-surface-container-high hover:bg-surface-container-highest transition-all duration-200"
+              aria-label="Schimbă tema"
             >
               {mounted ? (
                 theme === 'dark' ? (
-                  <Sun className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  <Sun className="h-5 w-5 text-on-surface-variant" />
                 ) : (
-                  <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  <Moon className="h-5 w-5 text-on-surface-variant" />
                 )
               ) : (
-                <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                <Moon className="h-5 w-5 text-on-surface-variant" />
               )}
             </button>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile Controls */}
           <div className="md:hidden flex items-center space-x-2">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              aria-label="Toggle theme"
+              className="state-layer p-3 rounded-full bg-surface-container-high hover:bg-surface-container-highest transition-all duration-200"
+              aria-label="Schimbă tema"
             >
               {mounted ? (
                 theme === 'dark' ? (
-                  <Sun className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  <Sun className="h-5 w-5 text-on-surface-variant" />
                 ) : (
-                  <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  <Moon className="h-5 w-5 text-on-surface-variant" />
                 )
               ) : (
-                <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                <Moon className="h-5 w-5 text-on-surface-variant" />
               )}
             </button>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              aria-label="Toggle menu"
+              className="state-layer p-3 rounded-full bg-surface-container-high hover:bg-surface-container-highest transition-all duration-200"
+              aria-label="Deschide meniul"
             >
               {isMenuOpen ? (
-                <X className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                <X className="h-5 w-5 text-on-surface-variant" />
               ) : (
-                <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                <Menu className="h-5 w-5 text-on-surface-variant" />
               )}
             </button>
           </div>
@@ -191,90 +207,92 @@ export function Navbar() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col space-y-4">
+          <div className="md:hidden py-6 border-t border-outline-variant animate-slide-down">
+            <div className="flex flex-col space-y-1">
               <Link 
                 href="/" 
-                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                className="state-layer px-4 py-3 rounded-lg label-large text-on-surface hover:bg-surface-container-high transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Acasă
               </Link>
               <Link 
                 href="/aeroporturi" 
-                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                className="state-layer px-4 py-3 rounded-lg label-large text-on-surface hover:bg-surface-container-high transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Aeroporturi
               </Link>
               
               {/* Mobile Analytics Section */}
-              <div className="border-l-2 border-primary-200 dark:border-primary-700 pl-4 space-y-2">
-                <div className="text-sm font-medium text-primary-600 dark:text-primary-400 flex items-center">
+              <div className="bg-surface-container-low rounded-lg p-4 my-2">
+                <div className="label-large font-medium text-primary-40 flex items-center mb-3">
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Analize
                 </div>
-                <Link 
-                  href="/statistici-aeroporturi" 
-                  className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Statistici Aeroporturi
-                </Link>
-                <Link 
-                  href="/program-zboruri" 
-                  className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Program Zboruri
-                </Link>
-                <Link 
-                  href="/analize-istorice" 
-                  className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Analize Istorice
-                </Link>
-                <Link 
-                  href="/analize-rute" 
-                  className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Analize Rute
-                </Link>
-                <Link 
-                  href="/aeronave" 
-                  className="block text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Catalog Aeronave
-                </Link>
+                <div className="space-y-1 ml-6">
+                  <Link 
+                    href="/statistici-aeroporturi" 
+                    className="state-layer block px-3 py-2 rounded-lg body-medium text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Statistici Aeroporturi
+                  </Link>
+                  <Link 
+                    href="/program-zboruri" 
+                    className="state-layer block px-3 py-2 rounded-lg body-medium text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Program Zboruri
+                  </Link>
+                  <Link 
+                    href="/analize-istorice" 
+                    className="state-layer block px-3 py-2 rounded-lg body-medium text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Analize Istorice
+                  </Link>
+                  <Link 
+                    href="/analize-rute" 
+                    className="state-layer block px-3 py-2 rounded-lg body-medium text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Analize Rute
+                  </Link>
+                  <Link 
+                    href="/aeronave" 
+                    className="state-layer block px-3 py-2 rounded-lg body-medium text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Catalog Aeronave
+                  </Link>
+                </div>
               </div>
               
               <Link 
                 href="/planificator-zboruri" 
-                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                className="state-layer px-4 py-3 rounded-lg label-large text-on-surface hover:bg-surface-container-high transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
-                ✈️ Planificator Zboruri
+                Planificator Zboruri
               </Link>
               <Link 
                 href="/program-saptamanal" 
-                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                className="state-layer px-4 py-3 rounded-lg label-large text-on-surface hover:bg-surface-container-high transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
-                📅 Program Săptămânal
+                Program Săptămânal
               </Link>
               <Link 
                 href="/parcari-otopeni" 
-                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                className="state-layer px-4 py-3 rounded-lg label-large text-on-surface hover:bg-surface-container-high transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
-                🅿️ Parcări Otopeni
+                Parcări Otopeni
               </Link>
               <Link 
                 href="/despre" 
-                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                className="state-layer px-4 py-3 rounded-lg label-large text-on-surface hover:bg-surface-container-high transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Despre

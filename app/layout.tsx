@@ -112,7 +112,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider>
           <FlightSchedulerProvider>
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+            <div className="min-h-screen bg-surface transition-colors duration-200">
               <Navbar />
               <main className="pt-16">
                 {children}

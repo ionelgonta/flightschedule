@@ -1,112 +1,89 @@
-# ✅ Flight Table Mobile - SUCCESS FINAL
+# Flight Table Mobile Layout - Final Success
 
-## 🎯 Problema Rezolvată: Carduri → Tabel Mobile
+## ✅ COMPLETED FIXES
 
-### Înainte:
-- **Format**: Carduri în grid (3 coloane pe desktop, 2 pe tablet, 1 pe mobile)
-- **Spațiu**: Mult spațiu ocupat, scroll vertical excesiv
-- **Usabilitate**: Greu de scanat rapid informațiile
+### 1. Table Structure Implementation
+- **FIXED**: Replaced card layout with proper HTML table structure
+- **RESULT**: Mobile-responsive table with proper columns for flight information
+- **COMPONENTS**: Updated `FlightList.tsx` with `FlightTableRow` component
 
-### Acum:
-- **Format**: Tabel compact optimizat pentru mobile
-- **Spațiu**: Eficient, mai multe zboruri vizibile simultan
-- **Usabilitate**: Scanare rapidă, sortare clickabilă
+### 2. Status Translation to Romanian
+- **FIXED**: All flight statuses now display in Romanian
+- **TRANSLATIONS**:
+  - `departed` → `Plecat`
+  - `landed` → `Aterizat` 
+  - `arrived` → `Sosit`
+  - `unknown` → `Necunoscut`
+  - `scheduled` → `Programat`
+  - `active` → `În Zbor`
+  - `cancelled` → `Anulat`
+  - `delayed` → `Întârziat`
+  - `diverted` → `Deviat`
+  - `boarding` → `Îmbarcare`
 
-## 📱 Layout Responsiv Implementat:
+### 3. City Name Duplication Fix
+- **FIXED**: Eliminated duplicate city names in destination display
+- **LOGIC**: Show city name on first line, airport name (if different) on second line
+- **FALLBACK**: Show airport code if airport name same as city name
 
-### Mobile (< 640px):
-```
-| Zbor | Destinație | Ora | Status |
-```
-- Compania afișată sub numărul zborului
-- Terminal ascuns (nu încape)
+### 4. Mobile Optimization
+- **RESPONSIVE DESIGN**: Table adapts to mobile screens
+- **HIDDEN COLUMNS**: Company column hidden on mobile, Terminal column hidden on small tablets
+- **COMPACT LAYOUT**: Optimized spacing and font sizes for mobile devices
 
-### Tablet (640px - 768px):
-```
-| Zbor | Companie | Destinație | Ora | Status |
-```
-- Terminal încă ascuns
+## 📱 MOBILE TABLE STRUCTURE
 
-### Desktop (> 768px):
 ```
 | Zbor | Companie | Destinație | Ora | Status | Terminal |
+|------|----------|------------|-----|--------|----------|
+| RO123| Tarom    | București  |15:30| Plecat | T1       |
+| Date |          | Airport    |Est  |        | Gate     |
 ```
-- Layout complet cu toate coloanele
 
-## 🔧 Modificări Tehnice:
+### Mobile View (< 640px):
+- Zbor: Flight number + date
+- Destinație: City name only
+- Ora: Scheduled + estimated time
+- Status: Romanian translation
+- Hidden: Company, Terminal columns
 
-### 1. FlightList.tsx - Restructurat Complet
-- **Înainte**: `<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`
-- **Acum**: `<table className="w-full">` cu structură responsivă
+### Tablet View (640px - 768px):
+- Shows Company column
+- Hides Terminal column
 
-### 2. FlightTableRow - Componentă Nouă
-- Înlocuiește `FlightCard` pentru afișarea în tabel
-- Padding responsiv: `px-2 sm:px-4 py-2 sm:py-3`
-- Coloane ascunse pe mobile: `hidden sm:table-cell`
+### Desktop View (> 768px):
+- Shows all columns
+- Full airport names displayed
 
-### 3. Sortare Integrată în Header
-- Butoane clickabile în header-ul tabelului
-- Iconuri SortAsc/SortDesc pentru feedback vizual
-- Sortare funcțională pentru toate coloanele
+## 🚀 DEPLOYMENT STATUS
 
-### 4. Statusuri Traduse Complet
-- Toate statusurile în română cu badge-uri colorate
-- `landed` → **Aterizat**
-- `unknown` → **Necunoscut**
-- `boarding` → **Îmbarcare**
-- `departed` → **Plecat**
+- ✅ Code committed to Git repository
+- ✅ Deployed to production server (anyway.ro)
+- ✅ PM2 processes restarted successfully
+- ✅ Build completed without errors
 
-### 5. Nume Aeroporturi Optimizate
-- **Linia 1**: Orașul (ex: "Cluj-Napoca")
-- **Linia 2**: Numele aeroportului (ex: "Aeroportul Internațional Cluj-Napoca")
-- Eliminată duplicarea: ~~"Cluj-Napoca - Aeroportul Internațional Cluj-Napoca"~~
+## 🔧 TECHNICAL DETAILS
 
-## 🚀 Deployment Status:
+### Files Modified:
+- `components/flights/FlightList.tsx` - Main table implementation
+- Status translation logic with case-insensitive matching
+- City name duplication prevention logic
 
-### ✅ Git Repository
-- Commit: "FlightList: Replace card layout with mobile-optimized table structure"
-- Push: Completat cu succes
+### Key Improvements:
+1. **Performance**: Table rendering more efficient than cards
+2. **Accessibility**: Proper table headers and structure
+3. **UX**: Compact information display suitable for mobile
+4. **Localization**: Complete Romanian translation of flight statuses
 
-### ✅ Server Deployment
-- Build: Completat cu succes (vezi log-ul de mai sus)
-- PM2: Restartat cu succes (anyway-ro online)
-- Cache: Sistemul de cache funcționează (se văd request-urile API)
+## 🌐 LIVE VERIFICATION
 
-### ✅ Live Verification
-- **URL**: https://anyway.ro
-- **Pagini afectate**: 
-  - `/aeroport/[code]/plecari` (Plecări)
-  - `/aeroport/[code]/sosiri` (Sosiri)
+The changes are now live at:
+- https://anyway.ro/aeroport/otopeni/sosiri
+- https://anyway.ro/aeroport/otopeni/plecari
+- All other airport arrival/departure pages
 
-## 📊 Beneficii Implementate:
-
-### UX Îmbunătățit
-- **Mai multe zboruri vizibile** pe același ecran
-- **Scanare rapidă** a informațiilor importante
-- **Sortare intuitivă** prin click pe header
-
-### Performance
-- **Menos DOM nodes** comparativ cu cardurile
-- **Rendering mai rapid** pentru liste mari
-- **Scroll redus** pe mobile
-
-### Responsive Design
-- **Mobile-first** approach
-- **Informații prioritizate** pe ecrane mici
-- **Progresiv enhancement** pentru ecrane mari
-
-## 🎯 Rezultat Final:
-
-**ÎNAINTE**: Carduri mari, greu de navigat pe mobile
-**ACUM**: Tabel compact, optimizat pentru toate ecranele
-
-### Status: ✅ LIVE PE PRODUCTION
-
-Toate modificările sunt acum active pe https://anyway.ro:
-- Tabel compact în loc de carduri
-- Layout responsiv pentru toate ecranele  
-- Statusuri traduse complet în română
-- Nume aeroporturi clare fără duplicare
-- Sortare funcțională în header
-
-**DEPLOYMENT COMPLET ✅**
+Users should now see:
+- ✅ Table layout instead of cards
+- ✅ Romanian flight statuses
+- ✅ No duplicate city names
+- ✅ Mobile-optimized responsive design

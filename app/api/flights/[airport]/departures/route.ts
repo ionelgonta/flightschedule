@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFlightRepository } from '@/lib/flightRepository';
 import type { FlightFilters } from '@/lib/flightRepository';
+import { getIcaoCode, isAirportSupported } from '@/lib/icaoMapping';
 
 export async function GET(
   request: NextRequest,
@@ -15,16 +16,30 @@ export async function GET(
     const airportCode = params.airport.toUpperCase();
     const { searchParams } = new URL(request.url);
 
-    // Validare cod aeroport
-    if (!airportCode || airportCode.length !== 3) {
+    // Validare și conversie cod aeroport
+    if (!airportCode) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Invalid airport code. Must be 3 characters (e.g., OTP)' 
+          error: 'Airport code is required' 
         },
         { status: 400 }
       );
     }
+
+    // Verifică dacă aeroportul este suportat
+    if (!isAirportSupported(airportCode)) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `Airport code ${airportCode} is not supported. Please use IATA codes like OTP, CLJ, TSR.` 
+        },
+        { status: 400 }
+      );
+    }
+
+    // Convertește IATA la ICAO pentru cache lookup
+    const icaoCode = getIcaoCode(airportCode);
 
     // Construiește filtrele din query parameters
     const filters: FlightFilters = {};
@@ -44,9 +59,12 @@ export async function GET(
       };
     }
 
-    // Obține datele din repository
+    // Obține datele din repository folosind codul ICAO
     const flightRepository = getFlightRepository();
-    const result = await flightRepository.getDepartures(airportCode, filters);
+    const result = await flightRepository.getDepartures(icaoCode, filters);
+    
+    // Setează codul IATA în răspuns pentru client
+    result.airport_code = airportCode;
 
     // Adaugă headers pentru cache
     const headers = new Headers();

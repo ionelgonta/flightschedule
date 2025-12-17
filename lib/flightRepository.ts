@@ -27,8 +27,7 @@ export interface FlightApiResponse {
 
 class FlightRepository {
   constructor() {
-    // Inițializează cache manager-ul
-    cacheManager.initialize().catch(console.error);
+    // NU inițializa cache manager-ul aici - se inițializează automat la primul acces
   }
 
   /**
