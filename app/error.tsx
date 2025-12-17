@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import { AlertTriangle, Home } from 'lucide-react'
 import Link from 'next/link'
 
 export default function Error({
@@ -37,7 +37,7 @@ export default function Error({
             onClick={reset}
             className="inline-flex items-center justify-center w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors space-x-2"
           >
-            <RefreshCw className="h-5 w-5" />
+
             <span>Try Again</span>
           </button>
           

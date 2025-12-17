@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, Clock, Plane, MapPin, Users, TrendingUp, RefreshCw } from 'lucide-react'
+import { Calendar, Clock, Plane, MapPin, Users, TrendingUp } from 'lucide-react'
 import { flightPlannerService, FlightPlannerFilters, FlightOption, PlannerStats } from '@/lib/flightPlannerService'
 import { FlightPlannerFilters as FilterComponent } from './FlightPlannerFilters'
 import { FlightOptionsGrid } from './FlightOptionsGrid'
@@ -64,18 +64,7 @@ export function FlightPlannerView() {
     performSearch(newFilters)
   }
 
-  const handleRefresh = async () => {
-    setLoading(true)
-    try {
-      await flightPlannerService.refreshCachedData()
-      await performSearch()
-    } catch (err) {
-      console.error('Error refreshing data:', err)
-      setError('Eroare la actualizarea datelor')
-    } finally {
-      setLoading(false)
-    }
-  }
+
 
   return (
     <div className="space-y-8">
@@ -91,14 +80,7 @@ export function FlightPlannerView() {
             <Calendar className="h-6 w-6 mr-2 text-primary-600" />
             Preferințele tale de călătorie
           </h2>
-          <button
-            onClick={handleRefresh}
-            disabled={loading}
-            className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            <span>Actualizează</span>
-          </button>
+
         </div>
         
         <FilterComponent
@@ -125,7 +107,7 @@ export function FlightPlannerView() {
         {loading && (
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center space-x-3">
-              <RefreshCw className="h-6 w-6 animate-spin text-primary-600" />
+              <div className="h-6 w-6 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
               <span className="text-gray-600 dark:text-gray-300">
                 Căutăm zborurile perfecte pentru tine...
               </span>
@@ -193,7 +175,7 @@ export function FlightPlannerView() {
           </div>
           <div>
             <h4 className="font-medium text-gray-900 dark:text-white mb-2">🔄 Date actualizate</h4>
-            <p>Folosim doar datele din cache-ul local pentru performanță maximă. Apasă "Actualizează" pentru date fresh.</p>
+            <p>Folosim doar datele din cache-ul local pentru performanță maximă. Datele se actualizează automat.</p>
           </div>
           <div>
             <h4 className="font-medium text-gray-900 dark:text-white mb-2">📊 Comparare ușoară</h4>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, Filter, RefreshCw, BarChart3 } from 'lucide-react'
+import { Calendar, Filter, BarChart3 } from 'lucide-react'
 import { WeeklyScheduleData } from '@/lib/weeklyScheduleAnalyzer'
 import { MAJOR_AIRPORTS } from '@/lib/airports'
 
@@ -239,7 +239,7 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
     return (
       <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 ${className}`}>
         <div className="flex items-center justify-center py-12">
-          <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
+          <div className="h-8 w-8 border-4 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
           <span className="ml-2 text-gray-600 dark:text-gray-400">Se încarcă programul săptămânal...</span>
         </div>
       </div>

@@ -8,7 +8,7 @@ import { getClientFlightService, ClientFlightFilters } from '@/lib/clientFlightS
 import { RawFlightData } from '@/lib/flightApiService'
 import FlightList from '@/components/flights/FlightList'
 import { AdBanner } from '@/components/ads/AdBanner'
-import { ArrowLeft, RefreshCw, Plane } from 'lucide-react'
+import { ArrowLeft, Plane } from 'lucide-react'
 
 interface ArrivalsPageProps {
   params: {
@@ -97,9 +97,7 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
     }
   }, [airport.code])
 
-  const handleRefresh = () => {
-    fetchFlights()
-  }
+
 
   const handleFiltersChange = (filters: any) => {
     // Filtrele sunt aplicate local în FlightList
@@ -145,14 +143,7 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
                     Actualizat: {new Date(lastUpdated).toLocaleTimeString()}
                   </p>
                 )}
-                <button
-                  onClick={handleRefresh}
-                  disabled={loading}
-                  className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-                >
-                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                  <span>Actualizează</span>
-                </button>
+
               </div>
             </div>
           </div>
@@ -163,22 +154,14 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Mobile Refresh Button */}
-            <div className="md:hidden mb-6 flex items-center justify-between">
-              {lastUpdated && (
+            {/* Last Updated Info */}
+            {lastUpdated && (
+              <div className="md:hidden mb-6">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Actualizat: {new Date(lastUpdated).toLocaleTimeString()}
                 </p>
-              )}
-              <button
-                onClick={handleRefresh}
-                disabled={loading}
-                className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                <span>Actualizează</span>
-              </button>
-            </div>
+              </div>
+            )}
 
             <FlightList
               flights={flights}
@@ -186,7 +169,7 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
               loading={loading}
               error={error || undefined}
               lastUpdated={lastUpdated || undefined}
-              onRefresh={handleRefresh}
+
               onFiltersChange={handleFiltersChange}
             />
           </div>

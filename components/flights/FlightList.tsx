@@ -8,7 +8,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { RawFlightData } from '@/lib/flightApiService';
 import { FlightFilters } from '@/lib/flightRepository';
 
-import { Search, Filter, SortAsc, SortDesc, RefreshCw, Plane } from 'lucide-react';
+import { Search, Filter, SortAsc, SortDesc, Plane } from 'lucide-react';
 
 // Helper function pentru status badge
 const getStatusBadge = (status: string) => {
@@ -150,7 +150,6 @@ interface FlightListProps {
   loading?: boolean;
   error?: string;
   lastUpdated?: string;
-  onRefresh?: () => void;
   onFiltersChange?: (filters: FlightFilters) => void;
 }
 
@@ -163,7 +162,6 @@ export function FlightList({
   loading = false, 
   error, 
   lastUpdated,
-  onRefresh,
   onFiltersChange 
 }: FlightListProps) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -289,14 +287,7 @@ export function FlightList({
           Nu am putut încărca datele zborurilor
         </h3>
         <p className="body-large text-on-error-container mb-6">{error}</p>
-        {onRefresh && (
-          <button
-            onClick={onRefresh}
-            className="inline-flex items-center px-6 py-3 bg-error text-on-error rounded-xl label-large font-medium hover:bg-error/90 transition-colors duration-200"
-          >
-            Încearcă din nou
-          </button>
-        )}
+
       </div>
     );
   }
@@ -340,17 +331,7 @@ export function FlightList({
               <span className="label-large font-medium">Filtre</span>
             </button>
 
-            {/* Buton refresh */}
-            {onRefresh && (
-              <button
-                onClick={onRefresh}
-                disabled={loading}
-                className="state-layer flex items-center space-x-2 px-4 py-3 bg-primary-40 hover:bg-primary-30 disabled:opacity-38 text-on-primary rounded-xl transition-all duration-200"
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                <span className="label-large font-medium">Actualizează</span>
-              </button>
-            )}
+
           </div>
         </div>
 
