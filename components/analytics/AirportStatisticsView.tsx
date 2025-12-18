@@ -317,7 +317,7 @@ export function AirportStatisticsView({ airport, initialPeriod }: Props) {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {statistics.mostFrequentRoutes.slice(0, 15).map((route, index) => (
-                  <tr key={`${route.origin}-${route.destination}`}>
+                  <tr key={`${route.origin}-${route.destination}-${index}`}>
                     <td className="py-3 text-gray-900 dark:text-white">
                       <div className="flex items-center">
                         <span className="font-medium">

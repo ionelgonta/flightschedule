@@ -173,7 +173,7 @@ export const API_CONFIGS = {
   aerodatabox: {
     provider: 'aerodatabox' as const,
     baseUrl: 'https://prod.api.market/api/v1/aedbx/aerodatabox',
-    apiKey: 'cmj2m39qs0001k00404cmwu75', // Updated working API key
+    apiKey: process.env.NEXT_PUBLIC_FLIGHT_API_KEY || 'cmj2m39qs0001k00404cmwu75', // Use env variable
     rateLimit: 150 // requests per minute
   }
 };

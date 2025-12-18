@@ -37,7 +37,7 @@ Badge.displayName = "Badge"
 
 // Flight Status Badge with semantic colors
 export interface FlightStatusBadgeProps extends Omit<BadgeProps, 'variant'> {
-  status: 'on-time' | 'delayed' | 'cancelled' | 'boarding' | 'departed' | 'arrived' | 'unknown'
+  status: 'on-time' | 'delayed' | 'cancelled' | 'boarding' | 'departed' | 'arrived' | 'unknown' | 'estimated'
 }
 
 const FlightStatusBadge = React.forwardRef<HTMLDivElement, FlightStatusBadgeProps>(
@@ -50,6 +50,7 @@ const FlightStatusBadge = React.forwardRef<HTMLDivElement, FlightStatusBadgeProp
       'departed': 'success',
       'arrived': 'success',
       'unknown': 'neutral',
+      'estimated': 'info',
     } as const
 
     const statusLabels = {
@@ -60,6 +61,7 @@ const FlightStatusBadge = React.forwardRef<HTMLDivElement, FlightStatusBadgeProp
       'departed': 'Plecat',
       'arrived': 'Sosit',
       'unknown': 'Necunoscut',
+      'estimated': 'Estimat',
     }
 
     return (

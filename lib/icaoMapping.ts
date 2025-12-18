@@ -116,23 +116,16 @@ export const AIRPORT_MAPPINGS: Record<string, AirportMapping> = {
   },
   'BBU': {
     iata: 'BBU',
-    icao: 'LRBS',
-    name: 'Baia Mare Airport',
-    city: 'Baia Mare',
+    icao: 'LRBB',
+    name: 'Aurel Vlaicu International Airport',
+    city: 'București',
     country: 'România'
   },
 
   // Moldova
-  'KIV': {
-    iata: 'KIV',
-    icao: 'LUKK',
-    name: 'Chișinău International Airport',
-    city: 'Chișinău',
-    country: 'Moldova'
-  },
   'RMO': {
     iata: 'RMO',
-    icao: 'LUKK', // Același cu KIV - sunt același aeroport
+    icao: 'LUKK',
     name: 'Chișinău International Airport',
     city: 'Chișinău',
     country: 'Moldova'

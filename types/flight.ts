@@ -51,6 +51,7 @@ export type FlightStatus =
   | 'boarding'
   | 'departed'
   | 'unknown'
+  | 'estimated'
 
 export interface Airport {
   code: string

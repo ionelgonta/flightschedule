@@ -192,7 +192,7 @@ class FlightScheduler {
 // Configurația default
 const DEFAULT_CONFIG: SchedulerConfig = {
   interval: 10 * 60 * 1000, // 10 minutes
-  priorityAirports: ['OTP', 'CLJ', 'TSR', 'IAS', 'CND', 'KIV', 'SBZ', 'CRA', 'BCM', 'BAY'],
+  priorityAirports: ['OTP', 'CLJ', 'TSR', 'IAS', 'CND', 'RMO', 'SBZ', 'CRA', 'BCM', 'BAY'],
   maxConcurrentRequests: 3,
   enabled: true
 };

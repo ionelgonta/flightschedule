@@ -147,25 +147,74 @@ export class FlightAnalyticsService {
     fromDate: string,
     toDate: string
   ): Promise<FlightSchedule[]> {
-    const cacheKey = `schedules_${airportCode}_${type}_${fromDate}_${toDate}`
-    
     try {
-      // Citește DOAR din cache - nu face request-uri API
-      const cachedData = cacheManager.getCachedData<FlightSchedule[]>(cacheKey)
+      // Convertește codul IATA la ICAO pentru cache lookup
+      const { getIcaoCode } = await import('./icaoMapping')
+      const icaoCode = getIcaoCode(airportCode)
       
-      if (cachedData && cachedData.length > 0) {
-        console.log(`Cache hit for schedules: ${cacheKey}`)
-        return cachedData
+      // Folosește cheia simplă din cache
+      const cacheKey = `${icaoCode}_${type}`
+      
+      // Citește datele din cache
+      const cachedFlights = cacheManager.getCachedData<any[]>(cacheKey) || []
+      
+      if (cachedFlights.length > 0) {
+        console.log(`Cache hit for flight schedules: ${cacheKey} (${cachedFlights.length} flights)`)
+        
+        // Convertește datele de zbor la format FlightSchedule
+        const schedules: FlightSchedule[] = cachedFlights.map((flight: any) => ({
+          flightNumber: flight.flight_number || 'N/A',
+          airline: {
+            code: flight.airline?.code || 'N/A',
+            name: flight.airline?.name || 'Unknown'
+          },
+          aircraft: flight.aircraft || 'Unknown',
+          origin: flight.origin?.code || flight.origin || 'N/A',
+          destination: flight.destination?.code || flight.destination || 'N/A',
+          scheduledTime: flight.scheduled_time || new Date().toISOString(),
+          estimatedTime: flight.estimated_time || null,
+          actualTime: flight.actual_time || null,
+          status: flight.status || 'scheduled',
+          gate: flight.gate || null,
+          terminal: flight.terminal || null,
+          delay: this.calculateDelay(flight),
+          isCargo: flight.isCargo || false
+        }))
+        
+        // Filtrează după perioada solicitată dacă este specificată
+        const fromDateTime = new Date(fromDate)
+        const toDateTime = new Date(toDate)
+        toDateTime.setHours(23, 59, 59, 999) // Include toată ziua
+        
+        const filteredSchedules = schedules.filter(schedule => {
+          const flightDate = new Date(schedule.scheduledTime)
+          return flightDate >= fromDateTime && flightDate <= toDateTime
+        })
+        
+        console.log(`Filtered ${schedules.length} flights to ${filteredSchedules.length} for period ${fromDate} to ${toDate}`)
+        return filteredSchedules
       }
 
-      // Nu există date în cache - returnează array gol
-      console.log(`No cached schedules for ${airportCode} ${type}`)
+      // Nu există date în cache
+      console.log(`No cached flight data for ${airportCode} ${type}`)
       return []
       
     } catch (error) {
       console.error('Error getting cached flight schedules:', error)
       return []
     }
+  }
+
+  /**
+   * Calculate delay in minutes from flight data
+   */
+  private calculateDelay(flight: any): number {
+    if (!flight.scheduled_time) return 0
+    
+    const scheduledTime = new Date(flight.scheduled_time)
+    const actualTime = new Date(flight.actual_time || flight.estimated_time || flight.scheduled_time)
+    
+    return Math.max(0, Math.round((actualTime.getTime() - scheduledTime.getTime()) / (1000 * 60)))
   }
 
   /**
@@ -178,6 +227,9 @@ export class FlightAnalyticsService {
     const cacheKey = `analytics_${airportCode}`
     
     try {
+      // Asigură-te că cache manager-ul este inițializat
+      await cacheManager.initialize()
+      
       // Citește DOAR din cache - nu face request-uri API
       const cachedData = cacheManager.getCachedData<AirportStatistics>(cacheKey)
       

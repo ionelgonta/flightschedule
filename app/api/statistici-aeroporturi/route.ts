@@ -29,11 +29,14 @@ const statisticsCache = new Map<string, { data: AirportStatistics[], timestamp: 
 
 async function calculateAirportStatistics(airport: any): Promise<AirportStatistics> {
   try {
-    // NU MAI FACE REQUESTURI API DIRECTE - folosește doar cache-ul centralizat
-    console.log(`Getting cached statistics for ${airport.code} from cache manager`)
+    // Convertește IATA la ICAO pentru cache lookup
+    const { getIcaoCode } = await import('@/lib/icaoMapping')
+    const icaoCode = getIcaoCode(airport.code)
     
-    // Încearcă să obții statistici din cache-ul centralizat
-    const cachedStats = flightAnalyticsService.getCachedData<any>(`analytics_${airport.code}`)
+    console.log(`Getting cached statistics for ${airport.code} (ICAO: ${icaoCode}) from cache manager`)
+    
+    // Încearcă să obții statistici din cache-ul centralizat folosind codul ICAO
+    const cachedStats = flightAnalyticsService.getCachedData<any>(`analytics_${icaoCode}`)
     
     if (cachedStats) {
       console.log(`Using cached statistics for ${airport.code}`)

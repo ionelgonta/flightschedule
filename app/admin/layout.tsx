@@ -9,12 +9,16 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
 
-  // Parolă admin pentru accesul la panoul de administrare
-  const ADMIN_PASSWORD = 'FlightSchedule2024!'
+  // Credențiale admin pentru accesul la panoul de administrare
+  const ADMIN_CREDENTIALS = {
+    username: 'admin',
+    password: 'FlightSchedule2024!'
+  }
 
   useEffect(() => {
     // Verifică dacă utilizatorul este deja autentificat
@@ -26,12 +30,14 @@ export default function AdminLayout({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
-    if (password === ADMIN_PASSWORD) {
+    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
       setIsAuthenticated(true)
       localStorage.setItem('adminAuth', 'true')
+      localStorage.setItem('adminUser', username)
       setError('')
     } else {
-      setError('Parolă incorectă!')
+      setError('Username sau parolă incorectă!')
+      setUsername('')
       setPassword('')
     }
   }
@@ -39,6 +45,8 @@ export default function AdminLayout({
   const handleLogout = () => {
     setIsAuthenticated(false)
     localStorage.removeItem('adminAuth')
+    localStorage.removeItem('adminUser')
+    setUsername('')
     setPassword('')
   }
 
@@ -56,14 +64,29 @@ export default function AdminLayout({
               Admin Dashboard
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Introduceți parola pentru a accesa panoul de administrare
+              Introduceți credențialele pentru a accesa panoul de administrare
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Parolă Admin
+                Username
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="Introdu username-ul..."
+                required
+                autoComplete="username"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Parolă
               </label>
               <div className="relative">
                 <input
@@ -73,6 +96,7 @@ export default function AdminLayout({
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-12"
                   placeholder="Introdu parola..."
                   required
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
@@ -103,7 +127,7 @@ export default function AdminLayout({
               <div className="text-sm text-blue-800 dark:text-blue-200">
                 <p className="font-medium mb-1">Securitate</p>
                 <ul className="space-y-1 text-xs">
-                  <li>• Acces restricționat cu parolă</li>
+                  <li>• Acces restricționat cu username și parolă</li>
                   <li>• Sesiunea expiră la închiderea browser-ului</li>
                   <li>• Toate acțiunile sunt monitorizate</li>
                 </ul>

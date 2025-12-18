@@ -2,37 +2,30 @@ import * as React from "react"
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'filled' | 'outlined' | 'text' | 'elevated' | 'tonal'
-  size?: 'default' | 'large' | 'small'
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
+  size?: 'default' | 'sm' | 'lg' | 'icon'
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'filled', size = 'default', ...props }, ref) => {
-    const baseClasses = "state-layer inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-38 relative overflow-hidden"
+  ({ className, variant = 'default', size = 'default', ...props }, ref) => {
+    const baseClasses = "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
     
     const variants = {
-      // Filled Button (Primary Action)
-      filled: "bg-primary-40 text-on-primary shadow-elevation-0 hover:shadow-elevation-1 active:shadow-elevation-0",
-      
-      // Outlined Button (Secondary Action)
-      outlined: "border border-outline text-primary-40 bg-transparent hover:bg-primary-40/8 active:bg-primary-40/12",
-      
-      // Text Button (Low Emphasis)
-      text: "text-primary-40 bg-transparent hover:bg-primary-40/8 active:bg-primary-40/12",
-      
-      // Elevated Button (Alternative to Filled)
-      elevated: "bg-surface-container-low text-primary-40 shadow-elevation-1 hover:shadow-elevation-2 active:shadow-elevation-1",
-      
-      // Tonal Button (Medium Emphasis)
-      tonal: "bg-secondary-container text-on-secondary-container shadow-elevation-0 hover:shadow-elevation-1 active:shadow-elevation-0",
+      default: "bg-primary-40 text-on-primary hover:bg-primary-50 state-layer",
+      destructive: "bg-error text-on-error hover:bg-error/90",
+      outline: "border border-outline bg-surface hover:bg-surface-container-high text-on-surface",
+      secondary: "bg-surface-container text-on-surface hover:bg-surface-container-high",
+      ghost: "hover:bg-surface-container-high text-on-surface",
+      link: "text-primary-40 underline-offset-4 hover:underline",
     }
     
     const sizes = {
-      small: "h-10 px-3 rounded-lg label-medium min-w-16",
-      default: "h-12 px-6 rounded-xl label-large min-w-16",
-      large: "h-14 px-8 rounded-xl label-large min-w-16",
+      default: "h-10 px-4 py-2",
+      sm: "h-9 rounded-md px-3",
+      lg: "h-11 rounded-md px-8",
+      icon: "h-10 w-10",
     }
-    
+
     return (
       <button
         className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className || ''}`}

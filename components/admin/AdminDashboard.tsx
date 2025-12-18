@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import WeeklyScheduleView from '@/components/analytics/WeeklyScheduleView'
 import CacheManagement from './CacheManagement'
-import { Save, Settings, Key, TestTube, CheckCircle, XCircle, Clock, TrendingUp, Calendar, LogOut } from 'lucide-react'
+import { AdManagement } from './AdManagement'
+import { Save, Settings, Key, TestTube, CheckCircle, XCircle, Clock, TrendingUp, Calendar, LogOut, Globe } from 'lucide-react'
 
 export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('api')
@@ -523,6 +524,17 @@ export function AdminDashboard() {
                 <Calendar className="h-4 w-4 inline mr-2" />
                 Program Săptămânal
               </button>
+              <button
+                onClick={() => setActiveTab('ads')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'ads'
+                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                <Globe className="h-4 w-4 inline mr-2" />
+                Publicitate
+              </button>
             </nav>
           </div>
 
@@ -833,6 +845,10 @@ export function AdminDashboard() {
                 {/* Weekly Schedule Component */}
                 <WeeklyScheduleView />
               </div>
+            )}
+
+            {activeTab === 'ads' && (
+              <AdManagement />
             )}
           </div>
         </div>

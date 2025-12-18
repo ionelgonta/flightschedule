@@ -1,0 +1,14 @@
+{
+  "flightData": {
+    "cronInterval": 60,
+    "cacheUntilNext": true
+  },
+  "analytics": {
+    "cronInterval": 7,
+    "cacheMaxAge": 30
+  },
+  "aircraft": {
+    "cronInterval": 7,
+    "cacheMaxAge": 30
+  }
+}

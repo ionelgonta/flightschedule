@@ -135,6 +135,7 @@ curl -I https://victoriaocara.com
 
 ### Admin Access:
 - **URL**: `https://anyway.ro/admin`
+- **Username**: `admin`
 - **Password**: `FlightSchedule2024!`
 
 ### Cache Configuration:

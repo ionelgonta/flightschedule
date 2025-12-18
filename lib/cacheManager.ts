@@ -1,11 +1,28 @@
 /**
  * Cache Manager - Sistem complet configurabil pentru cache și cron jobs
  * Toate intervalele sunt configurabile din admin, fără valori hardcodate
+ * Extended with Historical Cache Manager for persistent data storage
  */
 
 // Server-side only imports
 let fs: any = null
 let path: any = null
+let historicalCacheManager: any = null
+
+// Initialize historical cache manager only on server-side
+if (typeof window === 'undefined') {
+  try {
+    // Try to load the real historical cache manager (with SQLite)
+    const historicalModule = require('./historicalCacheManager')
+    historicalCacheManager = historicalModule.historicalCacheManager
+    console.log('[Cache Manager] Using real historical cache manager with SQLite')
+  } catch (error) {
+    // Fallback to mock version for local development
+    console.log('[Cache Manager] SQLite not available, using mock historical cache manager')
+    const mockModule = require('./historicalCacheManager.mock')
+    historicalCacheManager = mockModule.historicalCacheManager
+  }
+}
 
 // Initialize server-side modules only when running on server
 if (typeof window === 'undefined') {
@@ -94,10 +111,25 @@ class CacheManager {
     
     console.log('[Cache Manager] Initializing for the first time...')
     
+    // Oprește orice cron jobs existente înainte de inițializare
+    this.stopCronJobs()
+    
     await this.ensureDataDirectory()
     await this.loadConfig()
     await this.loadRequestCounter()
     await this.loadCacheData()
+    
+    // Initialize historical cache manager
+    if (historicalCacheManager) {
+      try {
+        await historicalCacheManager.initialize()
+        console.log('[Cache Manager] Historical cache manager initialized')
+      } catch (error) {
+        console.error('[Cache Manager] Failed to initialize historical cache manager:', error)
+        // Continue without historical cache if it fails
+      }
+    }
+    
     await this.startCronJobs()
     
     this.isInitialized = true
@@ -135,12 +167,12 @@ class CacheManager {
           cacheUntilNext: true
         },
         analytics: {
-          cronInterval: 30, // zile
-          cacheMaxAge: 360 // zile
+          cronInterval: 7, // zile (redus pentru a evita overflow)
+          cacheMaxAge: 30 // zile (redus pentru a evita overflow)
         },
         aircraft: {
-          cronInterval: 360, // zile
-          cacheMaxAge: 360 // zile
+          cronInterval: 7, // zile (redus pentru a evita overflow)
+          cacheMaxAge: 30 // zile (redus pentru a evita overflow)
         }
       }
       await this.saveConfig()
@@ -235,15 +267,17 @@ class CacheManager {
     }, flightDataInterval)
     this.cronJobs.set('flightData', flightDataJob)
 
-    // Analytics Cron - la fiecare X zile
-    const analyticsInterval = this.config.analytics.cronInterval * 24 * 60 * 60 * 1000 // convert to ms
+    // Analytics Cron - la fiecare X zile (max 24 zile pentru a evita overflow)
+    const maxAnalyticsInterval = Math.min(this.config.analytics.cronInterval, 24) // max 24 zile
+    const analyticsInterval = maxAnalyticsInterval * 24 * 60 * 60 * 1000 // convert to ms
     const analyticsJob = setInterval(async () => {
       await this.runAnalyticsCron()
     }, analyticsInterval)
     this.cronJobs.set('analytics', analyticsJob)
 
-    // Aircraft Cron - la fiecare X zile
-    const aircraftInterval = this.config.aircraft.cronInterval * 24 * 60 * 60 * 1000 // convert to ms
+    // Aircraft Cron - la fiecare X zile (max 24 zile pentru a evita overflow)
+    const maxAircraftInterval = Math.min(this.config.aircraft.cronInterval, 24) // max 24 zile
+    const aircraftInterval = maxAircraftInterval * 24 * 60 * 60 * 1000 // convert to ms
     const aircraftJob = setInterval(async () => {
       await this.runAircraftCron()
     }, aircraftInterval)
@@ -284,8 +318,8 @@ class CacheManager {
   private async runFlightDataCron(): Promise<void> {
     console.log('Running flight data cron job...')
     
-    // Lista aeroporturilor active
-    const airports = ['LROP', 'LRTR', 'LRCL', 'LRIA', 'LRBC', 'LRBS', 'LRSB', 'LRSM', 'LRCS', 'LROD', 'LRSU', 'LRTU', 'LRBM', 'LRCV', 'LRCT', 'LRAR']
+    // Obține toate aeroporturile din România și Moldova din baza de date
+    const airports = await this.getAllSupportedAirports()
     
     for (const airport of airports) {
       await this.fetchAndCacheFlightData(airport, 'arrivals', 'cron')
@@ -299,7 +333,8 @@ class CacheManager {
   private async runAnalyticsCron(): Promise<void> {
     console.log('Running analytics cron job...')
     
-    const airports = ['LROP', 'LRTR', 'LRCL', 'LRIA', 'LRBC', 'LRBS', 'LRSB', 'LRSM', 'LRCS', 'LROD', 'LRSU', 'LRTU', 'LRBM', 'LRCV', 'LRCT', 'LRAR']
+    // Obține toate aeroporturile din România și Moldova din baza de date
+    const airports = await this.getAllSupportedAirports()
     
     for (const airport of airports) {
       await this.fetchAndCacheAnalytics(airport, 'cron')
@@ -328,14 +363,68 @@ class CacheManager {
     type: 'arrivals' | 'departures',
     source: 'cron' | 'manual'
   ): Promise<void> {
+    console.log(`[Cache Manager] Fetching flight data for ${airportCode} ${type} (${source})`)
+    
+    // Check historical cache first to avoid redundant API calls
+    if (historicalCacheManager && source === 'cron') {
+      const today = new Date().toISOString().split('T')[0]
+      const hasHistoricalData = await historicalCacheManager.hasDataForDate(airportCode, today, type)
+      
+      if (hasHistoricalData) {
+        console.log(`[Cache Manager] Historical data exists for ${airportCode} ${type} on ${today}, using cached data`)
+        
+        // Get data from historical cache
+        const historicalData = await historicalCacheManager.getDataForDate(airportCode, today, type)
+        
+        if (historicalData.length > 0) {
+          // Convert historical data to current cache format and store in memory cache
+          const cacheKey = `${airportCode}_${type}`
+          const expiresAt = this.config!.flightData.cacheUntilNext 
+            ? new Date(Date.now() + this.config!.flightData.cronInterval * 60 * 1000).toISOString()
+            : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+
+          const cacheEntry: CacheEntry = {
+            id: `flight_${cacheKey}_${Date.now()}`,
+            category: 'flightData',
+            key: cacheKey,
+            data: historicalData,
+            createdAt: new Date().toISOString(),
+            expiresAt,
+            lastAccessed: new Date().toISOString(),
+            source: 'cache',
+            success: true
+          }
+
+          // Remove old entry and add new one
+          const oldEntries = Array.from(this.cacheData.values()).filter(
+            entry => entry.category === 'flightData' && entry.key === cacheKey
+          )
+          oldEntries.forEach(entry => this.cacheData.delete(entry.id))
+          
+          this.cacheData.set(cacheEntry.id, cacheEntry)
+          await this.saveCacheData()
+          
+          console.log(`[Cache Manager] Used historical cache data for ${airportCode} ${type} (${historicalData.length} flights)`)
+          return
+        }
+      }
+    }
+    
     try {
       // Import dinamic pentru a evita circular dependencies
-      const { default: FlightApiService, API_CONFIGS } = await import('./flightApiService')
+      const { default: FlightApiService } = await import('./flightApiService')
       
-      const apiService = new FlightApiService(API_CONFIGS.aerodatabox)
+      const apiService = new FlightApiService({
+        provider: 'aerodatabox',
+        apiKey: process.env.AERODATABOX_API_KEY || '',
+        baseUrl: 'https://aerodatabox.p.rapidapi.com',
+        rateLimit: 100
+      })
       const response = type === 'arrivals' 
         ? await apiService.getArrivals(airportCode)
         : await apiService.getDepartures(airportCode)
+
+      console.log(`[Cache Manager] API response for ${airportCode} ${type}: success=${response.success}, data length=${response.data?.length || 0}`)
 
       // Incrementează contorul
       this.incrementRequestCounter('flightData')
@@ -368,10 +457,51 @@ class CacheManager {
       this.cacheData.set(cacheEntry.id, cacheEntry)
       await this.saveCacheData()
 
-      console.log(`Cached flight data for ${airportCode} ${type} (${source})`)
+      // Save to historical cache if we have new data from API
+      if (historicalCacheManager && response.success && response.data && response.data.length > 0 && source !== 'cache') {
+        try {
+          const today = new Date().toISOString().split('T')[0]
+          const currentTime = new Date().toTimeString().split(' ')[0].substring(0, 5) // HH:mm format
+          
+          // Convert API response to historical format
+          const flightData: any[] = response.data.map((flight: any) => ({
+            flightNumber: flight.flight_number || flight.flightNumber || 'N/A',
+            airlineCode: flight.airline?.code || flight.airlineCode || 'XX',
+            airlineName: flight.airline?.name || flight.airlineName || 'Unknown',
+            originCode: flight.origin?.code || flight.originCode || 'XXX',
+            originName: flight.origin?.name || flight.originName || flight.origin?.code || 'Unknown',
+            destinationCode: flight.destination?.code || flight.destinationCode || 'XXX',
+            destinationName: flight.destination?.name || flight.destinationName || flight.destination?.code || 'Unknown',
+            scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
+            actualTime: flight.actual_time || flight.actualTime || undefined,
+            estimatedTime: flight.estimated_time || flight.estimatedTime || undefined,
+            status: flight.status || 'scheduled',
+            delayMinutes: flight.delay || flight.delayMinutes || 0
+          }))
+          
+          const dailySnapshot: any = {
+            airportCode,
+            date: today,
+            time: currentTime,
+            type,
+            source: 'api',
+            flights: flightData
+          }
+          
+          await historicalCacheManager.saveDailySnapshot(dailySnapshot)
+          console.log(`[Cache Manager] Saved ${flightData.length} flights to historical cache for ${airportCode} ${type}`)
+          
+        } catch (historicalError) {
+          console.error('[Cache Manager] Failed to save to historical cache:', historicalError)
+          // Don't fail the main caching operation if historical save fails
+        }
+      }
+
+      console.log(`[Cache Manager] Successfully cached flight data for ${airportCode} ${type} (${source}) - ${response.data?.length || 0} flights`)
+      console.log(`[Cache Manager] Cache now contains ${this.cacheData.size} total entries`)
 
     } catch (error) {
-      console.error(`Error fetching flight data for ${airportCode} ${type}:`, error)
+      console.error(`[Cache Manager] Error fetching flight data for ${airportCode} ${type}:`, error)
       
       // Incrementează contorul chiar și pentru erori
       this.incrementRequestCounter('flightData')
@@ -400,29 +530,55 @@ class CacheManager {
       // Calculate REAL statistics from cached flight data
       const totalFlights = allFlights.length
       
-      const onTimeFlights = allFlights.filter((f: any) => {
-        const status = f.status?.toLowerCase() || ''
-        const delay = f.delay || 0
-        return (status === 'on-time' || status === 'scheduled' || status === 'landed' || 
-                status === 'departed' || status === 'active' || status === 'en-route') && 
-               delay <= 15
-      }).length
+      // Calculate statistics based on both times and status
+      let onTimeFlights = 0
+      let delayedFlights = 0
+      let cancelledFlights = 0
+      const delayCalculations: number[] = []
       
-      const delayedFlights = allFlights.filter((f: any) => {
+      allFlights.forEach((f: any) => {
         const status = f.status?.toLowerCase() || ''
-        const delay = f.delay || 0
-        return status === 'delayed' || delay > 15
-      }).length
+        
+        // Check for cancelled flights first
+        if (status === 'cancelled' || status === 'canceled') {
+          cancelledFlights++
+          return
+        }
+        
+        // Calculate delay from flight data - check multiple delay sources
+        let delayMinutes = 0
+        
+        // Priority 1: Use existing delay field if available
+        if (f.delay && typeof f.delay === 'number' && f.delay > 0) {
+          delayMinutes = f.delay
+        }
+        // Priority 2: Calculate from times if available
+        else if (f.scheduled_time && (f.actual_time || f.estimated_time)) {
+          const scheduledTime = new Date(f.scheduled_time)
+          const actualTime = new Date(f.actual_time || f.estimated_time)
+          delayMinutes = Math.max(0, (actualTime.getTime() - scheduledTime.getTime()) / (1000 * 60))
+        }
+        // Priority 3: Use status to infer delay
+        else if (status === 'delayed') {
+          delayMinutes = 30 // Assume 30 minutes for status-only delayed flights
+        }
+        
+        // Classify flight based on delay
+        if (delayMinutes > 15) {
+          delayedFlights++
+          delayCalculations.push(delayMinutes)
+        } else if (status === 'delayed' && delayMinutes <= 15) {
+          // Status says delayed but calculated delay is small - trust the status
+          delayedFlights++
+          delayCalculations.push(Math.max(delayMinutes, 20)) // Minimum 20 min for delayed status
+        } else {
+          // On-time flight (delay <= 15 minutes or good status)
+          onTimeFlights++
+        }
+      })
       
-      const cancelledFlights = allFlights.filter((f: any) => {
-        const status = f.status?.toLowerCase() || ''
-        return status === 'cancelled' || status === 'canceled'
-      }).length
-      
-      // Calculate average delay from flights with actual delay data
-      const flightsWithDelay = allFlights.filter((f: any) => f.delay && f.delay > 0)
-      const averageDelay = flightsWithDelay.length > 0 
-        ? Math.round(flightsWithDelay.reduce((sum: number, f: any) => sum + (f.delay || 0), 0) / flightsWithDelay.length)
+      const averageDelay = delayCalculations.length > 0 
+        ? Math.round(delayCalculations.reduce((sum, delay) => sum + delay, 0) / delayCalculations.length)
         : 0
       
       const onTimePercentage = totalFlights > 0 ? Math.round((onTimeFlights / totalFlights) * 100) : 0
@@ -576,7 +732,11 @@ class CacheManager {
   async updateConfig(newConfig: CacheConfig): Promise<void> {
     this.config = newConfig
     await this.saveConfig()
+    
+    // Oprește job-urile existente înainte de a le reporni
+    this.stopCronJobs()
     await this.startCronJobs() // Repornește cu noile intervale
+    
     console.log('[Cache Manager] Configuration updated and cron jobs restarted')
   }
 
@@ -639,14 +799,62 @@ class CacheManager {
   }
 
   /**
-   * Obține lista de aeronave cunoscute din cache
+   * Obține toate aeroporturile suportate din România și Moldova (coduri ICAO)
+   */
+  private async getAllSupportedAirports(): Promise<string[]> {
+    try {
+      // Import dinamic pentru a evita circular dependencies
+      const { MAJOR_AIRPORTS } = await import('./airports')
+      const { getIcaoCode } = await import('./icaoMapping')
+      
+      // Convertește toate codurile IATA la ICAO
+      const icaoCodes = MAJOR_AIRPORTS
+        .filter(airport => airport.country === 'România' || airport.country === 'Moldova')
+        .map(airport => getIcaoCode(airport.code))
+        .filter(icao => icao && icao.length === 4) // Validează codurile ICAO
+      
+      console.log(`Found ${icaoCodes.length} supported airports: ${icaoCodes.join(', ')}`)
+      return icaoCodes
+    } catch (error) {
+      console.error('Error getting supported airports:', error)
+      // Fallback la lista hardcodată în caz de eroare
+      return ['LROP', 'LRTR', 'LRCL', 'LRIA', 'LRBC', 'LRBS', 'LRSB', 'LRSM', 'LRCS', 'LROD', 'LRSU', 'LRTU', 'LRBM', 'LRCV', 'LRCT', 'LRAR', 'LUKK']
+    }
+  }
+
+  /**
+   * Obține lista de aeronave cunoscute din cache și din datele de zbor
    */
   private async getKnownAircraft(): Promise<string[]> {
+    const aircraftSet = new Set<string>()
+    
+    // 1. Adaugă aeronave din cache-ul existent
     const aircraftEntries = Array.from(this.cacheData.values()).filter(
       entry => entry.category === 'aircraft'
     )
+    aircraftEntries.forEach(entry => {
+      aircraftSet.add(entry.key.replace('aircraft_', ''))
+    })
     
-    return aircraftEntries.map(entry => entry.key.replace('aircraft_', ''))
+    // 2. Extrage aeronave din datele de zbor cache-ate
+    const flightEntries = Array.from(this.cacheData.values()).filter(
+      entry => entry.category === 'flightData'
+    )
+    
+    flightEntries.forEach(entry => {
+      if (Array.isArray(entry.data)) {
+        entry.data.forEach((flight: any) => {
+          if (flight.aircraft?.icao24) {
+            aircraftSet.add(flight.aircraft.icao24.toUpperCase())
+          }
+        })
+      }
+    })
+    
+    const aircraftList = Array.from(aircraftSet)
+    console.log(`Found ${aircraftList.length} known aircraft from cache and flight data`)
+    
+    return aircraftList
   }
 
   /**
@@ -742,12 +950,28 @@ class CacheManager {
     const hourDelayMap = new Map<number, number[]>()
     
     flights.forEach(flight => {
-      if (flight.delay && flight.delay > 0) {
-        const hour = new Date(flight.scheduled_time || flight.scheduledTime || Date.now()).getHours()
+      if (!flight.scheduled_time) return
+      
+      const scheduledTime = new Date(flight.scheduled_time)
+      const hour = scheduledTime.getHours()
+      let delayMinutes = 0
+      
+      // Calculate delay based on available data
+      if (flight.actual_time || flight.estimated_time) {
+        const actualTime = new Date(flight.actual_time || flight.estimated_time)
+        delayMinutes = Math.max(0, (actualTime.getTime() - scheduledTime.getTime()) / (1000 * 60))
+      } else {
+        const status = flight.status?.toLowerCase() || ''
+        if (status === 'delayed') {
+          delayMinutes = 30 // Assume 30 minutes for status-only delayed flights
+        }
+      }
+      
+      if (delayMinutes > 0) {
         if (!hourDelayMap.has(hour)) {
           hourDelayMap.set(hour, [])
         }
-        hourDelayMap.get(hour)!.push(flight.delay)
+        hourDelayMap.get(hour)!.push(delayMinutes)
       }
     })
     
@@ -758,7 +982,11 @@ class CacheManager {
       hourAverages.push({ hour, avgDelay })
     })
     
-    // Return top 4 hours with highest average delays
+    // Return top 4 hours with highest average delays, or default hours if no delays
+    if (hourAverages.length === 0) {
+      return [8, 12, 18, 22] // Default peak hours
+    }
+    
     return hourAverages
       .sort((a, b) => b.avgDelay - a.avgDelay)
       .slice(0, 4)
@@ -807,7 +1035,10 @@ class CacheManager {
       
       const route = routeMap.get(routeKey)!
       route.flights.push(flight)
-      route.airlines.add(flight.airline?.code || flight.airline || 'Unknown')
+      
+      // Get airline code and add to set
+      const airlineCode = flight.airline?.code || flight.airline || 'XX'
+      route.airlines.add(airlineCode)
     })
     
     // Convert to route analysis format
@@ -816,24 +1047,39 @@ class CacheManager {
     routeMap.forEach((route) => {
       const flightCount = route.flights.length
       
-      const onTimeFlights = route.flights.filter((f: any) => {
+      // Better delay calculation for routes
+      let onTimeCount = 0
+      let delayedCount = 0
+      const delayCalculations: number[] = []
+      
+      route.flights.forEach((f: any) => {
         const status = f.status?.toLowerCase() || ''
-        const delay = f.delay || 0
-        return (status === 'on-time' || status === 'scheduled' || status === 'landed' || 
-                status === 'departed' || status === 'active' || status === 'en-route') && 
-               delay <= 15
+        let delayMinutes = 0
+        
+        // Calculate delay using same logic as main analytics
+        if (f.delay && typeof f.delay === 'number' && f.delay > 0) {
+          delayMinutes = f.delay
+        } else if (f.scheduled_time && (f.actual_time || f.estimated_time)) {
+          const scheduledTime = new Date(f.scheduled_time)
+          const actualTime = new Date(f.actual_time || f.estimated_time)
+          delayMinutes = Math.max(0, (actualTime.getTime() - scheduledTime.getTime()) / (1000 * 60))
+        } else if (status === 'delayed') {
+          delayMinutes = 30
+        }
+        
+        if (delayMinutes > 15) {
+          delayedCount++
+          delayCalculations.push(delayMinutes)
+        } else {
+          onTimeCount++
+        }
       })
       
-      const delayedFlights = route.flights.filter((f: any) => {
-        const delay = f.delay || 0
-        return delay > 15
-      })
-      
-      const averageDelay = delayedFlights.length > 0
-        ? Math.round(delayedFlights.reduce((sum, f) => sum + (f.delay || 0), 0) / delayedFlights.length)
+      const averageDelay = delayCalculations.length > 0
+        ? Math.round(delayCalculations.reduce((sum, delay) => sum + delay, 0) / delayCalculations.length)
         : 0
       
-      const onTimePercentage = flightCount > 0 ? Math.round((onTimeFlights.length / flightCount) * 100) : 0
+      const onTimePercentage = flightCount > 0 ? Math.round((onTimeCount / flightCount) * 100) : 0
       
       routes.push({
         origin: route.origin,
@@ -853,11 +1099,20 @@ class CacheManager {
    * Get cached data by key (simple version)
    */
   getCachedData<T>(key: string): T | null {
+    console.log(`[Cache Manager] Looking for key: ${key}`)
+    console.log(`[Cache Manager] Available keys: ${Array.from(this.cacheData.values()).map(e => e.key).join(', ')}`)
+    
     for (const entry of this.cacheData.values()) {
-      if (entry.key === key && !this.isExpired(entry)) {
-        return entry.data as T
+      if (entry.key === key) {
+        const expired = this.isExpired(entry)
+        console.log(`[Cache Manager] Found key ${key}, expired: ${expired}`)
+        if (!expired) {
+          console.log(`[Cache Manager] Returning data for key: ${key}`)
+          return entry.data as T
+        }
       }
     }
+    console.log(`[Cache Manager] No valid data found for key: ${key}`)
     return null
   }
 
@@ -898,3 +1153,17 @@ class CacheManager {
 
 // Export singleton
 export const cacheManager = CacheManager.getInstance()
+
+// Auto-initialize disabled to prevent multiple initializations
+// Initialize manually through API calls only
+if (false && typeof window === 'undefined') {
+  // Use setTimeout to avoid blocking the import
+  setTimeout(async () => {
+    try {
+      await cacheManager.initialize()
+      console.log('[Cache Manager] Auto-initialization completed')
+    } catch (error) {
+      console.error('[Cache Manager] Auto-initialization failed:', error)
+    }
+  }, 100)
+}

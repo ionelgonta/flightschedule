@@ -99,6 +99,10 @@ export const AIRLINE_MAPPING: { [key: string]: string } = {
   'S7': 'S7 Airlines',
   'SBI': 'S7 Airlines',
   
+  // New Airlines from user request
+  'H4': 'Hisky',
+  'HI': 'Hisky',
+  
   // Default fallback
   'XX': 'Companie Necunoscută'
 }
@@ -124,7 +128,6 @@ export const AIRPORT_CITY_MAPPING: { [key: string]: string } = {
   
   // Moldovan Airports
   'RMO': 'Chișinău',
-  'KIV': 'Chișinău',
   
   // Major European Airports
   'LHR': 'Londra',
@@ -217,6 +220,15 @@ export const AIRPORT_CITY_MAPPING: { [key: string]: string } = {
   'OPO': 'Porto',
   'ZAZ': 'Zaragoza',
   'VGO': 'Vigo',
+  
+  // New airports from user request
+  'VRN': 'Verona',
+  'SSH': 'Sharm el Sheikh',
+  'CDT': 'Castellon',
+  'EIN': 'Eindhoven',
+  'HHN': 'Frankfurt Hahn',
+  'BRI': 'Bari',
+  'LCA': 'Larnaca',
   
   // Default fallback
   'XXX': 'Oraș Necunoscut'

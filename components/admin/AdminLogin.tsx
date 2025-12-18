@@ -4,9 +4,13 @@ import { useState } from 'react'
 import { Lock, Eye, EyeOff, Shield } from 'lucide-react'
 import { AdminDashboard } from './AdminDashboard'
 
-const ADMIN_PASSWORD = 'FlightSchedule2024!'
+const ADMIN_CREDENTIALS = {
+  username: 'admin',
+  password: 'FlightSchedule2024!'
+}
 
 export function AdminLogin() {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -16,12 +20,13 @@ export function AdminLogin() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (password === ADMIN_PASSWORD) {
+    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
       setIsAuthenticated(true)
       setError('')
     } else {
       setAttempts(prev => prev + 1)
-      setError('Parolă incorectă')
+      setError('Username sau parolă incorectă')
+      setUsername('')
       setPassword('')
       
       // Block after 3 failed attempts
@@ -47,7 +52,7 @@ export function AdminLogin() {
             Admin Dashboard
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Introduceți parola pentru a accesa panoul de administrare
+            Introduceți credențialele pentru a accesa panoul de administrare
           </p>
         </div>
 
@@ -56,8 +61,29 @@ export function AdminLogin() {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <div className="space-y-4">
               <div>
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Username
+                </label>
+                <div className="relative">
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    disabled={attempts >= 3}
+                    className="w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    placeholder="Introduceți username-ul"
+                    required
+                    autoComplete="username"
+                  />
+                  <Shield className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+
+              <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Parolă Admin
+                  Parolă
                 </label>
                 <div className="relative">
                   <input
@@ -68,8 +94,9 @@ export function AdminLogin() {
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={attempts >= 3}
                     className="w-full px-3 py-2 pl-10 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                    placeholder="Introduceți parola de admin"
+                    placeholder="Introduceți parola"
                     required
+                    autoComplete="current-password"
                   />
                   <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                   <button
@@ -92,7 +119,7 @@ export function AdminLogin() {
 
               <button
                 type="submit"
-                disabled={!password || attempts >= 3}
+                disabled={!username || !password || attempts >= 3}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Autentificare
@@ -108,7 +135,7 @@ export function AdminLogin() {
             <div className="text-sm text-blue-800 dark:text-blue-200">
               <p className="font-medium mb-1">Securitate</p>
               <ul className="space-y-1 text-xs">
-                <li>• Acces restricționat cu parolă</li>
+                <li>• Acces restricționat cu username și parolă</li>
                 <li>• Maxim 3 încercări de autentificare</li>
                 <li>• Sesiunea expiră la închiderea browser-ului</li>
               </ul>

@@ -26,25 +26,42 @@ class ClientFlightService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    // Handle both client-side and server-side rendering
+    if (typeof window !== 'undefined') {
+      // Client-side: use current origin
+      this.baseUrl = window.location.origin;
+    } else {
+      // Server-side: use empty string for relative URLs
+      // This will work because Next.js API routes are on the same domain
+      this.baseUrl = '';
+    }
   }
 
   /**
    * Obține sosirile pentru un aeroport
    */
   async getArrivals(airportCode: string, filters?: ClientFlightFilters): Promise<ClientFlightResponse> {
-    const url = new URL(`${this.baseUrl}/api/flights/${airportCode}/arrivals`);
+    // Construct URL path
+    let urlPath = `/api/flights/${airportCode}/arrivals`;
     
-    // Adaugă filtrele ca query parameters
+    // Add query parameters if filters exist
+    const params = new URLSearchParams();
     if (filters) {
-      if (filters.airline) url.searchParams.set('airline', filters.airline);
-      if (filters.status) url.searchParams.set('status', filters.status);
-      if (filters.start_time) url.searchParams.set('start_time', filters.start_time);
-      if (filters.end_time) url.searchParams.set('end_time', filters.end_time);
+      if (filters.airline) params.set('airline', filters.airline);
+      if (filters.status) params.set('status', filters.status);
+      if (filters.start_time) params.set('start_time', filters.start_time);
+      if (filters.end_time) params.set('end_time', filters.end_time);
     }
+    
+    if (params.toString()) {
+      urlPath += `?${params.toString()}`;
+    }
+    
+    // Use full URL for client-side, relative URL for server-side
+    const fetchUrl = this.baseUrl ? `${this.baseUrl}${urlPath}` : urlPath;
 
     try {
-      const response = await fetch(url.toString(), {
+      const response = await fetch(fetchUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -77,18 +94,27 @@ class ClientFlightService {
    * Obține plecările pentru un aeroport
    */
   async getDepartures(airportCode: string, filters?: ClientFlightFilters): Promise<ClientFlightResponse> {
-    const url = new URL(`${this.baseUrl}/api/flights/${airportCode}/departures`);
+    // Construct URL path
+    let urlPath = `/api/flights/${airportCode}/departures`;
     
-    // Adaugă filtrele ca query parameters
+    // Add query parameters if filters exist
+    const params = new URLSearchParams();
     if (filters) {
-      if (filters.airline) url.searchParams.set('airline', filters.airline);
-      if (filters.status) url.searchParams.set('status', filters.status);
-      if (filters.start_time) url.searchParams.set('start_time', filters.start_time);
-      if (filters.end_time) url.searchParams.set('end_time', filters.end_time);
+      if (filters.airline) params.set('airline', filters.airline);
+      if (filters.status) params.set('status', filters.status);
+      if (filters.start_time) params.set('start_time', filters.start_time);
+      if (filters.end_time) params.set('end_time', filters.end_time);
     }
+    
+    if (params.toString()) {
+      urlPath += `?${params.toString()}`;
+    }
+    
+    // Use full URL for client-side, relative URL for server-side
+    const fetchUrl = this.baseUrl ? `${this.baseUrl}${urlPath}` : urlPath;
 
     try {
-      const response = await fetch(url.toString(), {
+      const response = await fetch(fetchUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

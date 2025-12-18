@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { flightAnalyticsService } from '@/lib/flightAnalyticsService'
 import { getAirportByCodeOrSlug } from '@/lib/airports'
+import { getIcaoCode } from '@/lib/icaoMapping'
 
 export async function GET(
   request: NextRequest,
@@ -18,9 +19,13 @@ export async function GET(
       )
     }
 
-    // Get route analysis
+    // Convert IATA to ICAO for cache lookup
+    const icaoCode = getIcaoCode(airport.code)
+    console.log(`Getting route analysis for ${airport.code} (ICAO: ${icaoCode})`)
+
+    // Get route analysis using ICAO code
     const routeAnalysis = await flightAnalyticsService.getRouteAnalysis(
-      airport.code
+      icaoCode
     )
 
     // Sort routes by frequency

@@ -22,7 +22,8 @@ const getStatusBadge = (status: string) => {
     diverted: { label: 'Deviat', className: 'bg-error-container text-on-error-container' },
     boarding: { label: 'Îmbarcare', className: 'bg-tertiary-container text-on-tertiary-container' },
     departed: { label: 'Plecat', className: 'bg-primary-container text-on-primary-container' },
-    unknown: { label: 'Necunoscut', className: 'bg-surface-container-high text-on-surface-variant' }
+    unknown: { label: 'Necunoscut', className: 'bg-surface-container-high text-on-surface-variant' },
+    estimated: { label: 'Estimat', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' }
   };
 
   const config = statusConfig[status.toLowerCase()] || statusConfig.unknown;

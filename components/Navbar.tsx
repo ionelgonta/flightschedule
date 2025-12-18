@@ -102,6 +102,14 @@ export function Navbar() {
                     <div className="body-small text-on-surface-variant">Calendar interactiv</div>
                   </Link>
                   <Link
+                    href="/statistici"
+                    className="state-layer block px-4 py-3 text-on-surface hover:bg-surface-container-high transition-colors duration-200"
+                    onClick={() => setIsAnalyticsOpen(false)}
+                  >
+                    <div className="label-large font-medium">📊 Statistici Live</div>
+                    <div className="body-small text-on-surface-variant">Date istorice și tendințe</div>
+                  </Link>
+                  <Link
                     href="/analize-istorice"
                     className="state-layer block px-4 py-3 text-on-surface hover:bg-surface-container-high transition-colors duration-200"
                     onClick={() => setIsAnalyticsOpen(false)}
@@ -244,6 +252,13 @@ export function Navbar() {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Program Zboruri
+                  </Link>
+                  <Link 
+                    href="/statistici" 
+                    className="state-layer block px-3 py-2 rounded-lg body-medium text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    📊 Statistici Live
                   </Link>
                   <Link 
                     href="/analize-istorice" 

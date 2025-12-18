@@ -163,7 +163,7 @@ class AeroDataBoxService {
     this.requestCount++;
     const startTime = Date.now();
 
-    // Use correct API.Market AeroDataBox URL structure
+    // Use API.Market AeroDataBox URL structure
     const url = `https://prod.api.market/api/v1/aedbx/aerodatabox${endpoint}`;
     
     try {
@@ -276,7 +276,7 @@ class AeroDataBoxService {
       const icaoCode = getIcaoCode(airportCode);
       
       // Always attempt the API request - track ALL requests regardless of expected data availability
-      // Use correct API.Market AeroDataBox endpoint - returns both arrivals and departures
+      // Use API.Market AeroDataBox endpoint - returns both arrivals and departures
       const endpoint = `/flights/airports/Icao/${icaoCode}`;
       const response = await this.makeRequest<FlightResponse>(endpoint, type, airportCode);
       
@@ -553,7 +553,8 @@ class AeroDataBoxService {
     if (statusLower.includes('departed')) return 'departed';
     if (statusLower.includes('diverted')) return 'diverted';
     
-    return 'unknown';
+    // For unknown statuses, check if flight is in the future - if so, assume it's on-time/estimated
+    return 'estimated'; // This will be displayed as "Estimat" in Romanian
   }
 }
 

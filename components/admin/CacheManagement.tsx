@@ -50,6 +50,7 @@ export default function CacheManagement() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [refreshing, setRefreshing] = useState<string | null>(null)
+  const [reloadingStats, setReloadingStats] = useState(false)
   
   // Form state pentru configurație
   const [config, setConfig] = useState({
@@ -78,17 +79,20 @@ export default function CacheManagement() {
   }, [stats])
 
   const loadStats = async () => {
+    setReloadingStats(true)
     try {
       const response = await fetch('/api/admin/cache-management')
       const data = await response.json()
       
       if (data.success) {
         setStats(data.data)
+        console.log('Cache stats reloaded successfully')
       }
     } catch (error) {
       console.error('Error loading cache stats:', error)
     } finally {
       setLoading(false)
+      setReloadingStats(false)
     }
   }
 
@@ -564,9 +568,9 @@ export default function CacheManagement() {
 
       {/* Refresh Button */}
       <div className="flex justify-center">
-        <Button onClick={loadStats} variant="outlined">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Reîncarcă Statistici
+        <Button onClick={loadStats} variant="outlined" disabled={reloadingStats}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${reloadingStats ? 'animate-spin' : ''}`} />
+          {reloadingStats ? 'Se reîncarcă...' : 'Reîncarcă Statistici'}
         </Button>
       </div>
     </div>

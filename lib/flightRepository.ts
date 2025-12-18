@@ -44,6 +44,9 @@ class FlightRepository {
     const cacheKey = this.getCacheKey(airportCode, 'arrivals');
     
     try {
+      // Asigură-te că cache manager-ul este inițializat
+      await cacheManager.initialize()
+      
       // Citește DOAR din cache - nu face request-uri API
       const cachedData = cacheManager.getCachedData<RawFlightData[]>(cacheKey);
       
@@ -95,6 +98,9 @@ class FlightRepository {
     const cacheKey = this.getCacheKey(airportCode, 'departures');
     
     try {
+      // Asigură-te că cache manager-ul este inițializat
+      await cacheManager.initialize()
+      
       // Citește DOAR din cache - nu face request-uri API
       const cachedData = cacheManager.getCachedData<RawFlightData[]>(cacheKey);
       
@@ -181,6 +187,22 @@ class FlightRepository {
   async refreshAirport(airportCode: string): Promise<void> {
     console.log(`Manual refresh triggered for airport ${airportCode}`);
     await cacheManager.manualRefresh('flightData', airportCode);
+  }
+
+  /**
+   * Forțează popularea cache-ului pentru un aeroport
+   */
+  async forcePopulateCache(airportCode: string): Promise<void> {
+    console.log(`[Flight Repository] Force populating cache for ${airportCode}`);
+    
+    // Inițializează cache manager-ul
+    await cacheManager.initialize();
+    
+    // Forțează fetch pentru arrivals și departures
+    await cacheManager.manualRefresh('flightData', airportCode);
+    
+    // Generează analytics din datele de zbor cache-ate
+    await cacheManager.manualRefresh('analytics', airportCode);
   }
 
   /**
