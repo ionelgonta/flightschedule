@@ -92,7 +92,7 @@ export default function AirportPage({ params }: AirportPageProps) {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href={`/aeroport/${generateAirportSlug(airport)}/sosiri`}
-                  className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2"
+                  className="bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center space-x-2"
                 >
                   <span>Vezi Sosiri</span>
                   <ArrowRight className="h-4 w-4" />

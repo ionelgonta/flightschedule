@@ -1,6 +1,13 @@
 import { Airport } from '@/types/flight'
+import { getStaticAirportInfo, getStaticCityName, STATIC_AIRPORT_DATABASE } from './staticAirportDatabase'
 
-export const MAJOR_AIRPORTS: Airport[] = [
+// Cache pentru aeroporturi pentru a evita apelurile repetate
+let airportCache: Map<string, Airport> = new Map()
+let cacheExpiry: number = 0
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minute
+
+// Fallback airports pentru când baza de date nu este disponibilă
+export const FALLBACK_AIRPORTS: Airport[] = [
   // Romanian Airports
   {
     code: 'OTP',
@@ -134,13 +141,141 @@ export const MAJOR_AIRPORTS: Airport[] = [
   }
 ]
 
-export const getAirportByCode = (code: string): Airport | undefined => {
-  return MAJOR_AIRPORTS.find(airport => airport.code === code)
+/**
+ * Obține informații despre aeroport din static database, API enhanced sau fallback
+ * Prioritate: Static DB > API Enhanced > Fallback
+ */
+export const getAirportByCode = async (code: string): Promise<Airport | undefined> => {
+  if (!code || code.length !== 3) return undefined
+  
+  const upperCode = code.toUpperCase()
+  
+  // Verifică cache-ul
+  const now = Date.now()
+  if (now < cacheExpiry && airportCache.has(upperCode)) {
+    return airportCache.get(upperCode)
+  }
+  
+  // Prioritate 1: Static database (instant, no API calls)
+  const staticAirport = getStaticAirportInfo(upperCode)
+  if (staticAirport) {
+    const airport: Airport = {
+      code: staticAirport.iata,
+      name: staticAirport.name,
+      city: staticAirport.city,
+      country: staticAirport.country,
+      timezone: staticAirport.timezone || 'UTC'
+    }
+    
+    // Actualizează cache-ul
+    airportCache.set(upperCode, airport)
+    cacheExpiry = now + CACHE_DURATION
+    
+    return airport
+  }
+  
+  try {
+    // Prioritate 2: API enhanced (care accesează baza de date pe server)
+    const response = await fetch(`/api/airports/enhanced?iata=${upperCode}`)
+    if (response.ok) {
+      const data = await response.json()
+      if (data.success && data.airport) {
+        const airport: Airport = {
+          code: data.airport.iata_code,
+          name: data.airport.name,
+          city: data.airport.city || data.airport.municipality_name || upperCode,
+          country: data.airport.country_name || 'Unknown',
+          timezone: data.airport.timezone || 'UTC',
+          coordinates: data.airport.latitude && data.airport.longitude ? {
+            lat: data.airport.latitude,
+            lng: data.airport.longitude
+          } : undefined
+        }
+        
+        // Actualizează cache-ul
+        airportCache.set(upperCode, airport)
+        cacheExpiry = now + CACHE_DURATION
+        
+        return airport
+      }
+    }
+  } catch (error) {
+    console.error(`[Airport Service] Error fetching airport ${upperCode} from API:`, error)
+  }
+  
+  // Prioritate 3: Fallback la lista statică (pentru aeroporturile românești)
+  const fallbackAirport = FALLBACK_AIRPORTS.find(airport => airport.code === upperCode)
+  if (fallbackAirport) {
+    airportCache.set(upperCode, fallbackAirport)
+    cacheExpiry = now + CACHE_DURATION
+  }
+  
+  return fallbackAirport
 }
+
+/**
+ * Versiune sincronă pentru compatibilitate cu codul existent
+ * Prioritate: Cache > Static DB > Fallback
+ */
+export const getAirportByCodeSync = (code: string): Airport | undefined => {
+  const upperCode = code.toUpperCase()
+  
+  // Verifică cache-ul mai întâi
+  if (airportCache.has(upperCode) && Date.now() < cacheExpiry) {
+    return airportCache.get(upperCode)
+  }
+  
+  // Prioritate 1: Static database
+  const staticAirport = getStaticAirportInfo(upperCode)
+  if (staticAirport) {
+    const airport: Airport = {
+      code: staticAirport.iata,
+      name: staticAirport.name,
+      city: staticAirport.city,
+      country: staticAirport.country,
+      timezone: staticAirport.timezone || 'UTC'
+    }
+    
+    // Actualizează cache-ul
+    airportCache.set(upperCode, airport)
+    cacheExpiry = Date.now() + CACHE_DURATION
+    
+    return airport
+  }
+  
+  // Prioritate 2: Fallback la lista statică (aeroporturi românești)
+  return FALLBACK_AIRPORTS.find(airport => airport.code === upperCode)
+}
+
+// Pentru compatibilitate - folosește fallback-ul static
+export const MAJOR_AIRPORTS = FALLBACK_AIRPORTS
 
 export const searchAirports = (query: string): Airport[] => {
   const searchTerm = query.toLowerCase()
-  return MAJOR_AIRPORTS.filter(airport => 
+  
+  // Combină static database cu fallback airports
+  const allAirports: Airport[] = [
+    // Convert static database to Airport format
+    ...Object.values(STATIC_AIRPORT_DATABASE).map(staticAirport => ({
+      code: staticAirport.iata,
+      name: staticAirport.name,
+      city: staticAirport.city,
+      country: staticAirport.country,
+      timezone: staticAirport.timezone || 'UTC'
+    })),
+    // Add fallback airports (Romanian airports)
+    ...FALLBACK_AIRPORTS
+  ]
+  
+  // Remove duplicates by IATA code (static database takes priority)
+  const uniqueAirports = allAirports.reduce((acc, airport) => {
+    if (!acc.some(existing => existing.code === airport.code)) {
+      acc.push(airport)
+    }
+    return acc
+  }, [] as Airport[])
+  
+  return uniqueAirports.filter(airport => 
     airport.code.toLowerCase().includes(searchTerm) ||
     airport.name.toLowerCase().includes(searchTerm) ||
     airport.city.toLowerCase().includes(searchTerm) ||
@@ -178,7 +313,7 @@ export const generateAirportSlug = (airport: Airport): string => {
 
 // Găsește aeroport după slug
 export const getAirportBySlug = (slug: string): Airport | undefined => {
-  return MAJOR_AIRPORTS.find(airport => generateAirportSlug(airport) === slug)
+  return FALLBACK_AIRPORTS.find(airport => generateAirportSlug(airport) === slug)
 }
 
 // Mapare pentru compatibilitate cu codurile vechi
@@ -187,6 +322,83 @@ export const getAirportByCodeOrSlug = (identifier: string): Airport | undefined 
   const bySlug = getAirportBySlug(identifier)
   if (bySlug) return bySlug
   
-  // Dacă nu găsește, încearcă după cod (pentru compatibilitate)
-  return getAirportByCode(identifier)
+  // Dacă nu găsește, încearcă după cod (pentru compatibilitate) - versiune sincronă
+  return getAirportByCodeSync(identifier)
+}
+
+/**
+ * Verifică dacă un cod de aeroport este suportat (IATA codes only)
+ */
+export const isAirportSupported = (code: string): boolean => {
+  return FALLBACK_AIRPORTS.some(airport => airport.code === code.toUpperCase())
+}
+
+/**
+ * Obține informațiile complete pentru un aeroport (versiune async)
+ */
+export const getAirportInfo = async (code: string): Promise<Airport | undefined> => {
+  return await getAirportByCode(code.toUpperCase())
+}
+
+/**
+ * Versiune sincronă pentru compatibilitate
+ */
+export const getAirportInfoSync = (code: string): Airport | undefined => {
+  return getAirportByCodeSync(code.toUpperCase())
+}
+
+/**
+ * Obține numele orașului pentru un cod IATA (versiune sincronă pentru UI)
+ * Prioritate: Cache > Static DB > Fallback > IATA code
+ */
+export const getCityName = (code: string): string => {
+  if (!code || code.length !== 3) return code
+  
+  const upperCode = code.toUpperCase()
+  
+  // Verifică cache-ul
+  if (airportCache.has(upperCode) && Date.now() < cacheExpiry) {
+    const airport = airportCache.get(upperCode)
+    return airport?.city || upperCode
+  }
+  
+  // Prioritate 1: Static database (instant lookup)
+  const staticCityName = getStaticCityName(upperCode)
+  if (staticCityName !== upperCode) {
+    // Found in static database, cache it
+    const staticAirport = getStaticAirportInfo(upperCode)
+    if (staticAirport) {
+      const airport: Airport = {
+        code: staticAirport.iata,
+        name: staticAirport.name,
+        city: staticAirport.city,
+        country: staticAirport.country,
+        timezone: staticAirport.timezone || 'UTC'
+      }
+      airportCache.set(upperCode, airport)
+      cacheExpiry = Date.now() + CACHE_DURATION
+    }
+    return staticCityName
+  }
+  
+  // Prioritate 2: Verifică fallback-ul (aeroporturi românești)
+  const fallbackAirport = FALLBACK_AIRPORTS.find(airport => airport.code === upperCode)
+  if (fallbackAirport) {
+    // Actualizează cache-ul cu fallback-ul
+    airportCache.set(upperCode, fallbackAirport)
+    cacheExpiry = Date.now() + CACHE_DURATION
+    return fallbackAirport.city
+  }
+  
+  // Prioritate 3: Returnează codul IATA dacă nu găsește nimic
+  return upperCode
+}
+
+/**
+ * Preîncarcă informațiile pentru o listă de coduri IATA
+ * Util pentru a popula cache-ul în avans
+ */
+export const preloadAirports = async (codes: string[]): Promise<void> => {
+  const promises = codes.map(code => getAirportByCode(code))
+  await Promise.all(promises)
 }

@@ -31,10 +31,58 @@ class FlightRepository {
   }
 
   /**
-   * Generează cheia de cache
+   * Generează cheia de cache - folosește IATA direct
    */
   private getCacheKey(airportCode: string, type: 'arrivals' | 'departures'): string {
     return `${airportCode}_${type}`;
+  }
+
+  /**
+   * Mapează datele din cache la formatul așteptat de componentă
+   * Folosește getCityName pentru a converti codurile IATA în nume de orașe
+   */
+  private mapCacheDataToRawFlightData(cacheData: any[]): RawFlightData[] {
+    // Import getCityName function
+    const { getCityName } = require('./airports');
+    
+    return cacheData.map(flight => {
+      const originCode = flight.originCode || flight.origin?.code || '';
+      const destinationCode = flight.destinationCode || flight.destination?.code || '';
+      
+      return {
+        flight_number: flight.flightNumber || flight.flight_number || '',
+        airline: {
+          name: flight.airlineName || flight.airline?.name || 'Unknown Airline',
+          code: flight.airlineCode || flight.airline?.code || 'XX',
+          logo: flight.airline?.logo
+        },
+        origin: {
+          airport: flight.originName || flight.origin?.airport || originCode || '',
+          code: originCode,
+          city: getCityName(originCode) // Use getCityName to convert IATA to city name
+        },
+        destination: {
+          airport: flight.destinationName || flight.destination?.airport || destinationCode || '',
+          code: destinationCode,
+          city: getCityName(destinationCode) // Use getCityName to convert IATA to city name
+        },
+        scheduled_time: flight.scheduledTime || flight.scheduled_time || '',
+        estimated_time: flight.estimatedTime || flight.estimated_time,
+        actual_time: flight.actualTime || flight.actual_time,
+        status: flight.status || 'unknown',
+        gate: flight.gate,
+        terminal: flight.terminal,
+        aircraft: flight.aircraft,
+        delay: flight.delayMinutes || flight.delay,
+        callSign: flight.callSign,
+        isCargo: flight.isCargo,
+        baggageBelt: flight.baggageBelt,
+        runway: flight.runway,
+        registration: flight.registration,
+        quality: flight.quality,
+        lastUpdated: flight.lastUpdated
+      };
+    });
   }
 
   /**
@@ -48,14 +96,23 @@ class FlightRepository {
       await cacheManager.initialize()
       
       // Citește DOAR din cache - nu face request-uri API
-      const cachedData = cacheManager.getCachedData<RawFlightData[]>(cacheKey);
+      const cachedData = cacheManager.getCachedData<any[]>(cacheKey);
       
-      if (cachedData && cachedData.length > 0) {
-        console.log(`Cache HIT for ${airportCode} arrivals`);
+      // Verifică dacă există o intrare în cache (chiar dacă e array gol)
+      if (cachedData !== null) {
+        console.log(`Cache HIT for ${airportCode} arrivals - ${cachedData.length} flights`);
+        
+        // Mapează datele din cache la formatul așteptat
+        const mappedData = this.mapCacheDataToRawFlightData(cachedData);
+        
+        // Procesează automat codurile IATA noi găsite în datele de zboruri (doar pe server)
+        if (typeof window === 'undefined') {
+          this.processNewAirportCodes(cachedData);
+        }
         
         return {
           success: true,
-          data: this.applyFilters(cachedData, filters),
+          data: this.applyFilters(mappedData, filters),
           cached: true,
           last_updated: new Date().toISOString(),
           airport_code: airportCode,
@@ -63,8 +120,8 @@ class FlightRepository {
         };
       }
 
-      // Nu există date în cache
-      console.log(`No cached data for ${airportCode} arrivals`);
+      // Nu există intrare în cache
+      console.log(`No cached entry for ${airportCode} arrivals`);
       
       return {
         success: false,
@@ -102,14 +159,23 @@ class FlightRepository {
       await cacheManager.initialize()
       
       // Citește DOAR din cache - nu face request-uri API
-      const cachedData = cacheManager.getCachedData<RawFlightData[]>(cacheKey);
+      const cachedData = cacheManager.getCachedData<any[]>(cacheKey);
       
-      if (cachedData && cachedData.length > 0) {
-        console.log(`Cache HIT for ${airportCode} departures`);
+      // Verifică dacă există o intrare în cache (chiar dacă e array gol)
+      if (cachedData !== null) {
+        console.log(`Cache HIT for ${airportCode} departures - ${cachedData.length} flights`);
+        
+        // Mapează datele din cache la formatul așteptat
+        const mappedData = this.mapCacheDataToRawFlightData(cachedData);
+        
+        // Procesează automat codurile IATA noi găsite în datele de zboruri (doar pe server)
+        if (typeof window === 'undefined') {
+          this.processNewAirportCodes(cachedData);
+        }
         
         return {
           success: true,
-          data: this.applyFilters(cachedData, filters),
+          data: this.applyFilters(mappedData, filters),
           cached: true,
           last_updated: new Date().toISOString(),
           airport_code: airportCode,
@@ -117,8 +183,8 @@ class FlightRepository {
         };
       }
 
-      // Nu există date în cache
-      console.log(`No cached data for ${airportCode} departures`);
+      // Nu există intrare în cache
+      console.log(`No cached entry for ${airportCode} departures`);
       
       return {
         success: false,
@@ -146,6 +212,62 @@ class FlightRepository {
   }
 
   /**
+   * Procesează codurile IATA noi găsite în datele de zboruri
+   */
+  private processNewAirportCodes(flights: any[]): void {
+    if (!flights || flights.length === 0) return;
+
+    // Nu procesează pe server-side - doar în browser
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    // Extrage codurile IATA din datele de zboruri
+    const codes = new Set<string>();
+    
+    flights.forEach(flight => {
+      if (flight.originCode && this.isValidIataCode(flight.originCode)) {
+        codes.add(flight.originCode.toUpperCase());
+      }
+      if (flight.destinationCode && this.isValidIataCode(flight.destinationCode)) {
+        codes.add(flight.destinationCode.toUpperCase());
+      }
+      if (flight.origin?.code && this.isValidIataCode(flight.origin.code)) {
+        codes.add(flight.origin.code.toUpperCase());
+      }
+      if (flight.destination?.code && this.isValidIataCode(flight.destination.code)) {
+        codes.add(flight.destination.code.toUpperCase());
+      }
+    });
+
+    // Procesează codurile prin API în background doar în browser
+    if (codes.size > 0) {
+      const uniqueCodes = Array.from(codes);
+      console.log(`[Flight Repository] Found ${uniqueCodes.length} IATA codes to process:`, uniqueCodes);
+      
+      // Apelează API-ul pentru fiecare cod în background
+      uniqueCodes.forEach(code => {
+        // Folosește setTimeout pentru a evita blocarea și a rula în următorul tick
+        setTimeout(() => {
+          fetch(`/api/airports/process?iata=${code}`)
+            .catch(error => {
+              console.error(`[Flight Repository] Failed to process ${code}:`, error);
+            });
+        }, 100);
+      });
+    }
+  }
+
+  /**
+   * Verifică dacă un cod este un IATA code valid
+   */
+  private isValidIataCode(code: string): boolean {
+    return typeof code === 'string' && 
+           code.length === 3 && 
+           /^[A-Z]{3}$/.test(code.toUpperCase());
+  }
+
+  /**
    * Aplică filtrele pe datele de zbor
    */
   private applyFilters(flights: RawFlightData[], filters?: FlightFilters): RawFlightData[] {
@@ -157,8 +279,8 @@ class FlightRepository {
     if (filters.airline) {
       const airlineFilter = filters.airline.toLowerCase();
       filtered = filtered.filter(flight => 
-        flight.airline.name.toLowerCase().includes(airlineFilter) ||
-        flight.airline.code.toLowerCase().includes(airlineFilter)
+        (flight.airline?.name || '').toLowerCase().includes(airlineFilter) ||
+        (flight.airline?.code || '').toLowerCase().includes(airlineFilter)
       );
     }
 
@@ -224,8 +346,7 @@ class FlightRepository {
     
     await cacheManager.updateConfig({
       flightData: {
-        cronInterval: realtimeInterval,
-        cacheUntilNext: true
+        cronInterval: realtimeInterval
       },
       analytics: currentConfig.analytics,
       aircraft: currentConfig.aircraft

@@ -91,8 +91,7 @@ export function updateCacheConfig(config: CacheConfig) {
   // Delegăm la noul cache manager
   cacheManager.updateConfig({
     flightData: {
-      cronInterval: config.realtimeInterval,
-      cacheUntilNext: true
+      cronInterval: config.realtimeInterval
     },
     analytics: {
       cronInterval: config.analyticsInterval,
@@ -126,14 +125,14 @@ export class FlightAnalyticsService {
     this.flightApiService = new FlightApiService({
       provider: 'aerodatabox',
       apiKey: process.env.AERODATABOX_API_KEY || '',
-      baseUrl: 'https://aerodatabox.p.rapidapi.com',
+      baseUrl: 'https://prod.api.market/api/v1/aedbx/aerodatabox',
       rateLimit: 100
     })
     
     // Inițializează AeroDataBox service pentru fallback
     this.aeroDataBoxService = new AeroDataBoxService({
       apiKey: process.env.AERODATABOX_API_KEY || '',
-      baseUrl: 'https://aerodatabox.p.rapidapi.com',
+      baseUrl: 'https://prod.api.market/api/v1/aedbx/aerodatabox',
       rateLimit: 100
     })
   }
@@ -148,12 +147,8 @@ export class FlightAnalyticsService {
     toDate: string
   ): Promise<FlightSchedule[]> {
     try {
-      // Convertește codul IATA la ICAO pentru cache lookup
-      const { getIcaoCode } = await import('./icaoMapping')
-      const icaoCode = getIcaoCode(airportCode)
-      
-      // Folosește cheia simplă din cache
-      const cacheKey = `${icaoCode}_${type}`
+      // Folosește IATA direct pentru cache lookup
+      const cacheKey = `${airportCode}_${type}`
       
       // Citește datele din cache
       const cachedFlights = cacheManager.getCachedData<any[]>(cacheKey) || []

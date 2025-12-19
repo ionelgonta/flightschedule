@@ -29,7 +29,7 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
   // Helper function to convert airport codes to display names
   const getAirportDisplayName = (code: string): string => {
     const airport = MAJOR_AIRPORTS.find(a => a.code === code)
-    return airport ? `${airport.city} (${airport.code})` : code
+    return airport ? airport.city : code
   }
 
   // Get Romanian and Moldovan airports for filters
@@ -47,7 +47,7 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
       const data = await response.json()
       
       if (data.success) {
-        // Convert airport codes to city names
+        // Convert airport codes to city names synchronously using MAJOR_AIRPORTS
         const processedData = data.data.map((item: WeeklyScheduleData) => ({
           ...item,
           airport: getAirportDisplayName(item.airport),
@@ -99,7 +99,7 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
     }
   }
 
-  // Apply filters and sorting
+  // Group similar routes and apply filters/sorting
   useEffect(() => {
     let filtered = [...scheduleData]
     
@@ -122,8 +122,56 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
       )
     }
     
+    // Group similar routes (same origin-destination pair)
+    const routeGroups = new Map<string, WeeklyScheduleData[]>()
+    
+    filtered.forEach(item => {
+      const routeKey = `${item.airport} → ${item.destination}`
+      if (!routeGroups.has(routeKey)) {
+        routeGroups.set(routeKey, [])
+      }
+      routeGroups.get(routeKey)!.push(item)
+    })
+    
+    // Create grouped data with combined information
+    const groupedData: WeeklyScheduleData[] = []
+    
+    routeGroups.forEach((flights, routeKey) => {
+      if (flights.length === 1) {
+        // Single flight, keep as is
+        groupedData.push(flights[0])
+      } else {
+        // Multiple flights on same route, create grouped entry
+        const airlines = [...new Set(flights.map(f => f.airline))].join(', ')
+        const flightNumbers = flights.map(f => f.flightNumber).join(', ')
+        const totalFrequency = flights.reduce((sum, f) => sum + f.frequency, 0)
+        
+        // Combine weekly patterns (OR operation)
+        const combinedPattern = {
+          monday: flights.some(f => f.weeklyPattern.monday),
+          tuesday: flights.some(f => f.weeklyPattern.tuesday),
+          wednesday: flights.some(f => f.weeklyPattern.wednesday),
+          thursday: flights.some(f => f.weeklyPattern.thursday),
+          friday: flights.some(f => f.weeklyPattern.friday),
+          saturday: flights.some(f => f.weeklyPattern.saturday),
+          sunday: flights.some(f => f.weeklyPattern.sunday)
+        }
+        
+        groupedData.push({
+          airport: flights[0].airport,
+          destination: flights[0].destination,
+          airline: airlines,
+          flightNumber: flightNumbers,
+          weeklyPattern: combinedPattern,
+          frequency: totalFrequency,
+          lastUpdated: flights[0].lastUpdated,
+          dataSource: flights[0].dataSource
+        })
+      }
+    })
+    
     // Apply sorting
-    filtered.sort((a, b) => {
+    groupedData.sort((a, b) => {
       let aValue: string | number = ''
       let bValue: string | number = ''
       
@@ -154,7 +202,7 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
       return sortOrder === 'asc' ? comparison : -comparison
     })
     
-    setFilteredData(filtered)
+    setFilteredData(groupedData)
   }, [scheduleData, airportFilter, destinationFilter, airlineFilter, sortBy, sortOrder])
 
   // Handle URL parameters for pre-filtering
@@ -408,18 +456,34 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredData.map((item, index) => (
                 <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4">
                     <div className="text-sm font-medium text-gray-900 dark:text-white">
                       {item.airport} → {item.destination}
                     </div>
+                    {item.airline.includes(',') && (
+                      <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                        Rută cu multiple companii
+                      </div>
+                    )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4">
                     <div className="text-sm text-gray-900 dark:text-white font-mono">
-                      {item.flightNumber}
+                      {item.flightNumber.length > 20 ? 
+                        `${item.flightNumber.substring(0, 20)}...` : 
+                        item.flightNumber
+                      }
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {item.airline}
+                      {item.airline.length > 30 ? 
+                        `${item.airline.substring(0, 30)}...` : 
+                        item.airline
+                      }
                     </div>
+                    {item.airline.includes(',') && (
+                      <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                        {item.airline.split(',').length} companii
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${

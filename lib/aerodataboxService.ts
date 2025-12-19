@@ -3,8 +3,8 @@
  * Suportă toate endpoint-urile disponibile în AeroDataBox API
  */
 
-import { getIcaoCode, getIataCode } from './icaoMapping';
-import { getAirportByCode } from './airports';
+// Removed ICAO imports - using IATA only
+import { getAirportByCodeSync } from './airports';
 // Server-side only import
 let persistentApiRequestTracker: any = null
 if (typeof window === 'undefined') {
@@ -273,19 +273,23 @@ class AeroDataBoxService {
     toTime?: string
   ): Promise<Flight[]> {
     try {
-      const icaoCode = getIcaoCode(airportCode);
+      // Use IATA codes directly for API calls
+      const endpoint = `/flights/airports/Iata/${airportCode}`;
+      console.log(`Making API request to: ${this.config.baseUrl}${endpoint}`);
       
-      // Always attempt the API request - track ALL requests regardless of expected data availability
-      // Use API.Market AeroDataBox endpoint - returns both arrivals and departures
-      const endpoint = `/flights/airports/Icao/${icaoCode}`;
       const response = await this.makeRequest<FlightResponse>(endpoint, type, airportCode);
+      
+      console.log(`API response keys:`, Object.keys(response));
+      console.log(`Arrivals count: ${response.arrivals?.length || 0}, Departures count: ${response.departures?.length || 0}`);
       
       const flights = type === 'arrivals' ? (response.arrivals || []) : (response.departures || []);
       
+      console.log(`Extracted ${flights.length} ${type} flights for ${airportCode}`);
+      
       // If no flights returned, add to limited data list for future reference but still track the request
       if (flights.length === 0) {
-        console.warn(`Airport ${airportCode} returned no ${type} data - adding to limited data list`);
-        this.limitedDataAirports.add(airportCode);
+        console.warn(`Airport ${airportCode} returned no ${type} data - this may be normal if no flights are scheduled`);
+        // Don't add to limited data list immediately - empty results can be normal
       }
       
       return flights;
@@ -296,9 +300,10 @@ class AeroDataBoxService {
       if (error instanceof Error && (
         error.message.includes('Empty response') || 
         error.message.includes('Invalid JSON') ||
-        error.message.includes('Unexpected end of JSON input')
+        error.message.includes('Unexpected end of JSON input') ||
+        error.message.includes('400 Bad Request')
       )) {
-        console.warn(`Adding ${airportCode} to limited data airports list due to API issues`);
+        console.warn(`Adding ${airportCode} to limited data airports list due to API issues: ${error.message}`);
         this.limitedDataAirports.add(airportCode);
       }
       
@@ -311,9 +316,8 @@ class AeroDataBoxService {
    * Obține informații despre un aeroport
    */
   async getAirportInfo(airportCode: string): Promise<Airport> {
-    const icaoCode = getIcaoCode(airportCode);
-    // Use correct API.Market endpoint structure (note: Icao with capital I)
-    const endpoint = `/airports/Icao/${icaoCode}?withRunways=false&withTime=false`;
+    // Use IATA codes directly
+    const endpoint = `/airports/Iata/${airportCode}?withRunways=false&withTime=false`;
     return this.makeRequest<Airport>(endpoint, 'statistics', airportCode);
   }
 
@@ -321,8 +325,7 @@ class AeroDataBoxService {
    * Obține statistici pentru un aeroport
    */
   async getAirportStats(airportCode: string): Promise<AirportStats> {
-    const icaoCode = getIcaoCode(airportCode);
-    const endpoint = `/airports/icao/${icaoCode}/stats`;
+    const endpoint = `/airports/iata/${airportCode}/stats`;
     return this.makeRequest<AirportStats>(endpoint, 'statistics', airportCode);
   }
 
@@ -386,11 +389,10 @@ class AeroDataBoxService {
     arrivalAirport: string,
     date?: string
   ): Promise<Flight[]> {
-    const depIcao = getIcaoCode(departureAirport);
-    const arrIcao = getIcaoCode(arrivalAirport);
+    // Use IATA codes directly
     const flightDate = date || new Date().toISOString().split('T')[0];
     
-    const endpoint = `/flights/airports/icao/${depIcao}/${arrIcao}/${flightDate}`;
+    const endpoint = `/flights/airports/iata/${departureAirport}/${arrivalAirport}/${flightDate}`;
     return this.makeRequest<Flight[]>(endpoint, 'routes', `${departureAirport}-${arrivalAirport}`);
   }
 
@@ -448,8 +450,8 @@ class AeroDataBoxService {
       const scheduledTime = movement.scheduledTime || {};
       const revisedTime = movement.revisedTime || {}; // This is the estimated/actual time
       
-      // Get current airport info dynamically
-      const currentAirport = currentAirportCode ? getAirportByCode(currentAirportCode) : null;
+      // Get current airport info dynamically (folosește versiunea sincronă)
+      const currentAirport = currentAirportCode ? getAirportByCodeSync(currentAirportCode) : null;
       const currentAirportInfo = {
         airport: currentAirport?.name || 'Unknown Airport',
         code: currentAirportCode || 'XXX',
@@ -498,6 +500,7 @@ class AeroDataBoxService {
       };
     } catch (error) {
       console.error('Error converting flight data:', error);
+      console.error('Flight data that caused error:', JSON.stringify(flight, null, 2));
       // Return a safe fallback structure
       return {
         flight_number: 'N/A',

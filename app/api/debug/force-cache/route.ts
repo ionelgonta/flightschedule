@@ -45,6 +45,6 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    message: 'Use POST with {"airportCode": "LROP"} to force cache population'
+    message: 'Use POST with {"airportCode": "OTP"} to force cache population'
   });
 }

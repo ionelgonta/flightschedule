@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import WeeklyScheduleView from '@/components/analytics/WeeklyScheduleView'
 import CacheManagement from './CacheManagement'
 import { AdManagement } from './AdManagement'
-import { Save, Settings, Key, TestTube, CheckCircle, XCircle, Clock, TrendingUp, Calendar, LogOut, Globe } from 'lucide-react'
+import AirportManagement from './AirportManagement'
+import { Save, Settings, Key, TestTube, CheckCircle, XCircle, Clock, TrendingUp, Calendar, LogOut, Globe, MapPin } from 'lucide-react'
 
 export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('api')
@@ -525,6 +526,17 @@ export function AdminDashboard() {
                 Program Săptămânal
               </button>
               <button
+                onClick={() => setActiveTab('airports')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'airports'
+                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                <MapPin className="h-4 w-4 inline mr-2" />
+                Aeroporturi
+              </button>
+              <button
                 onClick={() => setActiveTab('ads')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'ads'
@@ -845,6 +857,10 @@ export function AdminDashboard() {
                 {/* Weekly Schedule Component */}
                 <WeeklyScheduleView />
               </div>
+            )}
+
+            {activeTab === 'airports' && (
+              <AirportManagement />
             )}
 
             {activeTab === 'ads' && (

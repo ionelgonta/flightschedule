@@ -69,27 +69,7 @@ export class FlightStatisticsService {
             let currentArrivals = getCachedData(`${airportCode}_arrivals`) || []
             let currentDepartures = getCachedData(`${airportCode}_departures`) || []
             
-            // If no data with IATA code, try ICAO code
-            if (currentArrivals.length === 0 && currentDepartures.length === 0) {
-              const icaoMapping: { [key: string]: string } = {
-                'OTP': 'LROP',
-                'BBU': 'LRBS', 
-                'CLJ': 'LRCL',
-                'TSR': 'LRTR',
-                'IAS': 'LRIA',
-                'CND': 'LRCK',
-                'SBZ': 'LRSB',
-                'CRA': 'LRCV',
-                'RMO': 'LUKK'
-              }
-              
-              const icaoCode = icaoMapping[airportCode]
-              if (icaoCode) {
-                currentArrivals = getCachedData(`${icaoCode}_arrivals`) || []
-                currentDepartures = getCachedData(`${icaoCode}_departures`) || []
-                console.log(`[Flight Statistics] Found data with ICAO code ${icaoCode}: ${currentArrivals.length} arrivals, ${currentDepartures.length} departures`)
-              }
-            }
+            // Use IATA codes only - no ICAO fallback needed
           
           // Transform current cache data to historical format
           const transformedArrivals = currentArrivals.map((flight: any) => ({

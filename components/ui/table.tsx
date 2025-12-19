@@ -14,7 +14,7 @@ const Table = React.forwardRef<HTMLTableElement, TableProps>(
     }
     
     return (
-      <div className="relative overflow-hidden rounded-xl border border-outline-variant bg-surface">
+      <div className="relative overflow-hidden rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm">
         <div className="overflow-x-auto">
           <table
             ref={ref}
@@ -34,7 +34,7 @@ const TableHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={`bg-surface-container-high border-b border-outline-variant ${className || ''}`}
+    className={`bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 border-b border-gray-300 dark:border-gray-600 ${className || ''}`}
     {...props}
   />
 ))
@@ -46,7 +46,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={`bg-surface ${className || ''}`}
+    className={`bg-white dark:bg-gray-800 ${className || ''}`}
     {...props}
   />
 ))
@@ -58,7 +58,7 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={`bg-surface-container border-t border-outline-variant ${className || ''}`}
+    className={`bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 ${className || ''}`}
     {...props}
   />
 ))
@@ -73,8 +73,8 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={`
-      border-b border-outline-variant/50 transition-colors duration-200
-      ${interactive ? 'state-layer hover:bg-surface-container-high cursor-pointer' : ''}
+      border-b border-gray-200 dark:border-gray-600 transition-colors duration-200
+      ${interactive ? 'hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer' : 'hover:bg-gray-50 dark:hover:bg-gray-750'}
       ${className || ''}
     `}
     {...props}
@@ -89,7 +89,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={`
-      px-4 py-3 text-left label-large font-medium text-on-surface-variant
+      px-4 py-4 text-left text-sm font-bold text-gray-800 dark:text-gray-200
       first:pl-6 last:pr-6
       ${className || ''}
     `}
@@ -105,7 +105,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={`
-      px-4 py-4 body-medium text-on-surface
+      px-4 py-4 text-sm text-gray-900 dark:text-gray-100 font-semibold
       first:pl-6 last:pr-6
       ${className || ''}
     `}
@@ -165,23 +165,23 @@ const MobileTable = React.forwardRef<HTMLDivElement, MobileTableProps>(
         </div>
 
         {/* Mobile Cards */}
-        <div className="md:hidden space-y-3">
+        <div className="md:hidden space-y-4">
           {data.map((row, index) => (
             <div
               key={index}
               className={`
-                bg-surface-container rounded-xl border border-outline-variant p-4
-                ${onRowClick ? 'state-layer cursor-pointer hover:bg-surface-container-high' : ''}
+                bg-white dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-600 p-6 shadow-lg
+                ${onRowClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-xl transition-all duration-200' : ''}
               `}
             >
               {columns
                 .filter(column => !column.hideOnMobile)
                 .map((column) => (
-                  <div key={column.key} className="flex justify-between items-start py-1">
-                    <span className="label-medium text-on-surface-variant min-w-0 flex-1 pr-3">
+                  <div key={column.key} className="flex justify-between items-start py-2 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300 min-w-0 flex-1 pr-3">
                       {column.mobileLabel || column.label}:
                     </span>
-                    <span className="body-medium text-on-surface text-right min-w-0 flex-1">
+                    <span className="text-sm text-gray-900 dark:text-gray-100 font-semibold text-right min-w-0 flex-1">
                       {column.render 
                         ? column.render(row[column.key], row)
                         : row[column.key]

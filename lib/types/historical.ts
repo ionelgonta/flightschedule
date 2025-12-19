@@ -131,7 +131,7 @@ export interface TrendDataPoint {
 // Comparative analysis
 export interface ComparativeAnalysis {
   airport: string
-  comparisonType: 'day-over-day' | 'week-over-week' | 'month-over-month'
+  comparisonType: ComparisonType
   current: PeriodStats
   previous: PeriodStats
   changes: {

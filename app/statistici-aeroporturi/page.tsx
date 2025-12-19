@@ -1,11 +1,12 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { Building, TrendingUp, Clock, MapPin } from 'lucide-react'
+import { Building, TrendingUp, Clock, MapPin, BarChart3 } from 'lucide-react'
 import { MAJOR_AIRPORTS } from '@/lib/airports'
 import { AdBanner } from '@/components/ads/AdBanner'
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs'
 import { StructuredData, generateBreadcrumbSchema } from '@/components/seo/StructuredData'
 import { AirportStatisticsGrid } from '@/components/statistics/AirportStatisticsGrid'
+import { GlobalStatusDistribution } from '@/components/statistics/GlobalStatusDistribution'
 
 export const metadata: Metadata = {
   title: 'Statistici Aeroporturi România - Performanță și Punctualitate',
@@ -181,6 +182,32 @@ export default function StatisticiAeroporturiPage() {
                   className="mx-auto"
                 />
               </div>
+
+              {/* Global Status Distribution */}
+              <section>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+                  Statistici Generale România
+                </h2>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+                  <div className="lg:col-span-1">
+                    <GlobalStatusDistribution />
+                  </div>
+                  <div className="lg:col-span-2">
+                    {/* Placeholder for additional global stats */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        Performanță Generală
+                      </h3>
+                      <div className="text-center py-8">
+                        <BarChart3 className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+                        <p className="text-gray-600 dark:text-gray-400">
+                          Grafice detaliate de performanță vor fi disponibile în curând
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
 
               {/* Airport Statistics with Real Data */}
               <AirportStatisticsGrid />

@@ -112,6 +112,18 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
   private flightRepository = getFlightRepository();
 
   async getAllCachedFlights(): Promise<CachedFlightData[]> {
+    console.log('[Weekly Schedule] Getting all cached flights from historical database...');
+    
+    // First try to get historical data from the last 30 days
+    const historicalFlights = await this.getHistoricalFlights(30);
+    
+    if (historicalFlights.length > 0) {
+      console.log(`[Weekly Schedule] Found ${historicalFlights.length} historical flight datasets`);
+      return historicalFlights;
+    }
+    
+    // Fallback to current cache if no historical data
+    console.log('[Weekly Schedule] No historical data found, falling back to current cache...');
     const allFlights: CachedFlightData[] = [];
     
     // Iterate through all airports and get cached data
@@ -125,6 +137,162 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
     }
     
     return allFlights;
+  }
+
+  private async getHistoricalFlights(days: number): Promise<CachedFlightData[]> {
+    try {
+      // Import historical cache manager
+      const { historicalCacheManager } = await import('./historicalCacheManager');
+      await historicalCacheManager.initialize();
+      
+      const allFlights: CachedFlightData[] = [];
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+      
+      console.log(`[Weekly Schedule] Querying historical data from ${startDate.toISOString().split('T')[0]} to ${endDate.toISOString().split('T')[0]}`);
+      
+      // Get data for each airport and each day
+      for (const airport of MAJOR_AIRPORTS) {
+        try {
+          // Get historical data for this airport for both arrivals and departures
+          const arrivalsData = await historicalCacheManager.getDataForRange(
+            airport.code, 
+            startDate.toISOString().split('T')[0], 
+            endDate.toISOString().split('T')[0],
+            'arrivals'
+          );
+          
+          const departuresData = await historicalCacheManager.getDataForRange(
+            airport.code, 
+            startDate.toISOString().split('T')[0], 
+            endDate.toISOString().split('T')[0],
+            'departures'
+          );
+          
+          // Convert to the expected format
+          const historicalData: any[] = [];
+          
+          // Group arrivals by date
+          const arrivalsByDate = new Map<string, any[]>();
+          arrivalsData.forEach(flight => {
+            const date = flight.scheduledTime.split('T')[0];
+            if (!arrivalsByDate.has(date)) {
+              arrivalsByDate.set(date, []);
+            }
+            arrivalsByDate.get(date)!.push(flight);
+          });
+          
+          // Group departures by date
+          const departuresByDate = new Map<string, any[]>();
+          departuresData.forEach(flight => {
+            const date = flight.scheduledTime.split('T')[0];
+            if (!departuresByDate.has(date)) {
+              departuresByDate.set(date, []);
+            }
+            departuresByDate.get(date)!.push(flight);
+          });
+          
+          // Create snapshots for each date
+          const allDates = new Set([...arrivalsByDate.keys(), ...departuresByDate.keys()]);
+          allDates.forEach(date => {
+            if (arrivalsByDate.has(date)) {
+              historicalData.push({
+                date,
+                type: 'arrivals',
+                flights: arrivalsByDate.get(date)
+              });
+            }
+            if (departuresByDate.has(date)) {
+              historicalData.push({
+                date,
+                type: 'departures', 
+                flights: departuresByDate.get(date)
+              });
+            }
+          });
+          
+          if (historicalData.length > 0) {
+            console.log(`[Weekly Schedule] Airport ${airport.code}: Found ${historicalData.length} historical snapshots`);
+            
+            // Group by date and type
+            const groupedData = new Map<string, { arrivals: any[], departures: any[] }>();
+            
+            historicalData.forEach(snapshot => {
+              const key = snapshot.date;
+              if (!groupedData.has(key)) {
+                groupedData.set(key, { arrivals: [], departures: [] });
+              }
+              
+              if (snapshot.type === 'arrivals') {
+                groupedData.get(key)!.arrivals = snapshot.flights || [];
+              } else if (snapshot.type === 'departures') {
+                groupedData.get(key)!.departures = snapshot.flights || [];
+              }
+            });
+            
+            // Convert to CachedFlightData format
+            groupedData.forEach((data, date) => {
+              if (data.arrivals.length > 0) {
+                allFlights.push({
+                  airport_code: airport.code,
+                  type: 'arrivals',
+                  data: this.convertHistoricalToRawFlightData(data.arrivals),
+                  updated_at: `${date}T12:00:00.000Z`,
+                  expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                  success: true
+                });
+              }
+              
+              if (data.departures.length > 0) {
+                allFlights.push({
+                  airport_code: airport.code,
+                  type: 'departures',
+                  data: this.convertHistoricalToRawFlightData(data.departures),
+                  updated_at: `${date}T12:00:00.000Z`,
+                  expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                  success: true
+                });
+              }
+            });
+          }
+        } catch (error) {
+          console.warn(`[Weekly Schedule] Could not get historical data for ${airport.code}:`, error);
+        }
+      }
+      
+      console.log(`[Weekly Schedule] Total historical flights collected: ${allFlights.length} datasets`);
+      return allFlights;
+      
+    } catch (error) {
+      console.error('[Weekly Schedule] Error accessing historical cache manager:', error);
+      return [];
+    }
+  }
+
+  private convertHistoricalToRawFlightData(historicalFlights: any[]): RawFlightData[] {
+    return historicalFlights.map(flight => ({
+      flight_number: flight.flightNumber || 'N/A',
+      airline: {
+        name: flight.airlineName || 'Unknown',
+        code: flight.airlineCode || 'XX'
+      },
+      origin: {
+        airport: flight.originName || flight.originCode || 'Unknown',
+        code: flight.originCode || 'XXX',
+        city: flight.originName || flight.originCode || 'Unknown'
+      },
+      destination: {
+        airport: flight.destinationName || flight.destinationCode || 'Unknown', 
+        code: flight.destinationCode || 'XXX',
+        city: flight.destinationName || flight.destinationCode || 'Unknown'
+      },
+      scheduled_time: flight.scheduledTime || new Date().toISOString(),
+      actual_time: flight.actualTime,
+      estimated_time: flight.estimatedTime,
+      status: flight.status || 'scheduled',
+      delay: flight.delayMinutes || 0
+    }));
   }
 
   async getFlightsByAirport(airportCode: string): Promise<CachedFlightData[]> {
@@ -600,9 +768,19 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
       return { from: '', to: '' };
     }
     
-    const dates = historicalData.map(d => new Date(d.updated_at));
-    const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
-    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+    // Filter out invalid dates and convert to timestamps
+    const validDates = historicalData
+      .map(d => new Date(d.updated_at))
+      .filter(date => !isNaN(date.getTime()))
+      .map(date => date.getTime());
+    
+    if (validDates.length === 0) {
+      console.warn('[Weekly Schedule] No valid dates found in historical data');
+      return { from: '', to: '' };
+    }
+    
+    const minDate = new Date(Math.min(...validDates));
+    const maxDate = new Date(Math.max(...validDates));
     
     return {
       from: minDate.toISOString(),

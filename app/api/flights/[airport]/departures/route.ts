@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFlightRepository } from '@/lib/flightRepository';
 import type { FlightFilters } from '@/lib/flightRepository';
-import { getIcaoCode, isAirportSupported } from '@/lib/icaoMapping';
+import { isAirportSupported } from '@/lib/airports';
 
 export async function GET(
   request: NextRequest,
@@ -38,9 +38,7 @@ export async function GET(
       );
     }
 
-    // Convertește IATA la ICAO pentru cache lookup
-    const icaoCode = getIcaoCode(airportCode);
-
+    // Folosește IATA direct pentru cache lookup
     // Construiește filtrele din query parameters
     const filters: FlightFilters = {};
     
@@ -59,9 +57,9 @@ export async function GET(
       };
     }
 
-    // Obține datele din repository folosind codul ICAO
+    // Obține datele din repository folosind codul IATA
     const flightRepository = getFlightRepository();
-    const result = await flightRepository.getDepartures(icaoCode, filters);
+    const result = await flightRepository.getDepartures(airportCode, filters);
     
     // Setează codul IATA în răspuns pentru client
     result.airport_code = airportCode;

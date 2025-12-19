@@ -163,6 +163,38 @@ curl -I https://victoriaocara.com
 
 ## 📞 QUICK DIAGNOSTIC COMMANDS
 
+### PowerShell Commands (Windows):
+```powershell
+# Test site availability
+Invoke-WebRequest -Uri "https://anyway.ro" -Method Head
+Invoke-WebRequest -Uri "https://victoriaocara.com" -Method Head
+
+# Test API endpoints
+Invoke-WebRequest -Uri "https://anyway.ro/api/flights/OTP/arrivals" | Select-Object -ExpandProperty Content | ConvertFrom-Json
+
+# Check specific flight data
+$response = Invoke-WebRequest -Uri "https://anyway.ro/api/flights/OTP/arrivals"
+$data = $response.Content | ConvertFrom-Json
+$data.data | Select-Object -First 5 | Format-Table flight_number, @{Name='Origin';Expression={$_.origin.city}}, @{Name='Destination';Expression={$_.destination.city}}, status
+
+# Manual cache refresh (if flight data is empty)
+Invoke-WebRequest -Uri "https://anyway.ro/api/admin/cache-management" -Method Post -ContentType "application/json" -Body '{"action":"manualRefresh","category":"flightData","identifier":"OTP"}'
+
+# Refresh all flight data
+Invoke-WebRequest -Uri "https://anyway.ro/api/admin/cache-management" -Method Post -ContentType "application/json" -Body '{"action":"manualRefresh","category":"flightData"}'
+
+# Test statistics APIs (should show proper "no data" messages)
+$statsResponse = Invoke-WebRequest -Uri "https://anyway.ro/api/statistici-aeroporturi"
+$statsData = $statsResponse.Content | ConvertFrom-Json
+$statsData.data[0] | Format-List
+
+# Test individual airport statistics
+$airportStats = Invoke-WebRequest -Uri "https://anyway.ro/api/aeroport/OTP/statistici"
+$airportData = $airportStats.Content | ConvertFrom-Json
+$airportData | Format-List
+```
+
+### SSH Commands (from PowerShell):
 ```bash
 # Check services status
 ssh root@anyway.ro "pm2 list && systemctl status nginx"
@@ -177,9 +209,9 @@ ssh root@anyway.ro "nginx -t"
 ssh root@anyway.ro "pm2 logs anyway-ro --lines 20"
 ssh root@anyway.ro "tail -20 /var/log/nginx/error.log"
 
-# Test connectivity
-curl -I http://127.0.0.1:3000
-curl -I https://anyway.ro
+# Test local connectivity
+ssh root@anyway.ro "curl -I http://127.0.0.1:3000"
+ssh root@anyway.ro "curl -I https://anyway.ro"
 ```
 
 ## 🎯 WORKING CONFIGURATION

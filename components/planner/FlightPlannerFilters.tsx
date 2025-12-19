@@ -1,14 +1,25 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, Clock, MapPin, Search } from 'lucide-react'
-import { FlightPlannerFilters as Filters } from '@/lib/flightPlannerService'
+import { Calendar, Clock, MapPin, Search, Plus, Minus, Plane } from 'lucide-react'
+// Local type definition to avoid importing server-side code
+interface Filters {
+  departureDays: string[]
+  returnDays: string[]
+  departureTimeSlot: 'morning' | 'afternoon' | 'evening'
+  returnTimeSlot: 'morning' | 'afternoon' | 'evening'
+  departureDayFlexibility?: number
+  returnDayFlexibility?: number
+  originAirports?: string[]
+}
 import { MAJOR_AIRPORTS } from '@/lib/airports'
+import { getCityName } from '@/lib/airports'
 
 interface FlightPlannerFiltersProps {
   filters: Filters
   onChange: (filters: Filters) => void
   loading: boolean
+  showAdvanced?: boolean
 }
 
 const DAYS_OF_WEEK = [
@@ -27,24 +38,25 @@ const TIME_SLOTS = [
   { value: 'evening', label: 'Seara', time: '18:00 - 24:00', icon: '🌙' }
 ] as const
 
-export function FlightPlannerFilters({ filters, onChange, loading }: FlightPlannerFiltersProps) {
-  const [selectedDepartureDay, setSelectedDepartureDay] = useState('friday')
-  const [selectedReturnDay, setSelectedReturnDay] = useState('sunday')
-  const [showOriginSelector, setShowOriginSelector] = useState(false)
+export function FlightPlannerFilters({ filters, onChange, loading, showAdvanced = false }: FlightPlannerFiltersProps) {
+  const [selectedDepartureDay, setSelectedDepartureDay] = useState(filters.departureDays[0] || 'monday')
+  const [selectedReturnDay, setSelectedReturnDay] = useState(filters.returnDays[0] || 'sunday')
 
-  const getExpandedDays = (day: string): string[] => {
+  const getExpandedDays = (day: string, flexibility: number): string[] => {
     const dayIndex = DAYS_OF_WEEK.findIndex(d => d.value === day)
     if (dayIndex === -1) return [day]
 
-    const prevDay = DAYS_OF_WEEK[(dayIndex - 1 + 7) % 7].value
-    const nextDay = DAYS_OF_WEEK[(dayIndex + 1) % 7].value
-
-    return [prevDay, day, nextDay]
+    const days = []
+    for (let i = -flexibility; i <= flexibility; i++) {
+      const targetIndex = (dayIndex + i + 7) % 7
+      days.push(DAYS_OF_WEEK[targetIndex].value)
+    }
+    return days
   }
 
   const handleDepartureDayChange = (day: string) => {
     setSelectedDepartureDay(day)
-    const expandedDays = getExpandedDays(day)
+    const expandedDays = getExpandedDays(day, filters.departureDayFlexibility || 0)
     onChange({
       ...filters,
       departureDays: expandedDays
@@ -53,9 +65,27 @@ export function FlightPlannerFilters({ filters, onChange, loading }: FlightPlann
 
   const handleReturnDayChange = (day: string) => {
     setSelectedReturnDay(day)
-    const expandedDays = getExpandedDays(day)
+    const expandedDays = getExpandedDays(day, filters.returnDayFlexibility || 0)
     onChange({
       ...filters,
+      returnDays: expandedDays
+    })
+  }
+
+  const handleDepartureFlexibilityChange = (flexibility: number) => {
+    const expandedDays = getExpandedDays(selectedDepartureDay, flexibility)
+    onChange({
+      ...filters,
+      departureDayFlexibility: flexibility,
+      departureDays: expandedDays
+    })
+  }
+
+  const handleReturnFlexibilityChange = (flexibility: number) => {
+    const expandedDays = getExpandedDays(selectedReturnDay, flexibility)
+    onChange({
+      ...filters,
+      returnDayFlexibility: flexibility,
       returnDays: expandedDays
     })
   }
@@ -75,150 +105,445 @@ export function FlightPlannerFilters({ filters, onChange, loading }: FlightPlann
     })
   }
 
-  const romanianAirports = MAJOR_AIRPORTS.filter(a => a.country === 'România')
-  const selectedOrigins = filters.originAirports || romanianAirports.map(a => a.code)
+  const allAirports = MAJOR_AIRPORTS.filter(a => a.country === 'România' || a.country === 'Moldova')
+  const selectedOrigins = filters.originAirports || ['RMO'] // Default to Chișinău
 
-  return (
-    <div className="space-y-8">
-      {/* Origin Airports Selection */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
-            <MapPin className="h-4 w-4 mr-2" />
-            Aeroporturi de plecare
-          </label>
-          <button
-            onClick={() => setShowOriginSelector(!showOriginSelector)}
-            className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"
-          >
-            {showOriginSelector ? 'Ascunde' : 'Personalizează'}
-          </button>
-        </div>
-        
-        {showOriginSelector ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {romanianAirports.map(airport => (
-              <label key={airport.code} className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={selectedOrigins.includes(airport.code)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      handleOriginAirportsChange([...selectedOrigins, airport.code])
-                    } else {
-                      handleOriginAirportsChange(selectedOrigins.filter(code => code !== airport.code))
-                    }
-                  }}
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  {airport.code} - {airport.city}
-                </span>
-              </label>
-            ))}
+  if (!showAdvanced) {
+    // Simple Mode - Material Design M3 with Enhanced UX
+    return (
+      <div className="space-y-8">
+        {/* Origin Airport - Simple */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+              <MapPin className="h-4 w-4 mr-2" />
+              Plecare din
+            </label>
+            <select
+              value={selectedOrigins[0] || 'RMO'}
+              onChange={(e) => handleOriginAirportsChange([e.target.value])}
+              className="w-full p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+            >
+              {allAirports.map(airport => {
+                const cityName = getCityName(airport.code)
+                const airportName = airport.code === 'OTP' ? 'Henri Coandă' : 
+                                  airport.code === 'BBU' ? 'Aurel Vlaicu' :
+                                  airport.code === 'RMO' ? 'Chișinău' : airport.name
+                return (
+                  <option key={airport.code} value={airport.code}>
+                    {cityName} - {airport.code} {airportName !== cityName ? `(${airportName})` : ''}
+                  </option>
+                )
+              })}
+            </select>
           </div>
-        ) : (
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Selectate: {selectedOrigins.length} aeroporturi din România
-            {selectedOrigins.length < romanianAirports.length && (
-              <span className="ml-2 text-primary-600">
-                ({selectedOrigins.map(code => romanianAirports.find(a => a.code === code)?.city).join(', ')})
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+              <Calendar className="h-4 w-4 mr-2" />
+              Exemplu căutare
+            </label>
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-blue-200 dark:border-blue-800">
+              <p className="text-sm font-semibold text-blue-800 dark:text-blue-200">
+                <strong>{DAYS_OF_WEEK.find(d => d.value === selectedDepartureDay)?.label}</strong> încolo, 
+                <strong> {DAYS_OF_WEEK.find(d => d.value === selectedReturnDay)?.label}</strong> înapoi
+              </p>
+              <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                Din {getCityName(selectedOrigins[0] || 'RMO')} ce destinații sunt disponibile?
+              </p>
+              {((filters.departureDayFlexibility || 0) > 0 || (filters.returnDayFlexibility || 0) > 0) && (
+                <p className="text-xs text-purple-600 dark:text-purple-300 mt-2 font-medium">
+                  Flexibilitate: ±{filters.departureDayFlexibility || 0} plecare, ±{filters.returnDayFlexibility || 0} întoarcere
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Enhanced Day Selection with Flexibility */}
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Departure Day with Simple Flexibility */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
+            <label className="block text-sm font-semibold text-blue-900 dark:text-blue-100 mb-4 flex items-center">
+              <Plane className="h-5 w-5 mr-2 rotate-45" />
+              Ziua de plecare
+            </label>
+            <div className="grid grid-cols-7 gap-2 mb-4">
+              {DAYS_OF_WEEK.map(day => (
+                <button
+                  key={day.value}
+                  onClick={() => handleDepartureDayChange(day.value)}
+                  disabled={loading}
+                  className={`p-3 rounded-xl text-center transition-all ${
+                    selectedDepartureDay === day.value
+                      ? 'bg-blue-600 text-white shadow-lg scale-105'
+                      : filters.departureDays.includes(day.value)
+                      ? 'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200'
+                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:scale-105'
+                  } disabled:opacity-50`}
+                >
+                  <div className="font-bold text-sm">{day.short}</div>
+                  <div className="text-xs mt-1">{day.label.slice(0, 3)}</div>
+                </button>
+              ))}
+            </div>
+            
+            {/* Simple Flexibility Control */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                Flexibilitate: ±{filters.departureDayFlexibility || 0} zile
               </span>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleDepartureFlexibilityChange(Math.max(0, (filters.departureDayFlexibility || 0) - 1))}
+                  disabled={loading || (filters.departureDayFlexibility || 0) === 0}
+                  className="p-2 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors shadow-sm"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <span className="w-8 text-center font-bold text-blue-900 dark:text-blue-100">
+                  {filters.departureDayFlexibility || 0}
+                </span>
+                <button
+                  onClick={() => handleDepartureFlexibilityChange(Math.min(3, (filters.departureDayFlexibility || 0) + 1))}
+                  disabled={loading || (filters.departureDayFlexibility || 0) === 3}
+                  className="p-2 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors shadow-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            
+            {filters.departureDays.length > 1 && (
+              <div className="text-xs text-blue-800 dark:text-blue-200 mt-2">
+                Zilele incluse: {filters.departureDays.map(day => 
+                  DAYS_OF_WEEK.find(d => d.value === day)?.short
+                ).join(', ')}
+              </div>
             )}
           </div>
-        )}
-      </div>
 
-      {/* Departure Day Selection */}
+          {/* Return Day with Simple Flexibility */}
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800">
+            <label className="block text-sm font-semibold text-green-900 dark:text-green-100 mb-4 flex items-center">
+              <Plane className="h-5 w-5 mr-2 -rotate-45" />
+              Ziua de întoarcere
+            </label>
+            <div className="grid grid-cols-7 gap-2 mb-4">
+              {DAYS_OF_WEEK.map(day => (
+                <button
+                  key={day.value}
+                  onClick={() => handleReturnDayChange(day.value)}
+                  disabled={loading}
+                  className={`p-3 rounded-xl text-center transition-all ${
+                    selectedReturnDay === day.value
+                      ? 'bg-green-600 text-white shadow-lg scale-105'
+                      : filters.returnDays.includes(day.value)
+                      ? 'bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200'
+                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900/30 hover:scale-105'
+                  } disabled:opacity-50`}
+                >
+                  <div className="font-bold text-sm">{day.short}</div>
+                  <div className="text-xs mt-1">{day.label.slice(0, 3)}</div>
+                </button>
+              ))}
+            </div>
+            
+            {/* Simple Flexibility Control */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-green-900 dark:text-green-100">
+                Flexibilitate: ±{filters.returnDayFlexibility || 0} zile
+              </span>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleReturnFlexibilityChange(Math.max(0, (filters.returnDayFlexibility || 0) - 1))}
+                  disabled={loading || (filters.returnDayFlexibility || 0) === 0}
+                  className="p-2 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors shadow-sm"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <span className="w-8 text-center font-bold text-green-900 dark:text-green-100">
+                  {filters.returnDayFlexibility || 0}
+                </span>
+                <button
+                  onClick={() => handleReturnFlexibilityChange(Math.min(3, (filters.returnDayFlexibility || 0) + 1))}
+                  disabled={loading || (filters.returnDayFlexibility || 0) === 3}
+                  className="p-2 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors shadow-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            
+            {filters.returnDays.length > 1 && (
+              <div className="text-xs text-green-800 dark:text-green-200 mt-2">
+                Zilele incluse: {filters.returnDays.map(day => 
+                  DAYS_OF_WEEK.find(d => d.value === day)?.short
+                ).join(', ')}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Time Preferences - Simplified */}
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Departure Time */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center">
+              <Clock className="h-5 w-5 mr-2" />
+              Interval preferat pentru plecare
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {TIME_SLOTS.map(slot => (
+                <button
+                  key={slot.value}
+                  onClick={() => handleTimeSlotChange('departure', slot.value)}
+                  disabled={loading}
+                  className={`p-3 rounded-xl text-center transition-all ${
+                    filters.departureTimeSlot === slot.value
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-105'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105'
+                  } disabled:opacity-50`}
+                >
+                  <div className="text-lg mb-1">{slot.icon}</div>
+                  <div className="font-semibold text-xs">{slot.label}</div>
+                  <div className="text-xs opacity-75 mt-1">{slot.time}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Return Time */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center">
+              <Clock className="h-5 w-5 mr-2" />
+              Interval preferat pentru întoarcere
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {TIME_SLOTS.map(slot => (
+                <button
+                  key={slot.value}
+                  onClick={() => handleTimeSlotChange('return', slot.value)}
+                  disabled={loading}
+                  className={`p-3 rounded-xl text-center transition-all ${
+                    filters.returnTimeSlot === slot.value
+                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg scale-105'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105'
+                  } disabled:opacity-50`}
+                >
+                  <div className="text-lg mb-1">{slot.icon}</div>
+                  <div className="font-semibold text-xs">{slot.label}</div>
+                  <div className="text-xs opacity-75 mt-1">{slot.time}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Search Button */}
+        <div className="flex justify-center">
+          <button
+            onClick={() => onChange(filters)}
+            disabled={loading}
+            className="flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                Căutare în curs...
+              </>
+            ) : (
+              <>
+                <Search className="h-5 w-5 mr-3" />
+                Caută Zboruri
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Advanced Mode - Full functionality
+  return (
+    <div className="space-y-8">
+      {/* Origin Airports Selection - Advanced */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center">
-          <Calendar className="h-4 w-4 mr-2" />
-          Ziua preferată de plecare (±1 zi)
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center">
+          <MapPin className="h-5 w-5 mr-2" />
+          Aeroporturi de plecare
         </label>
-        <div className="grid grid-cols-7 gap-2">
-          {DAYS_OF_WEEK.map(day => (
-            <button
-              key={day.value}
-              onClick={() => handleDepartureDayChange(day.value)}
-              disabled={loading}
-              className={`p-3 rounded-lg text-center transition-colors ${
-                selectedDepartureDay === day.value
-                  ? 'bg-primary-600 text-white'
-                  : filters.departureDays.includes(day.value)
-                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-              } disabled:opacity-50`}
-            >
-              <div className="font-medium">{day.short}</div>
-              <div className="text-xs mt-1">{day.label}</div>
-            </button>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {allAirports.map(airport => (
+            <label key={airport.code} className="flex items-center space-x-3 cursor-pointer p-3 rounded-xl bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+              <input
+                type="checkbox"
+                checked={selectedOrigins.includes(airport.code)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    handleOriginAirportsChange([...selectedOrigins, airport.code])
+                  } else {
+                    handleOriginAirportsChange(selectedOrigins.filter(code => code !== airport.code))
+                  }
+                }}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4"
+              />
+              <div className="flex-1">
+                <div className="font-bold text-base text-gray-900 dark:text-white">{getCityName(airport.code)}</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  {airport.code} {airport.code === 'OTP' ? '- Henri Coandă' : 
+                                 airport.code === 'BBU' ? '- Aurel Vlaicu' : 
+                                 airport.code === 'RMO' ? '- Chișinău' : ''}
+                </div>
+              </div>
+            </label>
           ))}
         </div>
-        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          Zilele selectate: {filters.departureDays.map(day => 
-            DAYS_OF_WEEK.find(d => d.value === day)?.label
-          ).join(', ')}
+      </div>
+
+      {/* Advanced Day Selection with Flexibility */}
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* Departure Day with Flexibility */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
+          <label className="block text-sm font-semibold text-blue-900 dark:text-blue-100 mb-4 flex items-center">
+            <Plane className="h-5 w-5 mr-2 rotate-45" />
+            Plecare - Ziua preferată
+          </label>
+          
+          <div className="grid grid-cols-7 gap-2 mb-4">
+            {DAYS_OF_WEEK.map(day => (
+              <button
+                key={day.value}
+                onClick={() => handleDepartureDayChange(day.value)}
+                disabled={loading}
+                className={`p-2 rounded-lg text-center transition-all text-xs ${
+                  selectedDepartureDay === day.value
+                    ? 'bg-blue-600 text-white shadow-lg scale-105'
+                    : filters.departureDays.includes(day.value)
+                    ? 'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                } disabled:opacity-50`}
+              >
+                <div className="font-bold">{day.short}</div>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+              Flexibilitate: ±{filters.departureDayFlexibility || 0} zile
+            </span>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handleDepartureFlexibilityChange(Math.max(0, (filters.departureDayFlexibility || 0) - 1))}
+                disabled={loading || (filters.departureDayFlexibility || 0) === 0}
+                className="p-2 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <span className="w-8 text-center font-bold text-blue-900 dark:text-blue-100">
+                {filters.departureDayFlexibility || 0}
+              </span>
+              <button
+                onClick={() => handleDepartureFlexibilityChange(Math.min(3, (filters.departureDayFlexibility || 0) + 1))}
+                disabled={loading || (filters.departureDayFlexibility || 0) === 3}
+                className="p-2 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="text-xs text-blue-800 dark:text-blue-200">
+            Zilele selectate: {filters.departureDays.map(day => 
+              DAYS_OF_WEEK.find(d => d.value === day)?.short
+            ).join(', ')}
+          </div>
+        </div>
+
+        {/* Return Day with Flexibility */}
+        <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800">
+          <label className="block text-sm font-semibold text-green-900 dark:text-green-100 mb-4 flex items-center">
+            <Plane className="h-5 w-5 mr-2 -rotate-45" />
+            Întoarcere - Ziua preferată
+          </label>
+          
+          <div className="grid grid-cols-7 gap-2 mb-4">
+            {DAYS_OF_WEEK.map(day => (
+              <button
+                key={day.value}
+                onClick={() => handleReturnDayChange(day.value)}
+                disabled={loading}
+                className={`p-2 rounded-lg text-center transition-all text-xs ${
+                  selectedReturnDay === day.value
+                    ? 'bg-green-600 text-white shadow-lg scale-105'
+                    : filters.returnDays.includes(day.value)
+                    ? 'bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900/30'
+                } disabled:opacity-50`}
+              >
+                <div className="font-bold">{day.short}</div>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-green-900 dark:text-green-100">
+              Flexibilitate: ±{filters.returnDayFlexibility || 0} zile
+            </span>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handleReturnFlexibilityChange(Math.max(0, (filters.returnDayFlexibility || 0) - 1))}
+                disabled={loading || (filters.returnDayFlexibility || 0) === 0}
+                className="p-2 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <span className="w-8 text-center font-bold text-green-900 dark:text-green-100">
+                {filters.returnDayFlexibility || 0}
+              </span>
+              <button
+                onClick={() => handleReturnFlexibilityChange(Math.min(3, (filters.returnDayFlexibility || 0) + 1))}
+                disabled={loading || (filters.returnDayFlexibility || 0) === 3}
+                className="p-2 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="text-xs text-green-800 dark:text-green-200">
+            Zilele selectate: {filters.returnDays.map(day => 
+              DAYS_OF_WEEK.find(d => d.value === day)?.short
+            ).join(', ')}
+          </div>
         </div>
       </div>
 
-      {/* Return Day Selection */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center">
-          <Calendar className="h-4 w-4 mr-2" />
-          Ziua preferată de întoarcere (±1 zi)
-        </label>
-        <div className="grid grid-cols-7 gap-2">
-          {DAYS_OF_WEEK.map(day => (
-            <button
-              key={day.value}
-              onClick={() => handleReturnDayChange(day.value)}
-              disabled={loading}
-              className={`p-3 rounded-lg text-center transition-colors ${
-                selectedReturnDay === day.value
-                  ? 'bg-green-600 text-white'
-                  : filters.returnDays.includes(day.value)
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-              } disabled:opacity-50`}
-            >
-              <div className="font-medium">{day.short}</div>
-              <div className="text-xs mt-1">{day.label}</div>
-            </button>
-          ))}
-        </div>
-        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          Zilele selectate: {filters.returnDays.map(day => 
-            DAYS_OF_WEEK.find(d => d.value === day)?.label
-          ).join(', ')}
-        </div>
-      </div>
-
-      {/* Time Slots */}
+      {/* Time Slots - Advanced */}
       <div className="grid md:grid-cols-2 gap-8">
         {/* Departure Time */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center">
-            <Clock className="h-4 w-4 mr-2" />
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center">
+            <Clock className="h-5 w-5 mr-2" />
             Interval preferat pentru plecare
           </label>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {TIME_SLOTS.map(slot => (
               <button
                 key={slot.value}
                 onClick={() => handleTimeSlotChange('departure', slot.value)}
                 disabled={loading}
-                className={`w-full p-4 rounded-lg text-left transition-colors ${
+                className={`w-full p-4 rounded-xl text-left transition-all ${
                   filters.departureTimeSlot === slot.value
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 } disabled:opacity-50`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <span className="text-2xl mr-4">{slot.icon}</span>
                   <div>
-                    <div className="font-medium flex items-center">
-                      <span className="mr-2">{slot.icon}</span>
-                      {slot.label}
-                    </div>
+                    <div className="font-semibold">{slot.label}</div>
                     <div className="text-sm opacity-75">{slot.time}</div>
                   </div>
                 </div>
@@ -229,28 +554,26 @@ export function FlightPlannerFilters({ filters, onChange, loading }: FlightPlann
 
         {/* Return Time */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center">
-            <Clock className="h-4 w-4 mr-2" />
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center">
+            <Clock className="h-5 w-5 mr-2" />
             Interval preferat pentru întoarcere
           </label>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {TIME_SLOTS.map(slot => (
               <button
                 key={slot.value}
                 onClick={() => handleTimeSlotChange('return', slot.value)}
                 disabled={loading}
-                className={`w-full p-4 rounded-lg text-left transition-colors ${
+                className={`w-full p-4 rounded-xl text-left transition-all ${
                   filters.returnTimeSlot === slot.value
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 } disabled:opacity-50`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <span className="text-2xl mr-4">{slot.icon}</span>
                   <div>
-                    <div className="font-medium flex items-center">
-                      <span className="mr-2">{slot.icon}</span>
-                      {slot.label}
-                    </div>
+                    <div className="font-semibold">{slot.label}</div>
                     <div className="text-sm opacity-75">{slot.time}</div>
                   </div>
                 </div>
@@ -260,26 +583,40 @@ export function FlightPlannerFilters({ filters, onChange, loading }: FlightPlann
         </div>
       </div>
 
-      {/* Search Summary */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2 flex items-center">
-          <Search className="h-4 w-4 mr-2" />
-          Rezumatul căutării
+      {/* Search Summary - Advanced */}
+      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-6 border border-purple-200 dark:border-purple-800">
+        <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-4 flex items-center">
+          <Search className="h-5 w-5 mr-2" />
+          Rezumatul căutării avansate
         </h4>
-        <div className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-          <p>
-            <strong>Plecare:</strong> {filters.departureDays.map(day => 
-              DAYS_OF_WEEK.find(d => d.value === day)?.label
-            ).join(', ')} - {TIME_SLOTS.find(s => s.value === filters.departureTimeSlot)?.label}
-          </p>
-          <p>
-            <strong>Întoarcere:</strong> {filters.returnDays.map(day => 
-              DAYS_OF_WEEK.find(d => d.value === day)?.label
-            ).join(', ')} - {TIME_SLOTS.find(s => s.value === filters.returnTimeSlot)?.label}
-          </p>
-          <p>
-            <strong>Aeroporturi:</strong> {selectedOrigins.length} selectate din România
-          </p>
+        <div className="grid md:grid-cols-2 gap-4 text-sm">
+          <div className="space-y-2">
+            <div className="text-purple-800 dark:text-purple-200">
+              <strong>🛫 Plecare:</strong> {DAYS_OF_WEEK.find(d => d.value === selectedDepartureDay)?.label} 
+              {(filters.departureDayFlexibility || 0) > 0 && ` (±${filters.departureDayFlexibility} zile)`}
+            </div>
+            <div className="text-purple-700 dark:text-purple-300 text-xs">
+              Zilele: {filters.departureDays.map(day => 
+                DAYS_OF_WEEK.find(d => d.value === day)?.short
+              ).join(', ')} • {TIME_SLOTS.find(s => s.value === filters.departureTimeSlot)?.label}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="text-purple-800 dark:text-purple-200">
+              <strong>🛬 Întoarcere:</strong> {DAYS_OF_WEEK.find(d => d.value === selectedReturnDay)?.label}
+              {(filters.returnDayFlexibility || 0) > 0 && ` (±${filters.returnDayFlexibility} zile)`}
+            </div>
+            <div className="text-purple-700 dark:text-purple-300 text-xs">
+              Zilele: {filters.returnDays.map(day => 
+                DAYS_OF_WEEK.find(d => d.value === day)?.short
+              ).join(', ')} • {TIME_SLOTS.find(s => s.value === filters.returnTimeSlot)?.label}
+            </div>
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-purple-200 dark:border-purple-700">
+          <div className="text-purple-800 dark:text-purple-200 text-sm">
+            <strong>📍 Aeroporturi:</strong> {selectedOrigins.map(code => getCityName(code)).join(', ')}
+          </div>
         </div>
       </div>
     </div>

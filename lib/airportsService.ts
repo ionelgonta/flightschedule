@@ -1,5 +1,5 @@
 import { Flight, FlightFilters, ApiResponse } from '@/types/flight'
-import { getAirportByCode } from './airports'
+import { getAirportByCodeSync } from './airports'
 
 // Mock data generator for demonstration
 const generateMockFlight = (index: number, type: 'arrival' | 'departure', airportCode: string): Flight => {
@@ -20,8 +20,8 @@ const generateMockFlight = (index: number, type: 'arrival' | 'departure', airpor
     .filter(code => code !== airportCode)
 
   const airline = airlines[index % airlines.length]
-  const otherAirport = getAirportByCode(otherAirports[index % otherAirports.length])!
-  const currentAirport = getAirportByCode(airportCode)!
+  const otherAirport = getAirportByCodeSync(otherAirports[index % otherAirports.length])!
+  const currentAirport = getAirportByCodeSync(airportCode)!
   
   const statuses = ['scheduled', 'active', 'landed', 'delayed', 'cancelled'] as const
   const status = statuses[index % statuses.length]

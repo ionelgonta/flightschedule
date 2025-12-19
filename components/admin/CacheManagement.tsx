@@ -55,8 +55,7 @@ export default function CacheManagement() {
   // Form state pentru configurație
   const [config, setConfig] = useState({
     flightData: {
-      cronInterval: 60,
-      cacheUntilNext: true
+      cronInterval: 60
     },
     analytics: {
       cronInterval: 30,
@@ -255,7 +254,7 @@ export default function CacheManagement() {
               <Plane className="h-4 w-4" />
               Sosiri/Plecări (Flight Data)
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <Label htmlFor="flightDataInterval">Interval Cron (minute)</Label>
                 <Input
@@ -273,22 +272,8 @@ export default function CacheManagement() {
                   })}
                 />
                 <p className="text-sm text-muted-foreground mt-1">
-                  Actualizare automată la fiecare {formatDuration(config.flightData.cronInterval)}
+                  Actualizare automată la fiecare {formatDuration(config.flightData.cronInterval)}. Datele se păstrează 30 zile pentru statistici pe perioade.
                 </p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="cacheUntilNext"
-                  checked={config.flightData.cacheUntilNext}
-                  onCheckedChange={(checked) => setConfig({
-                    ...config,
-                    flightData: {
-                      ...config.flightData,
-                      cacheUntilNext: checked
-                    }
-                  })}
-                />
-                <Label htmlFor="cacheUntilNext">Cache până la următoarea actualizare</Label>
               </div>
             </div>
           </div>
@@ -454,7 +439,7 @@ export default function CacheManagement() {
                 <Clock className="h-4 w-4 inline mr-1" />
                 Ultimul reset: {formatDate(stats.requestCounter.lastReset)}
               </div>
-              <Button variant="outlined" onClick={resetCounter}>
+              <Button variant="outline" onClick={resetCounter}>
                 Reset Contor
               </Button>
             </div>
@@ -507,7 +492,7 @@ export default function CacheManagement() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
-              variant="outlined"
+              variant="outline"
               onClick={() => manualRefresh('flightData')}
               disabled={refreshing === 'flightData'}
               className="h-20 flex flex-col items-center justify-center"
@@ -522,7 +507,7 @@ export default function CacheManagement() {
             </Button>
 
             <Button
-              variant="outlined"
+              variant="outline"
               onClick={() => manualRefresh('analytics')}
               disabled={refreshing === 'analytics'}
               className="h-20 flex flex-col items-center justify-center"
@@ -537,7 +522,7 @@ export default function CacheManagement() {
             </Button>
 
             <Button
-              variant="outlined"
+              variant="outline"
               onClick={() => manualRefresh('aircraft')}
               disabled={refreshing === 'aircraft'}
               className="h-20 flex flex-col items-center justify-center"
@@ -559,7 +544,7 @@ export default function CacheManagement() {
               <AlertCircle className="h-4 w-4" />
               Refresh-ul manual va face request-uri API imediate
             </div>
-            <Button variant="outlined" onClick={cleanExpired}>
+            <Button variant="outline" onClick={cleanExpired}>
               Curăță Cache Expirat
             </Button>
           </div>
@@ -568,7 +553,7 @@ export default function CacheManagement() {
 
       {/* Refresh Button */}
       <div className="flex justify-center">
-        <Button onClick={loadStats} variant="outlined" disabled={reloadingStats}>
+        <Button onClick={loadStats} variant="outline" disabled={reloadingStats}>
           <RefreshCw className={`h-4 w-4 mr-2 ${reloadingStats ? 'animate-spin' : ''}`} />
           {reloadingStats ? 'Se reîncarcă...' : 'Reîncarcă Statistici'}
         </Button>

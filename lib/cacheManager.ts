@@ -19,8 +19,12 @@ if (typeof window === 'undefined') {
   } catch (error) {
     // Fallback to mock version for local development
     console.log('[Cache Manager] SQLite not available, using mock historical cache manager')
-    const mockModule = require('./historicalCacheManager.mock')
-    historicalCacheManager = mockModule.historicalCacheManager
+    historicalCacheManager = {
+      async initialize() { console.log('[Mock Historical Cache] Initialized') },
+      async hasDataForDate() { return false },
+      async getDataForDate() { return [] },
+      async saveDailySnapshot(snapshot: any) { console.log('[Mock Historical Cache] Saved snapshot for', snapshot.airportCode, snapshot.type) }
+    }
   }
 }
 
@@ -35,7 +39,6 @@ export interface CacheConfig {
   // Sosiri/Plecări - cron la fiecare 60 minute (configurabil)
   flightData: {
     cronInterval: number // minute
-    cacheUntilNext: boolean // păstrează până la următoarea actualizare
   }
   
   // Analize/Statistici - cron la 30 zile, cache 360 zile (configurabil)
@@ -163,8 +166,7 @@ class CacheManager {
       // Configurație default - TOATE valorile sunt configurabile din admin
       this.config = {
         flightData: {
-          cronInterval: 60, // minute
-          cacheUntilNext: true
+          cronInterval: 60 // minute
         },
         analytics: {
           cronInterval: 7, // zile (redus pentru a evita overflow)
@@ -379,9 +381,7 @@ class CacheManager {
         if (historicalData.length > 0) {
           // Convert historical data to current cache format and store in memory cache
           const cacheKey = `${airportCode}_${type}`
-          const expiresAt = this.config!.flightData.cacheUntilNext 
-            ? new Date(Date.now() + this.config!.flightData.cronInterval * 60 * 1000).toISOString()
-            : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+          const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days for statistics
 
           const cacheEntry: CacheEntry = {
             id: `flight_${cacheKey}_${Date.now()}`,
@@ -391,7 +391,7 @@ class CacheManager {
             createdAt: new Date().toISOString(),
             expiresAt,
             lastAccessed: new Date().toISOString(),
-            source: 'cache',
+            source: 'manual',
             success: true
           }
 
@@ -416,8 +416,8 @@ class CacheManager {
       
       const apiService = new FlightApiService({
         provider: 'aerodatabox',
-        apiKey: process.env.AERODATABOX_API_KEY || '',
-        baseUrl: 'https://aerodatabox.p.rapidapi.com',
+        apiKey: process.env.NEXT_PUBLIC_FLIGHT_API_KEY || process.env.AERODATABOX_API_KEY || '',
+        baseUrl: 'https://prod.api.market/api/v1/aedbx/aerodatabox',
         rateLimit: 100
       })
       const response = type === 'arrivals' 
@@ -430,12 +430,13 @@ class CacheManager {
       this.incrementRequestCounter('flightData')
 
       const cacheKey = `${airportCode}_${type}`
-      const expiresAt = this.config!.flightData.cacheUntilNext 
-        ? new Date(Date.now() + this.config!.flightData.cronInterval * 60 * 1000).toISOString()
-        : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // 1 an dacă nu e until next
+      // Pentru statistici pe perioade, păstrăm datele mai mult timp
+      // Cache-ul pentru flight data nu expiră rapid - se păstrează pentru analize
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 zile pentru statistici
 
+      const timestamp = Date.now()
       const cacheEntry: CacheEntry = {
-        id: `flight_${cacheKey}_${Date.now()}`,
+        id: `flight_${cacheKey}_${timestamp}`,
         category: 'flightData',
         key: cacheKey,
         data: response.data,
@@ -447,18 +448,33 @@ class CacheManager {
         error: response.error
       }
 
-      // Șterge intrarea veche pentru această cheie
+      // Pentru flight data, păstrăm doar ultima intrare pentru fiecare cheie (pentru afișare curentă)
+      // dar păstrăm datele în historical cache pentru statistici pe perioade
       const oldEntries = Array.from(this.cacheData.values()).filter(
         entry => entry.category === 'flightData' && entry.key === cacheKey
       )
-      oldEntries.forEach(entry => this.cacheData.delete(entry.id))
-
-      // Adaugă noua intrare
-      this.cacheData.set(cacheEntry.id, cacheEntry)
-      await this.saveCacheData()
+      
+      // NU ȘTERGE NICIODATĂ datele vechi automat - doar prin comandă manuală din admin
+      if (response.success && response.data && response.data.length > 0) {
+        // Doar dacă avem date noi și valide, înlocuiește datele vechi
+        oldEntries.forEach(entry => this.cacheData.delete(entry.id))
+        
+        // Adaugă noua intrare
+        this.cacheData.set(cacheEntry.id, cacheEntry)
+        await this.saveCacheData()
+        console.log(`[Cache Manager] Successfully updated cache for ${airportCode} ${type} with ${response.data.length} flights`)
+      } else {
+        // Păstrează ÎNTOTDEAUNA datele vechi când API-ul eșuează sau nu returnează date
+        console.log(`[Cache Manager] API failed or returned no data for ${airportCode} ${type}, keeping existing cache data`)
+        if (oldEntries.length === 0) {
+          // Doar dacă nu există deloc date, salvează intrarea cu eroare pentru debugging
+          this.cacheData.set(cacheEntry.id, cacheEntry)
+          await this.saveCacheData()
+        }
+      }
 
       // Save to historical cache if we have new data from API
-      if (historicalCacheManager && response.success && response.data && response.data.length > 0 && source !== 'cache') {
+      if (historicalCacheManager && response.success && response.data && response.data.length > 0 && source === 'cron') {
         try {
           const today = new Date().toISOString().split('T')[0]
           const currentTime = new Date().toTimeString().split(' ')[0].substring(0, 5) // HH:mm format
@@ -805,20 +821,19 @@ class CacheManager {
     try {
       // Import dinamic pentru a evita circular dependencies
       const { MAJOR_AIRPORTS } = await import('./airports')
-      const { getIcaoCode } = await import('./icaoMapping')
       
-      // Convertește toate codurile IATA la ICAO
-      const icaoCodes = MAJOR_AIRPORTS
+      // Folosește codurile IATA direct
+      const iataCodes = MAJOR_AIRPORTS
         .filter(airport => airport.country === 'România' || airport.country === 'Moldova')
-        .map(airport => getIcaoCode(airport.code))
-        .filter(icao => icao && icao.length === 4) // Validează codurile ICAO
+        .map(airport => airport.code)
+        .filter(iata => iata && iata.length === 3) // Validează codurile IATA
       
-      console.log(`Found ${icaoCodes.length} supported airports: ${icaoCodes.join(', ')}`)
-      return icaoCodes
+      console.log(`Found ${iataCodes.length} supported airports: ${iataCodes.join(', ')}`)
+      return iataCodes
     } catch (error) {
       console.error('Error getting supported airports:', error)
       // Fallback la lista hardcodată în caz de eroare
-      return ['LROP', 'LRTR', 'LRCL', 'LRIA', 'LRBC', 'LRBS', 'LRSB', 'LRSM', 'LRCS', 'LROD', 'LRSU', 'LRTU', 'LRBM', 'LRCV', 'LRCT', 'LRAR', 'LUKK']
+      return ['OTP', 'TSR', 'CLJ', 'IAS', 'BCM', 'BBU', 'SBZ', 'SUJ', 'CND', 'OMR', 'SCV', 'TGM', 'BAY', 'CRA', 'ARW']
     }
   }
 

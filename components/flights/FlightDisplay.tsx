@@ -70,7 +70,7 @@ function FlightRowComponent({ flight, type }: { flight: Flight; type: 'arrivals'
       {/* Destinație */}
       <td className="px-2 sm:px-4 py-2 sm:py-3">
         <div className="text-sm font-medium text-gray-900 dark:text-white">
-          {relevantAirport.airport.city}
+          {relevantAirport.airport?.city || 'N/A'}
         </div>
         <div className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
           {relevantAirport.airport.name}
