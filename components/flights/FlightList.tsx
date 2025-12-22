@@ -265,14 +265,14 @@ export function FlightList({
 
   if (error) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-300 dark:border-red-700 p-8 text-center shadow-lg">
-        <div className="p-4 bg-red-600 rounded-2xl w-fit mx-auto mb-6 shadow-md">
-          <Plane className="h-8 w-8 text-white" />
+      <div className="bg-red-50 rounded-lg border border-red-200 p-6 text-center">
+        <div className="p-3 bg-red-600 rounded-lg w-fit mx-auto mb-4">
+          <Plane className="h-6 w-6 text-white" />
         </div>
-        <h3 className="text-2xl font-bold text-red-800 dark:text-red-200 mb-4">
+        <h3 className="text-lg font-bold text-red-800 mb-2">
           Nu am putut încărca datele zborurilor
         </h3>
-        <p className="text-lg text-red-700 dark:text-red-300 mb-6">{error}</p>
+        <p className="text-sm text-red-700">{error}</p>
       </div>
     );
   }
@@ -280,17 +280,17 @@ export function FlightList({
   return (
     <div className="space-y-6">
       {/* Header cu căutare și controale */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 p-6 shadow-lg">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
           {/* Căutare */}
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 h-5 w-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <input
               type="text"
               placeholder={`Caută ${type === 'arrivals' ? 'sosiri' : 'plecări'}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base focus:border-blue-600 focus:border-2 focus:outline-none transition-all duration-200 shadow-sm"
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 text-sm focus:border-blue-500 focus:outline-none transition-colors"
             />
           </div>
 
@@ -298,7 +298,7 @@ export function FlightList({
           <div className="flex items-center space-x-3">
             {/* Ultima actualizare */}
             {lastUpdated && (
-              <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+              <span className="text-xs text-gray-500 font-medium">
                 Actualizat: {formatLastUpdated(lastUpdated)}
               </span>
             )}
@@ -306,31 +306,31 @@ export function FlightList({
             {/* Buton filtre */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg ${
+              className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
                 showFilters 
                   ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <Filter className="h-4 w-4" />
-              <span className="text-sm font-bold">Filtre</span>
+              <Filter className="h-3 w-3" />
+              <span>Filtre</span>
             </button>
           </div>
         </div>
 
         {/* Panoul de filtre */}
         {showFilters && (
-          <div className="mt-6 pt-6 border-t border-gray-300 dark:border-gray-600">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Filtru companie aeriană */}
               <div>
-                <label className="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Companie aeriană
                 </label>
                 <select
                   value={selectedAirline}
                   onChange={(e) => setSelectedAirline(e.target.value)}
-                  className="w-full px-4 py-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base focus:border-blue-600 focus:border-2 focus:outline-none transition-all duration-200 shadow-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:border-blue-500 focus:outline-none"
                 >
                   <option value="">Toate companiile</option>
                   {airlines.map(airline => (
@@ -341,13 +341,13 @@ export function FlightList({
 
               {/* Filtru status */}
               <div>
-                <label className="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Status
                 </label>
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full px-4 py-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base focus:border-blue-600 focus:border-2 focus:outline-none transition-all duration-200 shadow-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:border-blue-500 focus:outline-none"
                 >
                   <option value="">Toate statusurile</option>
                   {statuses.map(status => (
@@ -358,14 +358,14 @@ export function FlightList({
 
               {/* Sortare */}
               <div>
-                <label className="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Sortează după
                 </label>
                 <div className="flex space-x-2">
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    className="flex-1 px-4 py-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base focus:border-blue-600 focus:border-2 focus:outline-none transition-all duration-200 shadow-sm"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:border-blue-500 focus:outline-none"
                   >
                     <option value="scheduled_time">Ora</option>
                     <option value="airline">Companie</option>
@@ -374,9 +374,9 @@ export function FlightList({
                   </select>
                   <button
                     onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-                    className="px-4 py-4 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 shadow-md hover:shadow-lg"
+                    className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                   >
-                    {sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                    {sortDirection === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />}
                   </button>
                 </div>
               </div>
@@ -386,29 +386,29 @@ export function FlightList({
       </div>
 
       {/* Statistici */}
-      <div className="text-base font-semibold text-gray-700 dark:text-gray-300">
+      <div className="text-sm font-medium text-gray-600">
         Afișez {filteredAndSortedFlights.length} din {flights.length} {type === 'arrivals' ? 'sosiri' : 'plecări'}
       </div>
 
       {/* Lista de zboruri - Tabel */}
       {loading ? (
-        <div className="bg-surface rounded-xl border border-outline-variant overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div className="animate-pulse">
-            <div className="bg-surface-container-high h-14"></div>
+            <div className="bg-gray-100 h-12"></div>
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="border-t border-outline-variant/50 h-16 bg-surface-container" />
+              <div key={i} className="border-t border-gray-100 h-14 bg-gray-50" />
             ))}
           </div>
         </div>
       ) : filteredAndSortedFlights.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 p-12 text-center shadow-lg">
-          <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-2xl w-fit mx-auto mb-6 shadow-md">
-            <Plane className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+          <div className="p-3 bg-gray-100 rounded-lg w-fit mx-auto mb-4">
+            <Plane className="h-6 w-6 text-gray-600" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+          <h3 className="text-lg font-bold text-gray-900 mb-2">
             Nu sunt {type === 'arrivals' ? 'sosiri' : 'plecări'}
           </h3>
-          <p className="text-lg text-gray-700 dark:text-gray-300">
+          <p className="text-sm text-gray-600">
             {searchTerm || selectedAirline || selectedStatus 
               ? 'Nu există zboruri care să corespundă filtrelor selectate.'
               : `Nu sunt ${type === 'arrivals' ? 'sosiri' : 'plecări'} programate în acest moment.`
@@ -472,7 +472,7 @@ export function FlightList({
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
+                <tbody className="divide-y divide-gray-200">
                   {filteredAndSortedFlights.map((flight, index) => (
                     <FlightTableRow
                       key={`${flight.flight_number}-${index}`}
@@ -485,8 +485,8 @@ export function FlightList({
             </div>
           </div>
 
-          {/* Mobile Cards */}
-          <div className="md:hidden space-y-4">
+          {/* Mobile Cards - Compact Design */}
+          <div className="md:hidden space-y-3">
             {filteredAndSortedFlights.map((flight, index) => {
               const relevantLocation = type === 'arrivals' ? flight.origin : flight.destination;
               
@@ -511,60 +511,39 @@ export function FlightList({
               return (
                 <div
                   key={`${flight.flight_number}-${index}`}
-                  className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-600 p-6 shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow duration-200"
                 >
-                  {/* Header cu zbor și status */}
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-3 bg-blue-600 rounded-xl shadow-md">
-                        <Plane className="h-5 w-5 text-white" />
+                  {/* Header compact cu zbor și status */}
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+                        <Plane className="h-3 w-3 text-white" />
                       </div>
                       <div>
-                        <div className="text-lg font-bold text-gray-900 dark:text-white">{flight.flight_number}</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">{flight.airline?.name || 'Unknown Airline'}</div>
+                        <div className="text-sm font-bold text-gray-900">{flight.flight_number}</div>
+                        <div className="text-xs text-gray-500">{flight.airline?.code || 'XX'}</div>
                       </div>
                     </div>
                     {getStatusBadge(flight.status)}
                   </div>
                   
-                  {/* Detalii zbor */}
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{type === 'arrivals' ? 'Din:' : 'Spre:'}</span>
-                      <span className="text-base font-bold text-gray-900 dark:text-white">{relevantLocation?.city || 'N/A'}</span>
+                  {/* Detalii zbor - compact */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-gray-500">{type === 'arrivals' ? 'Din:' : 'Spre:'}</span>
+                      <div className="font-semibold text-gray-900">{relevantLocation?.city || 'N/A'}</div>
                     </div>
-                    
-                    <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Ora:</span>
-                      <div className="text-right">
-                        <div className="text-base font-bold text-gray-900 dark:text-white">
-                          {formatTime(flight.scheduled_time)}
-                        </div>
-                        {flight.estimated_time && flight.estimated_time !== flight.scheduled_time && (
-                          <div className="text-xs text-orange-600 dark:text-orange-400 font-semibold">
-                            Est: {formatTime(flight.estimated_time)}
-                          </div>
-                        )}
+                    <div className="text-right">
+                      <span className="text-gray-500">Ora:</span>
+                      <div className="font-semibold text-gray-900">
+                        {formatTime(flight.scheduled_time)}
                       </div>
+                      {flight.estimated_time && flight.estimated_time !== flight.scheduled_time && (
+                        <div className="text-xs text-orange-600 font-medium">
+                          Est: {formatTime(flight.estimated_time)}
+                        </div>
+                      )}
                     </div>
-                    
-                    {(flight.terminal || flight.gate) && (
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Terminal:</span>
-                        <div className="flex space-x-2">
-                          {flight.terminal && (
-                            <span className="inline-flex items-center px-3 py-2 bg-gray-600 text-white rounded-lg text-xs font-bold shadow-md">
-                              T{flight.terminal}
-                            </span>
-                          )}
-                          {flight.gate && (
-                            <span className="inline-flex items-center px-3 py-2 bg-gray-600 text-white rounded-lg text-xs font-bold shadow-md">
-                              {flight.gate}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               );
