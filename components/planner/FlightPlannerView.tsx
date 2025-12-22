@@ -59,6 +59,7 @@ interface PlannerStats {
 import { FlightPlannerFilters as FilterComponent } from './FlightPlannerFilters'
 import { FlightOptionsGrid } from './FlightOptionsGrid'
 
+
 export function FlightPlannerView() {
   const [filters, setFilters] = useState<FlightPlannerFilters>({
     departureDays: ['monday'], // Default: Monday
@@ -148,7 +149,7 @@ export function FlightPlannerView() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-6">
               <Sparkles className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
               Planificator Zboruri Inteligent
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
@@ -160,46 +161,9 @@ export function FlightPlannerView() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 space-y-8">
-        {/* Quick Stats - Material Design Cards */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-              <div className="flex items-center">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-2xl">
-                  <MapPin className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Aeroporturi</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalAirportsScanned}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-              <div className="flex items-center">
-                <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-2xl">
-                  <Plane className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Zboruri</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalFlightsAnalyzed}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-              <div className="flex items-center">
-                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-2xl">
-                  <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Destinații</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.availableDestinations}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+
+
+
 
         {/* Search Interface - Material Design M3 */}
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
@@ -277,22 +241,28 @@ export function FlightPlannerView() {
 
             {!loading && !error && flightOptions.length === 0 && (
               <div className="text-center py-16">
-                <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                  <Plane className="h-10 w-10 text-gray-400 dark:text-gray-500" />
+                <div className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                  <Sparkles className="h-10 w-10 text-blue-600 dark:text-blue-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  Nu am găsit zboruri
+                  Nu am găsit destinații dus-întors
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                  Încearcă să modifici criteriile de căutare sau să mărești flexibilitatea zilelor.
+                  Pentru criteriile selectate, nu există destinații cu zboruri atât la plecare cât și la întoarcere. Încearcă să modifici zilele sau intervalele orare.
                 </p>
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 max-w-md mx-auto">
-                  <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">💡 Sugestii:</h4>
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-6 max-w-md mx-auto border border-blue-200 dark:border-blue-800">
+                  <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">🚀 În curând:</h4>
                   <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1 text-left">
-                    <li>• Mărește flexibilitatea la ±2 sau ±3 zile</li>
-                    <li>• Încearcă intervale orare diferite</li>
-                    <li>• Verifică mai multe aeroporturi de plecare</li>
+                    <li>• Căutare inteligentă cu flexibilitate avansată</li>
+                    <li>• Recomandări personalizate de destinații</li>
+                    <li>• Compararea prețurilor și timpilor de zbor</li>
+                    <li>• Alertele pentru zborurile preferate</li>
                   </ul>
+                </div>
+                <div className="mt-6">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Între timp, poți consulta <a href="/program-zboruri" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline">programul zborurilor</a> pentru informații actualizate.
+                  </p>
                 </div>
               </div>
             )}
@@ -305,9 +275,9 @@ export function FlightPlannerView() {
                       <TrendingUp className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">Rezultate găsite</h3>
+                      <h3 className="font-semibold">Destinații cu zboruri dus-întors</h3>
                       <p className="text-sm mt-1">
-                        {flightOptions.length} destinații • {flightOptions.reduce((sum, opt) => sum + opt.totalOptions, 0)} combinații de zboruri
+                        {flightOptions.length} destinații complete • {flightOptions.reduce((sum, opt) => sum + opt.totalOptions, 0)} combinații dus-întors
                       </p>
                     </div>
                   </div>

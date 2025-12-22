@@ -57,7 +57,7 @@ export function AdManagement() {
         // Create config object from API response
         const configFromApi = {
           publisherId: data.publisherId || '',
-          zones: {
+          zones: data.zones || {
             'header-banner': { mode: 'inactive' as const, slotId: '', size: '728x90' },
             'sidebar-right': { mode: 'inactive' as const, slotId: '', size: '300x600' },
             'sidebar-square': { mode: 'inactive' as const, slotId: '', size: '300x250' },

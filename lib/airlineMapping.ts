@@ -230,8 +230,16 @@ export const AIRPORT_CITY_MAPPING: { [key: string]: string } = {
   'BRI': 'Bari',
   'LCA': 'Larnaca',
   
-  // Default fallback
-  'XXX': 'Oraș Necunoscut'
+  // Additional airports - December 2024
+  'AYT': 'Antalya',
+  'FMM': 'Memmingen',
+  'GYD': 'Baku',
+  'BEY': 'Beirut',
+  'CAI': 'Cairo',
+  'PSA': 'Pisa',
+  'BSL': 'Basel',
+  
+  // No fallback codes - only real IATA codes allowed
 }
 
 /**

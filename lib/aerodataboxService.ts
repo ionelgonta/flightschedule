@@ -452,24 +452,30 @@ class AeroDataBoxService {
       
       // Get current airport info dynamically (folosește versiunea sincronă)
       const currentAirport = currentAirportCode ? getAirportByCodeSync(currentAirportCode) : null;
+      // Skip flights without valid IATA codes early
+      const otherAirportCode = otherAirport.iata || otherAirport.icao;
+      if (!otherAirportCode || !currentAirportCode) {
+        return null; // Skip this flight - no valid airport codes
+      }
+      
       const currentAirportInfo = {
         airport: currentAirport?.name || 'Unknown Airport',
-        code: currentAirportCode || 'XXX',
+        code: currentAirportCode,
         city: currentAirport?.city || 'Unknown City'
       };
       
       // For arrivals: movement.airport = origin, current airport = destination
       // For departures: movement.airport = destination, current airport = origin
       const origin = type === 'arrivals' ? {
-        airport: otherAirport.name || 'Unknown',
-        code: otherAirport.iata || otherAirport.icao || 'XXX',
-        city: otherAirport.name || 'Unknown' // API doesn't provide city separately
+        airport: otherAirport.name || otherAirportCode,
+        code: otherAirportCode,
+        city: otherAirport.name || otherAirportCode // API doesn't provide city separately
       } : currentAirportInfo;
       
       const destination = type === 'departures' ? {
-        airport: otherAirport.name || 'Unknown',
-        code: otherAirport.iata || otherAirport.icao || 'XXX',
-        city: otherAirport.name || 'Unknown'
+        airport: otherAirport.name || otherAirportCode,
+        code: otherAirportCode,
+        city: otherAirport.name || otherAirportCode
       } : currentAirportInfo;
       
       return {
@@ -501,16 +507,8 @@ class AeroDataBoxService {
     } catch (error) {
       console.error('Error converting flight data:', error);
       console.error('Flight data that caused error:', JSON.stringify(flight, null, 2));
-      // Return a safe fallback structure
-      return {
-        flight_number: 'N/A',
-        airline: { name: 'Unknown', code: 'XX' },
-        origin: { airport: 'Unknown', code: 'XXX', city: 'Unknown' },
-        destination: { airport: 'Unknown', code: 'XXX', city: 'Unknown' },
-        scheduled_time: new Date().toISOString(),
-        status: 'unknown',
-        delay: undefined
-      };
+      // Return null for invalid flights instead of fallback structure
+      return null;
     }
   }
 

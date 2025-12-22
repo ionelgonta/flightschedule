@@ -13,9 +13,37 @@ export async function GET() {
     const publisherIdMatch = configContent.match(/publisherId:\s*['"`]([^'"`]+)['"`]/)
     const currentPublisherId = publisherIdMatch ? publisherIdMatch[1] : ''
     
+    // Extrage configurația zonelor
+    const zonesMatch = configContent.match(/zones:\s*{([^}]+(?:{[^}]*}[^}]*)*)}/)
+    let zones = {}
+    
+    if (zonesMatch) {
+      // Parse zone configurations (simplified parsing)
+      const zoneContent = zonesMatch[1]
+      const zoneMatches = zoneContent.matchAll(/'([^']+)':\s*{([^}]+)}/g)
+      
+      for (const match of zoneMatches) {
+        const zoneName = match[1]
+        const zoneConfig = match[2]
+        
+        const modeMatch = zoneConfig.match(/mode:\s*['"`]([^'"`]+)['"`]/)
+        const slotIdMatch = zoneConfig.match(/slotId:\s*['"`]([^'"`]*)['"`]/)
+        const sizeMatch = zoneConfig.match(/size:\s*['"`]([^'"`]+)['"`]/)
+        const customHtmlMatch = zoneConfig.match(/customHtml:\s*['"`]([^'"`]*)['"`]/)
+        
+        zones[zoneName] = {
+          mode: modeMatch ? modeMatch[1] : 'inactive',
+          slotId: slotIdMatch ? slotIdMatch[1] : '',
+          size: sizeMatch ? sizeMatch[1] : '300x250',
+          customHtml: customHtmlMatch ? customHtmlMatch[1] : undefined
+        }
+      }
+    }
+    
     return NextResponse.json({
       success: true,
       publisherId: currentPublisherId,
+      zones: zones,
       hasPublisherId: !!currentPublisherId
     })
   } catch (error) {
@@ -29,7 +57,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { publisherId, action } = await request.json()
+    const body = await request.json()
+    const { publisherId, action, config } = body
     
     if (action === 'test') {
       // Testează validitatea Publisher ID-ului
@@ -52,20 +81,30 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    if (action === 'save') {
+    if (action === 'save' || action === 'update') {
+      const publisherIdToSave = config?.publisherId || publisherId
+      
       // Validează Publisher ID-ul înainte de salvare
-      if (!publisherId || !publisherId.startsWith('ca-pub-')) {
+      if (!publisherIdToSave) {
+        return NextResponse.json({
+          success: false,
+          error: 'Publisher ID lipsește'
+        }, { status: 400 })
+      }
+      
+      if (!publisherIdToSave.startsWith('ca-pub-')) {
         return NextResponse.json({
           success: false,
           error: 'Publisher ID invalid. Trebuie să înceapă cu "ca-pub-"'
         }, { status: 400 })
       }
       
-      const publisherIdRegex = /^ca-pub-\d{16}$/
-      if (!publisherIdRegex.test(publisherId)) {
+      // Relaxed validation - accept any ca-pub- format
+      const publisherIdRegex = /^ca-pub-\d+$/
+      if (!publisherIdRegex.test(publisherIdToSave)) {
         return NextResponse.json({
           success: false,
-          error: 'Format Publisher ID invalid. Exemplu: ca-pub-1234567890123456'
+          error: 'Format Publisher ID invalid. Trebuie să conțină doar cifre după "ca-pub-"'
         }, { status: 400 })
       }
       
@@ -75,18 +114,41 @@ export async function POST(request: NextRequest) {
       
       // Înlocuiește Publisher ID-ul în fișier
       const publisherIdPattern = /(publisherId:\s*['"`])([^'"`]+)(['"`])/
-      const newConfigContent = configContent.replace(
+      configContent = configContent.replace(
         publisherIdPattern,
-        `$1${publisherId}$3`
+        `$1${publisherIdToSave}$3`
       )
       
+      // Dacă avem configurația completă, actualizează și zonele
+      if (config && config.zones) {
+        // Actualizează configurația zonelor
+        for (const [zoneName, zoneConfig] of Object.entries(config.zones)) {
+          const zone = zoneConfig as any
+          
+          // Actualizează mode
+          const modePattern = new RegExp(`('${zoneName}':\\s*{[^}]*mode:\\s*['"\`])([^'"\`]+)(['"\`])`)
+          configContent = configContent.replace(modePattern, `$1${zone.mode}$3`)
+          
+          // Actualizează slotId
+          const slotIdPattern = new RegExp(`('${zoneName}':\\s*{[^}]*slotId:\\s*['"\`])([^'"\`]*)(['"\`])`)
+          configContent = configContent.replace(slotIdPattern, `$1${zone.slotId || ''}$3`)
+          
+          // Actualizează customHtml pentru zone partner
+          if (zoneName.includes('partner') && zone.customHtml !== undefined) {
+            const customHtmlPattern = new RegExp(`('${zoneName}':[^}]*customHtml:\\s*)([^,}]+)`)
+            const newValue = zone.customHtml ? `'${zone.customHtml.replace(/'/g, "\\'")}'` : 'undefined'
+            configContent = configContent.replace(customHtmlPattern, `$1${newValue}`)
+          }
+        }
+      }
+      
       // Salvează fișierul actualizat
-      await writeFile(configPath, newConfigContent, 'utf-8')
+      await writeFile(configPath, configContent, 'utf-8')
       
       return NextResponse.json({
         success: true,
-        message: 'Publisher ID AdSense salvat cu succes',
-        publisherId: publisherId
+        message: 'Configurația AdSense a fost salvată cu succes',
+        publisherId: publisherIdToSave
       })
     }
     

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { MapPin, Plane, Clock, Calendar, Users, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react'
+import { MapPin, Plane, Clock, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react'
 import { FlightOption, FlightMatch } from '@/lib/flightPlannerService'
+import { getCityName } from '@/lib/airports'
 
 interface FlightOptionsGridProps {
   options: FlightOption[]
@@ -11,12 +12,12 @@ interface FlightOptionsGridProps {
 export function FlightOptionsGrid({ options }: FlightOptionsGridProps) {
   const [expandedOptions, setExpandedOptions] = useState<Set<string>>(new Set())
 
-  const toggleExpanded = (destinationCode: string) => {
+  const toggleExpanded = (uniqueKey: string) => {
     const newExpanded = new Set(expandedOptions)
-    if (newExpanded.has(destinationCode)) {
-      newExpanded.delete(destinationCode)
+    if (newExpanded.has(uniqueKey)) {
+      newExpanded.delete(uniqueKey)
     } else {
-      newExpanded.add(destinationCode)
+      newExpanded.add(uniqueKey)
     }
     setExpandedOptions(newExpanded)
   }
@@ -109,54 +110,55 @@ export function FlightOptionsGrid({ options }: FlightOptionsGridProps) {
 
   return (
     <div className="space-y-6">
-      {options.map((option) => {
-        const isExpanded = expandedOptions.has(option.destination.code)
+      {options.map((option, index) => {
+        const uniqueKey = `${option.destination.city}-${option.destination.code || 'unknown'}-${index}`
+        const isExpanded = expandedOptions.has(uniqueKey)
         
         return (
-          <div key={option.destination.code} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <div key={uniqueKey} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             {/* Destination Header */}
             <div 
-              className="p-6 bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
-              onClick={() => toggleExpanded(option.destination.code)}
+              className="p-4 md:p-6 bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+              onClick={() => toggleExpanded(uniqueKey)}
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3 md:space-x-4 flex-1 min-w-0">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xs md:text-sm">
                       {option.destination.code}
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                      {option.destination.city}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white truncate">
+                      {getCityName(option.destination.code) !== option.destination.code 
+                        ? getCityName(option.destination.code) 
+                        : option.destination.city}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      {option.destination.name}
+                    <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 truncate">
+                      {option.destination.name !== option.destination.city 
+                        ? option.destination.name 
+                        : `Aeroport ${option.destination.city}`}
                     </p>
-                    <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex flex-wrap items-center gap-2 md:gap-4 mt-1 md:mt-2 text-xs md:text-sm text-gray-500 dark:text-gray-400">
                       <span className="flex items-center">
-                        <Plane className="h-4 w-4 mr-1" />
-                        {option.outboundFlights.length} zboruri plecare
+                        <Plane className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                        {option.outboundFlights.length} plecare
                       </span>
                       <span className="flex items-center">
-                        <Plane className="h-4 w-4 mr-1 transform rotate-180" />
-                        {option.returnFlights.length} zboruri întoarcere
-                      </span>
-                      <span className="flex items-center">
-                        <Users className="h-4 w-4 mr-1" />
-                        {option.totalOptions} combinații
+                        <Plane className="h-3 w-3 md:h-4 md:w-4 mr-1 transform rotate-180" />
+                        {option.returnFlights.length} întoarcere
                       </span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                    <div className="text-lg md:text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {option.totalOptions}
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      opțiuni totale
+                    <div className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                      opțiuni
                     </div>
                   </div>
                   {isExpanded ? (
@@ -221,7 +223,7 @@ export function FlightOptionsGrid({ options }: FlightOptionsGridProps) {
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      <strong>Combinații posibile:</strong> {option.outboundFlights.length} plecare × {Math.max(1, option.returnFlights.length)} întoarcere = {option.totalOptions} opțiuni
+                      <strong>Combinații dus-întors:</strong> {option.outboundFlights.length} plecare × {option.returnFlights.length} întoarcere = {option.totalOptions} opțiuni
                     </div>
                     <div className="flex space-x-3">
                       <a

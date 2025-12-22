@@ -279,12 +279,12 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
       },
       origin: {
         airport: flight.originName || flight.originCode || 'Unknown',
-        code: flight.originCode || 'XXX',
+        code: flight.originCode || null,
         city: flight.originName || flight.originCode || 'Unknown'
       },
       destination: {
         airport: flight.destinationName || flight.destinationCode || 'Unknown', 
-        code: flight.destinationCode || 'XXX',
+        code: flight.destinationCode || null,
         city: flight.destinationName || flight.destinationCode || 'Unknown'
       },
       scheduled_time: flight.scheduledTime || new Date().toISOString(),

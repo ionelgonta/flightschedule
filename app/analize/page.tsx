@@ -98,7 +98,7 @@ export default function AnalyzePage() {
                 <BarChart3 className="h-12 w-12" />
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold mb-6">
               Analize și Statistici Zboruri
             </h1>
             <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">

@@ -40,6 +40,7 @@ export const STATIC_AIRPORT_DATABASE: Record<string, StaticAirportInfo> = {
   'MAD': { iata: 'MAD', name: 'Adolfo Suárez Madrid–Barajas Airport', city: 'Madrid', country: 'Spain' },
   'MUC': { iata: 'MUC', name: 'Munich Airport', city: 'Munich', country: 'Germany' },
   'ZRH': { iata: 'ZRH', name: 'Zurich Airport', city: 'Zurich', country: 'Switzerland' },
+  'BSL': { iata: 'BSL', name: 'EuroAirport Basel Mulhouse Freiburg', city: 'Basel', country: 'Switzerland' },
   'FCO': { iata: 'FCO', name: 'Leonardo da Vinci–Fiumicino Airport', city: 'Rome', country: 'Italy' },
   'BCN': { iata: 'BCN', name: 'Barcelona–El Prat Airport', city: 'Barcelona', country: 'Spain' },
   'BER': { iata: 'BER', name: 'Berlin Brandenburg Airport', city: 'Berlin', country: 'Germany' },
@@ -83,6 +84,8 @@ export const STATIC_AIRPORT_DATABASE: Record<string, StaticAirportInfo> = {
   'BGY': { iata: 'BGY', name: 'Milan Bergamo Airport', city: 'Milan', country: 'Italy' },
   'VCE': { iata: 'VCE', name: 'Venice Marco Polo Airport', city: 'Venice', country: 'Italy' },
   'TRN': { iata: 'TRN', name: 'Turin Airport', city: 'Turin', country: 'Italy' },
+  'NAP': { iata: 'NAP', name: 'Naples International Airport', city: 'Napoli', country: 'Italy' },
+  'PSA': { iata: 'PSA', name: 'Pisa International Airport', city: 'Pisa', country: 'Italy' },
   'MLA': { iata: 'MLA', name: 'Malta International Airport', city: 'Valletta', country: 'Malta' },
 
   // Spanish Airports
@@ -93,6 +96,7 @@ export const STATIC_AIRPORT_DATABASE: Record<string, StaticAirportInfo> = {
   // French Airports
   'NCE': { iata: 'NCE', name: 'Nice Côte d\'Azur Airport', city: 'Nice', country: 'France' },
   'LYS': { iata: 'LYS', name: 'Lyon–Saint-Exupéry Airport', city: 'Lyon', country: 'France' },
+  'MRS': { iata: 'MRS', name: 'Marseille Provence Airport', city: 'Marseille', country: 'France' },
   'BVA': { iata: 'BVA', name: 'Paris Beauvais Airport', city: 'Paris', country: 'France' },
 
   // German Airports
@@ -101,6 +105,8 @@ export const STATIC_AIRPORT_DATABASE: Record<string, StaticAirportInfo> = {
   'DUS': { iata: 'DUS', name: 'Düsseldorf Airport', city: 'Düsseldorf', country: 'Germany' },
   'STR': { iata: 'STR', name: 'Stuttgart Airport', city: 'Stuttgart', country: 'Germany' },
   'FKB': { iata: 'FKB', name: 'Karlsruhe/Baden-Baden Airport', city: 'Baden-Baden', country: 'Germany' },
+  'HHN': { iata: 'HHN', name: 'Frankfurt-Hahn Airport', city: 'Frankfurt Hahn', country: 'Germany' },
+  'FMM': { iata: 'FMM', name: 'Memmingen Airport', city: 'Memmingen', country: 'Germany' },
 
   // Netherlands Airports
   'EIN': { iata: 'EIN', name: 'Eindhoven Airport', city: 'Eindhoven', country: 'Netherlands' },
@@ -112,10 +118,14 @@ export const STATIC_AIRPORT_DATABASE: Record<string, StaticAirportInfo> = {
   // Middle East & International
   'IST': { iata: 'IST', name: 'Istanbul Airport', city: 'Istanbul', country: 'Turkey' },
   'SAW': { iata: 'SAW', name: 'Istanbul Sabiha Gökçen Airport', city: 'Istanbul', country: 'Turkey' },
+  'AYT': { iata: 'AYT', name: 'Antalya Airport', city: 'Antalya', country: 'Turkey' },
   'TLV': { iata: 'TLV', name: 'Ben Gurion Airport', city: 'Tel Aviv', country: 'Israel' },
   'DXB': { iata: 'DXB', name: 'Dubai International Airport', city: 'Dubai', country: 'UAE' },
   'DOH': { iata: 'DOH', name: 'Hamad International Airport', city: 'Doha', country: 'Qatar' },
   'LCA': { iata: 'LCA', name: 'Larnaca International Airport', city: 'Larnaca', country: 'Cyprus' },
+  'GYD': { iata: 'GYD', name: 'Heydar Aliyev International Airport', city: 'Baku', country: 'Azerbaijan' },
+  'BEY': { iata: 'BEY', name: 'Rafic Hariri International Airport', city: 'Beirut', country: 'Lebanon' },
+  'CAI': { iata: 'CAI', name: 'Cairo International Airport', city: 'Cairo', country: 'Egypt' },
 
   // Other European destinations
   'TSF': { iata: 'TSF', name: 'Treviso Airport', city: 'Treviso', country: 'Italy' },

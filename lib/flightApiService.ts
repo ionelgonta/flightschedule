@@ -82,13 +82,13 @@ class FlightApiService {
       const flights = await this.aeroDataBoxService.getFlights(airportCode, 'arrivals');
       
       // Convert to our standard format with Romanian delay formatting
-      const convertedFlights = flights.map(flight => {
-        const converted = this.aeroDataBoxService.convertToStandardFormat(flight, 'arrivals', airportCode);
-        return {
+      const convertedFlights = flights
+        .map(flight => this.aeroDataBoxService.convertToStandardFormat(flight, 'arrivals', airportCode))
+        .filter(converted => converted !== null) // Filter out flights without valid airport codes
+        .map(converted => ({
           ...converted,
           delay: converted.delay ? converted.delay : undefined
-        };
-      });
+        }));
 
       console.log(`Successfully fetched ${convertedFlights.length} real arrivals for ${airportCode}`);
       
@@ -129,13 +129,13 @@ class FlightApiService {
       const flights = await this.aeroDataBoxService.getFlights(airportCode, 'departures');
       
       // Convert to our standard format with Romanian delay formatting
-      const convertedFlights = flights.map(flight => {
-        const converted = this.aeroDataBoxService.convertToStandardFormat(flight, 'departures', airportCode);
-        return {
+      const convertedFlights = flights
+        .map(flight => this.aeroDataBoxService.convertToStandardFormat(flight, 'departures', airportCode))
+        .filter(converted => converted !== null) // Filter out flights without valid airport codes
+        .map(converted => ({
           ...converted,
           delay: converted.delay ? converted.delay : undefined
-        };
-      });
+        }));
 
       console.log(`Successfully fetched ${convertedFlights.length} real departures for ${airportCode}`);
       

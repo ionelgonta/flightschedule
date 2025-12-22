@@ -80,7 +80,7 @@ export default function AirportPage({ params }: AirportPageProps) {
                   <Plane className="h-12 w-12" />
                 </div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              <h1 className="text-2xl md:text-3xl font-bold mb-4">
                 {airport.name}
               </h1>
               <div className="flex items-center justify-center space-x-2 text-xl text-primary-100 mb-8">

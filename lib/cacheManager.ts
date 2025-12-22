@@ -480,20 +480,32 @@ class CacheManager {
           const currentTime = new Date().toTimeString().split(' ')[0].substring(0, 5) // HH:mm format
           
           // Convert API response to historical format
-          const flightData: any[] = response.data.map((flight: any) => ({
-            flightNumber: flight.flight_number || flight.flightNumber || 'N/A',
-            airlineCode: flight.airline?.code || flight.airlineCode || 'XX',
-            airlineName: flight.airline?.name || flight.airlineName || 'Unknown',
-            originCode: flight.origin?.code || flight.originCode || 'XXX',
-            originName: flight.origin?.name || flight.originName || flight.origin?.code || 'Unknown',
-            destinationCode: flight.destination?.code || flight.destinationCode || 'XXX',
-            destinationName: flight.destination?.name || flight.destinationName || flight.destination?.code || 'Unknown',
-            scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
-            actualTime: flight.actual_time || flight.actualTime || undefined,
-            estimatedTime: flight.estimated_time || flight.estimatedTime || undefined,
-            status: flight.status || 'scheduled',
-            delayMinutes: flight.delay || flight.delayMinutes || 0
-          }))
+          const flightData: any[] = response.data
+            .map((flight: any) => {
+              // Skip flights without valid airport codes
+              const originCode = flight.origin?.code || flight.originCode;
+              const destinationCode = flight.destination?.code || flight.destinationCode;
+              
+              if (!originCode || !destinationCode) {
+                return null; // Skip this flight - no valid airport codes
+              }
+              
+              return {
+                flightNumber: flight.flight_number || flight.flightNumber || 'N/A',
+                airlineCode: flight.airline?.code || flight.airlineCode || 'XX',
+                airlineName: flight.airline?.name || flight.airlineName || 'Unknown',
+                originCode: originCode,
+                originName: flight.origin?.name || flight.originName || originCode,
+                destinationCode: destinationCode,
+                destinationName: flight.destination?.name || flight.destinationName || destinationCode,
+                scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
+                actualTime: flight.actual_time || flight.actualTime || undefined,
+                estimatedTime: flight.estimated_time || flight.estimatedTime || undefined,
+                status: flight.status || 'scheduled',
+                delayMinutes: flight.delay || flight.delayMinutes || 0
+              };
+            })
+            .filter(flight => flight !== null) // Remove null entries
           
           const dailySnapshot: any = {
             airportCode,

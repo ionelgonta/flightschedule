@@ -119,7 +119,7 @@ class FlightPlannerService {
   }
 
   /**
-   * Find flight options based on planner filters using historical data
+   * Find flight options based on planner filters using real-time data
    * This method should only be called from server-side API routes
    */
   async findFlightOptions(filters: FlightPlannerFilters): Promise<FlightOption[]> {
@@ -135,11 +135,22 @@ class FlightPlannerService {
     this.filters = filters
     
     try {
-      // Get weekly schedule data directly from the analyzer (server-side only)
-      const { getWeeklyScheduleAnalyzer } = await import('./weeklyScheduleAnalyzer')
-      const weeklyScheduleAnalyzer = getWeeklyScheduleAnalyzer()
-      const scheduleData = await weeklyScheduleAnalyzer.getScheduleData() || []
-      console.log(`📊 Analyzing ${scheduleData.length} weekly schedule entries`)
+      // First try to get weekly schedule data
+      let scheduleData: any[] = []
+      try {
+        const { getWeeklyScheduleAnalyzer } = await import('./weeklyScheduleAnalyzer')
+        const weeklyScheduleAnalyzer = getWeeklyScheduleAnalyzer()
+        scheduleData = await weeklyScheduleAnalyzer.getScheduleData() || []
+        console.log(`📊 Found ${scheduleData.length} weekly schedule entries`)
+      } catch (error) {
+        console.warn('Could not load weekly schedule data:', error)
+      }
+
+      // If no weekly schedule data, use real-time flight data
+      if (scheduleData.length === 0) {
+        console.log('📡 No weekly schedule data found, using real-time flight data...')
+        return await this.findFlightOptionsFromRealTimeData(filters)
+      }
 
       const destinationMap = new Map<string, FlightOption>()
 
@@ -149,10 +160,10 @@ class FlightPlannerService {
 
       // Enhanced filtering with flexibility support
       const matchingOutboundFlights = scheduleData.filter((flight: any) => {
-        // Check if origin airport matches
+        // Check if origin airport matches - try both airport code and city name
         const originMatches = originAirports.some(origin => {
-          const originCity = getCityName(origin)
-          return flight.airport === originCity || flight.airport.includes(originCity)
+          // Match by airport code directly
+          return flight.airport === origin
         })
         
         if (!originMatches) return false
@@ -176,13 +187,19 @@ class FlightPlannerService {
           // Check if this is a return flight (destination -> origin)
           const returnMatches = originAirports.some(origin => {
             const originCity = getCityName(origin)
-            return returnFlight.destination === originCity || returnFlight.destination.includes(originCity)
+            // Match by airport code directly or by city name
+            return returnFlight.destination === origin || 
+                   returnFlight.destination === originCity || 
+                   returnFlight.destination.includes(originCity) ||
+                   returnFlight.destination.includes(origin)
           })
           
           if (!returnMatches) return false
           
-          // Check if origin is our destination
-          if (returnFlight.airport !== destCity) return false
+          // Check if origin is our destination - also try both code and city matching
+          const originMatches = returnFlight.airport === destCity || 
+                               returnFlight.airport.includes(destCity)
+          if (!originMatches) return false
 
           // Check return days with flexibility
           const returnDayMatches = this.checkDayFlexibility(returnFlight.weeklyPattern, filters.returnDays)
@@ -198,7 +215,7 @@ class FlightPlannerService {
 
           destinationMap.set(destCity, {
             destination: {
-              code: destAirport?.code || 'XXX',
+              code: destAirport?.code || destCity.substring(0, 3).toUpperCase(),
               name: destAirport?.name || destCity,
               city: destCity,
               country: destAirport?.country || 'Unknown'
@@ -243,9 +260,9 @@ class FlightPlannerService {
         option.totalOptions = option.outboundFlights.length * Math.max(1, option.returnFlights.length)
       }
 
-      // Convert map to array and sort by total options and destination popularity
+      // Convert map to array and filter to show ONLY destinations with BOTH outbound AND return flights
       const sortedOptions = Array.from(destinationMap.values())
-        .filter(option => option.outboundFlights.length > 0)
+        .filter(option => option.outboundFlights.length > 0 && option.returnFlights.length > 0)
         .sort((a, b) => {
           // Primary sort: total options
           if (b.totalOptions !== a.totalOptions) {
@@ -270,6 +287,169 @@ class FlightPlannerService {
       console.error('❌ Error finding flight options:', error)
       return []
     }
+  }
+
+  /**
+   * Find flight options using real-time flight data when weekly schedule is not available
+   */
+  private async findFlightOptionsFromRealTimeData(filters: FlightPlannerFilters): Promise<FlightOption[]> {
+    console.log('🔍 Using real-time flight data for flight planning...')
+    
+    const destinationMap = new Map<string, FlightOption>()
+    const originAirports = filters.originAirports || ['RMO']
+    
+    console.log(`🛫 Searching real-time flights from: ${originAirports.map(code => getCityName(code)).join(', ')}`)
+
+    // Load current flight data for each origin airport
+    for (const originCode of originAirports) {
+      try {
+        // Get departures from this airport (outbound flights)
+        const departuresResponse = await this.flightRepository.getDepartures(originCode)
+        console.log(`📤 ${originCode} departures: ${departuresResponse.data.length} flights`)
+        
+        if (departuresResponse.success && departuresResponse.data.length > 0) {
+          // Process each departure flight
+          departuresResponse.data.forEach(flight => {
+            // Extract destination information
+            let destCode = ''
+            let destCity = ''
+            let destName = ''
+            
+            if (typeof flight.destination === 'object' && flight.destination) {
+              destCode = flight.destination.code || ''
+              destCity = flight.destination.city || flight.destination.airport || ''
+              destName = flight.destination.airport || flight.destination.city || ''
+            } else if (typeof flight.destination === 'string') {
+              destCode = flight.destination
+              destCity = getCityName(flight.destination) || flight.destination
+              destName = flight.destination
+            }
+
+            // Skip if no valid destination or no valid destination code
+            if (!destCity || destCity === getCityName(originCode) || !destCode) return
+
+            // Check if this flight matches the day preferences
+            const flightDate = new Date(flight.scheduled_time)
+            const dayOfWeek = this.getDayOfWeek(flightDate)
+            const timeSlot = this.getTimeSlot(flightDate)
+            
+            // Check departure day and time preferences
+            const dayMatches = filters.departureDays.includes(dayOfWeek)
+            const timeMatches = timeSlot === filters.departureTimeSlot
+            
+            if (!dayMatches || !timeMatches) return
+
+            // Create or update destination option
+            if (!destinationMap.has(destCity)) {
+              const destAirport = MAJOR_AIRPORTS.find(a => 
+                a.code === destCode || getCityName(a.code) === destCity || a.city === destCity
+              )
+
+              destinationMap.set(destCity, {
+                destination: {
+                  code: destCode || destAirport?.code || destCity.substring(0, 3).toUpperCase(),
+                  name: destName || destAirport?.name || destCity,
+                  city: destCity,
+                  country: destAirport?.country || 'Unknown'
+                },
+                outboundFlights: [],
+                returnFlights: [],
+                totalOptions: 0
+              })
+            }
+
+            const option = destinationMap.get(destCity)!
+            
+            // Convert to flight match
+            const flightMatch = this.convertToFlightMatch(flight)
+            
+            // Check for duplicates
+            const existingFlight = option.outboundFlights.find(f => 
+              f.flightNumber === flightMatch.flightNumber
+            )
+            
+            if (!existingFlight) {
+              option.outboundFlights.push(flightMatch)
+            }
+          })
+        }
+
+        // Get arrivals to this airport (potential return flights)
+        const arrivalsResponse = await this.flightRepository.getArrivals(originCode)
+        console.log(`📥 ${originCode} arrivals: ${arrivalsResponse.data.length} flights`)
+        
+        if (arrivalsResponse.success && arrivalsResponse.data.length > 0) {
+          // Process each arrival flight as potential return flight
+          arrivalsResponse.data.forEach(flight => {
+            // Extract origin information (this would be the destination for outbound)
+            let originFlightCode = ''
+            let originFlightCity = ''
+            
+            if (typeof flight.origin === 'object' && flight.origin) {
+              originFlightCode = flight.origin.code || ''
+              originFlightCity = flight.origin.city || flight.origin.airport || ''
+            } else if (typeof flight.origin === 'string') {
+              originFlightCode = flight.origin
+              originFlightCity = getCityName(flight.origin) || flight.origin
+            }
+
+            // Skip if no valid origin, no valid origin code, or if it's the same as our departure airport
+            if (!originFlightCity || !originFlightCode || originFlightCity === getCityName(originCode)) return
+
+            // Check if we have this destination in our map
+            if (!destinationMap.has(originFlightCity)) return
+
+            // Check if this flight matches the return day preferences
+            const flightDate = new Date(flight.scheduled_time)
+            const dayOfWeek = this.getDayOfWeek(flightDate)
+            const timeSlot = this.getTimeSlot(flightDate)
+            
+            // Check return day and time preferences
+            const dayMatches = filters.returnDays.includes(dayOfWeek)
+            const timeMatches = timeSlot === filters.returnTimeSlot
+            
+            if (!dayMatches || !timeMatches) return
+
+            const option = destinationMap.get(originFlightCity)!
+            
+            // Convert to flight match
+            const flightMatch = this.convertToFlightMatch(flight)
+            
+            // Check for duplicates
+            const existingFlight = option.returnFlights.find(f => 
+              f.flightNumber === flightMatch.flightNumber
+            )
+            
+            if (!existingFlight) {
+              option.returnFlights.push(flightMatch)
+            }
+          })
+        }
+      } catch (error) {
+        console.warn(`Error processing flights for ${originCode}:`, error)
+      }
+    }
+
+    // Calculate total options and filter to show ONLY destinations with BOTH outbound AND return flights
+    const sortedOptions = Array.from(destinationMap.values())
+      .map(option => {
+        option.totalOptions = option.outboundFlights.length * option.returnFlights.length
+        return option
+      })
+      .filter(option => option.outboundFlights.length > 0 && option.returnFlights.length > 0)
+      .sort((a, b) => {
+        if (b.totalOptions !== a.totalOptions) {
+          return b.totalOptions - a.totalOptions
+        }
+        return a.destination.city.localeCompare(b.destination.city)
+      })
+
+    console.log(`🎯 Found ${sortedOptions.length} destinations from real-time data:`)
+    sortedOptions.slice(0, 5).forEach(option => {
+      console.log(`  • ${option.destination.city}: ${option.outboundFlights.length} plecare, ${option.returnFlights.length} întoarcere`)
+    })
+
+    return sortedOptions
   }
 
   /**
@@ -511,7 +691,7 @@ class FlightPlannerService {
 
         if (!destinationMap.has(destCity)) {
           destinationMap.set(destCity, {
-            code: destAirport?.code || 'XXX',
+            code: destAirport?.code || destCity.substring(0, 3).toUpperCase(),
             name: destAirport?.name || destCity,
             city: destCity,
             country: destAirport?.country || 'Unknown',
@@ -594,12 +774,12 @@ class FlightPlannerService {
         code: 'XX'
       },
       origin: {
-        code: originAirport?.code || 'XXX',
+        code: originAirport?.code || scheduleEntry.airport.substring(0, 3).toUpperCase(),
         name: originAirport?.name || scheduleEntry.airport,
         city: scheduleEntry.airport
       },
       destination: {
-        code: destAirport?.code || 'XXX',
+        code: destAirport?.code || scheduleEntry.destination.substring(0, 3).toUpperCase(),
         name: destAirport?.name || scheduleEntry.destination,
         city: scheduleEntry.destination
       },

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Calendar, Clock, MapPin, Search, Plus, Minus, Plane } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Calendar, Clock, MapPin, Search, Plus, Minus, Plane, TrendingUp } from 'lucide-react'
 // Local type definition to avoid importing server-side code
 interface Filters {
   departureDays: string[]
@@ -41,6 +41,36 @@ const TIME_SLOTS = [
 export function FlightPlannerFilters({ filters, onChange, loading, showAdvanced = false }: FlightPlannerFiltersProps) {
   const [selectedDepartureDay, setSelectedDepartureDay] = useState(filters.departureDays[0] || 'monday')
   const [selectedReturnDay, setSelectedReturnDay] = useState(filters.returnDays[0] || 'sunday')
+  const [cityStats, setCityStats] = useState({ flights: 0, destinations: 0 })
+
+  // Define selectedOrigins before useEffect that uses it
+  const selectedOrigins = filters.originAirports || ['RMO']
+
+  // Fetch city-specific stats when origin changes
+  useEffect(() => {
+    const fetchCityStats = async () => {
+      const selectedCity = selectedOrigins[0] || 'RMO'
+      try {
+        const response = await fetch(`/api/flights/${selectedCity}/departures`)
+        const data = await response.json()
+        
+        if (data.success && data.data) {
+          const destinations = new Set(data.data.map((flight: any) => 
+            flight.destination?.city || flight.destination?.code || ''
+          ).filter(Boolean))
+          
+          setCityStats({
+            flights: data.data.length,
+            destinations: destinations.size
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching city stats:', error)
+      }
+    }
+    
+    fetchCityStats()
+  }, [selectedOrigins[0]])
 
   const getExpandedDays = (day: string, flexibility: number): string[] => {
     const dayIndex = DAYS_OF_WEEK.findIndex(d => d.value === day)
@@ -106,7 +136,6 @@ export function FlightPlannerFilters({ filters, onChange, loading, showAdvanced 
   }
 
   const allAirports = MAJOR_AIRPORTS.filter(a => a.country === 'România' || a.country === 'Moldova')
-  const selectedOrigins = filters.originAirports || ['RMO'] // Default to Chișinău
 
   if (!showAdvanced) {
     // Simple Mode - Material Design M3 with Enhanced UX
@@ -285,63 +314,51 @@ export function FlightPlannerFilters({ filters, onChange, loading, showAdvanced 
           </div>
         </div>
 
-        {/* Time Preferences - Simplified */}
-        <div className="grid md:grid-cols-2 gap-8">
+        {/* Time Preferences - Compact Dropdowns */}
+        <div className="grid md:grid-cols-2 gap-6">
           {/* Departure Time */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center">
-              <Clock className="h-5 w-5 mr-2" />
-              Interval preferat pentru plecare
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+              <Clock className="h-4 w-4 mr-2" />
+              Interval plecare
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <select
+              value={filters.departureTimeSlot}
+              onChange={(e) => handleTimeSlotChange('departure', e.target.value as 'morning' | 'afternoon' | 'evening')}
+              disabled={loading}
+              className="w-full p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+            >
               {TIME_SLOTS.map(slot => (
-                <button
-                  key={slot.value}
-                  onClick={() => handleTimeSlotChange('departure', slot.value)}
-                  disabled={loading}
-                  className={`p-3 rounded-xl text-center transition-all ${
-                    filters.departureTimeSlot === slot.value
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-105'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105'
-                  } disabled:opacity-50`}
-                >
-                  <div className="text-lg mb-1">{slot.icon}</div>
-                  <div className="font-semibold text-xs">{slot.label}</div>
-                  <div className="text-xs opacity-75 mt-1">{slot.time}</div>
-                </button>
+                <option key={slot.value} value={slot.value}>
+                  {slot.icon} {slot.label} ({slot.time})
+                </option>
               ))}
-            </div>
+            </select>
           </div>
 
           {/* Return Time */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center">
-              <Clock className="h-5 w-5 mr-2" />
-              Interval preferat pentru întoarcere
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+              <Clock className="h-4 w-4 mr-2" />
+              Interval întoarcere
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <select
+              value={filters.returnTimeSlot}
+              onChange={(e) => handleTimeSlotChange('return', e.target.value as 'morning' | 'afternoon' | 'evening')}
+              disabled={loading}
+              className="w-full p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all shadow-sm"
+            >
               {TIME_SLOTS.map(slot => (
-                <button
-                  key={slot.value}
-                  onClick={() => handleTimeSlotChange('return', slot.value)}
-                  disabled={loading}
-                  className={`p-3 rounded-xl text-center transition-all ${
-                    filters.returnTimeSlot === slot.value
-                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg scale-105'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105'
-                  } disabled:opacity-50`}
-                >
-                  <div className="text-lg mb-1">{slot.icon}</div>
-                  <div className="font-semibold text-xs">{slot.label}</div>
-                  <div className="text-xs opacity-75 mt-1">{slot.time}</div>
-                </button>
+                <option key={slot.value} value={slot.value}>
+                  {slot.icon} {slot.label} ({slot.time})
+                </option>
               ))}
-            </div>
+            </select>
           </div>
         </div>
 
-        {/* Search Button */}
-        <div className="flex justify-center">
+        {/* Search Button with City Stats */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             onClick={() => onChange(filters)}
             disabled={loading}
@@ -359,6 +376,20 @@ export function FlightPlannerFilters({ filters, onChange, loading, showAdvanced 
               </>
             )}
           </button>
+          
+          {/* Compact City Stats */}
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-sm">
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-xl px-3 py-2 shadow-sm border border-gray-200 dark:border-gray-700">
+              <Plane className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <span className="text-gray-600 dark:text-gray-400">Zboruri din {getCityName(selectedOrigins[0] || 'RMO')}:</span>
+              <span className="font-bold text-gray-900 dark:text-white">{cityStats.flights}</span>
+            </div>
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-xl px-3 py-2 shadow-sm border border-gray-200 dark:border-gray-700">
+              <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <span className="text-gray-600 dark:text-gray-400">Destinații:</span>
+              <span className="font-bold text-gray-900 dark:text-white">{cityStats.destinations}</span>
+            </div>
+          </div>
         </div>
       </div>
     )

@@ -60,7 +60,7 @@ export default function AirportsPage() {
                   <MapPin className="h-12 w-12" />
                 </div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              <h1 className="text-2xl md:text-3xl font-bold mb-4">
                 Director Aeroporturi
               </h1>
               <p className="text-xl text-primary-100 mb-8 max-w-3xl mx-auto">

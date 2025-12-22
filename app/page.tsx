@@ -58,7 +58,7 @@ export default function HomePage() {
                 <Plane className="h-16 w-16 text-white" />
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 text-white">
               Informații Zboruri în Timp Real
             </h1>
             <p className="text-xl md:text-2xl mb-12 text-blue-100 max-w-4xl mx-auto leading-relaxed">
