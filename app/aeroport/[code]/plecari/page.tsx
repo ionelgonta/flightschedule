@@ -22,7 +22,7 @@ export default function DeparturesPage({ params }: DeparturesPageProps) {
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<'grouped' | 'list'>('grouped')
+  const [viewMode, setViewMode] = useState<'grouped' | 'list'>('list')
 
   const airport = getAirportByCodeOrSlug(params.code)
   const clientFlightService = getClientFlightService()

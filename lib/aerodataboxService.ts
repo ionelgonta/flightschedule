@@ -284,15 +284,22 @@ class AeroDataBoxService {
       
       const flights = type === 'arrivals' ? (response.arrivals || []) : (response.departures || []);
       
-      console.log(`Extracted ${flights.length} ${type} flights for ${airportCode}`);
+      // Filter out codeshare flights - keep only IsOperator
+      const operatorFlights = flights.filter(flight => {
+        const codeshareStatus = flight.codeshareStatus || '';
+        return codeshareStatus === 'IsOperator' || codeshareStatus === '';
+      });
+      
+      console.log(`Extracted ${flights.length} total ${type} flights for ${airportCode}`);
+      console.log(`Filtered to ${operatorFlights.length} operator flights (excluded codeshare)`);
       
       // If no flights returned, add to limited data list for future reference but still track the request
-      if (flights.length === 0) {
-        console.warn(`Airport ${airportCode} returned no ${type} data - this may be normal if no flights are scheduled`);
+      if (operatorFlights.length === 0) {
+        console.warn(`Airport ${airportCode} returned no operator ${type} data after filtering - this may be normal if no flights are scheduled`);
         // Don't add to limited data list immediately - empty results can be normal
       }
       
-      return flights;
+      return operatorFlights;
     } catch (error) {
       console.error(`Failed to get ${type} for airport ${airportCode}:`, error);
       

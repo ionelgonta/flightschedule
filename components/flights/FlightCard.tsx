@@ -7,6 +7,7 @@
 
 import { RawFlightData } from '@/lib/flightApiService';
 import { formatDelayInRomanian } from '@/lib/flightUtils';
+import { AirlineLogo } from '@/components/ui/AirlineLogo';
 import { Plane, Clock, MapPin, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 
 interface FlightCardProps {
@@ -74,9 +75,11 @@ export function FlightCard({ flight, type, className = '' }: FlightCardProps) {
       {/* Header cu numărul zborului și compania */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-3">
-          <div className="flex items-center justify-center w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full">
-            <Plane className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          </div>
+          <AirlineLogo 
+            airlineCode={flight.airline.code}
+            airlineName={flight.airline.name}
+            size="md"
+          />
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-white">
               {flight.flight_number}

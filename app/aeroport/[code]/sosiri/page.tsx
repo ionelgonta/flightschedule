@@ -22,7 +22,7 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<'grouped' | 'list'>('grouped')
+  const [viewMode, setViewMode] = useState<'grouped' | 'list'>('list')
 
   const airport = getAirportByCodeOrSlug(params.code)
   const clientFlightService = getClientFlightService()
@@ -169,24 +169,24 @@ export default function ArrivalsPage({ params }: ArrivalsPageProps) {
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-1">
                 <button
-                  onClick={() => setViewMode('grouped')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                    viewMode === 'grouped'
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  Grupat pe Rute
-                </button>
-                <button
                   onClick={() => setViewMode('list')}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                     viewMode === 'list'
-                      ? 'bg-blue-600 text-white shadow-md'
+                      ? 'bg-green-600 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                   }`}
                 >
                   Lista Completă
+                </button>
+                <button
+                  onClick={() => setViewMode('grouped')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    viewMode === 'grouped'
+                      ? 'bg-green-600 text-white shadow-md'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  Grupat pe Rute
                 </button>
               </div>
             </div>

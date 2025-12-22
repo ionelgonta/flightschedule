@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { writeFile, readFile } from 'fs/promises'
 import { join } from 'path'
 
+// Import the current config to get default values
+import { adConfig as defaultAdConfig } from '@/lib/adConfig'
+
 // API endpoint pentru gestionarea configurației AdSense
 export async function GET() {
   try {
@@ -13,46 +16,8 @@ export async function GET() {
     const publisherIdMatch = configContent.match(/publisherId:\s*['"`]([^'"`]+)['"`]/)
     const currentPublisherId = publisherIdMatch ? publisherIdMatch[1] : ''
     
-    // Extrage configurația zonelor cu un regex mai robust
-    const zonesMatch = configContent.match(/zones:\s*{([\s\S]*?)}\s*}/m)
-    let zones: any = {}
-    
-    if (zonesMatch) {
-      // Parse zone configurations cu un regex mai complex pentru nested objects
-      const zoneContent = zonesMatch[1]
-      const zoneMatches = zoneContent.matchAll(/'([^']+)':\s*{([^}]*(?:{[^}]*}[^}]*)*)}/g)
-      
-      for (const match of zoneMatches) {
-        const zoneName = match[1]
-        const zoneConfig = match[2]
-        
-        const modeMatch = zoneConfig.match(/mode:\s*['"`]([^'"`]+)['"`]/)
-        const slotIdMatch = zoneConfig.match(/slotId:\s*['"`]([^'"`]*)['"`]/)
-        const sizeMatch = zoneConfig.match(/size:\s*['"`]([^'"`]+)['"`]/)
-        const customHtmlMatch = zoneConfig.match(/customHtml:\s*(?:['"`]([^'"`]*)['"`]|undefined)/)
-        
-        zones[zoneName] = {
-          mode: modeMatch ? modeMatch[1] : 'inactive',
-          slotId: slotIdMatch ? slotIdMatch[1] : '',
-          size: sizeMatch ? sizeMatch[1] : '300x250',
-          customHtml: customHtmlMatch && customHtmlMatch[1] ? customHtmlMatch[1] : undefined
-        }
-      }
-    }
-    
-    // Dacă nu s-au găsit zone prin parsing, returnează configurația default
-    if (Object.keys(zones).length === 0) {
-      zones = {
-        'header-banner': { mode: 'active', slotId: '1234567890', size: '728x90' },
-        'sidebar-right': { mode: 'active', slotId: '1234567891', size: '300x600' },
-        'sidebar-square': { mode: 'active', slotId: '1234567892', size: '300x250' },
-        'inline-banner': { mode: 'active', slotId: '1234567893', size: '728x90' },
-        'footer-banner': { mode: 'active', slotId: '1234567894', size: '970x90' },
-        'mobile-banner': { mode: 'active', slotId: '1234567895', size: '320x50' },
-        'partner-banner-1': { mode: 'inactive', slotId: '', size: '728x90', customHtml: undefined },
-        'partner-banner-2': { mode: 'inactive', slotId: '', size: '300x250', customHtml: undefined }
-      }
-    }
+    // Use the imported config as the source of truth for zones
+    const zones = defaultAdConfig.zones
     
     return NextResponse.json({
       success: true,
