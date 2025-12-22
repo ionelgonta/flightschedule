@@ -1,6 +1,6 @@
 /**
  * FlightCard - Componentă pentru afișarea unui zbor individual
- * Design minimalist cu informații complete
+ * Design compact și modern, fără informații despre terminal și poartă
  */
 
 'use client';
@@ -55,13 +55,13 @@ export function FlightCard({ flight, type, className = '' }: FlightCardProps) {
       case 'landed':
       case 'arrived':
       case 'departed':
-        return <CheckCircle className="h-4 w-4" />;
+        return <CheckCircle className="h-3 w-3" />;
       case 'delayed':
-        return <AlertCircle className="h-4 w-4" />;
+        return <AlertCircle className="h-3 w-3" />;
       case 'cancelled':
-        return <XCircle className="h-4 w-4" />;
+        return <XCircle className="h-3 w-3" />;
       default:
-        return <Clock className="h-4 w-4" />;
+        return <Clock className="h-3 w-3" />;
     }
   };
 
@@ -71,110 +71,85 @@ export function FlightCard({ flight, type, className = '' }: FlightCardProps) {
   const isDelayed = estimatedTime && estimatedTime !== scheduledTime;
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow ${className}`}>
-      {/* Header cu numărul zborului și compania */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-3">
+    <div className={`bg-white rounded-lg border border-gray-200 p-3 hover:border-blue-300 hover:shadow-sm transition-all ${className}`}>
+      {/* Compact Header */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center space-x-2">
           <AirlineLogo 
             airlineCode={flight.airline.code}
             airlineName={flight.airline.name}
-            size="md"
+            size="sm"
           />
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">
+            <h3 className="font-semibold text-gray-900 text-sm">
               {flight.flight_number}
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-xs text-gray-500 truncate max-w-24">
               {flight.airline.name}
             </p>
           </div>
         </div>
         
-        {/* Status badge */}
-        <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(flight.status)}`}>
+        {/* Compact Status */}
+        <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-md text-xs font-medium border ${getStatusColor(flight.status)}`}>
           {getStatusIcon(flight.status)}
-          <span className="capitalize">{flight.status}</span>
+          <span className="capitalize hidden sm:inline">{flight.status}</span>
         </div>
       </div>
 
-      {/* Ruta și destinația */}
-      <div className="flex items-center space-x-2 mb-3">
-        <MapPin className="h-4 w-4 text-gray-400" />
-        <div className="flex items-center space-x-2 text-sm">
-          <span className="font-medium text-gray-900 dark:text-white">
+      {/* Compact Route */}
+      <div className="flex items-center space-x-1 mb-2">
+        <MapPin className="h-3 w-3 text-gray-400 flex-shrink-0" />
+        <div className="flex items-center space-x-1 text-xs min-w-0">
+          <span className="font-medium text-gray-900">
             {type === 'arrivals' ? 'Din' : 'Spre'}
           </span>
-          <span className="text-gray-600 dark:text-gray-400">
-            {relevantAirport.city} - {relevantAirport.airport}
+          <span className="text-gray-600 truncate">
+            {relevantAirport.city}
+          </span>
+          <span className="text-gray-400 hidden sm:inline">
+            ({relevantAirport.code})
           </span>
         </div>
       </div>
 
-      {/* Orele și detaliile */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Ora programată */}
+      {/* Compact Time Info */}
+      <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-            Ora programată
-          </p>
-          <p className="text-lg font-semibold text-gray-900 dark:text-white">
+          <p className="text-xs text-gray-500">Programat</p>
+          <p className="text-sm font-semibold text-gray-900">
             {formatTime(scheduledTime)}
           </p>
         </div>
 
-        {/* Ora estimată */}
-        <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-            {isDelayed ? 'Ora estimată' : 'Status'}
-          </p>
-          {isDelayed ? (
-            <p className="text-lg font-semibold text-orange-600 dark:text-orange-400">
+        {isDelayed ? (
+          <div className="text-right">
+            <p className="text-xs text-orange-600">Estimat</p>
+            <p className="text-sm font-semibold text-orange-600">
               {formatTime(estimatedTime)}
             </p>
-          ) : (
-            <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
-              La timp
-            </p>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="text-right">
+            <p className="text-xs text-green-600">La timp</p>
+          </div>
+        )}
       </div>
 
-      {/* Terminal și poarta */}
-      {(flight.terminal || flight.gate) && (
-        <div className="flex items-center space-x-4 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-          {flight.terminal && (
-            <div className="flex items-center space-x-1">
-              <span className="text-xs text-gray-500 dark:text-gray-400">Terminal:</span>
-              <span className="text-sm font-medium text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                {flight.terminal}
-              </span>
-            </div>
-          )}
-          {flight.gate && (
-            <div className="flex items-center space-x-1">
-              <span className="text-xs text-gray-500 dark:text-gray-400">Poarta:</span>
-              <span className="text-sm font-medium text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                {flight.gate}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Întârzierea */}
+      {/* Compact Delay Info */}
       {flight.delay && flight.delay > 0 && (
-        <div className="mt-2 flex items-center space-x-1 text-orange-600 dark:text-orange-400">
-          <AlertCircle className="h-4 w-4" />
-          <span className="text-sm font-medium">
-            Întârziere: {formatDelayInRomanian(flight.delay)}
+        <div className="mt-2 flex items-center space-x-1 text-orange-600">
+          <AlertCircle className="h-3 w-3" />
+          <span className="text-xs font-medium">
+            +{formatDelayInRomanian(flight.delay)}
           </span>
         </div>
       )}
 
-      {/* Aeronava */}
+      {/* Aircraft Info - Compact */}
       {flight.aircraft && (
-        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          Aeronava: {flight.aircraft}
+        <div className="mt-1 text-xs text-gray-400 truncate">
+          {flight.aircraft}
         </div>
       )}
     </div>

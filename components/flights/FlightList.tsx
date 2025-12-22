@@ -70,79 +70,61 @@ function FlightTableRow({ flight, type }: { flight: RawFlightData; type: 'arriva
   }
 
   return (
-    <tr className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 border-b border-gray-200 dark:border-gray-600">
-      {/* Zbor */}
-      <td className="px-4 py-4 first:pl-6">
-        <div className="text-sm font-bold text-gray-900 dark:text-white">
+    <tr className="hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100">
+      {/* Zbor - Compact */}
+      <td className="px-3 py-3 first:pl-4">
+        <div className="text-sm font-bold text-gray-900">
           {flight.flight_number}
         </div>
-        <div className="text-xs text-gray-600 dark:text-gray-400 sm:hidden">
+        <div className="text-xs text-gray-500 sm:hidden">
           {flight.airline?.code || 'XX'}
         </div>
-        <div className="text-xs text-gray-600 dark:text-gray-400">
+        <div className="text-xs text-gray-500">
           {formatDate(flight.scheduled_time)}
         </div>
       </td>
       
-      {/* Companie - ascuns pe mobile */}
-      <td className="px-4 py-4 hidden sm:table-cell">
+      {/* Companie - Compact, ascuns pe mobile */}
+      <td className="px-3 py-3 hidden sm:table-cell">
         <div className="flex items-center">
-          <div className="flex-shrink-0 h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center shadow-md">
+          <div className="flex-shrink-0 h-6 w-6 bg-blue-600 rounded-md flex items-center justify-center">
             <span className="text-xs font-bold text-white">
               {flight.airline?.code || 'XX'}
             </span>
           </div>
-          <div className="ml-3">
-            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+          <div className="ml-2 min-w-0">
+            <div className="text-sm font-semibold text-gray-900 truncate">
               {flight.airline?.name || 'Unknown Airline'}
             </div>
           </div>
         </div>
       </td>
       
-      {/* Destinație */}
-      <td className="px-4 py-4">
-        <div className="text-sm font-bold text-gray-900 dark:text-white">
+      {/* Destinație - Compact */}
+      <td className="px-3 py-3">
+        <div className="text-sm font-bold text-gray-900">
           {relevantLocation?.city || 'N/A'}
         </div>
-        <div className="text-xs text-gray-600 dark:text-gray-400 hidden sm:block">
-          {relevantLocation?.airport && relevantLocation?.airport !== relevantLocation?.city 
-            ? relevantLocation?.airport 
-            : relevantLocation?.code || 'N/A'}
+        <div className="text-xs text-gray-500 hidden sm:block">
+          {relevantLocation?.code || 'N/A'}
         </div>
       </td>
       
-      {/* Ora */}
-      <td className="px-4 py-4">
-        <div className="text-sm font-bold text-gray-900 dark:text-white">
+      {/* Ora - Compact */}
+      <td className="px-3 py-3">
+        <div className="text-sm font-bold text-gray-900">
           {formatTime(flight.scheduled_time)}
         </div>
         {flight.estimated_time && flight.estimated_time !== flight.scheduled_time && (
-          <div className="text-xs text-orange-600 dark:text-orange-400 font-semibold">
+          <div className="text-xs text-orange-600 font-semibold">
             Est: {formatTime(flight.estimated_time)}
           </div>
         )}
       </td>
       
-      {/* Status */}
-      <td className="px-4 py-4">
+      {/* Status - Compact */}
+      <td className="px-3 py-3 last:pr-4">
         {getStatusBadge(flight.status)}
-      </td>
-      
-      {/* Terminal - ascuns pe mobile și tablet mic */}
-      <td className="px-4 py-4 last:pr-6 hidden md:table-cell">
-        <div className="flex space-x-2">
-          {flight.terminal && (
-            <span className="inline-flex items-center px-3 py-2 bg-gray-600 text-white rounded-lg text-xs font-bold shadow-md">
-              T{flight.terminal}
-            </span>
-          )}
-          {flight.gate && (
-            <span className="inline-flex items-center px-3 py-2 bg-gray-600 text-white rounded-lg text-xs font-bold shadow-md">
-              {flight.gate}
-            </span>
-          )}
-        </div>
       </td>
     </tr>
   );
@@ -435,61 +417,58 @@ export function FlightList({
         </div>
       ) : (
         <>
-          {/* Desktop Table */}
-          <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+          {/* Desktop Table - Compact Design */}
+          <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 border-b border-gray-300 dark:border-gray-600">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-4 py-4 first:pl-6 text-left text-sm font-bold text-gray-800 dark:text-gray-200">
+                    <th className="px-3 py-3 first:pl-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       <button
                         onClick={() => handleSort('scheduled_time')}
-                        className="flex items-center space-x-1 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 p-1 rounded-lg"
+                        className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
                       >
                         <span>Zbor</span>
                         {sortBy === 'scheduled_time' && (
-                          sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
+                          sortDirection === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
                         )}
                       </button>
                     </th>
-                    <th className="px-4 py-4 text-left text-sm font-bold text-gray-800 dark:text-gray-200">
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden sm:table-cell">
                       <button
                         onClick={() => handleSort('airline')}
-                        className="flex items-center space-x-1 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 p-1 rounded-lg"
+                        className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
                       >
                         <span>Companie</span>
                         {sortBy === 'airline' && (
-                          sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
+                          sortDirection === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
                         )}
                       </button>
                     </th>
-                    <th className="px-4 py-4 text-left text-sm font-bold text-gray-800 dark:text-gray-200">
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       <button
                         onClick={() => handleSort('destination')}
-                        className="flex items-center space-x-1 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 p-1 rounded-lg"
+                        className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
                       >
                         <span>{type === 'arrivals' ? 'Din' : 'Spre'}</span>
                         {sortBy === 'destination' && (
-                          sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
+                          sortDirection === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
                         )}
                       </button>
                     </th>
-                    <th className="px-4 py-4 text-left text-sm font-bold text-gray-800 dark:text-gray-200">
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Ora
                     </th>
-                    <th className="px-4 py-4 text-left text-sm font-bold text-gray-800 dark:text-gray-200">
+                    <th className="px-3 py-3 last:pr-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       <button
                         onClick={() => handleSort('status')}
-                        className="flex items-center space-x-1 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 p-1 rounded-lg"
+                        className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
                       >
                         <span>Status</span>
                         {sortBy === 'status' && (
-                          sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
+                          sortDirection === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
                         )}
                       </button>
-                    </th>
-                    <th className="px-4 py-4 last:pr-6 text-left text-sm font-bold text-gray-800 dark:text-gray-200">
-                      Terminal
                     </th>
                   </tr>
                 </thead>
