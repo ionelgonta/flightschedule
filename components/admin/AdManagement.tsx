@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Eye, EyeOff, Settings, CheckCircle, XCircle, Monitor, Smartphone, Globe } from 'lucide-react'
+import { Save, Settings, CheckCircle, XCircle, Monitor, Smartphone, Globe } from 'lucide-react'
 
 interface AdZone {
   mode: 'active' | 'inactive'
@@ -24,7 +24,6 @@ export function AdManagement() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
-  const [demoMode, setDemoMode] = useState(false)
 
   // Zone descriptions for better UX
   const zoneDescriptions = {
@@ -41,10 +40,6 @@ export function AdManagement() {
   // Load configuration on mount
   useEffect(() => {
     loadConfig()
-    
-    // Check demo mode
-    const demoEnabled = localStorage.getItem('demoAdsEnabled')
-    setDemoMode(demoEnabled === 'true')
   }, [])
 
   const loadConfig = async () => {
@@ -201,17 +196,6 @@ export function AdManagement() {
     })
   }
 
-  const toggleDemoMode = () => {
-    const newDemoMode = !demoMode
-    setDemoMode(newDemoMode)
-    localStorage.setItem('demoAdsEnabled', newDemoMode.toString())
-    
-    // Reload page to apply demo mode
-    if (confirm('Pentru a aplica modul demo, pagina va fi reîncărcată. Continuați?')) {
-      window.location.reload()
-    }
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -288,28 +272,6 @@ export function AdManagement() {
               ID-ul de publisher din contul Google AdSense
             </p>
           </div>
-
-          {/* Demo Mode Toggle */}
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div>
-              <span className="text-sm font-medium text-gray-900 dark:text-white">Mod Demo</span>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Afișează banere demo în loc de AdSense pentru testare
-              </p>
-            </div>
-            <button
-              onClick={toggleDemoMode}
-              className={`flex items-center space-x-2 px-3 py-1 rounded-lg transition-colors ${
-                demoMode 
-                  ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300' 
-                  : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-              }`}
-            >
-              {demoMode ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-              <span className="text-sm">{demoMode ? 'Activ' : 'Inactiv'}</span>
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Ad Zones Configuration */}
