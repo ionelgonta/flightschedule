@@ -287,19 +287,31 @@ class AeroDataBoxService {
       // Filter out codeshare flights - keep only IsOperator
       const operatorFlights = flights.filter(flight => {
         const codeshareStatus = flight.codeshareStatus || '';
-        return codeshareStatus === 'IsOperator' || codeshareStatus === '';
+        // Only keep flights where this airline is the actual operator
+        // Exclude all codeshare variants except IsOperator
+        return codeshareStatus === 'IsOperator';
+      });
+      
+      // Additional deduplication based on flight number and time to handle any remaining duplicates
+      const uniqueFlights = operatorFlights.filter((flight, index, array) => {
+        const flightKey = `${flight.number?.iata || flight.number?.icao}-${flight.departure?.scheduledTime?.utc}-${flight.arrival?.scheduledTime?.utc}`;
+        return array.findIndex(f => {
+          const fKey = `${f.number?.iata || f.number?.icao}-${f.departure?.scheduledTime?.utc}-${f.arrival?.scheduledTime?.utc}`;
+          return fKey === flightKey;
+        }) === index;
       });
       
       console.log(`Extracted ${flights.length} total ${type} flights for ${airportCode}`);
       console.log(`Filtered to ${operatorFlights.length} operator flights (excluded codeshare)`);
+      console.log(`Deduplicated to ${uniqueFlights.length} unique flights`);
       
       // If no flights returned, add to limited data list for future reference but still track the request
-      if (operatorFlights.length === 0) {
-        console.warn(`Airport ${airportCode} returned no operator ${type} data after filtering - this may be normal if no flights are scheduled`);
+      if (uniqueFlights.length === 0) {
+        console.warn(`Airport ${airportCode} returned no unique operator ${type} data after filtering - this may be normal if no flights are scheduled`);
         // Don't add to limited data list immediately - empty results can be normal
       }
       
-      return operatorFlights;
+      return uniqueFlights;
     } catch (error) {
       console.error(`Failed to get ${type} for airport ${airportCode}:`, error);
       
