@@ -272,6 +272,7 @@ export function AdManagement() {
               ID-ul de publisher din contul Google AdSense
             </p>
           </div>
+        </div>
       </div>
 
       {/* Ad Zones Configuration */}

@@ -15,7 +15,7 @@ export async function GET() {
     
     // Extrage configurația zonelor
     const zonesMatch = configContent.match(/zones:\s*{([^}]+(?:{[^}]*}[^}]*)*)}/)
-    let zones = {}
+    let zones: any = {}
     
     if (zonesMatch) {
       // Parse zone configurations (simplified parsing)

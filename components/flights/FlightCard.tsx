@@ -6,7 +6,7 @@
 'use client';
 
 import { RawFlightData } from '@/lib/flightApiService';
-import { formatDelayInRomanian } from '@/lib/demoFlightData';
+import { formatDelayInRomanian } from '@/lib/flightUtils';
 import { Plane, Clock, MapPin, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 
 interface FlightCardProps {

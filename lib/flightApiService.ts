@@ -4,7 +4,7 @@
  */
 
 import AeroDataBoxService from './aerodataboxService';
-import { formatDelayInRomanian } from './demoFlightData';
+import { formatDelayInRomanian } from './flightUtils';
 
 export interface FlightApiConfig {
   provider: 'aerodatabox';
