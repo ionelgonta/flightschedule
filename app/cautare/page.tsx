@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { Search, Plane, MapPin, Clock } from 'lucide-react';
 
 interface SearchResult {
   flight: any;
@@ -109,51 +110,55 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Căutare Zboruri
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+          {/* Compact Header */}
+          <div className="mb-6">
+            <div className="flex items-center space-x-3 mb-2">
+              <Search className="h-6 w-6 text-blue-600" />
+              <h1 className="text-2xl font-bold text-gray-900">
+                Căutare Zboruri
+              </h1>
+            </div>
+            <p className="text-gray-600 text-sm">
               Căutați zboruri după numărul de zbor sau explorați rute între aeroporturi
             </p>
           </div>
 
-          {/* Search Type Selector */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-            <div className="flex space-x-4 mb-6">
+          {/* Compact Search Form */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+            {/* Search Type Selector - Compact */}
+            <div className="flex space-x-2 mb-4">
               <button
                 onClick={() => setSearchType('flight')}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   searchType === 'flight'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Căutare după numărul zborului
+                Număr zbor
               </button>
               <button
                 onClick={() => setSearchType('route')}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   searchType === 'route'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Căutare rută
+                Rută
               </button>
             </div>
 
-            {/* Flight Number Search */}
+            {/* Flight Number Search - Compact */}
             {searchType === 'flight' && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Numărul zborului
                   </label>
                   <input
@@ -161,17 +166,17 @@ export default function SearchPage() {
                     value={flightNumber}
                     onChange={(e) => setFlightNumber(e.target.value)}
                     placeholder="ex: RO123, LH456"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 text-sm"
                   />
                 </div>
               </div>
             )}
 
-            {/* Route Search */}
+            {/* Route Search - Compact */}
             {searchType === 'route' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     De la (aeroport)
                   </label>
                   <input
@@ -180,11 +185,11 @@ export default function SearchPage() {
                     onChange={(e) => setFromAirport(e.target.value)}
                     placeholder="ex: OTP"
                     maxLength={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white uppercase"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 uppercase text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     La (aeroport)
                   </label>
                   <input
@@ -193,85 +198,88 @@ export default function SearchPage() {
                     onChange={(e) => setToAirport(e.target.value)}
                     placeholder="ex: LHR"
                     maxLength={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white uppercase"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 uppercase text-sm"
                   />
                 </div>
               </div>
             )}
 
-            {/* Date and Search Button */}
-            <div className="flex flex-col sm:flex-row gap-4 mt-4">
+            {/* Date and Search Button - Compact */}
+            <div className="flex flex-col sm:flex-row gap-3 mt-3">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
                   Data
                 </label>
                 <input
                   type="date"
                   value={searchDate}
                   onChange={(e) => setSearchDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 text-sm"
                 />
               </div>
               <div className="flex items-end">
                 <button
                   onClick={handleSearch}
                   disabled={loading}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
                 >
                   {loading ? 'Căutare...' : 'Căutare'}
                 </button>
               </div>
             </div>
 
-            {/* Error Message */}
+            {/* Error Message - Compact */}
             {error && (
-              <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg">
-                <p className="text-red-700 dark:text-red-400">{error}</p>
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-red-700 text-sm">{error}</p>
               </div>
             )}
           </div>
 
-          {/* Flight Results */}
+          {/* Flight Results - Compact */}
           {flightResults.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-3">
                 Rezultate căutare zbor ({flightResults.length})
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {flightResults.map((result, index) => (
-                  <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div key={index} className="border border-gray-200 rounded-md p-3">
                     <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">
-                          {result.flight.number?.iata || result.flight.number?.icao}
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {result.flight.airline?.name}
-                        </p>
+                      <div className="flex items-center space-x-2">
+                        <Plane className="h-4 w-4 text-blue-600" />
+                        <div>
+                          <h3 className="font-semibold text-gray-900 text-sm">
+                            {result.flight.number?.iata || result.flight.number?.icao}
+                          </h3>
+                          <p className="text-xs text-gray-600">
+                            {result.flight.airline?.name}
+                          </p>
+                        </div>
                       </div>
-                      <span className="text-sm bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400 px-2 py-1 rounded">
-                        Relevanță: {result.relevanceScore}%
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        {result.relevanceScore}%
                       </span>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                       <div>
-                        <p className="text-gray-600 dark:text-gray-400">Plecare:</p>
-                        <p className="font-medium text-gray-900 dark:text-white">
+                        <p className="text-gray-600">Plecare:</p>
+                        <p className="font-medium text-gray-900">
                           {result.flight.departure?.airport?.name} ({result.flight.departure?.airport?.iata})
                         </p>
-                        <p className="text-gray-600 dark:text-gray-400">
+                        <p className="text-gray-600">
                           {result.flight.departure?.scheduledTime?.local && 
                             new Date(result.flight.departure.scheduledTime.local).toLocaleString('ro-RO')
                           }
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-600 dark:text-gray-400">Sosire:</p>
-                        <p className="font-medium text-gray-900 dark:text-white">
+                        <p className="text-gray-600">Sosire:</p>
+                        <p className="font-medium text-gray-900">
                           {result.flight.arrival?.airport?.name} ({result.flight.arrival?.airport?.iata})
                         </p>
-                        <p className="text-gray-600 dark:text-gray-400">
+                        <p className="text-gray-600">
                           {result.flight.arrival?.scheduledTime?.local && 
                             new Date(result.flight.arrival.scheduledTime.local).toLocaleString('ro-RO')
                           }
@@ -279,19 +287,19 @@ export default function SearchPage() {
                       </div>
                     </div>
 
-                    <div className="mt-2 flex items-center space-x-4 text-sm">
+                    <div className="mt-2 flex items-center space-x-3 text-xs">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         result.flight.status?.text?.toLowerCase().includes('cancel') 
-                          ? 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
+                          ? 'bg-red-100 text-red-800'
                           : result.flight.status?.text?.toLowerCase().includes('delay')
-                          ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400'
-                          : 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-green-100 text-green-800'
                       }`}>
                         {result.flight.status?.text || 'Unknown'}
                       </span>
                       
                       {result.flight.aircraft?.model && (
-                        <span className="text-gray-600 dark:text-gray-400">
+                        <span className="text-gray-600">
                           {result.flight.aircraft.model}
                         </span>
                       )}
@@ -302,94 +310,100 @@ export default function SearchPage() {
             </div>
           )}
 
-          {/* Route Info */}
+          {/* Route Info - Compact */}
           {routeInfo && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <h2 className="text-lg font-semibold text-gray-900 mb-3">
                 Informații Rută
               </h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <h3 className="font-medium text-gray-900 dark:text-white mb-2">Plecare</h3>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="font-medium text-gray-900 mb-1 text-sm">Plecare</h3>
+                  <p className="text-sm font-semibold text-gray-900">
                     {routeInfo.departure.name}
                   </p>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-xs text-gray-600">
                     {routeInfo.departure.municipalityName}, {routeInfo.departure.countryCode}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                  <p className="text-xs text-gray-500">
                     {routeInfo.departure.iata} / {routeInfo.departure.icao}
                   </p>
                 </div>
                 
                 <div>
-                  <h3 className="font-medium text-gray-900 dark:text-white mb-2">Sosire</h3>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="font-medium text-gray-900 mb-1 text-sm">Sosire</h3>
+                  <p className="text-sm font-semibold text-gray-900">
                     {routeInfo.arrival.name}
                   </p>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-xs text-gray-600">
                     {routeInfo.arrival.municipalityName}, {routeInfo.arrival.countryCode}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                  <p className="text-xs text-gray-500">
                     {routeInfo.arrival.iata} / {routeInfo.arrival.icao}
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 rounded-md">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  <p className="text-lg font-bold text-blue-600">
                     {routeInfo.distance ? formatDistance(routeInfo.distance) : 'N/A'}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Distanță</p>
+                  <p className="text-xs text-gray-600">Distanță</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  <p className="text-lg font-bold text-green-600">
                     {routeInfo.averageFlightTime ? formatDuration(routeInfo.averageFlightTime) : 'N/A'}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Durata medie</p>
+                  <p className="text-xs text-gray-600">Durata medie</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                  <p className="text-lg font-bold text-purple-600">
                     {routeInfo.flights.length}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Zboruri astăzi</p>
+                  <p className="text-xs text-gray-600">Zboruri astăzi</p>
                 </div>
               </div>
 
               {routeInfo.flights.length > 0 && (
                 <div>
-                  <h3 className="font-medium text-gray-900 dark:text-white mb-3">
+                  <h3 className="font-medium text-gray-900 mb-2 text-sm">
                     Zboruri disponibile ({routeInfo.flights.length})
                   </h3>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
                     {routeInfo.flights.map((flight, index) => (
-                      <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                      <div key={index} className="border border-gray-200 rounded-md p-2">
                         <div className="flex justify-between items-center">
-                          <div>
-                            <span className="font-medium text-gray-900 dark:text-white">
-                              {flight.number?.iata || flight.number?.icao}
-                            </span>
-                            <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                              {flight.airline?.name}
-                            </span>
+                          <div className="flex items-center space-x-2">
+                            <Plane className="h-3 w-3 text-blue-600" />
+                            <div>
+                              <span className="font-medium text-gray-900 text-sm">
+                                {flight.number?.iata || flight.number?.icao}
+                              </span>
+                              <span className="ml-2 text-xs text-gray-600">
+                                {flight.airline?.name}
+                              </span>
+                            </div>
                           </div>
-                          <div className="text-right text-sm">
-                            <p className="text-gray-900 dark:text-white">
-                              {flight.departure?.scheduledTime?.local && 
-                                new Date(flight.departure.scheduledTime.local).toLocaleTimeString('ro-RO', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })
-                              } → {flight.arrival?.scheduledTime?.local && 
-                                new Date(flight.arrival.scheduledTime.local).toLocaleTimeString('ro-RO', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })
-                              }
+                          <div className="text-right text-xs">
+                            <p className="text-gray-900 flex items-center space-x-1">
+                              <Clock className="h-3 w-3" />
+                              <span>
+                                {flight.departure?.scheduledTime?.local && 
+                                  new Date(flight.departure.scheduledTime.local).toLocaleTimeString('ro-RO', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })
+                                } → {flight.arrival?.scheduledTime?.local && 
+                                  new Date(flight.arrival.scheduledTime.local).toLocaleTimeString('ro-RO', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })
+                                }
+                              </span>
                             </p>
-                            <p className="text-gray-600 dark:text-gray-400">
+                            <p className="text-gray-600">
                               {flight.status?.text || 'Unknown'}
                             </p>
                           </div>

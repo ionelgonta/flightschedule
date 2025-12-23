@@ -8,7 +8,7 @@ import { flightStatisticsService } from '../../../../lib/flightStatisticsService
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const searchParams = request.nextUrl.searchParams
     const airport = searchParams.get('airport')
     const fromDate = searchParams.get('from')
     const toDate = searchParams.get('to')
@@ -16,14 +16,14 @@ export async function GET(request: NextRequest) {
     // Validate required parameters
     if (!airport) {
       return NextResponse.json(
-        { error: 'Airport code is required' },
+        { error: 'Codul aeroportului este obligatoriu' },
         { status: 400 }
       )
     }
 
     if (!fromDate || !toDate) {
       return NextResponse.json(
-        { error: 'Both from and to dates are required (YYYY-MM-DD format)' },
+        { error: 'Ambele date (de la și până la) sunt obligatorii (format YYYY-MM-DD)' },
         { status: 400 }
       )
     }
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/
     if (!dateRegex.test(fromDate) || !dateRegex.test(toDate)) {
       return NextResponse.json(
-        { error: 'Invalid date format. Use YYYY-MM-DD' },
+        { error: 'Format de dată invalid. Folosiți YYYY-MM-DD' },
         { status: 400 }
       )
     }
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const airportRegex = /^[A-Z]{3,4}$/
     if (!airportRegex.test(airport.toUpperCase())) {
       return NextResponse.json(
-        { error: 'Invalid airport code format' },
+        { error: 'Format cod aeroport invalid' },
         { status: 400 }
       )
     }
@@ -142,8 +142,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false,
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Eroare internă de server',
+        message: error instanceof Error ? error.message : 'Eroare necunoscută'
       },
       { status: 500 }
     )

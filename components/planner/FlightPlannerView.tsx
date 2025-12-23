@@ -2,70 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import { Search, Plane, Calendar, Clock, MapPin, TrendingUp, Sparkles, Filter } from 'lucide-react'
-// Types for the planner
-interface FlightPlannerFilters {
-  departureDays: string[]
-  returnDays: string[]
-  departureTimeSlot: 'morning' | 'afternoon' | 'evening'
-  returnTimeSlot: 'morning' | 'afternoon' | 'evening'
-  departureDayFlexibility?: number
-  returnDayFlexibility?: number
-  originAirports?: string[]
-}
-
-interface FlightOption {
-  destination: {
-    code: string
-    name: string
-    city: string
-    country: string
-  }
-  outboundFlights: FlightMatch[]
-  returnFlights: FlightMatch[]
-  totalOptions: number
-}
-
-interface FlightMatch {
-  flightNumber: string
-  airline: {
-    name: string
-    code: string
-  }
-  origin: {
-    code: string
-    name: string
-    city: string
-  }
-  destination: {
-    code: string
-    name: string
-    city: string
-  }
-  scheduledTime: string
-  dayOfWeek: string
-  timeSlot: 'morning' | 'afternoon' | 'evening'
-  status: string
-  gate?: string
-  terminal?: string
-}
-
-interface PlannerStats {
-  totalAirportsScanned: number
-  totalFlightsAnalyzed: number
-  cacheHitRate: number
-  lastUpdated: string
-  availableDestinations: number
-}
 import { FlightPlannerFilters as FilterComponent } from './FlightPlannerFilters'
 import { FlightOptionsGrid } from './FlightOptionsGrid'
+import { FlightPlannerFilters, FlightOption, FlightMatch, PlannerStats } from '@/lib/flightPlannerService'
 
 
 export function FlightPlannerView() {
   const [filters, setFilters] = useState<FlightPlannerFilters>({
     departureDays: ['monday'], // Default: Monday
     returnDays: ['sunday'], // Default: Sunday
-    departureTimeSlot: 'morning',
-    returnTimeSlot: 'evening',
+    departureTimeSlots: ['morning'], // Default: morning only
+    returnTimeSlots: ['evening'], // Default: evening only
     departureDayFlexibility: 0, // ±0 days initially
     returnDayFlexibility: 0, // ±0 days initially
     originAirports: ['RMO'] // Default: Chișinău
@@ -148,41 +95,36 @@ export function FlightPlannerView() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-500 rounded-full mb-6">
               <Sparkles className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              Planificator Zboruri Inteligent
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
+              Planificator Zboruri
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-              Găsește zborurile perfecte cu flexibilitate maximă. Caută după ziua preferată ±1, 2 sau 3 zile, 
-              separat pentru plecare și întoarcere.
+            <p className="text-sm text-gray-600 max-w-2xl mx-auto mb-6">
+              Găsește zborurile perfecte cu flexibilitate maximă. Selectează zilele și intervalele orare preferate.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 space-y-8">
-
-
-
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         {/* Search Interface - Clean Design */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="bg-blue-500 px-8 py-6">
+          <div className="bg-blue-500 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center text-white">
-                <Search className="h-6 w-6 mr-3" />
-                <h2 className="text-2xl font-bold">Caută Zboruri</h2>
+                <Search className="h-5 w-5 mr-2" />
+                <h2 className="text-lg font-bold">Caută Zboruri</h2>
               </div>
               <button
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white transition-colors"
+                className="flex items-center px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-white transition-colors text-sm"
               >
-                <Filter className="h-4 w-4 mr-2" />
+                <Filter className="h-3 w-3 mr-1.5" />
                 {showAdvancedFilters ? 'Simplu' : 'Avansat'}
               </button>
             </div>
           </div>
           
-          <div className="p-8">
+          <div className="p-6">
             <FilterComponent
               filters={filters}
               onChange={handleFiltersChange}
@@ -308,9 +250,9 @@ export function FlightPlannerView() {
               <div className="p-4 bg-green-100 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                 <Clock className="h-8 w-8 text-green-600" />
               </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Intervale Orare</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">Intervale Orare Multiple</h4>
               <p className="text-sm text-gray-600">
-                Dimineața (06-12), Amiaza (12-18), Seara (18-24). Personalizează pentru plecare și întoarcere.
+                Dimineața (06-12), Amiaza (12-18), Seara (18-24). Selectează unul sau mai multe pentru plecare și întoarcere.
               </p>
             </div>
             

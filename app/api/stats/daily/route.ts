@@ -8,21 +8,21 @@ import { flightStatisticsService } from '../../../../lib/flightStatisticsService
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const searchParams = request.nextUrl.searchParams
     const airport = searchParams.get('airport')
     const date = searchParams.get('date')
 
     // Validate required parameters
     if (!airport) {
       return NextResponse.json(
-        { error: 'Airport code is required' },
+        { error: 'Codul aeroportului este obligatoriu' },
         { status: 400 }
       )
     }
 
     if (!date) {
       return NextResponse.json(
-        { error: 'Date is required (YYYY-MM-DD format)' },
+        { error: 'Data este obligatorie (format YYYY-MM-DD)' },
         { status: 400 }
       )
     }
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/
     if (!dateRegex.test(date)) {
       return NextResponse.json(
-        { error: 'Invalid date format. Use YYYY-MM-DD' },
+        { error: 'Format de dată invalid. Folosiți YYYY-MM-DD' },
         { status: 400 }
       )
     }
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     const airportRegex = /^[A-Z]{3,4}$/
     if (!airportRegex.test(airport.toUpperCase())) {
       return NextResponse.json(
-        { error: 'Invalid airport code format' },
+        { error: 'Format cod aeroport invalid' },
         { status: 400 }
       )
     }
@@ -86,9 +86,9 @@ export async function GET(request: NextRequest) {
         chartData: {
           // Data formatted for pie charts
           statusDistribution: [
-            { name: 'On Time', value: statistics.onTimeFlights, color: '#10b981' },
-            { name: 'Delayed', value: statistics.delayedFlights, color: '#f59e0b' },
-            { name: 'Cancelled', value: statistics.cancelledFlights, color: '#ef4444' }
+            { name: 'La Timp', value: statistics.onTimeFlights, color: '#10b981' },
+            { name: 'Întârziate', value: statistics.delayedFlights, color: '#f59e0b' },
+            { name: 'Anulate', value: statistics.cancelledFlights, color: '#ef4444' }
           ],
           // Data formatted for bar charts
           airlinePerformance: statistics.topAirlines.map(airline => ({
@@ -123,8 +123,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false,
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Eroare internă de server',
+        message: error instanceof Error ? error.message : 'Eroare necunoscută'
       },
       { status: 500 }
     )

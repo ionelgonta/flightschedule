@@ -2,12 +2,14 @@
  * Cache Manager - Sistem complet configurabil pentru cache și cron jobs
  * Toate intervalele sunt configurabile din admin, fără valori hardcodate
  * Extended with Historical Cache Manager for persistent data storage
+ * Enhanced with Persistent Flight Cache for disk-based flight data storage
  */
 
 // Server-side only imports
 let fs: any = null
 let path: any = null
 let historicalCacheManager: any = null
+let persistentFlightCache: any = null
 
 // Initialize historical cache manager only on server-side
 if (typeof window === 'undefined') {
@@ -25,6 +27,15 @@ if (typeof window === 'undefined') {
       async getDataForDate() { return [] },
       async saveDailySnapshot(snapshot: any) { console.log('[Mock Historical Cache] Saved snapshot for', snapshot.airportCode, snapshot.type) }
     }
+  }
+
+  // Initialize persistent flight cache
+  try {
+    const { persistentFlightCache: pfc } = require('./persistentFlightCache')
+    persistentFlightCache = pfc
+    console.log('[Cache Manager] Persistent flight cache loaded')
+  } catch (error) {
+    console.error('[Cache Manager] Failed to load persistent flight cache:', error)
   }
 }
 
@@ -130,6 +141,17 @@ class CacheManager {
       } catch (error) {
         console.error('[Cache Manager] Failed to initialize historical cache manager:', error)
         // Continue without historical cache if it fails
+      }
+    }
+
+    // Initialize persistent flight cache
+    if (persistentFlightCache) {
+      try {
+        await persistentFlightCache.loadCache()
+        console.log('[Cache Manager] Persistent flight cache initialized')
+      } catch (error) {
+        console.error('[Cache Manager] Failed to initialize persistent flight cache:', error)
+        // Continue without persistent cache if it fails
       }
     }
     
@@ -367,6 +389,73 @@ class CacheManager {
   ): Promise<void> {
     console.log(`[Cache Manager] Fetching flight data for ${airportCode} ${type} (${source})`)
     
+    // PRIMUL PAS: Încearcă să încarce datele din cache-ul persistent
+    if (persistentFlightCache) {
+      try {
+        const cachedFlights = await persistentFlightCache.getFlightData(airportCode, type)
+        
+        if (cachedFlights.length > 0) {
+          console.log(`[Cache Manager] Found ${cachedFlights.length} flights in persistent cache for ${airportCode} ${type}`)
+          
+          // Convertește datele din cache-ul persistent la formatul curent
+          const convertedFlights = cachedFlights.map((flight: any) => ({
+            flight_number: flight.flightNumber,
+            airline: {
+              code: flight.airlineCode,
+              name: flight.airlineName
+            },
+            origin: {
+              code: flight.originCode,
+              name: flight.originName
+            },
+            destination: {
+              code: flight.destinationCode,
+              name: flight.destinationName
+            },
+            scheduled_time: flight.scheduledTime,
+            actual_time: flight.actualTime,
+            estimated_time: flight.estimatedTime,
+            status: flight.status,
+            delay: flight.delayMinutes
+          }))
+
+          // Salvează în cache-ul în memorie pentru acces rapid
+          const cacheKey = `${airportCode}_${type}`
+          const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+
+          const cacheEntry: CacheEntry = {
+            id: `flight_${cacheKey}_${Date.now()}`,
+            category: 'flightData',
+            key: cacheKey,
+            data: convertedFlights,
+            createdAt: new Date().toISOString(),
+            expiresAt,
+            lastAccessed: new Date().toISOString(),
+            source: 'manual', // Marchează ca manual pentru că vine din cache persistent
+            success: true
+          }
+
+          // Remove old entry and add new one
+          const oldEntries = Array.from(this.cacheData.values()).filter(
+            entry => entry.category === 'flightData' && entry.key === cacheKey
+          )
+          oldEntries.forEach(entry => this.cacheData.delete(entry.id))
+          
+          this.cacheData.set(cacheEntry.id, cacheEntry)
+          await this.saveCacheData()
+          
+          console.log(`[Cache Manager] Loaded ${convertedFlights.length} flights from persistent cache for ${airportCode} ${type}`)
+          
+          // Dacă avem date din cache persistent și nu e manual refresh, nu mai facem API call
+          if (source === 'cron') {
+            return
+          }
+        }
+      } catch (error) {
+        console.error('[Cache Manager] Error loading from persistent cache:', error)
+      }
+    }
+    
     // Check historical cache first to avoid redundant API calls
     if (historicalCacheManager && source === 'cron') {
       const today = new Date().toISOString().split('T')[0]
@@ -456,7 +545,17 @@ class CacheManager {
       
       // NU ȘTERGE NICIODATĂ datele vechi automat - doar prin comandă manuală din admin
       if (response.success && response.data && response.data.length > 0) {
-        // Doar dacă avem date noi și valide, înlocuiește datele vechi
+        // SALVEAZĂ ÎN CACHE-UL PERSISTENT ÎNAINTE DE ORICE
+        if (persistentFlightCache) {
+          try {
+            await persistentFlightCache.addFlightData(airportCode, type, response.data, 'api')
+            console.log(`[Cache Manager] Saved ${response.data.length} flights to persistent cache`)
+          } catch (error) {
+            console.error('[Cache Manager] Failed to save to persistent cache:', error)
+          }
+        }
+
+        // Doar dacă avem date noi și valide, înlocuiește datele vechi în memoria cache
         oldEntries.forEach(entry => this.cacheData.delete(entry.id))
         
         // Adaugă noua intrare
@@ -541,12 +640,12 @@ class CacheManager {
    */
   private async fetchAndCacheAnalytics(airportCode: string, source: 'cron' | 'manual'): Promise<void> {
     try {
-      // Generate REAL analytics from cached flight data
+      // Generate REAL analytics from cached flight data (including persistent cache)
       const arrivalsKey = `${airportCode}_arrivals`
       const departuresKey = `${airportCode}_departures`
       
-      const cachedArrivals = this.getCachedData<any[]>(arrivalsKey) || []
-      const cachedDepartures = this.getCachedData<any[]>(departuresKey) || []
+      const cachedArrivals = await this.getCachedDataWithPersistent<any[]>(arrivalsKey) || []
+      const cachedDepartures = await this.getCachedDataWithPersistent<any[]>(departuresKey) || []
       
       const allFlights = [...cachedArrivals, ...cachedDepartures]
       
@@ -823,6 +922,77 @@ class CacheManager {
           ? aircraftEntries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0].createdAt
           : null
       }
+    }
+  }
+
+  /**
+   * Obține statistici cache persistent
+   */
+  async getPersistentCacheStats(): Promise<any> {
+    if (!persistentFlightCache) {
+      return { error: 'Persistent cache not available' }
+    }
+
+    try {
+      return await persistentFlightCache.getCacheStats()
+    } catch (error) {
+      console.error('[Cache Manager] Error getting persistent cache stats:', error)
+      return { error: 'Failed to get persistent cache stats' }
+    }
+  }
+
+  /**
+   * Curăță cache-ul persistent (datele mai vechi de 14 zile)
+   */
+  async cleanPersistentCache(): Promise<number> {
+    if (!persistentFlightCache) {
+      console.log('[Cache Manager] Persistent cache not available')
+      return 0
+    }
+
+    try {
+      const deletedCount = await persistentFlightCache.cleanOldData()
+      console.log(`[Cache Manager] Cleaned ${deletedCount} old entries from persistent cache`)
+      return deletedCount
+    } catch (error) {
+      console.error('[Cache Manager] Error cleaning persistent cache:', error)
+      return 0
+    }
+  }
+
+  /**
+   * Șterge tot cache-ul persistent (doar pentru admin)
+   */
+  async clearPersistentCache(): Promise<void> {
+    if (!persistentFlightCache) {
+      console.log('[Cache Manager] Persistent cache not available')
+      return
+    }
+
+    try {
+      await persistentFlightCache.clearAllCache()
+      console.log('[Cache Manager] Cleared all persistent cache data')
+    } catch (error) {
+      console.error('[Cache Manager] Error clearing persistent cache:', error)
+    }
+  }
+
+  /**
+   * Șterge cache-ul persistent pentru un aeroport specific
+   */
+  async clearAirportPersistentCache(airportCode: string): Promise<number> {
+    if (!persistentFlightCache) {
+      console.log('[Cache Manager] Persistent cache not available')
+      return 0
+    }
+
+    try {
+      const deletedCount = await persistentFlightCache.clearAirportCache(airportCode)
+      console.log(`[Cache Manager] Cleared ${deletedCount} entries for ${airportCode} from persistent cache`)
+      return deletedCount
+    } catch (error) {
+      console.error('[Cache Manager] Error clearing airport persistent cache:', error)
+      return 0
     }
   }
 
@@ -1125,6 +1295,9 @@ class CacheManager {
   /**
    * Get cached data by key (simple version)
    */
+  /**
+   * Get cached data by key (simple version) - synchronous for compatibility
+   */
   getCachedData<T>(key: string): T | null {
     console.log(`[Cache Manager] Looking for key: ${key}`)
     console.log(`[Cache Manager] Available keys: ${Array.from(this.cacheData.values()).map(e => e.key).join(', ')}`)
@@ -1140,6 +1313,38 @@ class CacheManager {
       }
     }
     console.log(`[Cache Manager] No valid data found for key: ${key}`)
+    return null
+  }
+
+  /**
+   * Get cached data with persistent cache fallback (async version)
+   */
+  async getCachedDataWithPersistent<T>(key: string): Promise<T | null> {
+    // First try main cache
+    const mainData = this.getCachedData<T>(key)
+    if (mainData) {
+      return mainData
+    }
+
+    // If not found and it's flight data, try persistent cache
+    if ((key.includes('_arrivals') || key.includes('_departures')) && persistentFlightCache) {
+      try {
+        const [airportCode, type] = key.split('_')
+        if (airportCode && type) {
+          const persistentData = await persistentFlightCache.getFlightData(airportCode, type as 'arrivals' | 'departures')
+          if (persistentData && persistentData.length > 0) {
+            console.log(`[Cache Manager] Found ${persistentData.length} flights in persistent cache for ${key}`)
+            
+            // Store in main cache for faster future access (with short TTL)
+            this.setCachedData(key, persistentData as T, 'flightData', 5 * 60 * 1000) // 5 minutes
+            return persistentData as T
+          }
+        }
+      } catch (error) {
+        console.error(`[Cache Manager] Error accessing persistent cache for ${key}:`, error)
+      }
+    }
+
     return null
   }
 

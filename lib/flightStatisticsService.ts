@@ -4,7 +4,9 @@
  * Integrates with Historical Cache Manager for long-term data analysis
  */
 
-import { historicalCacheManager } from './historicalCacheManager'
+import { cacheManager } from './cacheManager'
+import { persistentFlightCache } from './persistentFlightCache'
+import { getAirlineName } from './airlineMapping'
 import {
   DailyStatistics,
   RangeStatistics,
@@ -39,72 +41,43 @@ export class FlightStatisticsService {
     console.log(`[Flight Statistics] Getting daily statistics for ${airportCode} on ${date}`)
 
     try {
-      await historicalCacheManager.initialize()
+      // Initialize cache manager
+      await cacheManager.initialize()
 
-      // Get flight data for the specific date
-      let arrivals = await historicalCacheManager.getDataForDate(airportCode, date, 'arrivals')
-      let departures = await historicalCacheManager.getDataForDate(airportCode, date, 'departures')
-      let allFlights = [...arrivals, ...departures]
-
-      // If no historical data found, try to use current cache data as fallback
-      if (allFlights.length === 0) {
-        console.log(`[Flight Statistics] No historical data found for ${airportCode} on ${date}, trying current cache...`)
-        
-        try {
-          // Direct access to cache data file (fallback approach)
-          const fs = require('fs')
-          const path = require('path')
-          const cacheDataPath = path.join(process.cwd(), 'data', 'cache-data.json')
-          
-          if (fs.existsSync(cacheDataPath)) {
-            const cacheData = JSON.parse(fs.readFileSync(cacheDataPath, 'utf8'))
-            
-            // Create a simple cache accessor
-            const getCachedData = (key: string) => {
-              const item = cacheData.find((entry: any) => entry.key === key)
-              return item ? item.data : null
-            }
-            
-            // Try both IATA and ICAO codes
-            let currentArrivals = getCachedData(`${airportCode}_arrivals`) || []
-            let currentDepartures = getCachedData(`${airportCode}_departures`) || []
-            
-            // Use IATA codes only - no ICAO fallback needed
-          
-          // Transform current cache data to historical format
-          const transformedArrivals = currentArrivals.map((flight: any) => ({
-            flightNumber: flight.flight_number || flight.number || 'N/A',
-            airline: flight.airline?.name || flight.airline || 'Unknown',
-            airlineCode: flight.airline?.code || flight.airline?.iata || flight.airline?.icao || 'XX',
-            status: flight.status || 'scheduled',
-            delayMinutes: flight.delay || flight.delayMinutes || 0,
-            scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
-            actualTime: flight.actual_time || flight.actualTime || null,
-            aircraft: flight.aircraft?.model || flight.aircraft || null,
-            type: 'arrival'
-          }))
-          
-          const transformedDepartures = currentDepartures.map((flight: any) => ({
-            flightNumber: flight.flight_number || flight.number || 'N/A',
-            airline: flight.airline?.name || flight.airline || 'Unknown',
-            airlineCode: flight.airline?.code || flight.airline?.iata || flight.airline?.icao || 'XX',
-            status: flight.status || 'scheduled',
-            delayMinutes: flight.delay || flight.delayMinutes || 0,
-            scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
-            actualTime: flight.actual_time || flight.actualTime || null,
-            aircraft: flight.aircraft?.model || flight.aircraft || null,
-            type: 'departure'
-          }))
-          
-            allFlights = [...transformedArrivals, ...transformedDepartures]
-            console.log(`[Flight Statistics] Using current cache data: ${allFlights.length} flights`)
-          } else {
-            console.log('[Flight Statistics] Cache data file not found')
-          }
-        } catch (cacheError) {
-          console.error('[Flight Statistics] Error accessing current cache:', cacheError)
-        }
-      }
+      // Get flight data using cache manager with persistent cache fallback
+      const arrivalsKey = `${airportCode}_arrivals`
+      const departuresKey = `${airportCode}_departures`
+      
+      let currentArrivals = await cacheManager.getCachedDataWithPersistent<any[]>(arrivalsKey) || []
+      let currentDepartures = await cacheManager.getCachedDataWithPersistent<any[]>(departuresKey) || []
+      
+      // Transform current cache data to historical format
+      const transformedArrivals = currentArrivals.map((flight: any) => ({
+        flightNumber: flight.flight_number || flight.number || 'N/A',
+        airline: flight.airline?.name || flight.airline || 'Unknown',
+        airlineCode: flight.airline?.code || flight.airline?.iata || flight.airline?.icao || 'XX',
+        status: flight.status || 'scheduled',
+        delayMinutes: flight.delay || flight.delayMinutes || 0,
+        scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
+        actualTime: flight.actual_time || flight.actualTime || null,
+        aircraft: flight.aircraft?.model || flight.aircraft || null,
+        type: 'arrival'
+      }))
+      
+      const transformedDepartures = currentDepartures.map((flight: any) => ({
+        flightNumber: flight.flight_number || flight.number || 'N/A',
+        airline: flight.airline?.name || flight.airline || 'Unknown',
+        airlineCode: flight.airline?.code || flight.airline?.iata || flight.airline?.icao || 'XX',
+        status: flight.status || 'scheduled',
+        delayMinutes: flight.delay || flight.delayMinutes || 0,
+        scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
+        actualTime: flight.actual_time || flight.actualTime || null,
+        aircraft: flight.aircraft?.model || flight.aircraft || null,
+        type: 'departure'
+      }))
+      
+      const allFlights = [...transformedArrivals, ...transformedDepartures]
+      console.log(`[Flight Statistics] Using cache data: ${allFlights.length} flights`)
 
       if (allFlights.length === 0) {
         console.log(`[Flight Statistics] No flight data found for ${airportCode} on ${date}`)
@@ -171,10 +144,42 @@ export class FlightStatisticsService {
     console.log(`[Flight Statistics] Getting range statistics for ${airportCode} from ${fromDate} to ${toDate}`)
 
     try {
-      await historicalCacheManager.initialize()
+      // Initialize cache manager
+      await cacheManager.initialize()
 
-      // Get all flight data for the range
-      const allFlights = await historicalCacheManager.getDataForRange(airportCode, fromDate, toDate)
+      // For range statistics, use current cache data as we don't have historical range data
+      const arrivalsKey = `${airportCode}_arrivals`
+      const departuresKey = `${airportCode}_departures`
+      
+      const currentArrivals = await cacheManager.getCachedDataWithPersistent<any[]>(arrivalsKey) || []
+      const currentDepartures = await cacheManager.getCachedDataWithPersistent<any[]>(departuresKey) || []
+      
+      // Transform and use current data for range analysis
+      const transformedArrivals = currentArrivals.map((flight: any) => ({
+        flightNumber: flight.flight_number || flight.number || 'N/A',
+        airline: flight.airline?.name || flight.airline || 'Unknown',
+        airlineCode: flight.airline?.code || flight.airline?.iata || flight.airline?.icao || 'XX',
+        status: flight.status || 'scheduled',
+        delayMinutes: flight.delay || flight.delayMinutes || 0,
+        scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
+        actualTime: flight.actual_time || flight.actualTime || null,
+        aircraft: flight.aircraft?.model || flight.aircraft || null,
+        type: 'arrival'
+      }))
+      
+      const transformedDepartures = currentDepartures.map((flight: any) => ({
+        flightNumber: flight.flight_number || flight.number || 'N/A',
+        airline: flight.airline?.name || flight.airline || 'Unknown',
+        airlineCode: flight.airline?.code || flight.airline?.iata || flight.airline?.icao || 'XX',
+        status: flight.status || 'scheduled',
+        delayMinutes: flight.delay || flight.delayMinutes || 0,
+        scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
+        actualTime: flight.actual_time || flight.actualTime || null,
+        aircraft: flight.aircraft?.model || flight.aircraft || null,
+        type: 'departure'
+      }))
+      
+      const allFlights = [...transformedArrivals, ...transformedDepartures]
 
       if (allFlights.length === 0) {
         console.log(`[Flight Statistics] No flight data found for ${airportCode} in range ${fromDate} to ${toDate}`)
@@ -362,15 +367,43 @@ export class FlightStatisticsService {
     console.log(`[Flight Statistics] Getting peak hours analysis for ${airportCode} over ${period}`)
 
     try {
+      // Initialize cache manager
+      await cacheManager.initialize()
+
+      // Use current cache data for peak hours analysis
+      const arrivalsKey = `${airportCode}_arrivals`
+      const departuresKey = `${airportCode}_departures`
+      
+      const currentArrivals = await cacheManager.getCachedDataWithPersistent<any[]>(arrivalsKey) || []
+      const currentDepartures = await cacheManager.getCachedDataWithPersistent<any[]>(departuresKey) || []
+      
+      // Transform current cache data
+      const transformedArrivals = currentArrivals.map((flight: any) => ({
+        flightNumber: flight.flight_number || flight.number || 'N/A',
+        airline: flight.airline?.name || flight.airline || 'Unknown',
+        airlineCode: flight.airline?.code || flight.airline?.iata || flight.airline?.icao || 'XX',
+        status: flight.status || 'scheduled',
+        delayMinutes: flight.delay || flight.delayMinutes || 0,
+        scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
+        actualTime: flight.actual_time || flight.actualTime || null,
+        aircraft: flight.aircraft?.model || flight.aircraft || null,
+        type: 'arrival'
+      }))
+      
+      const transformedDepartures = currentDepartures.map((flight: any) => ({
+        flightNumber: flight.flight_number || flight.number || 'N/A',
+        airline: flight.airline?.name || flight.airline || 'Unknown',
+        airlineCode: flight.airline?.code || flight.airline?.iata || flight.airline?.icao || 'XX',
+        status: flight.status || 'scheduled',
+        delayMinutes: flight.delay || flight.delayMinutes || 0,
+        scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
+        actualTime: flight.actual_time || flight.actualTime || null,
+        aircraft: flight.aircraft?.model || flight.aircraft || null,
+        type: 'departure'
+      }))
+      
+      const allFlights = [...transformedArrivals, ...transformedDepartures]
       const days = this.periodToDays(period as AnalysisPeriod)
-      const endDate = new Date()
-      const startDate = new Date(endDate)
-      startDate.setDate(startDate.getDate() - days)
-
-      const endDateStr = endDate.toISOString().split('T')[0]
-      const startDateStr = startDate.toISOString().split('T')[0]
-
-      const allFlights = await historicalCacheManager.getDataForRange(airportCode, startDateStr, endDateStr)
 
       // Group flights by hour
       const hourlyData = Array.from({ length: 24 }, (_, hour) => {
@@ -430,15 +463,42 @@ export class FlightStatisticsService {
     console.log(`[Flight Statistics] Getting airline performance for ${airportCode} over ${period}`)
 
     try {
-      const days = this.periodToDays(period as AnalysisPeriod)
-      const endDate = new Date()
-      const startDate = new Date(endDate)
-      startDate.setDate(startDate.getDate() - days)
+      // Initialize cache manager
+      await cacheManager.initialize()
 
-      const endDateStr = endDate.toISOString().split('T')[0]
-      const startDateStr = startDate.toISOString().split('T')[0]
-
-      const allFlights = await historicalCacheManager.getDataForRange(airportCode, startDateStr, endDateStr)
+      // Use current cache data for airline performance analysis
+      const arrivalsKey = `${airportCode}_arrivals`
+      const departuresKey = `${airportCode}_departures`
+      
+      const currentArrivals = await cacheManager.getCachedDataWithPersistent<any[]>(arrivalsKey) || []
+      const currentDepartures = await cacheManager.getCachedDataWithPersistent<any[]>(departuresKey) || []
+      
+      // Transform current cache data
+      const transformedArrivals = currentArrivals.map((flight: any) => ({
+        flightNumber: flight.flight_number || flight.number || 'N/A',
+        airline: flight.airline?.name || flight.airline || 'Unknown',
+        airlineCode: flight.airline?.code || flight.airline?.iata || flight.airline?.icao || 'XX',
+        status: flight.status || 'scheduled',
+        delayMinutes: flight.delay || flight.delayMinutes || 0,
+        scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
+        actualTime: flight.actual_time || flight.actualTime || null,
+        aircraft: flight.aircraft?.model || flight.aircraft || null,
+        type: 'arrival'
+      }))
+      
+      const transformedDepartures = currentDepartures.map((flight: any) => ({
+        flightNumber: flight.flight_number || flight.number || 'N/A',
+        airline: flight.airline?.name || flight.airline || 'Unknown',
+        airlineCode: flight.airline?.code || flight.airline?.iata || flight.airline?.icao || 'XX',
+        status: flight.status || 'scheduled',
+        delayMinutes: flight.delay || flight.delayMinutes || 0,
+        scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
+        actualTime: flight.actual_time || flight.actualTime || null,
+        aircraft: flight.aircraft?.model || flight.aircraft || null,
+        type: 'departure'
+      }))
+      
+      const allFlights = [...transformedArrivals, ...transformedDepartures]
 
       // Group flights by airline
       const airlineMap = new Map<string, any[]>()
@@ -470,7 +530,7 @@ export class FlightStatisticsService {
 
         airlinePerformances.push({
           airlineCode,
-          airlineName: flights[0]?.airlineName || airlineCode,
+          airlineName: getAirlineName(airlineCode), // Use the airline mapping function
           airport: airportCode,
           period,
           totalFlights,
@@ -550,7 +610,7 @@ export class FlightStatisticsService {
 
       airlines.push({
         code,
-        name: airlineFlights[0]?.airlineName || code,
+        name: getAirlineName(code), // Use the airline mapping function
         flights: airlineFlights.length,
         onTimePercentage,
         averageDelay
@@ -652,20 +712,20 @@ export class FlightStatisticsService {
     const recommendations: string[] = []
 
     if (trafficChange > 10) {
-      recommendations.push('Traffic is increasing significantly. Consider capacity planning.')
+      recommendations.push('Traficul crește semnificativ. Luați în considerare planificarea capacității.')
     } else if (trafficChange < -10) {
-      recommendations.push('Traffic is decreasing. Investigate potential causes.')
+      recommendations.push('Traficul scade. Investigați cauzele potențiale.')
     }
 
     if (delayChange > 10) {
-      recommendations.push('Delays are increasing. Review operational procedures.')
+      recommendations.push('Întârzierile cresc. Revizuiți procedurile operaționale.')
     } else if (delayChange < -10) {
-      recommendations.push('Delays are improving. Continue current practices.')
+      recommendations.push('Întârzierile se îmbunătățesc. Continuați practicile actuale.')
     }
 
     const avgOnTime = dataPoints.reduce((sum, p) => sum + p.onTimePercentage, 0) / dataPoints.length
     if (avgOnTime < 70) {
-      recommendations.push('On-time performance is below industry standards. Focus on punctuality improvements.')
+      recommendations.push('Performanța la timp este sub standardele industriei. Concentrați-vă pe îmbunătățirea punctualității.')
     }
 
     return recommendations
@@ -674,14 +734,14 @@ export class FlightStatisticsService {
   private generatePeakHoursRecommendations(hourlyData: any[], peakHours: number[], quietHours: number[]): string[] {
     const recommendations: string[] = []
 
-    recommendations.push(`Peak traffic hours: ${peakHours.map(h => `${h}:00`).join(', ')}`)
-    recommendations.push(`Quietest hours: ${quietHours.map(h => `${h}:00`).join(', ')}`)
+    recommendations.push(`Ore de vârf: ${peakHours.map(h => `${h}:00`).join(', ')}`)
+    recommendations.push(`Ore liniștite: ${quietHours.map(h => `${h}:00`).join(', ')}`)
 
     const peakDelays = peakHours.map(h => hourlyData[h].averageDelay)
     const avgPeakDelay = peakDelays.reduce((sum, d) => sum + d, 0) / peakDelays.length
 
     if (avgPeakDelay > 20) {
-      recommendations.push('Consider additional resources during peak hours to reduce delays.')
+      recommendations.push('Luați în considerare resurse suplimentare în orele de vârf pentru a reduce întârzierile.')
     }
 
     return recommendations

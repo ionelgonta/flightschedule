@@ -99,7 +99,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="ro" suppressHydrationWarning>
       <head>
         <meta name="google-adsense-account" content="ca-pub-2305349540791838" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -109,7 +109,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <AdSenseScript />
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider>
           <FlightSchedulerProvider>
             <div className="min-h-screen bg-surface transition-colors duration-200">

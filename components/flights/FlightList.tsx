@@ -7,35 +7,82 @@
 import { useState, useMemo, useEffect } from 'react';
 import { RawFlightData } from '@/lib/flightApiService';
 import { FlightFilters } from '@/lib/flightRepository';
+import { getAirlineName } from '@/lib/airlineMapping';
+import { AirlineLogo } from '@/components/ui/AirlineLogo';
 
 import { Search, Filter, SortAsc, SortDesc, Plane } from 'lucide-react';
 
-// Helper function pentru status badge
+// Helper function pentru status badge cu design îmbunătățit
 const getStatusBadge = (status: string) => {
-  const statusConfig: Record<string, { label: string; className: string }> = {
-    scheduled: { label: 'Programat', className: 'bg-green-600 text-white shadow-md' },
-    active: { label: 'În Zbor', className: 'bg-blue-600 text-white shadow-md' },
-    landed: { label: 'Aterizat', className: 'bg-gray-600 text-white shadow-md' },
-    arrived: { label: 'Sosit', className: 'bg-blue-600 text-white shadow-md' },
-    cancelled: { label: 'Anulat', className: 'bg-red-600 text-white shadow-md' },
-    delayed: { label: 'Întârziat', className: 'bg-orange-600 text-white shadow-md' },
-    diverted: { label: 'Deviat', className: 'bg-yellow-600 text-white shadow-md' },
-    boarding: { label: 'Îmbarcare', className: 'bg-purple-600 text-white shadow-md' },
-    departed: { label: 'Plecat', className: 'bg-blue-600 text-white shadow-md' },
-    unknown: { label: 'Necunoscut', className: 'bg-gray-500 text-white shadow-md' },
-    estimated: { label: 'Estimat', className: 'bg-indigo-600 text-white shadow-md' }
+  const statusConfig: Record<string, { label: string; className: string; icon: string }> = {
+    scheduled: { 
+      label: 'Programat', 
+      className: 'bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border-emerald-200 shadow-sm',
+      icon: '🕐'
+    },
+    active: { 
+      label: 'În Zbor', 
+      className: 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-blue-200 shadow-sm animate-pulse',
+      icon: '✈️'
+    },
+    landed: { 
+      label: 'Aterizat', 
+      className: 'bg-gradient-to-r from-green-50 to-green-100 text-green-700 border-green-200 shadow-sm',
+      icon: '🛬'
+    },
+    arrived: { 
+      label: 'Sosit', 
+      className: 'bg-gradient-to-r from-green-50 to-green-100 text-green-700 border-green-200 shadow-sm',
+      icon: '✅'
+    },
+    cancelled: { 
+      label: 'Anulat', 
+      className: 'bg-gradient-to-r from-red-50 to-red-100 text-red-700 border-red-200 shadow-sm',
+      icon: '❌'
+    },
+    delayed: { 
+      label: 'Întârziat', 
+      className: 'bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 border-orange-200 shadow-sm',
+      icon: '⏰'
+    },
+    diverted: { 
+      label: 'Deviat', 
+      className: 'bg-gradient-to-r from-yellow-50 to-yellow-100 text-yellow-700 border-yellow-200 shadow-sm',
+      icon: '🔄'
+    },
+    boarding: { 
+      label: 'Îmbarcare', 
+      className: 'bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 border-purple-200 shadow-sm',
+      icon: '🚪'
+    },
+    departed: { 
+      label: 'Plecat', 
+      className: 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-blue-200 shadow-sm',
+      icon: '🛫'
+    },
+    unknown: { 
+      label: 'Necunoscut', 
+      className: 'bg-gradient-to-r from-gray-50 to-gray-100 text-gray-600 border-gray-200 shadow-sm',
+      icon: '❓'
+    },
+    estimated: { 
+      label: 'Estimat', 
+      className: 'bg-gradient-to-r from-indigo-50 to-indigo-100 text-indigo-700 border-indigo-200 shadow-sm',
+      icon: '📊'
+    }
   };
 
   const config = statusConfig[status.toLowerCase()] || statusConfig.unknown;
   
   return (
-    <span className={`inline-flex items-center px-3 py-2 rounded-lg text-xs font-bold ${config.className}`}>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${config.className} transition-all duration-200 hover:scale-105`}>
+      <span className="text-sm">{config.icon}</span>
       {config.label}
     </span>
   );
 };
 
-// Componenta pentru afișarea unui rând în tabel
+// Componenta pentru afișarea unui rând în tabel cu design îmbunătățit
 function FlightTableRow({ flight, type }: { flight: RawFlightData; type: 'arrivals' | 'departures' }) {
   const formatTime = (timeString: string) => {
     try {
@@ -70,61 +117,78 @@ function FlightTableRow({ flight, type }: { flight: RawFlightData; type: 'arriva
   }
 
   return (
-    <tr className="hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100">
-      {/* Zbor - Compact */}
-      <td className="px-3 py-3 first:pl-4">
-        <div className="text-sm font-bold text-gray-900">
-          {flight.flight_number}
-        </div>
-        <div className="text-xs text-gray-500 sm:hidden">
-          {flight.airline?.code || 'XX'}
-        </div>
-        <div className="text-xs text-gray-500">
-          {formatDate(flight.scheduled_time)}
-        </div>
-      </td>
-      
-      {/* Companie - Compact, ascuns pe mobile */}
-      <td className="px-3 py-3 hidden sm:table-cell">
-        <div className="flex items-center">
-          <div className="flex-shrink-0 h-6 w-6 bg-blue-600 rounded-md flex items-center justify-center">
-            <span className="text-xs font-bold text-white">
-              {flight.airline?.code || 'XX'}
-            </span>
+    <tr className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 border-b border-gray-100 hover:border-blue-200 hover:shadow-sm">
+      {/* Destinație/Origine - Design îmbunătățit cu iconuri */}
+      <td className="px-4 py-4 first:pl-6">
+        <div className="flex items-start space-x-3">
+          <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
+            <Plane className="h-5 w-5 text-white transform group-hover:scale-110 transition-transform duration-300" />
           </div>
-          <div className="ml-2 min-w-0">
-            <div className="text-sm font-semibold text-gray-900 truncate">
-              {flight.airline?.name || 'Unknown Airline'}
+          <div className="flex-1 min-w-0">
+            <div className="text-lg font-bold text-gray-900 leading-tight group-hover:text-blue-900 transition-colors duration-300">
+              {relevantLocation?.city || 'N/A'}
+            </div>
+            <div className="text-sm font-semibold text-blue-600 mt-0.5 group-hover:text-blue-700 transition-colors duration-300">
+              {flight.flight_number}
+            </div>
+            <div className="flex items-center space-x-2 mt-1">
+              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md font-medium">
+                {relevantLocation?.code || 'N/A'}
+              </span>
+              <span className="text-xs text-gray-400">
+                {formatDate(flight.scheduled_time)}
+              </span>
             </div>
           </div>
         </div>
       </td>
       
-      {/* Destinație - Compact */}
-      <td className="px-3 py-3">
-        <div className="text-sm font-bold text-gray-900">
-          {relevantLocation?.city || 'N/A'}
-        </div>
-        <div className="text-xs text-gray-500 hidden sm:block">
-          {relevantLocation?.code || 'N/A'}
-        </div>
-      </td>
-      
-      {/* Ora - Compact */}
-      <td className="px-3 py-3">
-        <div className="text-sm font-bold text-gray-900">
-          {formatTime(flight.scheduled_time)}
-        </div>
-        {flight.estimated_time && flight.estimated_time !== flight.scheduled_time && (
-          <div className="text-xs text-orange-600 font-semibold">
-            Est: {formatTime(flight.estimated_time)}
+      {/* Companie - Design îmbunătățit */}
+      <td className="px-4 py-4 hidden sm:table-cell">
+        <div className="flex items-center space-x-3">
+          <div className="flex-shrink-0">
+            <AirlineLogo 
+              airlineCode={flight.airline?.code || 'XX'} 
+              size="md"
+              className="ring-2 ring-white shadow-md group-hover:ring-blue-200 transition-all duration-300"
+            />
           </div>
-        )}
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold text-gray-900 truncate group-hover:text-blue-900 transition-colors duration-300">
+              {getAirlineName(flight.airline?.code || 'XX')}
+            </div>
+            <div className="text-xs text-gray-500 truncate">
+              {flight.airline?.code || 'XX'}
+            </div>
+          </div>
+        </div>
       </td>
       
-      {/* Status - Compact */}
-      <td className="px-3 py-3 last:pr-4">
-        {getStatusBadge(flight.status)}
+      {/* Ora - Design îmbunătățit cu iconuri de timp */}
+      <td className="px-4 py-4">
+        <div className="text-center">
+          <div className="flex items-center justify-center space-x-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <div className="text-lg font-bold text-gray-900 group-hover:text-blue-900 transition-colors duration-300">
+              {formatTime(flight.scheduled_time)}
+            </div>
+          </div>
+          {flight.estimated_time && flight.estimated_time !== flight.scheduled_time && (
+            <div className="flex items-center justify-center space-x-1 mt-1">
+              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+              <div className="text-xs text-orange-600 font-semibold">
+                Est: {formatTime(flight.estimated_time)}
+              </div>
+            </div>
+          )}
+        </div>
+      </td>
+      
+      {/* Status - Design îmbunătățit */}
+      <td className="px-4 py-4 last:pr-6">
+        <div className="flex justify-end">
+          {getStatusBadge(flight.status)}
+        </div>
       </td>
     </tr>
   );
@@ -169,9 +233,21 @@ export function FlightList({
     return Array.from(uniqueStatuses).sort();
   }, [flights]);
 
-  // Aplică filtrarea și sortarea
+  // Aplică filtrarea și sortarea cu filtrare pe timp (10 ore în urmă + toate viitoare)
   const filteredAndSortedFlights = useMemo(() => {
     let filtered = flights;
+
+    // Filtrare pe timp: arată zborurile din ultimele 10 ore și toate zborurile viitoare
+    const now = new Date();
+    const tenHoursAgo = new Date(now.getTime() - 10 * 60 * 60 * 1000); // 10 ore în urmă
+    
+    filtered = filtered.filter(flight => {
+      const scheduledTime = new Date(flight.scheduled_time);
+      // Arată doar zborurile care sunt:
+      // 1. Programate în viitor (scheduledTime > now)
+      // 2. Programate în ultimele 10 ore (scheduledTime > tenHoursAgo)
+      return scheduledTime > tenHoursAgo;
+    });
 
     // Filtru de căutare
     if (searchTerm) {
@@ -278,105 +354,114 @@ export function FlightList({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header cu căutare și controale */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
-          {/* Căutare */}
+    <div className="space-y-8">
+      {/* Header cu căutare și controale - Design îmbunătățit */}
+      <div className="bg-gradient-to-r from-white to-blue-50 rounded-2xl border border-blue-200 shadow-lg p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          {/* Căutare cu design îmbunătățit */}
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-blue-400" />
+            </div>
             <input
               type="text"
               placeholder={`Caută ${type === 'arrivals' ? 'sosiri' : 'plecări'}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 text-sm focus:border-blue-500 focus:outline-none transition-colors"
+              className="w-full pl-12 pr-4 py-3 border-2 border-blue-200 rounded-xl bg-white text-gray-900 placeholder-blue-400 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 shadow-sm hover:shadow-md"
             />
           </div>
 
-          {/* Controale */}
-          <div className="flex items-center space-x-3">
-            {/* Ultima actualizare */}
+          {/* Controale cu design îmbunătățit */}
+          <div className="flex items-center space-x-4">
+            {/* Ultima actualizare cu design îmbunătățit */}
             {lastUpdated && (
-              <span className="text-xs text-gray-500 font-medium">
-                Actualizat: {formatLastUpdated(lastUpdated)}
-              </span>
+              <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-gray-600 font-medium">
+                  Actualizat: {formatLastUpdated(lastUpdated)}
+                </span>
+              </div>
             )}
 
-            {/* Buton filtre */}
+            {/* Buton filtre cu design îmbunătățit */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
+              className={`flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105 ${
                 showFilters 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-200' 
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
               }`}
             >
-              <Filter className="h-3 w-3" />
+              <Filter className="h-4 w-4" />
               <span>Filtre</span>
+              {showFilters && <span className="text-xs bg-white bg-opacity-20 px-2 py-0.5 rounded-full">Activ</span>}
             </button>
           </div>
         </div>
 
-        {/* Panoul de filtre */}
+        {/* Panoul de filtre cu design îmbunătățit */}
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Filtru companie aeriană */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Companie aeriană
+          <div className="mt-6 pt-6 border-t border-blue-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Filtru companie aeriană cu design îmbunătățit */}
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-gray-700 flex items-center space-x-2">
+                  <span className="text-blue-600">✈️</span>
+                  <span>Companie aeriană</span>
                 </label>
                 <select
                   value={selectedAirline}
                   onChange={(e) => setSelectedAirline(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:border-blue-500 focus:outline-none"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 shadow-sm hover:shadow-md"
                 >
-                  <option value="">Toate companiile</option>
+                  <option value="">🌐 Toate companiile</option>
                   {airlines.map(airline => (
                     <option key={airline} value={airline}>{airline}</option>
                   ))}
                 </select>
               </div>
 
-              {/* Filtru status */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Status
+              {/* Filtru status cu design îmbunătățit */}
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-gray-700 flex items-center space-x-2">
+                  <span className="text-green-600">📊</span>
+                  <span>Status</span>
                 </label>
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:border-blue-500 focus:outline-none"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 shadow-sm hover:shadow-md"
                 >
-                  <option value="">Toate statusurile</option>
+                  <option value="">📋 Toate statusurile</option>
                   {statuses.map(status => (
                     <option key={status} value={status} className="capitalize">{status}</option>
                   ))}
                 </select>
               </div>
 
-              {/* Sortare */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Sortează după
+              {/* Sortare cu design îmbunătățit */}
+              <div className="space-y-2">
+                <label className="block text-sm font-bold text-gray-700 flex items-center space-x-2">
+                  <span className="text-purple-600">🔄</span>
+                  <span>Sortează după</span>
                 </label>
                 <div className="flex space-x-2">
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:border-blue-500 focus:outline-none"
+                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 shadow-sm hover:shadow-md"
                   >
-                    <option value="scheduled_time">Ora</option>
-                    <option value="airline">Companie</option>
-                    <option value="status">Status</option>
-                    <option value="destination">{type === 'arrivals' ? 'Origine' : 'Destinație'}</option>
+                    <option value="scheduled_time">🕐 Ora</option>
+                    <option value="airline">✈️ Companie</option>
+                    <option value="status">📊 Status</option>
+                    <option value="destination">🌍 {type === 'arrivals' ? 'Origine' : 'Destinație'}</option>
                   </select>
                   <button
                     onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-                    className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="px-4 py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-blue-100 hover:to-blue-200 hover:text-blue-700 transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105"
                   >
-                    {sortDirection === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />}
+                    {sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
@@ -385,94 +470,160 @@ export function FlightList({
         )}
       </div>
 
-      {/* Statistici */}
-      <div className="text-sm font-medium text-gray-600">
-        Afișez {filteredAndSortedFlights.length} din {flights.length} {type === 'arrivals' ? 'sosiri' : 'plecări'}
+      {/* Statistici cu design îmbunătățit */}
+      <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
+            <Plane className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <div className="text-lg font-bold text-gray-900">
+              {filteredAndSortedFlights.length} {type === 'arrivals' ? 'sosiri' : 'plecări'}
+            </div>
+            <div className="text-sm text-gray-600">
+              din {flights.length} total
+            </div>
+          </div>
+        </div>
+        {(searchTerm || selectedAirline || selectedStatus) && (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
+              Filtrate
+            </span>
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedAirline('');
+                setSelectedStatus('');
+              }}
+              className="text-xs text-blue-600 hover:text-blue-800 font-medium underline"
+            >
+              Resetează
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Lista de zboruri - Tabel */}
+      {/* Lista de zboruri - Tabel cu design îmbunătățit */}
       {loading ? (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
           <div className="animate-pulse">
-            <div className="bg-gray-100 h-12"></div>
+            <div className="bg-gradient-to-r from-gray-100 to-gray-200 h-16"></div>
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="border-t border-gray-100 h-14 bg-gray-50" />
+              <div key={i} className="border-t border-gray-100 h-20 bg-gradient-to-r from-gray-50 to-gray-100" />
             ))}
           </div>
         </div>
       ) : filteredAndSortedFlights.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-          <div className="p-3 bg-gray-100 rounded-lg w-fit mx-auto mb-4">
-            <Plane className="h-6 w-6 text-gray-600" />
+        <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl border border-blue-200 shadow-lg p-12 text-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <Plane className="h-10 w-10 text-white" />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-2">
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">
             Nu sunt {type === 'arrivals' ? 'sosiri' : 'plecări'}
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-gray-600 max-w-md mx-auto leading-relaxed">
             {searchTerm || selectedAirline || selectedStatus 
-              ? 'Nu există zboruri care să corespundă filtrelor selectate.'
-              : `Nu sunt ${type === 'arrivals' ? 'sosiri' : 'plecări'} programate în acest moment.`
+              ? 'Nu există zboruri care să corespundă filtrelor selectate. Încearcă să modifici criteriile de căutare.'
+              : `Nu sunt ${type === 'arrivals' ? 'sosiri' : 'plecări'} programate în acest moment. Verifică din nou mai târziu.`
             }
           </p>
+          {(searchTerm || selectedAirline || selectedStatus) && (
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedAirline('');
+                setSelectedStatus('');
+              }}
+              className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+            >
+              Resetează filtrele
+            </button>
+          )}
         </div>
       ) : (
         <>
-          {/* Desktop Table - Compact Design */}
-          <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden">
+          {/* Desktop Table - Design îmbunătățit */}
+          <div className="hidden md:block bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gradient-to-r from-gray-50 to-blue-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-3 py-3 first:pl-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      <button
-                        onClick={() => handleSort('scheduled_time')}
-                        className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
-                      >
-                        <span>Zbor</span>
-                        {sortBy === 'scheduled_time' && (
-                          sortDirection === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
-                        )}
-                      </button>
-                    </th>
-                    <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden sm:table-cell">
-                      <button
-                        onClick={() => handleSort('airline')}
-                        className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
-                      >
-                        <span>Companie</span>
-                        {sortBy === 'airline' && (
-                          sortDirection === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
-                        )}
-                      </button>
-                    </th>
-                    <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
                       <button
                         onClick={() => handleSort('destination')}
-                        className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
+                        className="flex items-center space-x-2 hover:text-blue-600 transition-colors duration-300 group"
                       >
                         <span>{type === 'arrivals' ? 'Din' : 'Spre'}</span>
                         {sortBy === 'destination' && (
-                          sortDirection === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
+                          <div className="text-blue-600">
+                            {sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                          </div>
                         )}
+                        <div className="w-0 group-hover:w-4 transition-all duration-300 overflow-hidden">
+                          <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                          </div>
+                        </div>
                       </button>
                     </th>
-                    <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Ora
+                    <th className="px-4 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider hidden sm:table-cell">
+                      <button
+                        onClick={() => handleSort('airline')}
+                        className="flex items-center space-x-2 hover:text-blue-600 transition-colors duration-300 group"
+                      >
+                        <span>Companie</span>
+                        {sortBy === 'airline' && (
+                          <div className="text-blue-600">
+                            {sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                          </div>
+                        )}
+                        <div className="w-0 group-hover:w-4 transition-all duration-300 overflow-hidden">
+                          <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                          </div>
+                        </div>
+                      </button>
                     </th>
-                    <th className="px-3 py-3 last:pr-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">
+                      <button
+                        onClick={() => handleSort('scheduled_time')}
+                        className="flex items-center justify-center space-x-2 hover:text-blue-600 transition-colors duration-300 group w-full"
+                      >
+                        <span>Ora</span>
+                        {sortBy === 'scheduled_time' && (
+                          <div className="text-blue-600">
+                            {sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                          </div>
+                        )}
+                        <div className="w-0 group-hover:w-4 transition-all duration-300 overflow-hidden">
+                          <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                          </div>
+                        </div>
+                      </button>
+                    </th>
+                    <th className="px-6 py-4 text-right text-sm font-bold text-gray-700 uppercase tracking-wider">
                       <button
                         onClick={() => handleSort('status')}
-                        className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
+                        className="flex items-center justify-end space-x-2 hover:text-blue-600 transition-colors duration-300 group w-full"
                       >
-                        <span>Status</span>
+                        <div className="w-0 group-hover:w-4 transition-all duration-300 overflow-hidden">
+                          <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                          </div>
+                        </div>
                         {sortBy === 'status' && (
-                          sortDirection === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
+                          <div className="text-blue-600">
+                            {sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                          </div>
                         )}
+                        <span>Status</span>
                       </button>
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-100">
                   {filteredAndSortedFlights.map((flight, index) => (
                     <FlightTableRow
                       key={`${flight.flight_number}-${index}`}
@@ -485,8 +636,8 @@ export function FlightList({
             </div>
           </div>
 
-          {/* Mobile Cards - Compact Design */}
-          <div className="md:hidden space-y-3">
+          {/* Mobile Cards - Design premium îmbunătățit */}
+          <div className="md:hidden space-y-4">
             {filteredAndSortedFlights.map((flight, index) => {
               const relevantLocation = type === 'arrivals' ? flight.origin : flight.destination;
               
@@ -511,38 +662,71 @@ export function FlightList({
               return (
                 <div
                   key={`${flight.flight_number}-${index}`}
-                  className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow duration-200"
+                  className="bg-gradient-to-br from-white to-blue-50 rounded-2xl border border-blue-200 shadow-lg hover:shadow-xl hover:border-blue-300 transition-all duration-300 transform hover:scale-[1.02] p-6"
                 >
-                  {/* Header compact cu zbor și status */}
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
-                        <Plane className="h-3 w-3 text-white" />
+                  {/* Header cu destinație și timp */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start space-x-4 flex-1">
+                      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
+                        <Plane className="h-6 w-6 text-white" />
                       </div>
-                      <div>
-                        <div className="text-sm font-bold text-gray-900">{flight.flight_number}</div>
-                        <div className="text-xs text-gray-500">{flight.airline?.code || 'XX'}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xl font-bold text-gray-900 leading-tight mb-1">
+                          {relevantLocation?.city || 'N/A'}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-lg font-medium">
+                            {relevantLocation?.code || 'N/A'}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {new Date(flight.scheduled_time).toLocaleDateString('ro-RO', { 
+                              month: 'short', 
+                              day: '2-digit' 
+                            })}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    {getStatusBadge(flight.status)}
-                  </div>
-                  
-                  {/* Detalii zbor - compact */}
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-gray-500">{type === 'arrivals' ? 'Din:' : 'Spre:'}</span>
-                      <div className="font-semibold text-gray-900">{relevantLocation?.city || 'N/A'}</div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-gray-500">Ora:</span>
-                      <div className="font-semibold text-gray-900">
-                        {formatTime(flight.scheduled_time)}
+                    
+                    {/* Timp în colțul din dreapta */}
+                    <div className="text-right flex-shrink-0">
+                      <div className="flex items-center justify-end space-x-2 mb-1">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <div className="text-2xl font-bold text-gray-900">
+                          {formatTime(flight.scheduled_time)}
+                        </div>
                       </div>
                       {flight.estimated_time && flight.estimated_time !== flight.scheduled_time && (
-                        <div className="text-xs text-orange-600 font-medium">
-                          Est: {formatTime(flight.estimated_time)}
+                        <div className="flex items-center justify-end space-x-1">
+                          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                          <div className="text-sm text-orange-600 font-semibold">
+                            Est: {formatTime(flight.estimated_time)}
+                          </div>
                         </div>
                       )}
+                    </div>
+                  </div>
+                  
+                  {/* Footer cu companie și status */}
+                  <div className="flex items-center justify-between pt-4 border-t border-blue-100">
+                    <div className="flex items-center space-x-3 flex-1">
+                      <AirlineLogo 
+                        airlineCode={flight.airline?.code || 'XX'} 
+                        size="md"
+                        className="flex-shrink-0 ring-2 ring-white shadow-md"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-600 truncate">
+                          {getAirlineName(flight.airline?.code || 'XX')}
+                        </div>
+                        <div className="text-lg font-bold text-blue-600">
+                          {flight.flight_number}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex-shrink-0 ml-4">
+                      {getStatusBadge(flight.status)}
                     </div>
                   </div>
                 </div>

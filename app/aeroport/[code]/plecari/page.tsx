@@ -109,81 +109,97 @@ export default function DeparturesPage({ params }: DeparturesPageProps) {
   return (
     <div className="min-h-screen">
       {/* Header Banner Ad */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white border-b border-gray-200">
         <AdBanner 
           slot="header-banner"
           size="728x90"
-          className="max-w-7xl mx-auto py-4"
+          className="max-w-7xl mx-auto py-2"
         />
       </div>
 
-      {/* Page Header */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12">
+      {/* Page Header - Compact */}
+      <section className="bg-blue-600 text-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-4 mb-6">
+          <div className="flex items-center space-x-3 mb-4">
             <Link
               href={`/aeroport/${generateAirportSlug(airport)}`}
-              className="flex items-center space-x-2 text-blue-100 hover:text-white transition-colors"
+              className="flex items-center space-x-2 text-blue-100 hover:text-white transition-colors text-sm"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4" />
               <span>Înapoi la {airport.city}</span>
             </Link>
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">
+              <h1 className="text-xl md:text-2xl font-bold mb-2">
                 Plecări - {airport.city}
               </h1>
-              <p className="text-blue-100 text-lg">
+              <p className="text-blue-100 text-sm">
                 {airport.city} - {airport.name}, {airport.country}
               </p>
             </div>
             <div className="hidden md:flex items-center space-x-4">
               <div className="text-right">
                 {lastUpdated && (
-                  <p className="text-sm text-blue-100">
+                  <p className="text-xs text-blue-100">
                     Actualizat: {new Date(lastUpdated).toLocaleTimeString()}
                   </p>
                 )}
-
               </div>
             </div>
+          </div>
+          
+          {/* Quick Navigation - Added higher up */}
+          <div className="flex flex-col sm:flex-row gap-2 mt-4">
+            <Link
+              href={`/aeroport/${generateAirportSlug(airport)}/sosiri`}
+              className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-1 text-sm"
+            >
+              <Plane className="h-3 w-3" />
+              <span>Vezi Sosiri</span>
+            </Link>
+            <Link
+              href={`/aeroport/${generateAirportSlug(airport)}`}
+              className="border border-white text-white px-4 py-2 rounded-lg font-medium hover:bg-white/10 transition-colors flex items-center justify-center space-x-1 text-sm"
+            >
+              <span>Prezentare Aeroport</span>
+            </Link>
           </div>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-3">
             {/* Last Updated Info */}
             {lastUpdated && (
-              <div className="md:hidden mb-6">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="md:hidden mb-4">
+                <p className="text-xs text-gray-600">
                   Actualizat: {new Date(lastUpdated).toLocaleTimeString()}
                 </p>
               </div>
             )}
 
-            {/* Toggle pentru modul de vizualizare */}
-            <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-1">
+            {/* Toggle pentru modul de vizualizare - Compact */}
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center space-x-1 bg-white rounded-lg border border-gray-300 p-1">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all duration-200 ${
                     viewMode === 'list'
                       ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                      : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
                   Lista Completă
                 </button>
                 <button
                   onClick={() => setViewMode('grouped')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all duration-200 ${
                     viewMode === 'grouped'
                       ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                      : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
                   Grupat pe Rute
@@ -213,59 +229,59 @@ export default function DeparturesPage({ params }: DeparturesPageProps) {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-8">
+          <div className="lg:col-span-1 space-y-6">
             {/* Sidebar Ad */}
             <AdBanner 
               slot="sidebar-right"
               size="300x600"
             />
             
-            {/* Quick Links */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            {/* Quick Links - Compact */}
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">
                 Linkuri Rapide
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Link
                   href={`/aeroport/${generateAirportSlug(airport)}/sosiri`}
-                  className="block w-full text-left px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                  className="block w-full text-left px-3 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-xs"
                 >
                   Vezi Sosiri
                 </Link>
                 <Link
                   href={`/aeroport/${generateAirportSlug(airport)}`}
-                  className="block w-full text-left px-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                  className="block w-full text-left px-3 py-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                 >
                   Prezentare Aeroport
                 </Link>
               </div>
             </div>
 
-            {/* Flight Statistics */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            {/* Flight Statistics - Compact */}
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">
                 Statistici Plecări
               </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Total Zboruri</span>
-                  <span className="font-semibold text-gray-900 dark:text-white">{flights.length}</span>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600">Total Zboruri</span>
+                  <span className="font-semibold text-gray-900">{flights.length}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">La timp</span>
-                  <span className="font-semibold text-green-600 dark:text-green-400">
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600">La timp</span>
+                  <span className="font-semibold text-green-600">
                     {flights.filter(f => f.status === 'scheduled' || f.status === 'active' || f.status === 'departed').length}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Întârziate</span>
-                  <span className="font-semibold text-orange-600 dark:text-orange-400">
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600">Întârziate</span>
+                  <span className="font-semibold text-orange-600">
                     {flights.filter(f => f.status === 'delayed').length}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Anulate</span>
-                  <span className="font-semibold text-red-600 dark:text-red-400">
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600">Anulate</span>
+                  <span className="font-semibold text-red-600">
                     {flights.filter(f => f.status === 'cancelled').length}
                   </span>
                 </div>

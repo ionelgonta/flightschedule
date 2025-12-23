@@ -9,21 +9,21 @@ import { AnalysisPeriod } from '../../../../lib/types/historical'
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const searchParams = request.nextUrl.searchParams
     const airport = searchParams.get('airport')
     const period = searchParams.get('period') as AnalysisPeriod
 
     // Validate required parameters
     if (!airport) {
       return NextResponse.json(
-        { error: 'Airport code is required' },
+        { error: 'Codul aeroportului este obligatoriu' },
         { status: 400 }
       )
     }
 
     if (!period) {
       return NextResponse.json(
-        { error: 'Period is required (7d, 30d, 90d, or 365d)' },
+        { error: 'Perioada este obligatorie (7d, 30d, 90d, sau 365d)' },
         { status: 400 }
       )
     }
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     const validPeriods: AnalysisPeriod[] = ['7d', '30d', '90d', '365d']
     if (!validPeriods.includes(period)) {
       return NextResponse.json(
-        { error: 'Invalid period. Must be one of: 7d, 30d, 90d, 365d' },
+        { error: 'Perioadă invalidă. Trebuie să fie una dintre: 7d, 30d, 90d, 365d' },
         { status: 400 }
       )
     }
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const airportRegex = /^[A-Z]{3,4}$/
     if (!airportRegex.test(airport.toUpperCase())) {
       return NextResponse.json(
-        { error: 'Invalid airport code format' },
+        { error: 'Format cod aeroport invalid' },
         { status: 400 }
       )
     }
@@ -116,8 +116,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false,
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Eroare internă de server',
+        message: error instanceof Error ? error.message : 'Eroare necunoscută'
       },
       { status: 500 }
     )

@@ -558,6 +558,226 @@ export default function CacheManagement() {
           {reloadingStats ? 'Se reîncarcă...' : 'Reîncarcă Statistici'}
         </Button>
       </div>
+
+      {/* Persistent Cache Section */}
+      <PersistentCacheSection />
     </div>
+  )
+}
+
+// Componenta pentru gestionarea cache-ului persistent
+function PersistentCacheSection() {
+  const [persistentStats, setPersistentStats] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+  const [cleaning, setCleaning] = useState(false)
+
+  useEffect(() => {
+    loadPersistentStats()
+  }, [])
+
+  const loadPersistentStats = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/admin/persistent-cache?action=stats')
+      const data = await response.json()
+      
+      if (data.success) {
+        setPersistentStats(data.data)
+      }
+    } catch (error) {
+      console.error('Error loading persistent cache stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const cleanOldData = async () => {
+    if (!confirm('Sigur vrei să ștergi datele mai vechi de 14 zile din cache-ul persistent?')) return
+    
+    setCleaning(true)
+    try {
+      const response = await fetch('/api/admin/persistent-cache?action=clean')
+      const data = await response.json()
+      
+      if (data.success) {
+        alert(data.message)
+        await loadPersistentStats()
+      } else {
+        alert(`Eroare: ${data.error}`)
+      }
+    } catch (error) {
+      console.error('Error cleaning persistent cache:', error)
+      alert('Eroare la curățarea cache-ului persistent')
+    } finally {
+      setCleaning(false)
+    }
+  }
+
+  const clearAllCache = async () => {
+    if (!confirm('ATENȚIE! Sigur vrei să ștergi TOATE datele din cache-ul persistent? Această acțiune nu poate fi anulată!')) return
+    
+    try {
+      const response = await fetch('/api/admin/persistent-cache', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clearAll' })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        alert(data.message)
+        await loadPersistentStats()
+      } else {
+        alert(`Eroare: ${data.error}`)
+      }
+    } catch (error) {
+      console.error('Error clearing persistent cache:', error)
+      alert('Eroare la ștergerea cache-ului persistent')
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Database className="h-5 w-5" />
+          Cache Persistent pe Disc (flights_cache.json)
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <RefreshCw className="h-6 w-6 animate-spin mr-2" />
+            Se încarcă statisticile cache-ului persistent...
+          </div>
+        ) : persistentStats ? (
+          <>
+            {/* Statistici Generale */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">{persistentStats.totalFlights}</div>
+                <div className="text-sm text-muted-foreground">Total Zboruri</div>
+              </div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">{persistentStats.flightsByType.arrivals}</div>
+                <div className="text-sm text-muted-foreground">Sosiri</div>
+              </div>
+              <div className="text-center p-4 bg-purple-50 rounded-lg">
+                <div className="text-2xl font-bold text-purple-600">{persistentStats.flightsByType.departures}</div>
+                <div className="text-sm text-muted-foreground">Plecări</div>
+              </div>
+            </div>
+
+            {/* Informații Perioadă */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 border rounded-lg">
+                <div className="text-sm text-muted-foreground mb-1">Cel mai vechi zbor</div>
+                <div className="font-semibold">
+                  {persistentStats.oldestFlight 
+                    ? new Date(persistentStats.oldestFlight).toLocaleString('ro-RO')
+                    : 'N/A'}
+                </div>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <div className="text-sm text-muted-foreground mb-1">Cel mai recent zbor</div>
+                <div className="font-semibold">
+                  {persistentStats.newestFlight 
+                    ? new Date(persistentStats.newestFlight).toLocaleString('ro-RO')
+                    : 'N/A'}
+                </div>
+              </div>
+            </div>
+
+            {/* Zboruri pe Aeroport */}
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Zboruri pe Aeroport</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {Object.entries(persistentStats.flightsByAirport || {}).map(([code, count]) => (
+                  <div key={code} className="p-2 border rounded text-center">
+                    <div className="font-bold">{code}</div>
+                    <div className="text-sm text-muted-foreground">{count as number} zboruri</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Dimensiune Fișier */}
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-muted-foreground">Dimensiune fișier cache</div>
+                  <div className="text-xl font-bold">{persistentStats.cacheSize}</div>
+                </div>
+                <Database className="h-8 w-8 text-gray-400" />
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Informații Importante */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                <div className="text-sm text-blue-900">
+                  <p className="font-semibold mb-2">Despre Cache-ul Persistent:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Datele se salvează automat pe disc în <code className="bg-blue-100 px-1 rounded">flights_cache.json</code></li>
+                    <li>Cache-ul NU se șterge la restart - datele rămân pe disc</li>
+                    <li>Se păstrează automat doar ultimele 14 zile de date</li>
+                    <li>Datele noi se fuzionează cu cele existente (nu se suprascriu)</li>
+                    <li>La pornire, aplicația încarcă automat datele din cache</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Acțiuni */}
+            <div className="flex flex-wrap gap-4">
+              <Button 
+                variant="outline" 
+                onClick={loadPersistentStats}
+                disabled={loading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Reîncarcă Statistici
+              </Button>
+
+              <Button 
+                variant="outline" 
+                onClick={cleanOldData}
+                disabled={cleaning}
+                className="border-yellow-300 hover:bg-yellow-50"
+              >
+                {cleaning ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                    Se curăță...
+                  </>
+                ) : (
+                  <>
+                    <Clock className="h-4 w-4 mr-2" />
+                    Curăță Date Vechi (&gt;14 zile)
+                  </>
+                )}
+              </Button>
+
+              <Button 
+                variant="outline" 
+                onClick={clearAllCache}
+                className="border-red-300 hover:bg-red-50 text-red-600"
+              >
+                <AlertCircle className="h-4 w-4 mr-2" />
+                Șterge TOT Cache-ul
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            Nu s-au putut încărca statisticile cache-ului persistent
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

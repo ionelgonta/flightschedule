@@ -15,10 +15,13 @@ export const AIRLINE_MAPPING: { [key: string]: string } = {
   'W4': 'Wizz Air',
   'WZZ': 'Wizz Air',
   'W6': 'Wizz Air',
+  'W9': 'Wizz Air',
   'FR': 'Ryanair',
   'RYR': 'Ryanair',
   'LH': 'Lufthansa',
   'DLH': 'Lufthansa',
+  'LX': 'Swiss International Air Lines',
+  'SWR': 'Swiss International Air Lines',
   'AF': 'Air France',
   'AFR': 'Air France',
   'KL': 'KLM',
@@ -39,6 +42,10 @@ export const AIRLINE_MAPPING: { [key: string]: string } = {
   'FIN': 'Finnair',
   'TP': 'TAP Air Portugal',
   'TAP': 'TAP Air Portugal',
+  'VL': 'Volotea',
+  'VOE': 'Volotea',
+  'LG': 'Luxair',
+  'LGL': 'Luxair',
   
   // Turkish Airlines
   'TK': 'Turkish Airlines',
@@ -65,14 +72,22 @@ export const AIRLINE_MAPPING: { [key: string]: string } = {
   'EWG': 'Eurowings',
   'PC': 'Pegasus Airlines',
   'PGT': 'Pegasus Airlines',
+  'DY': 'Norwegian Air',
+  'NAX': 'Norwegian Air',
+  'D8': 'Norwegian Air International',
+  'DKT': 'Norwegian Air International',
   
-  // Middle East & Others
+  // Middle East & Premium Airlines
   'QR': 'Qatar Airways',
   'QTR': 'Qatar Airways',
   'EK': 'Emirates',
   'UAE': 'Emirates',
+  'EY': 'Etihad Airways',
+  'ETD': 'Etihad Airways',
+  'FZ': 'flydubai',
+  'FDB': 'flydubai',
   
-  // Additional Airlines
+  // Additional European Airlines
   '5F': 'FlyOne',
   'HV': 'Transavia',
   'TRA': 'Transavia',
@@ -90,122 +105,205 @@ export const AIRLINE_MAPPING: { [key: string]: string } = {
   'MGX': 'Montenegro Airlines',
   'FB': 'Bulgaria Air',
   'LZB': 'Bulgaria Air',
+  
+  // Middle East & Africa
   'RJ': 'Royal Jordanian',
   'RJA': 'Royal Jordanian',
   'MS': 'EgyptAir',
   'MSR': 'EgyptAir',
+  'AT': 'Royal Air Maroc',
+  'RAM': 'Royal Air Maroc',
+  
+  // Russian & CIS Airlines
   'SU': 'Aeroflot',
   'AFL': 'Aeroflot',
   'S7': 'S7 Airlines',
   'SBI': 'S7 Airlines',
+  'UT': 'UTair',
+  'UTA': 'UTair',
+  
+  // Asian Airlines
+  'CZ': 'China Southern',
+  'CSN': 'China Southern',
+  'CA': 'Air China',
+  'CCA': 'Air China',
+  'MU': 'China Eastern',
+  'CES': 'China Eastern',
+  
+  // Additional Low-Cost Carriers
+  'G9': 'Air Arabia',
+  'AGY': 'Air Arabia',
+  'XQ': 'SunExpress',
+  'SXS': 'SunExpress',
+  'W8': 'Carpatair',
+  'CRL': 'Carpatair',
+  
+  // Charter Airlines
+  'CFG': 'Condor',
+  'TUI': 'TUI Airways',
+  'X3': 'TUI Airways',
+  
+  // Regional Airlines
+  'WF': 'Widerøe',
+  'WIF': 'Widerøe',
+  'YW': 'Air Nostrum',
+  'ANE': 'Air Nostrum',
   
   // New Airlines from user request
-  'H4': 'Hisky',
-  'HI': 'Hisky',
+  'H4': 'HiSky',
+  'HI': 'HiSky',
   
   // Default fallback
   'XX': 'Companie Necunoscută'
 }
 
-// Airline logo mapping - IATA/ICAO codes to logo URLs
+// Airline logo mapping - Using GitHub repositories with comprehensive IATA logo collections
 export const AIRLINE_LOGO_MAPPING: { [key: string]: string } = {
   // Romanian Airlines
-  'RO': 'https://logos-world.net/wp-content/uploads/2023/01/Tarom-Logo.png',
-  'ROT': 'https://logos-world.net/wp-content/uploads/2023/01/Tarom-Logo.png',
-  '0B': 'https://logos-world.net/wp-content/uploads/2020/03/Blue-Air-Logo.png',
-  'BMS': 'https://logos-world.net/wp-content/uploads/2020/03/Blue-Air-Logo.png',
+  'RO': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/RO.svg',
+  'ROT': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/RO.svg',
+  '0B': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/0B.svg',
+  'BMS': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/0B.svg',
   
   // Major European Airlines
-  'W4': 'https://logos-world.net/wp-content/uploads/2020/03/Wizz-Air-Logo.png',
-  'WZZ': 'https://logos-world.net/wp-content/uploads/2020/03/Wizz-Air-Logo.png',
-  'W6': 'https://logos-world.net/wp-content/uploads/2020/03/Wizz-Air-Logo.png',
-  'FR': 'https://logos-world.net/wp-content/uploads/2020/03/Ryanair-Logo.png',
-  'RYR': 'https://logos-world.net/wp-content/uploads/2020/03/Ryanair-Logo.png',
-  'LH': 'https://logos-world.net/wp-content/uploads/2020/03/Lufthansa-Logo.png',
-  'DLH': 'https://logos-world.net/wp-content/uploads/2020/03/Lufthansa-Logo.png',
-  'AF': 'https://logos-world.net/wp-content/uploads/2020/03/Air-France-Logo.png',
-  'AFR': 'https://logos-world.net/wp-content/uploads/2020/03/Air-France-Logo.png',
-  'KL': 'https://logos-world.net/wp-content/uploads/2020/03/KLM-Logo.png',
-  'KLM': 'https://logos-world.net/wp-content/uploads/2020/03/KLM-Logo.png',
-  'BA': 'https://logos-world.net/wp-content/uploads/2020/03/British-Airways-Logo.png',
-  'BAW': 'https://logos-world.net/wp-content/uploads/2020/03/British-Airways-Logo.png',
-  'IB': 'https://logos-world.net/wp-content/uploads/2020/03/Iberia-Logo.png',
-  'IBE': 'https://logos-world.net/wp-content/uploads/2020/03/Iberia-Logo.png',
-  'AZ': 'https://logos-world.net/wp-content/uploads/2021/08/ITA-Airways-Logo.png',
-  'ITY': 'https://logos-world.net/wp-content/uploads/2021/08/ITA-Airways-Logo.png',
-  'OS': 'https://logos-world.net/wp-content/uploads/2020/03/Austrian-Airlines-Logo.png',
-  'AUA': 'https://logos-world.net/wp-content/uploads/2020/03/Austrian-Airlines-Logo.png',
-  'SN': 'https://logos-world.net/wp-content/uploads/2020/03/Brussels-Airlines-Logo.png',
-  'BEL': 'https://logos-world.net/wp-content/uploads/2020/03/Brussels-Airlines-Logo.png',
-  'SK': 'https://logos-world.net/wp-content/uploads/2020/03/SAS-Logo.png',
-  'SAS': 'https://logos-world.net/wp-content/uploads/2020/03/SAS-Logo.png',
-  'AY': 'https://logos-world.net/wp-content/uploads/2020/03/Finnair-Logo.png',
-  'FIN': 'https://logos-world.net/wp-content/uploads/2020/03/Finnair-Logo.png',
-  'TP': 'https://logos-world.net/wp-content/uploads/2020/03/TAP-Air-Portugal-Logo.png',
-  'TAP': 'https://logos-world.net/wp-content/uploads/2020/03/TAP-Air-Portugal-Logo.png',
+  'W4': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/W4.svg',
+  'WZZ': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/W4.svg',
+  'W6': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/W6.svg',
+  'FR': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/FR.svg',
+  'RYR': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/FR.svg',
+  'LH': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/LH.svg',
+  'DLH': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/LH.svg',
+  'AF': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/AF.svg',
+  'AFR': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/AF.svg',
+  'KL': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/KL.svg',
+  'KLM': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/KL.svg',
+  'BA': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/BA.svg',
+  'BAW': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/BA.svg',
+  'IB': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/IB.svg',
+  'IBE': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/IB.svg',
+  'AZ': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/AZ.svg',
+  'ITY': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/AZ.svg',
+  'OS': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/OS.svg',
+  'AUA': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/OS.svg',
+  'SN': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/SN.svg',
+  'BEL': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/SN.svg',
+  'SK': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/SK.svg',
+  'SAS': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/SK.svg',
+  'AY': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/AY.svg',
+  'FIN': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/AY.svg',
+  'TP': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/TP.svg',
+  'TAP': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/TP.svg',
   
   // Turkish Airlines
-  'TK': 'https://logos-world.net/wp-content/uploads/2020/03/Turkish-Airlines-Logo.png',
-  'THY': 'https://logos-world.net/wp-content/uploads/2020/03/Turkish-Airlines-Logo.png',
+  'TK': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/TK.svg',
+  'THY': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/TK.svg',
   
   // Eastern European
-  '9U': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Air_Moldova_logo.svg/200px-Air_Moldova_logo.svg.png',
-  'MLD': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Air_Moldova_logo.svg/200px-Air_Moldova_logo.svg.png',
-  'PS': 'https://logos-world.net/wp-content/uploads/2020/03/Ukraine-International-Airlines-Logo.png',
-  'AUI': 'https://logos-world.net/wp-content/uploads/2020/03/Ukraine-International-Airlines-Logo.png',
-  'BT': 'https://logos-world.net/wp-content/uploads/2020/03/Air-Baltic-Logo.png',
-  'BTI': 'https://logos-world.net/wp-content/uploads/2020/03/Air-Baltic-Logo.png',
-  'LO': 'https://logos-world.net/wp-content/uploads/2020/03/LOT-Polish-Airlines-Logo.png',
-  'LOT': 'https://logos-world.net/wp-content/uploads/2020/03/LOT-Polish-Airlines-Logo.png',
-  'OK': 'https://logos-world.net/wp-content/uploads/2020/03/Czech-Airlines-Logo.png',
-  'CSA': 'https://logos-world.net/wp-content/uploads/2020/03/Czech-Airlines-Logo.png',
+  '9U': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/9U.svg',
+  'MLD': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/9U.svg',
+  'PS': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/PS.svg',
+  'AUI': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/PS.svg',
+  'BT': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/BT.svg',
+  'BTI': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/BT.svg',
+  'LO': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/LO.svg',
+  'LOT': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/LO.svg',
+  'OK': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/OK.svg',
+  'CSA': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/OK.svg',
   
   // Low-cost carriers
-  'U2': 'https://logos-world.net/wp-content/uploads/2020/03/EasyJet-Logo.png',
-  'EZY': 'https://logos-world.net/wp-content/uploads/2020/03/EasyJet-Logo.png',
-  'VY': 'https://logos-world.net/wp-content/uploads/2020/03/Vueling-Logo.png',
-  'VLG': 'https://logos-world.net/wp-content/uploads/2020/03/Vueling-Logo.png',
-  'EW': 'https://logos-world.net/wp-content/uploads/2020/03/Eurowings-Logo.png',
-  'EWG': 'https://logos-world.net/wp-content/uploads/2020/03/Eurowings-Logo.png',
-  'PC': 'https://logos-world.net/wp-content/uploads/2020/03/Pegasus-Airlines-Logo.png',
-  'PGT': 'https://logos-world.net/wp-content/uploads/2020/03/Pegasus-Airlines-Logo.png',
+  'U2': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/U2.svg',
+  'EZY': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/U2.svg',
+  'VY': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/VY.svg',
+  'VLG': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/VY.svg',
+  'EW': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/EW.svg',
+  'EWG': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/EW.svg',
+  'PC': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/PC.svg',
+  'PGT': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/PC.svg',
   
-  // Middle East & Others
-  'QR': 'https://logos-world.net/wp-content/uploads/2020/03/Qatar-Airways-Logo.png',
-  'QTR': 'https://logos-world.net/wp-content/uploads/2020/03/Qatar-Airways-Logo.png',
-  'EK': 'https://logos-world.net/wp-content/uploads/2020/03/Emirates-Logo.png',
-  'UAE': 'https://logos-world.net/wp-content/uploads/2020/03/Emirates-Logo.png',
+  // Middle East & Premium Airlines
+  'QR': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/QR.svg',
+  'QTR': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/QR.svg',
+  'EK': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/EK.svg',
+  'UAE': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/EK.svg',
+  'EY': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/EY.svg',
+  'ETD': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/EY.svg',
   
-  // Additional Airlines
-  '5F': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/FlyOne_logo.svg/200px-FlyOne_logo.svg.png',
-  'HV': 'https://logos-world.net/wp-content/uploads/2020/03/Transavia-Logo.png',
-  'TRA': 'https://logos-world.net/wp-content/uploads/2020/03/Transavia-Logo.png',
-  'EN': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Air_Dolomiti_Logo.svg/200px-Air_Dolomiti_Logo.svg.png',
-  'DLA': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Air_Dolomiti_Logo.svg/200px-Air_Dolomiti_Logo.svg.png',
-  'A3': 'https://logos-world.net/wp-content/uploads/2020/03/Aegean-Airlines-Logo.png',
-  'AEE': 'https://logos-world.net/wp-content/uploads/2020/03/Aegean-Airlines-Logo.png',
-  'JU': 'https://logos-world.net/wp-content/uploads/2020/03/Air-Serbia-Logo.png',
-  'ASL': 'https://logos-world.net/wp-content/uploads/2020/03/Air-Serbia-Logo.png',
-  'OU': 'https://logos-world.net/wp-content/uploads/2020/03/Croatia-Airlines-Logo.png',
-  'CTN': 'https://logos-world.net/wp-content/uploads/2020/03/Croatia-Airlines-Logo.png',
-  'JP': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Adria_Airways_logo.svg/200px-Adria_Airways_logo.svg.png',
-  'ADR': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Adria_Airways_logo.svg/200px-Adria_Airways_logo.svg.png',
-  'YM': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Montenegro_Airlines_logo.svg/200px-Montenegro_Airlines_logo.svg.png',
-  'MGX': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Montenegro_Airlines_logo.svg/200px-Montenegro_Airlines_logo.svg.png',
-  'FB': 'https://logos-world.net/wp-content/uploads/2020/03/Bulgaria-Air-Logo.png',
-  'LZB': 'https://logos-world.net/wp-content/uploads/2020/03/Bulgaria-Air-Logo.png',
-  'RJ': 'https://logos-world.net/wp-content/uploads/2020/03/Royal-Jordanian-Logo.png',
-  'RJA': 'https://logos-world.net/wp-content/uploads/2020/03/Royal-Jordanian-Logo.png',
-  'MS': 'https://logos-world.net/wp-content/uploads/2020/03/EgyptAir-Logo.png',
-  'MSR': 'https://logos-world.net/wp-content/uploads/2020/03/EgyptAir-Logo.png',
-  'SU': 'https://logos-world.net/wp-content/uploads/2020/03/Aeroflot-Logo.png',
-  'AFL': 'https://logos-world.net/wp-content/uploads/2020/03/Aeroflot-Logo.png',
-  'S7': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/S7_Airlines_logo.svg/200px-S7_Airlines_logo.svg.png',
-  'SBI': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/S7_Airlines_logo.svg/200px-S7_Airlines_logo.svg.png',
+  // Additional European Airlines
+  '5F': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/5F.svg',
+  'HV': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/HV.svg',
+  'TRA': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/HV.svg',
+  'EN': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/EN.svg',
+  'DLA': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/EN.svg',
+  'A3': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/A3.svg',
+  'AEE': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/A3.svg',
+  'JU': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/JU.svg',
+  'ASL': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/JU.svg',
+  'OU': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/OU.svg',
+  'CTN': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/OU.svg',
+  'JP': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/JP.svg',
+  'ADR': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/JP.svg',
+  'YM': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/YM.svg',
+  'MGX': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/YM.svg',
+  'FB': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/FB.svg',
+  'LZB': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/FB.svg',
+  
+  // Middle East & Africa
+  'RJ': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/RJ.svg',
+  'RJA': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/RJ.svg',
+  'MS': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/MS.svg',
+  'MSR': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/MS.svg',
+  'AT': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/AT.svg',
+  'RAM': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/AT.svg',
+  
+  // Russian & CIS Airlines
+  'SU': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/SU.svg',
+  'AFL': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/SU.svg',
+  'S7': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/S7.svg',
+  'SBI': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/S7.svg',
+  'UT': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/UT.svg',
+  'UTA': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/UT.svg',
+  
+  // Asian Airlines
+  'CZ': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/CZ.svg',
+  'CSN': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/CZ.svg',
+  'CA': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/CA.svg',
+  'CCA': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/CA.svg',
+  'MU': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/MU.svg',
+  'CES': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/MU.svg',
+  
+  // Additional Low-Cost Carriers
+  'W9': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/W9.svg',
+  'G9': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/G9.svg',
+  'AGY': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/G9.svg',
+  'XQ': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/XQ.svg',
+  'SXS': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/XQ.svg',
+  
+  // Charter Airlines
+  'CFG': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/CFG.svg',
+  'X3': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/X3.svg',
+  
+  // Regional Airlines
+  'WF': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/WF.svg',
+  'WIF': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/WF.svg',
+  'YW': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/YW.svg',
+  'ANE': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/YW.svg',
   
   // New Airlines from user request
-  'H4': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/HiSky_logo.svg/200px-HiSky_logo.svg.png',
-  'HI': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/HiSky_logo.svg/200px-HiSky_logo.svg.png'
+  'H4': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/H4.svg',
+  'HI': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/H4.svg',
+  
+  // Additional Airlines commonly seen in Romanian airports
+  'DY': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/DY.svg',
+  'NAX': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/DY.svg',
+  'D8': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/D8.svg',
+  'DKT': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/D8.svg',
+  'FZ': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/FZ.svg',
+  'FDB': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/FZ.svg',
+  'W8': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/W8.svg',
+  'CRL': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/W8.svg',
+  
+  // Fallback to Wikimedia Commons for airlines not in GitHub repo
+  'XX': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Generic_airline_logo.svg/200px-Generic_airline_logo.svg.png'
 }
 
 // Airport mapping with city names in Romanian

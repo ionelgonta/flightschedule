@@ -34,12 +34,12 @@ async function calculateAirportStatistics(airport: any): Promise<AirportStatisti
     
     // Folosește cache manager-ul principal pentru a obține datele de zboruri
     
-    // Obține datele de sosiri și plecări din cache
+    // Obține datele de sosiri și plecări din cache (inclusiv cache persistent)
     const arrivalsKey = `${airport.code}_arrivals`
     const departuresKey = `${airport.code}_departures`
     
-    const cachedArrivals = cacheManager.getCachedData<any[]>(arrivalsKey) || []
-    const cachedDepartures = cacheManager.getCachedData<any[]>(departuresKey) || []
+    const cachedArrivals = await cacheManager.getCachedDataWithPersistent<any[]>(arrivalsKey) || []
+    const cachedDepartures = await cacheManager.getCachedDataWithPersistent<any[]>(departuresKey) || []
     
     const allFlights = [...cachedArrivals, ...cachedDepartures]
     
@@ -60,11 +60,12 @@ async function calculateAirportStatistics(airport: any): Promise<AirportStatisti
     // Calculează statistici din datele cache-uite
     const totalFlights = allFlights.length
     
-    // Calculează zboruri la timp - doar cele cu status explicit pozitiv
+    // Calculează zboruri la timp - include estimated and scheduled as on-time
     const onTimeFlights = allFlights.filter(flight => {
       const status = flight.status?.toLowerCase() || ''
       return status === 'on-time' || status === 'landed' || status === 'departed' || 
-             status === 'arrived' || status === 'completed'
+             status === 'arrived' || status === 'completed' || status === 'estimated' ||
+             status === 'scheduled' || status === 'active' || status === 'boarding'
     }).length
     
     // Calculează zboruri întârziate
@@ -79,11 +80,10 @@ async function calculateAirportStatistics(airport: any): Promise<AirportStatisti
       return status.includes('cancel') || status === 'cancelled'
     }).length
     
-    // Calculează zboruri programate (încă în așteptare)
+    // Calculează zboruri programate (încă în așteptare) - exclude those already counted as on-time
     const scheduledFlights = allFlights.filter(flight => {
       const status = flight.status?.toLowerCase() || ''
-      return status === 'scheduled' || status === 'active' || status === 'boarding' ||
-             status === 'gate-closed' || status === 'taxiing'
+      return status === 'gate-closed' || status === 'taxiing'
     }).length
     
     // Calculează întârzierea medie realistă

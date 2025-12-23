@@ -78,110 +78,72 @@ export default function AirportsPage() {
         { name: 'Aeroporturi', url: 'https://anyway.ro/aeroporturi' }
       ])} />
       
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gray-50">
         {/* Header Banner Ad */}
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-b border-gray-300 dark:border-gray-600">
+        <div className="bg-white border-b border-gray-200">
           <AdBanner 
             slot="header-banner"
             size="728x90"
-            className="max-w-7xl mx-auto py-6"
+            className="max-w-7xl mx-auto py-4"
           />
         </div>
 
-        {/* Page Header */}
-        <section className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white py-20">
+        {/* Compact Page Header */}
+        <section className="bg-white border-b border-gray-200 py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <div className="flex justify-center mb-8">
-                <div className="p-6 bg-white/10 backdrop-blur-sm rounded-3xl shadow-xl">
-                  <MapPin className="h-12 w-12 text-white" />
-                </div>
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="p-3 bg-blue-600 rounded-lg">
+                <MapPin className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6">
-                Director Aeroporturi
-              </h1>
-              <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-4xl mx-auto leading-relaxed">
-                Explorează toate aeroporturile din România și Moldova și accesează informații în timp real despre zboruri, 
-                sosiri și plecări de la aeroporturile naționale.
-              </p>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Director Aeroporturi
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  Toate aeroporturile din România și Moldova cu informații în timp real
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Breadcrumbs */}
-          <Breadcrumbs items={breadcrumbItems} className="mb-8" />
+          <Breadcrumbs items={breadcrumbItems} className="mb-6" />
           
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Main Content */}
-            <div className="lg:col-span-3 space-y-12">
-              {/* Search Section */}
+            <div className="lg:col-span-3 space-y-8">
+              {/* Compact Stats Section */}
               <section>
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 p-8 shadow-lg">
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="p-3 bg-blue-600 rounded-xl shadow-md">
-                      <Search className="h-6 w-6 text-white" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      Găsește un Aeroport
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <Search className="h-5 w-5 text-blue-600" />
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      Statistici Aeroporturi
                     </h2>
                   </div>
-                  <p className="text-lg text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
-                    Caută după codul aeroportului sau numele orașului pentru a găsi informații despre zboruri din România și Moldova.
-                  </p>
                   
-                  {/* Stats Table */}
-                  <div className="hidden md:block">
-                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 overflow-hidden shadow-md">
-                      <table className="w-full">
-                        <thead className="bg-gray-200 dark:bg-gray-700">
-                          <tr>
-                            <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 dark:text-gray-200">Statistică</th>
-                            <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 dark:text-gray-200">Valoare</th>
-                            <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 dark:text-gray-200">Descriere</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="border-b border-gray-300 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-750 transition-colors">
-                            <td className="px-6 py-4 text-sm text-gray-900 dark:text-white font-semibold">Aeroporturi</td>
-                            <td className="px-6 py-4 text-xl text-blue-700 dark:text-blue-400 font-bold">{MAJOR_AIRPORTS.length}+</td>
-                            <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">Aeroporturi acoperite</td>
-                          </tr>
-                          <tr className="border-b border-gray-300 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-750 transition-colors">
-                            <td className="px-6 py-4 text-sm text-gray-900 dark:text-white font-semibold">Țări</td>
-                            <td className="px-6 py-4 text-xl text-blue-700 dark:text-blue-400 font-bold">2</td>
-                            <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">România și Moldova</td>
-                          </tr>
-                          <tr className="hover:bg-white dark:hover:bg-gray-750 transition-colors">
-                            <td className="px-6 py-4 text-sm text-gray-900 dark:text-white font-semibold">Disponibilitate</td>
-                            <td className="px-6 py-4 text-xl text-blue-700 dark:text-blue-400 font-bold">24/7</td>
-                            <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">Date în timp real</td>
-                          </tr>
-                        </tbody>
-                      </table>
+                  {/* Compact Stats Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="text-2xl font-bold text-blue-600">{MAJOR_AIRPORTS.length}+</div>
+                      <div className="text-sm text-gray-600">Aeroporturi</div>
                     </div>
-                  </div>
-
-                  {/* Mobile Stats */}
-                  <div className="md:hidden grid grid-cols-1 gap-4">
-                    <div className="flex justify-between items-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl border border-blue-200 dark:border-blue-700 shadow-sm">
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Aeroporturi:</span>
-                      <span className="text-lg text-blue-700 dark:text-blue-400 font-bold">{MAJOR_AIRPORTS.length}+</span>
+                    <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="text-2xl font-bold text-green-600">2</div>
+                      <div className="text-sm text-gray-600">Țări</div>
                     </div>
-                    <div className="flex justify-between items-center p-4 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl border border-green-200 dark:border-green-700 shadow-sm">
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Țări:</span>
-                      <span className="text-lg text-green-700 dark:text-green-400 font-bold">2</span>
-                    </div>
-                    <div className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl border border-purple-200 dark:border-purple-700 shadow-sm">
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Disponibilitate:</span>
-                      <span className="text-lg text-purple-700 dark:text-purple-400 font-bold">24/7</span>
+                    <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="text-2xl font-bold text-purple-600">24/7</div>
+                      <div className="text-sm text-gray-600">Disponibilitate</div>
                     </div>
                   </div>
                 </div>
               </section>
 
               {/* Inline Banner Ad */}
-              <div className="py-8">
+              <div className="py-4">
                 <AdBanner 
                   slot="inline-banner"
                   size="728x90"
@@ -193,58 +155,53 @@ export default function AirportsPage() {
               {Object.entries(airportsByRegion).map(([region, airports]) => (
                 airports.length > 0 && (
                   <section key={region}>
-                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">
                       Aeroporturi din {region}
                     </h2>
                     
-                    {/* Desktop Table */}
-                    <div className="hidden md:block mb-8">
-                      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 overflow-hidden shadow-lg">
+                    {/* Desktop Table - Compact */}
+                    <div className="hidden md:block mb-6">
+                      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                         <table className="w-full">
-                          <thead className="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
-                            <tr className="border-b border-gray-300 dark:border-gray-600">
-                              <th className="px-6 py-5 text-left text-sm font-bold text-gray-800 dark:text-gray-200">Cod</th>
-                              <th className="px-6 py-5 text-left text-sm font-bold text-gray-800 dark:text-gray-200">Oraș</th>
-                              <th className="px-6 py-5 text-left text-sm font-bold text-gray-800 dark:text-gray-200">Nume Aeroport</th>
-                              <th className="px-6 py-5 text-left text-sm font-bold text-gray-800 dark:text-gray-200">Servicii</th>
-                              <th className="px-6 py-5 text-left text-sm font-bold text-gray-800 dark:text-gray-200">Acțiuni</th>
+                          <thead className="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Cod</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Oraș</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Nume Aeroport</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Servicii</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Acțiuni</th>
                             </tr>
                           </thead>
-                          <tbody>
-                            {airports.map((airport, index) => (
+                          <tbody className="divide-y divide-gray-200">
+                            {airports.map((airport) => (
                               <tr 
                                 key={airport.code}
-                                className={`
-                                  hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm
-                                  ${index !== airports.length - 1 ? 'border-b border-gray-200 dark:border-gray-600' : ''}
-                                `}
+                                className="hover:bg-gray-50 transition-colors"
                               >
-                                <td className="px-6 py-5">
-                                  <div className="flex items-center space-x-3">
-                                    <div className="p-3 bg-blue-600 rounded-xl shadow-md">
-                                      <Plane className="h-5 w-5 text-white" />
-                                    </div>
-                                    <span className="text-lg text-blue-700 dark:text-blue-400 font-bold">{airport.code}</span>
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center space-x-2">
+                                    <Plane className="h-4 w-4 text-blue-600" />
+                                    <span className="text-sm font-semibold text-blue-600">{airport.code}</span>
                                   </div>
                                 </td>
-                                <td className="px-6 py-5 text-base text-gray-900 dark:text-white font-semibold">{airport.city}</td>
-                                <td className="px-6 py-5 text-sm text-gray-800 dark:text-gray-200 font-medium">{airport.name}</td>
-                                <td className="px-6 py-5">
-                                  <div className="flex space-x-3">
-                                    <span className="inline-flex items-center px-3 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold shadow-sm">
+                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{airport.city}</td>
+                                <td className="px-4 py-3 text-sm text-gray-600">{airport.name}</td>
+                                <td className="px-4 py-3">
+                                  <div className="flex space-x-2">
+                                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
                                       Sosiri
                                     </span>
-                                    <span className="inline-flex items-center px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-bold shadow-sm">
+                                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
                                       Plecări
                                     </span>
                                   </div>
                                 </td>
-                                <td className="px-6 py-5">
+                                <td className="px-4 py-3">
                                   <Link
                                     href={`/aeroport/${generateAirportSlug(airport)}`}
-                                    className="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg"
+                                    className="inline-flex items-center px-3 py-1 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors"
                                   >
-                                    Vezi detalii
+                                    Vezi
                                   </Link>
                                 </td>
                               </tr>
@@ -254,40 +211,32 @@ export default function AirportsPage() {
                       </div>
                     </div>
 
-                    {/* Mobile Cards */}
-                    <div className="md:hidden space-y-4 mb-8">
+                    {/* Mobile Cards - Compact */}
+                    <div className="md:hidden space-y-3 mb-6">
                       {airports.map((airport) => (
                         <Link
                           key={airport.code}
                           href={`/aeroport/${generateAirportSlug(airport)}`}
-                          className="block bg-white dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-600 p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                          className="block bg-white rounded-lg border border-gray-200 p-4 hover:bg-gray-50 transition-colors"
                         >
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center space-x-4">
-                              <div className="p-3 bg-blue-600 rounded-xl shadow-md">
-                                <Plane className="h-6 w-6 text-white" />
-                              </div>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-3">
+                              <Plane className="h-4 w-4 text-blue-600" />
                               <div>
-                                <div className="text-xl text-blue-700 dark:text-blue-400 font-bold">{airport.code}</div>
-                                <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">{airport.city}</div>
+                                <div className="text-sm font-semibold text-blue-600">{airport.code}</div>
+                                <div className="text-xs text-gray-500">{airport.city}</div>
                               </div>
                             </div>
-                            <div className="px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl shadow-md">
-                              <span className="text-sm font-bold">Vezi</span>
+                            <div className="px-2 py-1 bg-blue-600 text-white rounded text-xs font-medium">
+                              Vezi
                             </div>
                           </div>
-                          <div className="mb-4">
-                            <div className="text-base text-gray-900 dark:text-white font-semibold mb-2">{airport.name}</div>
-                            <div className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
-                              <MapPin className="h-4 w-4 text-gray-500" />
-                              <span>{airport.city}, {airport.country}</span>
-                            </div>
-                          </div>
-                          <div className="flex space-x-3">
-                            <span className="inline-flex items-center px-3 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold shadow-sm">
+                          <div className="text-sm text-gray-900 font-medium mb-2">{airport.name}</div>
+                          <div className="flex space-x-2">
+                            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
                               Sosiri
                             </span>
-                            <span className="inline-flex items-center px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-bold shadow-sm">
+                            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
                               Plecări
                             </span>
                           </div>
@@ -298,23 +247,17 @@ export default function AirportsPage() {
                 )
               ))}
 
-              {/* SEO Content */}
-              <section className="prose prose-gray dark:prose-invert max-w-none">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+              {/* Compact SEO Content */}
+              <section className="bg-white rounded-lg border border-gray-200 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
                   Aeroporturile din România și Moldova
                 </h2>
-                <div className="text-gray-600 dark:text-gray-400 space-y-4">
+                <div className="text-gray-600 text-sm space-y-3">
                   <p>
                     Directorul nostru cuprinzător de aeroporturi oferă acces la informații în timp real despre zboruri 
                     de la toate aeroporturile din România și Moldova. Fie că urmărești sosiri, 
                     monitorizezi plecări sau îți planifici călătoria, platforma noastră oferă date detaliate 
                     despre zboruri de la toate aeroporturile naționale și regionale.
-                  </p>
-                  <p>
-                    Fiecare pagină de aeroport oferă informații cuprinzătoare incluzând statusul zborurilor în timp real, 
-                    detalii despre companii aeriene, informații despre terminale și porți, și date istorice. 
-                    Sistemul nostru avansat de filtrare îți permite să cauți după criterii specifice precum 
-                    compania aeriană, statusul zborului, destinația și intervalul de timp.
                   </p>
                   <p>
                     De la hub-ul principal Aeroportul Internațional Henri Coandă (OTP) din București 
@@ -325,58 +268,38 @@ export default function AirportsPage() {
               </section>
             </div>
 
-            {/* Sidebar */}
-            <div className="lg:col-span-1 space-y-8">
+            {/* Compact Sidebar */}
+            <div className="lg:col-span-1 space-y-6">
               {/* Sidebar Ad */}
               <AdBanner 
                 slot="sidebar-right"
                 size="300x600"
               />
               
-              {/* Popular Airports */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 p-6 shadow-lg">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+              {/* Popular Airports - Compact */}
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
                   Cele Mai Populare
                 </h3>
                 
-                {/* Popular Airports Table */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 overflow-hidden shadow-md">
-                  <table className="w-full">
-                    <thead className="bg-gray-200 dark:bg-gray-700">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-800 dark:text-gray-200">Aeroport</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-800 dark:text-gray-200">Cod</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {MAJOR_AIRPORTS.slice(0, 5).map((airport, index) => (
-                        <tr 
-                          key={airport.code}
-                          className={`
-                            hover:bg-white dark:hover:bg-gray-750 transition-all duration-200 hover:shadow-sm
-                            ${index !== 4 ? 'border-b border-gray-300 dark:border-gray-600' : ''}
-                          `}
-                        >
-                          <td className="px-4 py-4">
-                            <div className="flex items-center space-x-3">
-                              <div className="p-2 bg-blue-600 rounded-lg shadow-sm">
-                                <Plane className="h-3 w-3 text-white" />
-                              </div>
-                              <div>
-                                <div className="text-sm text-gray-900 dark:text-white font-semibold">{airport.city}</div>
-                                <div className="text-xs text-gray-700 dark:text-gray-300">{airport.name.length > 18 ? airport.name.substring(0, 18) + '...' : airport.name}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <span className="inline-flex items-center px-3 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold shadow-sm">
-                              {airport.code}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="space-y-2">
+                  {MAJOR_AIRPORTS.slice(0, 5).map((airport) => (
+                    <div 
+                      key={airport.code}
+                      className="flex items-center justify-between p-2 hover:bg-gray-50 rounded transition-colors"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Plane className="h-3 w-3 text-blue-600" />
+                        <div>
+                          <div className="text-xs font-medium text-gray-900">{airport.city}</div>
+                          <div className="text-xs text-gray-500">{airport.name.length > 15 ? airport.name.substring(0, 15) + '...' : airport.name}</div>
+                        </div>
+                      </div>
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                        {airport.code}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
 

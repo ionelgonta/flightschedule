@@ -89,20 +89,46 @@ export default function AirportPage({ params }: AirportPageProps) {
                 <span className="mx-1">•</span>
                 <span>{airport.country}</span>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              
+              {/* Primary Flight Links - Moved higher up */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
                 <Link
                   href={`/aeroport/${generateAirportSlug(airport)}/sosiri`}
-                  className="bg-white text-blue-600 px-6 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-1 text-sm"
+                  className="bg-white text-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2 text-sm"
                 >
+                  <Plane className="h-4 w-4 rotate-180" />
                   <span>Vezi Sosiri</span>
                   <ArrowRight className="h-3 w-3" />
                 </Link>
                 <Link
                   href={`/aeroport/${generateAirportSlug(airport)}/plecari`}
-                  className="border border-white text-white px-6 py-2 rounded-lg font-medium hover:bg-white/10 transition-colors flex items-center justify-center space-x-1 text-sm"
+                  className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center space-x-2 text-sm"
                 >
+                  <Plane className="h-4 w-4" />
                   <span>Vezi Plecări</span>
                   <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+              
+              {/* Secondary Links */}
+              <div className="flex flex-wrap gap-2 justify-center">
+                <Link
+                  href={`/aeroport/${generateAirportSlug(airport)}/statistici`}
+                  className="border border-white/30 text-white px-4 py-2 rounded-lg font-medium hover:bg-white/10 transition-colors text-xs"
+                >
+                  Statistici
+                </Link>
+                <Link
+                  href={`/aeroport/${generateAirportSlug(airport)}/program-zboruri`}
+                  className="border border-white/30 text-white px-4 py-2 rounded-lg font-medium hover:bg-white/10 transition-colors text-xs"
+                >
+                  Program Zboruri
+                </Link>
+                <Link
+                  href={`/aeroport/${generateAirportSlug(airport)}/analize-zboruri`}
+                  className="border border-white/30 text-white px-4 py-2 rounded-lg font-medium hover:bg-white/10 transition-colors text-xs"
+                >
+                  Analize Rute
                 </Link>
               </div>
             </div>

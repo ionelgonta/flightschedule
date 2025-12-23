@@ -292,11 +292,29 @@ class AeroDataBoxService {
         return codeshareStatus === 'IsOperator';
       });
       
-      // Additional deduplication based on flight number and time to handle any remaining duplicates
+      // Enhanced deduplication based on multiple criteria to handle all duplicate scenarios
       const uniqueFlights = operatorFlights.filter((flight, index, array) => {
-        const flightKey = `${flight.number?.iata || flight.number?.icao}-${flight.departure?.scheduledTime?.utc}-${flight.arrival?.scheduledTime?.utc}`;
+        // Create a comprehensive unique key using multiple flight attributes
+        const flightNumber = flight.number?.iata || flight.number?.icao || '';
+        const airlineCode = flight.airline?.iata || flight.airline?.icao || '';
+        const departureTime = flight.departure?.scheduledTime?.utc || '';
+        const arrivalTime = flight.arrival?.scheduledTime?.utc || '';
+        const departureAirport = flight.departure?.airport?.iata || flight.departure?.airport?.icao || '';
+        const arrivalAirport = flight.arrival?.airport?.iata || flight.arrival?.airport?.icao || '';
+        
+        // Create a unique key that combines all identifying information
+        const flightKey = `${flightNumber}-${airlineCode}-${departureTime}-${arrivalTime}-${departureAirport}-${arrivalAirport}`;
+        
+        // Find the first occurrence of this exact flight combination
         return array.findIndex(f => {
-          const fKey = `${f.number?.iata || f.number?.icao}-${f.departure?.scheduledTime?.utc}-${f.arrival?.scheduledTime?.utc}`;
+          const fNumber = f.number?.iata || f.number?.icao || '';
+          const fAirlineCode = f.airline?.iata || f.airline?.icao || '';
+          const fDepartureTime = f.departure?.scheduledTime?.utc || '';
+          const fArrivalTime = f.arrival?.scheduledTime?.utc || '';
+          const fDepartureAirport = f.departure?.airport?.iata || f.departure?.airport?.icao || '';
+          const fArrivalAirport = f.arrival?.airport?.iata || f.arrival?.airport?.icao || '';
+          
+          const fKey = `${fNumber}-${fAirlineCode}-${fDepartureTime}-${fArrivalTime}-${fDepartureAirport}-${fArrivalAirport}`;
           return fKey === flightKey;
         }) === index;
       });
@@ -451,6 +469,7 @@ class AeroDataBoxService {
 
   /**
    * Convertește Flight în formatul nostru standard - API.Market AeroDataBox structure
+   * UPDATED: Based on actual API response structure from 2025-12-22
    */
   convertToStandardFormat(flight: any, type: 'arrivals' | 'departures', currentAirportCode?: string) {
     // Handle API.Market AeroDataBox structure - CORRECTED based on actual API response
@@ -471,6 +490,7 @@ class AeroDataBoxService {
       
       // Get current airport info dynamically (folosește versiunea sincronă)
       const currentAirport = currentAirportCode ? getAirportByCodeSync(currentAirportCode) : null;
+      
       // Skip flights without valid IATA codes early
       const otherAirportCode = otherAirport.iata || otherAirport.icao;
       if (!otherAirportCode || !currentAirportCode) {
@@ -497,6 +517,10 @@ class AeroDataBoxService {
         city: otherAirport.name || otherAirportCode
       } : currentAirportInfo;
       
+      // FIXED: Use correct time fields from actual API response
+      const scheduledTimeStr = scheduledTime.local || scheduledTime.utc || new Date().toISOString();
+      const revisedTimeStr = revisedTime.local || revisedTime.utc;
+      
       return {
         flight_number: flightNumber,
         airline: {
@@ -506,9 +530,9 @@ class AeroDataBoxService {
         },
         origin,
         destination,
-        scheduled_time: scheduledTime.local || scheduledTime.utc || new Date().toISOString(),
-        estimated_time: revisedTime.local || revisedTime.utc,
-        actual_time: revisedTime.local || revisedTime.utc, // revisedTime is the actual/estimated time
+        scheduled_time: scheduledTimeStr,
+        estimated_time: revisedTimeStr,
+        actual_time: revisedTimeStr, // revisedTime is the actual/estimated time
         status: this.normalizeStatus(status),
         gate: movement.gate,
         terminal: movement.terminal,

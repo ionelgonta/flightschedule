@@ -112,9 +112,75 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
   private flightRepository = getFlightRepository();
 
   async getAllCachedFlights(): Promise<CachedFlightData[]> {
-    console.log('[Weekly Schedule] Getting all cached flights from historical database...');
+    console.log('[Weekly Schedule] Getting all cached flights - prioritizing persistent cache...');
     
-    // First try to get historical data from the last 30 days
+    // First try persistent cache directly (contains today's data)
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const persistentCachePath = path.join(process.cwd(), 'data', 'flights_cache.json');
+      
+      console.log(`[Weekly Schedule] Reading persistent cache from: ${persistentCachePath}`);
+      const persistentCacheContent = await fs.readFile(persistentCachePath, 'utf8');
+      const persistentCache = JSON.parse(persistentCacheContent);
+      
+      console.log(`[Weekly Schedule] Found ${Object.keys(persistentCache).length} entries in persistent cache`);
+      
+      // Group flights by airport and type
+      const flightsByAirportType = new Map<string, { arrivals: any[], departures: any[] }>();
+      
+      Object.values(persistentCache).forEach((flight: any) => {
+        if (!flight.airportCode || !flight.type) return;
+        
+        const key = flight.airportCode;
+        if (!flightsByAirportType.has(key)) {
+          flightsByAirportType.set(key, { arrivals: [], departures: [] });
+        }
+        
+        if (flight.type === 'arrivals') {
+          flightsByAirportType.get(key)!.arrivals.push(flight);
+        } else if (flight.type === 'departures') {
+          flightsByAirportType.get(key)!.departures.push(flight);
+        }
+      });
+      
+      const allFlights: CachedFlightData[] = [];
+      
+      // Convert to CachedFlightData format
+      flightsByAirportType.forEach((data, airportCode) => {
+        if (data.arrivals.length > 0) {
+          allFlights.push({
+            airport_code: airportCode,
+            type: 'arrivals',
+            data: this.convertPersistentToRawFlightData(data.arrivals),
+            updated_at: new Date().toISOString(),
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            success: true
+          });
+        }
+        
+        if (data.departures.length > 0) {
+          allFlights.push({
+            airport_code: airportCode,
+            type: 'departures',
+            data: this.convertPersistentToRawFlightData(data.departures),
+            updated_at: new Date().toISOString(),
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            success: true
+          });
+        }
+      });
+      
+      console.log(`[Weekly Schedule] Converted ${allFlights.length} flight datasets from persistent cache`);
+      
+      if (allFlights.length > 0) {
+        return allFlights;
+      }
+    } catch (error) {
+      console.warn('[Weekly Schedule] Could not read persistent cache:', error);
+    }
+    
+    // Fallback to historical data
     const historicalFlights = await this.getHistoricalFlights(30);
     
     if (historicalFlights.length > 0) {
@@ -122,8 +188,8 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
       return historicalFlights;
     }
     
-    // Fallback to current cache if no historical data
-    console.log('[Weekly Schedule] No historical data found, falling back to current cache...');
+    // Final fallback to flight repository
+    console.log('[Weekly Schedule] Falling back to flight repository...');
     const allFlights: CachedFlightData[] = [];
     
     // Iterate through all airports and get cached data
@@ -272,6 +338,31 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
 
   private convertHistoricalToRawFlightData(historicalFlights: any[]): RawFlightData[] {
     return historicalFlights.map(flight => ({
+      flight_number: flight.flightNumber || 'N/A',
+      airline: {
+        name: flight.airlineName || 'Unknown',
+        code: flight.airlineCode || 'XX'
+      },
+      origin: {
+        airport: flight.originName || flight.originCode || 'Unknown',
+        code: flight.originCode || null,
+        city: flight.originName || flight.originCode || 'Unknown'
+      },
+      destination: {
+        airport: flight.destinationName || flight.destinationCode || 'Unknown', 
+        code: flight.destinationCode || null,
+        city: flight.destinationName || flight.destinationCode || 'Unknown'
+      },
+      scheduled_time: flight.scheduledTime || new Date().toISOString(),
+      actual_time: flight.actualTime,
+      estimated_time: flight.estimatedTime,
+      status: flight.status || 'scheduled',
+      delay: flight.delayMinutes || 0
+    }));
+  }
+
+  private convertPersistentToRawFlightData(persistentFlights: any[]): RawFlightData[] {
+    return persistentFlights.map(flight => ({
       flight_number: flight.flightNumber || 'N/A',
       airline: {
         name: flight.airlineName || 'Unknown',

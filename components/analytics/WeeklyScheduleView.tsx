@@ -28,8 +28,334 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
 
   // Helper function to convert airport codes to display names
   const getAirportDisplayName = (code: string): string => {
-    const airport = MAJOR_AIRPORTS.find(a => a.code === code)
-    return airport ? airport.city : code
+    // Handle cases where code might already be a city name or contain parentheses
+    if (code.includes('(') || code.length > 3) {
+      return code
+    }
+    
+    // First check Romanian/Moldovan airports
+    const airport = MAJOR_AIRPORTS.find(a => a.code === code.toUpperCase())
+    if (airport) {
+      return airport.city
+    }
+    
+    // For international airports, use a basic mapping for common ones
+    const internationalAirports: { [key: string]: string } = {
+      // France
+      'BVA': 'Paris (Beauvais)',
+      'CDG': 'Paris (Charles de Gaulle)',
+      'ORY': 'Paris (Orly)',
+      'LYS': 'Lyon',
+      'MRS': 'Marseille',
+      'NCE': 'Nisa',
+      'TLS': 'Toulouse',
+      'BOD': 'Bordeaux',
+      'NTE': 'Nantes',
+      'SXB': 'Strasbourg',
+      
+      // UK & Ireland
+      'LHR': 'Londra (Heathrow)',
+      'LGW': 'Londra (Gatwick)',
+      'STN': 'Londra (Stansted)',
+      'LTN': 'Londra (Luton)',
+      'LBA': 'Leeds',
+      'EDI': 'Edinburgh',
+      'GLA': 'Glasgow',
+      'MAN': 'Manchester',
+      'BHX': 'Birmingham',
+      'LPL': 'Liverpool',
+      'NCL': 'Newcastle',
+      'BRS': 'Bristol',
+      'CWL': 'Cardiff',
+      'BFS': 'Belfast',
+      'DUB': 'Dublin',
+      'ORK': 'Cork',
+      
+      // Italy
+      'FCO': 'Roma (Fiumicino)',
+      'CIA': 'Roma (Ciampino)',
+      'MXP': 'Milano (Malpensa)',
+      'BGY': 'Milano (Bergamo)',
+      'LIN': 'Milano (Linate)',
+      'VRN': 'Verona',
+      'TSF': 'Treviso',
+      'VCE': 'Veneția',
+      'BLQ': 'Bologna',
+      'FLR': 'Florența',
+      'PSA': 'Pisa',
+      'PSR': 'Pescara',
+      'TRN': 'Torino',
+      'GRO': 'Girona',
+      'NAP': 'Napoli',
+      'CTA': 'Catania',
+      'PMO': 'Palermo',
+      'CAG': 'Cagliari',
+      'BRI': 'Bari',
+      'BDS': 'Brindisi',
+      'REG': 'Reggio Calabria',
+      'LMP': 'Lampedusa',
+      'PNL': 'Pantelleria',
+      
+      // Germany
+      'MUC': 'München',
+      'FRA': 'Frankfurt',
+      'DUS': 'Düsseldorf',
+      'CGN': 'Köln',
+      'DTM': 'Dortmund',
+      'HAM': 'Hamburg',
+      'BER': 'Berlin',
+      'SXF': 'Berlin (Schönefeld)',
+      'TXL': 'Berlin (Tegel)',
+      'STR': 'Stuttgart',
+      'NUE': 'Nürnberg',
+      'HHN': 'Frankfurt (Hahn)',
+      'FKB': 'Karlsruhe/Baden-Baden',
+      'LEJ': 'Leipzig',
+      'DRS': 'Dresden',
+      'HAN': 'Hannover',
+      'BRE': 'Bremen',
+      
+      // Netherlands & Belgium
+      'AMS': 'Amsterdam',
+      'RTM': 'Rotterdam',
+      'EIN': 'Eindhoven',
+      'MST': 'Maastricht',
+      'BRU': 'Bruxelles',
+      'CRL': 'Bruxelles (Charleroi)',
+      'ANR': 'Antwerp',
+      'LGG': 'Liège',
+      
+      // Spain & Portugal
+      'MAD': 'Madrid',
+      'BCN': 'Barcelona',
+      'AGP': 'Málaga',
+      'VLC': 'Valencia',
+      'PMI': 'Palma de Mallorca',
+      'SVQ': 'Sevilla',
+      'BIO': 'Bilbao',
+      'SDR': 'Santander',
+      'LCG': 'A Coruña',
+      'VGO': 'Vigo',
+      'LIS': 'Lisabona',
+      'OPO': 'Porto',
+      'FAO': 'Faro',
+      'FNC': 'Funchal',
+      'TER': 'Terceira',
+      
+      // Switzerland & Austria
+      'ZUR': 'Zürich',
+      'ZRH': 'Zürich',
+      'GVA': 'Geneva',
+      'BSL': 'Basel',
+      'BRN': 'Berna',
+      'VIE': 'Viena',
+      'SZG': 'Salzburg',
+      'GRZ': 'Graz',
+      'INN': 'Innsbruck',
+      'LNZ': 'Linz',
+      'KLU': 'Klagenfurt',
+      
+      // Scandinavia
+      'CPH': 'Copenhaga',
+      'BLL': 'Billund',
+      'AAL': 'Aalborg',
+      'ARN': 'Stockholm',
+      'GOT': 'Göteborg',
+      'MMX': 'Malmö',
+      'OSL': 'Oslo',
+      'BGO': 'Bergen',
+      'TRD': 'Trondheim',
+      'SVG': 'Stavanger',
+      'HEL': 'Helsinki',
+      'TMP': 'Tampere',
+      'TKU': 'Turku',
+      'OUL': 'Oulu',
+      'RVN': 'Rovaniemi',
+      
+      // Turkey
+      'IST': 'Istanbul',
+      'SAW': 'Istanbul (Sabiha)',
+      'AYT': 'Antalya',
+      'ESB': 'Ankara',
+      'ADB': 'Izmir',
+      'BJV': 'Bodrum',
+      'DLM': 'Dalaman',
+      'GZT': 'Gaziantep',
+      'TZX': 'Trabzon',
+      
+      // Greece & Cyprus
+      'ATH': 'Atena',
+      'SKG': 'Thessaloniki',
+      'HER': 'Heraklion',
+      'CHQ': 'Chania',
+      'RHO': 'Rodos',
+      'KOS': 'Kos',
+      'CFU': 'Corfu',
+      'ZTH': 'Zakynthos',
+      'JTR': 'Santorini',
+      'MYK': 'Mykonos',
+      'LCA': 'Larnaca',
+      'PFO': 'Paphos',
+      
+      // Eastern Europe
+      'SOF': 'Sofia',
+      'VAR': 'Varna',
+      'BOJ': 'Burgas',
+      'PDV': 'Plovdiv',
+      'BEG': 'Belgrad',
+      'NIS': 'Niš',
+      'ZAG': 'Zagreb',
+      'SPU': 'Split',
+      'DBV': 'Dubrovnik',
+      'ZAD': 'Zadar',
+      'PUY': 'Pula',
+      'RJK': 'Rijeka',
+      'LJU': 'Ljubljana',
+      'MBX': 'Maribor',
+      'BUD': 'Budapesta',
+      'DEB': 'Debrecen',
+      'PEV': 'Pécs',
+      'SOB': 'Szeged',
+      'PRG': 'Praga',
+      'BRQ': 'Brno',
+      'OSR': 'Ostrava',
+      'PED': 'Pardubice',
+      'WAW': 'Varșovia',
+      'WMI': 'Varșovia (Modlin)',
+      'KRK': 'Cracovia',
+      'GDN': 'Gdansk',
+      'WRO': 'Wrocław',
+      'KTW': 'Katowice',
+      'POZ': 'Poznań',
+      'SZZ': 'Szczecin',
+      'LUZ': 'Lublin',
+      'RZE': 'Rzeszów',
+      
+      // Balkans
+      'SKP': 'Skopje',
+      'OHD': 'Ohrid',
+      'TGD': 'Podgorica',
+      'TIV': 'Tivat',
+      'SJJ': 'Sarajevo',
+      'OMO': 'Mostar',
+      'TZL': 'Tuzla',
+      'BNX': 'Banja Luka',
+      
+      // Middle East & North Africa
+      'TLV': 'Tel Aviv',
+      'VDA': 'Eilat',
+      'HFA': 'Haifa',
+      'DOH': 'Doha',
+      'DXB': 'Dubai',
+      'EVN': 'Erevan',
+      'BTS': 'Bratislava',
+      'CAI': 'Cairo',
+      'HRG': 'Hurghada',
+      'SSH': 'Sharm el-Sheikh',
+      'LXR': 'Luxor',
+      'ASW': 'Aswan',
+      'RMF': 'Marsa Alam',
+      'TUN': 'Tunis',
+      'MIR': 'Monastir',
+      'DJE': 'Djerba',
+      'SFA': 'Sfax',
+      'CMN': 'Casablanca',
+      'RAK': 'Marrakech',
+      'AGA': 'Agadir',
+      'FEZ': 'Fez',
+      'TNG': 'Tanger',
+      'NDR': 'Nador',
+      'OUD': 'Oujda',
+      
+      // Luxembourg & Monaco
+      'LUX': 'Luxemburg',
+      'MCM': 'Monaco',
+      
+      // Malta
+      'MLA': 'Malta',
+      
+      // Iceland
+      'KEF': 'Reykjavik',
+      'AEY': 'Akureyri',
+      
+      // Baltic States
+      'RIX': 'Riga',
+      'VNO': 'Vilnius',
+      'KUN': 'Kaunas',
+      'TLL': 'Tallinn',
+      'TRU': 'Tartu',
+      
+      // Russia & CIS
+      'SVO': 'Moscova (Sheremetyevo)',
+      'DME': 'Moscova (Domodedovo)',
+      'VKO': 'Moscova (Vnukovo)',
+      'LED': 'Sankt Petersburg',
+      'KZN': 'Kazan',
+      'ROV': 'Rostov-pe-Don',
+      'VOG': 'Volgograd',
+      'KRR': 'Krasnodar',
+      'AER': 'Soci',
+      'UFA': 'Ufa',
+      'SVX': 'Ekaterinburg',
+      'OVB': 'Novosibirsk',
+      'KJA': 'Krasnoyarsk',
+      'IKT': 'Irkutsk',
+      'VVO': 'Vladivostok',
+      'KHV': 'Habarovsk',
+      'YKS': 'Yakutsk',
+      'MAG': 'Magadan',
+      'PKC': 'Petropavlovsk-Kamchatsky',
+      'KGD': 'Kaliningrad',
+      'MRV': 'Mineralnye Vody',
+      'STW': 'Stavropol',
+      'ASF': 'Astrakhan',
+      'PEE': 'Perm',
+      'CEK': 'Chelyabinsk',
+      'TJM': 'Tyumen',
+      'OMS': 'Omsk',
+      'BAX': 'Barnaul',
+      'TOF': 'Tomsk',
+      'KEJ': 'Kemerovo',
+      'SUR': 'Surgut',
+      'NJC': 'Nizhnevartovsk',
+      'HMA': 'Khanty-Mansiysk',
+      'NYM': 'Nadym',
+      'ABA': 'Abakan',
+      'KYZ': 'Kyzyl',
+      'UUD': 'Ulan-Ude',
+      'CHT': 'Chita',
+      'BQS': 'Blagoveshchensk',
+      'DYR': 'Anadyr',
+      'PWE': 'Pevek',
+      'TIK': 'Tiksi',
+      'ARH': 'Arkhangelsk',
+      'MMK': 'Murmansk',
+      'PES': 'Petrozavodsk',
+      'JOK': 'Yoshkar-Ola',
+      'CSY': 'Cheboksary',
+      'ULV': 'Ulyanovsk',
+      'PZA': 'Penza',
+      'LPK': 'Lipetsk',
+      'VOR': 'Voronezh',
+      'KUF': 'Samara',
+      'TOL': 'Togliatti',
+      'RTW': 'Saratov',
+      'EGO': 'Belgorod',
+      'KUR': 'Kursk',
+      'ORL': 'Orel',
+      'TBW': 'Tambov',
+      'RYB': 'Rybinsk',
+      'IAR': 'Yaroslavl',
+      'KLD': 'Kaluga',
+      'TLA': 'Tula',
+      'VKT': 'Vorkuta',
+      'NNM': 'Naryan-Mar',
+      'AMV': 'Amderma',
+      'KTT': 'Kittilä'
+    }
+    
+    const upperCode = code.toUpperCase()
+    return internationalAirports[upperCode] || code
   }
 
   // Get Romanian and Moldovan airports for filters
@@ -53,6 +379,8 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
           airport: getAirportDisplayName(item.airport),
           destination: getAirportDisplayName(item.destination)
         }))
+        
+        console.log(`Processed ${processedData.length} schedule entries, converted IATA codes to city names`)
         
         setScheduleData(processedData)
         setFilteredData(processedData)
@@ -269,14 +597,12 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
   }, [autoUpdateEnabled])
 
   // Get unique values for filter dropdowns from Romanian and Moldovan airports
-  const departureAirports = romanianMoldovanAirports
-    .filter(airport => scheduleData.some(item => item.airport.includes(airport.code)))
-    .map(airport => `${airport.city} (${airport.code})`)
+  const departureAirports = [...new Set(scheduleData.map(item => item.airport))]
+    .filter(airport => airport && airport.length > 0)
     .sort()
   
-  const arrivalAirports = romanianMoldovanAirports
-    .filter(airport => scheduleData.some(item => item.destination.includes(airport.code)))
-    .map(airport => `${airport.city} (${airport.code})`)
+  const arrivalAirports = [...new Set(scheduleData.map(item => item.destination))]
+    .filter(airport => airport && airport.length > 0)
     .sort()
   
   const uniqueAirlines = [...new Set(scheduleData.map(item => item.airline))].sort()
@@ -418,6 +744,31 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
             </p>
           </div>
         ) : (
+          <>
+            {/* Data Availability Notice */}
+            <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                    Informații despre datele disponibile
+                  </h4>
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    Programul săptămânal se bazează pe datele istorice disponibile în cache. 
+                    Dacă observați că lipsesc zboruri pentru anumite zile, acest lucru poate indica 
+                    că API-urile externe nu au furnizat date pentru acele perioade.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+        
+        {filteredData.length > 0 && (
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
               <tr>

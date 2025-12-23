@@ -52,7 +52,9 @@ export function GlobalStatusDistribution() {
       setLoading(true)
       setError(null)
       
-      const response = await fetch('/api/statistici-aeroporturi')
+      // Add timestamp to force cache refresh
+      const timestamp = Date.now()
+      const response = await fetch(`/api/statistici-aeroporturi?t=${timestamp}`)
       const data: StatisticsResponse = await response.json()
       
       if (data.success) {

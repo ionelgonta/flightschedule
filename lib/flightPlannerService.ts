@@ -21,8 +21,8 @@ interface CachedFlightData {
 export interface FlightPlannerFilters {
   departureDays: string[] // ['monday', 'tuesday', 'wednesday'] - preferred day ±flexibility
   returnDays: string[] // ['saturday', 'sunday', 'monday'] - preferred day ±flexibility
-  departureTimeSlot: 'morning' | 'afternoon' | 'evening' // 06-12, 12-18, 18-24
-  returnTimeSlot: 'morning' | 'afternoon' | 'evening'
+  departureTimeSlots: ('morning' | 'afternoon' | 'evening')[] // Multiple time slots
+  returnTimeSlots: ('morning' | 'afternoon' | 'evening')[] // Multiple time slots
   departureDayFlexibility?: number // 0, 1, 2, or 3 days flexibility
   returnDayFlexibility?: number // 0, 1, 2, or 3 days flexibility
   originAirports?: string[] // Optional: limit origin airports
@@ -231,10 +231,11 @@ class FlightPlannerService {
         // Convert schedule entry to flight match with enhanced data
         const outboundMatch = this.convertScheduleToFlightMatch(outboundFlight, 'outbound')
         
-        // Check if this flight already exists (avoid duplicates)
+        // Check if this flight already exists (avoid duplicates including codeshare)
         const existingOutbound = option.outboundFlights.find(f => 
           f.flightNumber === outboundMatch.flightNumber && 
-          f.airline.name === outboundMatch.airline.name
+          f.airline.name === outboundMatch.airline.name &&
+          f.scheduledTime === outboundMatch.scheduledTime
         )
         
         if (!existingOutbound) {
@@ -245,10 +246,11 @@ class FlightPlannerService {
         returnFlights.forEach((returnFlight: any) => {
           const returnMatch = this.convertScheduleToFlightMatch(returnFlight, 'return')
           
-          // Check if this return flight already exists
+          // Check if this return flight already exists (avoid duplicates including codeshare)
           const existingReturn = option.returnFlights.find(f => 
             f.flightNumber === returnMatch.flightNumber && 
-            f.airline.name === returnMatch.airline.name
+            f.airline.name === returnMatch.airline.name &&
+            f.scheduledTime === returnMatch.scheduledTime
           )
           
           if (!existingReturn) {
@@ -335,7 +337,7 @@ class FlightPlannerService {
             
             // Check departure day and time preferences
             const dayMatches = filters.departureDays.includes(dayOfWeek)
-            const timeMatches = timeSlot === filters.departureTimeSlot
+            const timeMatches = (filters.departureTimeSlots || ['morning']).includes(timeSlot)
             
             if (!dayMatches || !timeMatches) return
 
@@ -363,9 +365,11 @@ class FlightPlannerService {
             // Convert to flight match
             const flightMatch = this.convertToFlightMatch(flight)
             
-            // Check for duplicates
+            // Check for duplicates (including codeshare variants)
             const existingFlight = option.outboundFlights.find(f => 
-              f.flightNumber === flightMatch.flightNumber
+              f.flightNumber === flightMatch.flightNumber &&
+              f.airline.name === flightMatch.airline.name &&
+              f.scheduledTime === flightMatch.scheduledTime
             )
             
             if (!existingFlight) {
@@ -406,7 +410,7 @@ class FlightPlannerService {
             
             // Check return day and time preferences
             const dayMatches = filters.returnDays.includes(dayOfWeek)
-            const timeMatches = timeSlot === filters.returnTimeSlot
+            const timeMatches = (filters.returnTimeSlots || ['evening']).includes(timeSlot)
             
             if (!dayMatches || !timeMatches) return
 
@@ -415,9 +419,11 @@ class FlightPlannerService {
             // Convert to flight match
             const flightMatch = this.convertToFlightMatch(flight)
             
-            // Check for duplicates
+            // Check for duplicates (including codeshare variants)
             const existingFlight = option.returnFlights.find(f => 
-              f.flightNumber === flightMatch.flightNumber
+              f.flightNumber === flightMatch.flightNumber &&
+              f.airline.name === flightMatch.airline.name &&
+              f.scheduledTime === flightMatch.scheduledTime
             )
             
             if (!existingFlight) {
@@ -752,14 +758,18 @@ class FlightPlannerService {
     
     // Set time based on direction and time slot
     if (direction === 'outbound') {
-      switch (this.filters?.departureTimeSlot) {
+      const departureSlots = this.filters?.departureTimeSlots || ['morning']
+      const primarySlot = departureSlots[0] // Use first selected slot for sample time
+      switch (primarySlot) {
         case 'morning': sampleTime.setHours(9, 0, 0, 0); break
         case 'afternoon': sampleTime.setHours(15, 0, 0, 0); break
         case 'evening': sampleTime.setHours(20, 0, 0, 0); break
         default: sampleTime.setHours(12, 0, 0, 0)
       }
     } else {
-      switch (this.filters?.returnTimeSlot) {
+      const returnSlots = this.filters?.returnTimeSlots || ['evening']
+      const primarySlot = returnSlots[0] // Use first selected slot for sample time
+      switch (primarySlot) {
         case 'morning': sampleTime.setHours(10, 0, 0, 0); break
         case 'afternoon': sampleTime.setHours(16, 0, 0, 0); break
         case 'evening': sampleTime.setHours(21, 0, 0, 0); break
@@ -786,8 +796,8 @@ class FlightPlannerService {
       scheduledTime: sampleTime.toISOString(),
       dayOfWeek: this.getActiveDays(scheduleEntry.weeklyPattern)[0] || 'monday',
       timeSlot: direction === 'outbound' ? 
-        (this.filters?.departureTimeSlot || 'morning') : 
-        (this.filters?.returnTimeSlot || 'evening'),
+        (this.filters?.departureTimeSlots?.[0] || 'morning') : 
+        (this.filters?.returnTimeSlots?.[0] || 'evening'),
       status: 'scheduled'
     }
   }

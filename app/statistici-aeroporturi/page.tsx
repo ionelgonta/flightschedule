@@ -67,27 +67,27 @@ export default function StatisticiAeroporturiPage() {
       
       <div className="min-h-screen">
         {/* Header Banner Ad */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-white border-b border-gray-200">
           <AdBanner 
             slot="header-banner"
             size="728x90"
-            className="max-w-7xl mx-auto py-4"
+            className="max-w-7xl mx-auto py-2"
           />
         </div>
 
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-green-600 to-green-800 text-white py-16">
+        <section className="bg-white border-b border-gray-200 py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <div className="flex justify-center mb-6">
-                <div className="p-4 bg-white/10 rounded-full">
-                  <Building className="h-12 w-12" />
+              <div className="flex justify-center mb-4">
+                <div className="p-2 bg-green-50 rounded-lg">
+                  <Building className="h-8 w-8 text-green-600" />
                 </div>
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold mb-6">
+              <h1 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900">
                 Statistici Aeroporturi România
               </h1>
-              <p className="text-xl text-green-100 mb-8 max-w-3xl mx-auto">
+              <p className="text-base text-gray-600 mb-6 max-w-2xl mx-auto">
                 Analize complete de performanță pentru toate aeroporturile din România și Moldova. 
                 Monitorizează punctualitatea, întârzierile și eficiența operațională.
               </p>
@@ -95,77 +95,77 @@ export default function StatisticiAeroporturiPage() {
           </div>
         </section>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Breadcrumbs */}
-          <Breadcrumbs items={breadcrumbItems} className="mb-8" />
+          <Breadcrumbs items={breadcrumbItems} className="mb-6" />
           
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Main Content */}
-            <div className="lg:col-span-3 space-y-12">
+            <div className="lg:col-span-3 space-y-8">
               {/* Statistics Overview */}
               <section>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Tipuri de Statistici Disponibile
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg border border-green-200 dark:border-green-700 p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="p-3 bg-green-600 rounded-lg">
-                        <TrendingUp className="h-6 w-6 text-white" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-green-600 rounded-lg">
+                        <TrendingUp className="h-4 w-4 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-green-800 dark:text-green-200 mb-2">
+                        <h3 className="font-bold text-green-800 mb-1 text-sm">
                           Indice Punctualitate
                         </h3>
-                        <p className="text-sm text-green-700 dark:text-green-300 mb-3">
+                        <p className="text-xs text-green-700">
                           Procentajul zborurilor la timp, întârzieri medii și distribuția întârzierilor pe categorii
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg border border-blue-200 dark:border-blue-700 p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="p-3 bg-blue-600 rounded-lg">
-                        <Clock className="h-6 w-6 text-white" />
+                  <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-blue-600 rounded-lg">
+                        <Clock className="h-4 w-4 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-blue-800 dark:text-blue-200 mb-2">
+                        <h3 className="font-bold text-blue-800 mb-1 text-sm">
                           Ore de Vârf
                         </h3>
-                        <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                        <p className="text-xs text-blue-700">
                           Analiza traficului pe ore, identificarea perioadelor aglomerate și optimizarea programului
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg border border-purple-200 dark:border-purple-700 p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="p-3 bg-purple-600 rounded-lg">
-                        <Building className="h-6 w-6 text-white" />
+                  <div className="bg-purple-50 rounded-lg border border-purple-200 p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-purple-600 rounded-lg">
+                        <Building className="h-4 w-4 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-purple-800 dark:text-purple-200 mb-2">
+                        <h3 className="font-bold text-purple-800 mb-1 text-sm">
                           Performanță Operațională
                         </h3>
-                        <p className="text-sm text-purple-700 dark:text-purple-300 mb-3">
+                        <p className="text-xs text-purple-700">
                           Capacitate de procesare, eficiența terminalelor și utilizarea pistelor
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg border border-orange-200 dark:border-orange-700 p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="p-3 bg-orange-600 rounded-lg">
-                        <MapPin className="h-6 w-6 text-white" />
+                  <div className="bg-orange-50 rounded-lg border border-orange-200 p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-orange-600 rounded-lg">
+                        <MapPin className="h-4 w-4 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-orange-800 dark:text-orange-200 mb-2">
+                        <h3 className="font-bold text-orange-800 mb-1 text-sm">
                           Comparații Regionale
                         </h3>
-                        <p className="text-sm text-orange-700 dark:text-orange-300 mb-3">
+                        <p className="text-xs text-orange-700">
                           Benchmarking între aeroporturi, clasamente de performanță și analize comparative
                         </p>
                       </div>
@@ -175,7 +175,7 @@ export default function StatisticiAeroporturiPage() {
               </section>
 
               {/* Inline Banner Ad */}
-              <div className="py-8">
+              <div className="py-6">
                 <AdBanner 
                   slot="inline-banner"
                   size="728x90"
@@ -185,22 +185,22 @@ export default function StatisticiAeroporturiPage() {
 
               {/* Global Status Distribution */}
               <section>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Statistici Generale România
                 </h2>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
                   <div className="lg:col-span-1">
                     <GlobalStatusDistribution />
                   </div>
                   <div className="lg:col-span-2">
                     {/* Placeholder for additional global stats */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    <div className="bg-white rounded-lg border border-gray-200 p-4">
+                      <h3 className="text-base font-semibold text-gray-900 mb-3">
                         Performanță Generală
                       </h3>
-                      <div className="text-center py-8">
-                        <BarChart3 className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                        <p className="text-gray-600 dark:text-gray-400">
+                      <div className="text-center py-6">
+                        <BarChart3 className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+                        <p className="text-gray-600 text-sm">
                           Grafice detaliate de performanță vor fi disponibile în curând
                         </p>
                       </div>
@@ -214,7 +214,7 @@ export default function StatisticiAeroporturiPage() {
             </div>
 
             {/* Sidebar */}
-            <div className="lg:col-span-1 space-y-8">
+            <div className="lg:col-span-1 space-y-6">
               {/* Sidebar Ad */}
               <AdBanner 
                 slot="sidebar-right"
@@ -222,16 +222,16 @@ export default function StatisticiAeroporturiPage() {
               />
               
               {/* Quick Stats */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <h3 className="text-base font-semibold text-gray-900 mb-3">
                   Informații Generale
                 </h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Aeroporturi Monitorizate</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">{MAJOR_AIRPORTS.length}</span>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Aeroporturi Monitorizate</span>
+                    <span className="font-semibold text-gray-900">{MAJOR_AIRPORTS.length}</span>
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <div className="text-xs text-gray-600 pt-2 border-t border-gray-200">
                     Statisticile se calculează pe baza datelor reale din ultimele 7 zile. Pentru aeroporturile cu date insuficiente, se afișează mesajul corespunzător.
                   </div>
                 </div>

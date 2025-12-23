@@ -67,27 +67,27 @@ export default function AnalizeRutePage() {
       
       <div className="min-h-screen">
         {/* Header Banner Ad */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-white border-b border-gray-200">
           <AdBanner 
             slot="header-banner"
             size="728x90"
-            className="max-w-7xl mx-auto py-4"
+            className="max-w-7xl mx-auto py-2"
           />
         </div>
 
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white py-16">
+        <section className="bg-white border-b border-gray-200 py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <div className="flex justify-center mb-6">
-                <div className="p-4 bg-white/10 rounded-full">
-                  <Route className="h-12 w-12" />
+              <div className="flex justify-center mb-4">
+                <div className="p-2 bg-indigo-50 rounded-lg">
+                  <Route className="h-8 w-8 text-indigo-600" />
                 </div>
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold mb-6">
+              <h1 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900">
                 Analize Rute Zboruri România
               </h1>
-              <p className="text-xl text-indigo-100 mb-8 max-w-3xl mx-auto">
+              <p className="text-base text-gray-600 mb-6 max-w-2xl mx-auto">
                 Explorează rutele aeriene, destinațiile populare și companiile aeriene active din România și Moldova. 
                 Analize detaliate de conectivitate și frecvență zboruri.
               </p>
@@ -95,77 +95,77 @@ export default function AnalizeRutePage() {
           </div>
         </section>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Breadcrumbs */}
-          <Breadcrumbs items={breadcrumbItems} className="mb-8" />
+          <Breadcrumbs items={breadcrumbItems} className="mb-6" />
           
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Main Content */}
-            <div className="lg:col-span-3 space-y-12">
+            <div className="lg:col-span-3 space-y-8">
               {/* Analysis Types Overview */}
               <section>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Tipuri de Analize Rute Disponibile
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 rounded-lg border border-indigo-200 dark:border-indigo-700 p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="p-3 bg-indigo-600 rounded-lg">
-                        <Route className="h-6 w-6 text-white" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-indigo-50 rounded-lg border border-indigo-200 p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-indigo-600 rounded-lg">
+                        <Route className="h-4 w-4 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-indigo-800 dark:text-indigo-200 mb-2">
+                        <h3 className="font-bold text-indigo-800 mb-1 text-sm">
                           Rute Populare
                         </h3>
-                        <p className="text-sm text-indigo-700 dark:text-indigo-300 mb-3">
+                        <p className="text-xs text-indigo-700">
                           Identificarea rutelor cu cel mai mare trafic, destinațiile preferate și frecvența zborurilor
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg border border-blue-200 dark:border-blue-700 p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="p-3 bg-blue-600 rounded-lg">
-                        <Plane className="h-6 w-6 text-white" />
+                  <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-blue-600 rounded-lg">
+                        <Plane className="h-4 w-4 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-blue-800 dark:text-blue-200 mb-2">
+                        <h3 className="font-bold text-blue-800 mb-1 text-sm">
                           Companii Aeriene
                         </h3>
-                        <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                        <p className="text-xs text-blue-700">
                           Analiza companiilor aeriene active, cota de piață și destinațiile deservite
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg border border-green-200 dark:border-green-700 p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="p-3 bg-green-600 rounded-lg">
-                        <MapPin className="h-6 w-6 text-white" />
+                  <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-green-600 rounded-lg">
+                        <MapPin className="h-4 w-4 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-green-800 dark:text-green-200 mb-2">
+                        <h3 className="font-bold text-green-800 mb-1 text-sm">
                           Conectivitate Geografică
                         </h3>
-                        <p className="text-sm text-green-700 dark:text-green-300 mb-3">
+                        <p className="text-xs text-green-700">
                           Hărți interactive cu rutele aeriene, conectivitatea regională și internațională
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg border border-orange-200 dark:border-orange-700 p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="p-3 bg-orange-600 rounded-lg">
-                        <Users className="h-6 w-6 text-white" />
+                  <div className="bg-orange-50 rounded-lg border border-orange-200 p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-orange-600 rounded-lg">
+                        <Users className="h-4 w-4 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-orange-800 dark:text-orange-200 mb-2">
+                        <h3 className="font-bold text-orange-800 mb-1 text-sm">
                           Capacitate și Cerere
                         </h3>
-                        <p className="text-sm text-orange-700 dark:text-orange-300 mb-3">
+                        <p className="text-xs text-orange-700">
                           Analiza capacității pe rute, ocuparea zborurilor și cererea pentru destinații
                         </p>
                       </div>
@@ -175,7 +175,7 @@ export default function AnalizeRutePage() {
               </section>
 
               {/* Inline Banner Ad */}
-              <div className="py-8">
+              <div className="py-6">
                 <AdBanner 
                   slot="inline-banner"
                   size="728x90"
@@ -184,20 +184,20 @@ export default function AnalizeRutePage() {
               </div>
 
               {/* Data Availability Notice */}
-              <section className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="p-2 bg-amber-100 dark:bg-amber-800 rounded-lg">
-                    <Route className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <section className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="p-1 bg-amber-100 rounded-lg">
+                    <Route className="h-4 w-4 text-amber-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
+                    <h3 className="font-semibold text-amber-800 mb-2 text-sm">
                       Disponibilitatea Datelor de Rute
                     </h3>
-                    <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                    <p className="text-xs text-amber-700 mb-2">
                       Analizele de rute sunt disponibile doar pentru aeroporturile cu suficiente date despre destinații și companii aeriene. 
                       Pentru aeroporturile cu date limitate, va fi afișat mesajul "Nu sunt suficiente date pentru a afișa această informație".
                     </p>
-                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                    <p className="text-xs text-amber-600">
                       Datele de rute se actualizează în timp real pe măsură ce colectăm informații despre zboruri și destinații.
                     </p>
                   </div>
@@ -206,40 +206,40 @@ export default function AnalizeRutePage() {
 
               {/* Romanian Airports */}
               <section>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Analize Rute - Aeroporturi România
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {romanianAirports.map((airport) => (
                     <Link
                       key={airport.code}
                       href={`/aeroport/${generateAirportSlug(airport)}/analize-zboruri`}
-                      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-all duration-200 hover:scale-105"
+                      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200 hover:scale-105"
                     >
-                      <div className="text-center mb-4">
-                        <div className="text-lg font-bold text-primary-600 dark:text-primary-400 mb-2">
+                      <div className="text-center mb-3">
+                        <div className="text-base font-bold text-blue-600 mb-1">
                           {airport.city}
                         </div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                        <h3 className="font-semibold text-gray-900 mb-1 text-sm">
                           {airport.name}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        <p className="text-xs text-gray-600 mb-3">
                           Cod: {airport.code}
                         </p>
                       </div>
                       
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-center space-x-2 text-sm">
-                          <Route className="h-4 w-4 text-indigo-500" />
-                          <span className="text-gray-600 dark:text-gray-400">Rute Populare</span>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-center space-x-2 text-xs">
+                          <Route className="h-3 w-3 text-indigo-500" />
+                          <span className="text-gray-600">Rute Populare</span>
                         </div>
-                        <div className="flex items-center justify-center space-x-2 text-sm">
-                          <Plane className="h-4 w-4 text-blue-500" />
-                          <span className="text-gray-600 dark:text-gray-400">Companii Aeriene</span>
+                        <div className="flex items-center justify-center space-x-2 text-xs">
+                          <Plane className="h-3 w-3 text-blue-500" />
+                          <span className="text-gray-600">Companii Aeriene</span>
                         </div>
-                        <div className="flex items-center justify-center space-x-2 text-sm">
-                          <MapPin className="h-4 w-4 text-green-500" />
-                          <span className="text-gray-600 dark:text-gray-400">Conectivitate</span>
+                        <div className="flex items-center justify-center space-x-2 text-xs">
+                          <MapPin className="h-3 w-3 text-green-500" />
+                          <span className="text-gray-600">Conectivitate</span>
                         </div>
                       </div>
                     </Link>
@@ -249,40 +249,40 @@ export default function AnalizeRutePage() {
 
               {/* Moldovan Airports */}
               <section>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Analize Rute - Aeroporturi Moldova
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {moldovanAirports.map((airport) => (
                     <Link
                       key={airport.code}
                       href={`/aeroport/${generateAirportSlug(airport)}/analize-zboruri`}
-                      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-all duration-200 hover:scale-105"
+                      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200 hover:scale-105"
                     >
-                      <div className="text-center mb-4">
-                        <div className="text-lg font-bold text-primary-600 dark:text-primary-400 mb-2">
+                      <div className="text-center mb-3">
+                        <div className="text-base font-bold text-blue-600 mb-1">
                           {airport.city}
                         </div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                        <h3 className="font-semibold text-gray-900 mb-1 text-sm">
                           {airport.name}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        <p className="text-xs text-gray-600 mb-3">
                           Cod: {airport.code}
                         </p>
                       </div>
                       
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-center space-x-2 text-sm">
-                          <Route className="h-4 w-4 text-indigo-500" />
-                          <span className="text-gray-600 dark:text-gray-400">Rute Populare</span>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-center space-x-2 text-xs">
+                          <Route className="h-3 w-3 text-indigo-500" />
+                          <span className="text-gray-600">Rute Populare</span>
                         </div>
-                        <div className="flex items-center justify-center space-x-2 text-sm">
-                          <Plane className="h-4 w-4 text-blue-500" />
-                          <span className="text-gray-600 dark:text-gray-400">Companii Aeriene</span>
+                        <div className="flex items-center justify-center space-x-2 text-xs">
+                          <Plane className="h-3 w-3 text-blue-500" />
+                          <span className="text-gray-600">Companii Aeriene</span>
                         </div>
-                        <div className="flex items-center justify-center space-x-2 text-sm">
-                          <MapPin className="h-4 w-4 text-green-500" />
-                          <span className="text-gray-600 dark:text-gray-400">Conectivitate</span>
+                        <div className="flex items-center justify-center space-x-2 text-xs">
+                          <MapPin className="h-3 w-3 text-green-500" />
+                          <span className="text-gray-600">Conectivitate</span>
                         </div>
                       </div>
                     </Link>
@@ -292,7 +292,7 @@ export default function AnalizeRutePage() {
             </div>
 
             {/* Sidebar */}
-            <div className="lg:col-span-1 space-y-8">
+            <div className="lg:col-span-1 space-y-6">
               {/* Sidebar Ad */}
               <AdBanner 
                 slot="sidebar-right"
@@ -300,28 +300,28 @@ export default function AnalizeRutePage() {
               />
               
               {/* Quick Access */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <h3 className="text-base font-semibold text-gray-900 mb-3">
                   Acces Rapid
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Link
                     href="/aeroport/bucuresti-henri-coanda/analize-zboruri"
-                    className="block p-3 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm"
+                    className="block p-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   >
                     <div className="font-medium">OTP - București</div>
                     <div className="text-xs text-gray-500">Analize Rute</div>
                   </Link>
                   <Link
                     href="/aeroport/cluj-napoca/analize-zboruri"
-                    className="block p-3 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm"
+                    className="block p-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   >
                     <div className="font-medium">CLJ - Cluj-Napoca</div>
                     <div className="text-xs text-gray-500">Analize Rute</div>
                   </Link>
                   <Link
                     href="/aeroport/timisoara-traian-vuia/analize-zboruri"
-                    className="block p-3 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm"
+                    className="block p-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   >
                     <div className="font-medium">TSR - Timișoara</div>
                     <div className="text-xs text-gray-500">Analize Rute</div>

@@ -96,8 +96,20 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
     setViewMode(mode)
   }
 
-  // Filter schedules based on current filters
+  // Filter schedules based on current filters and time range (10 hours back, all future)
   const filteredSchedules = schedules.filter(schedule => {
+    // Time-based filtering: show flights from 10 hours ago and all future flights
+    const now = new Date()
+    const scheduledTime = new Date(schedule.scheduledTime)
+    const tenHoursAgo = new Date(now.getTime() - 10 * 60 * 60 * 1000) // 10 hours ago
+    
+    // Only show flights that are either:
+    // 1. Scheduled in the future (scheduledTime > now)
+    // 2. Scheduled within the last 10 hours (scheduledTime > tenHoursAgo)
+    if (scheduledTime < tenHoursAgo) {
+      return false
+    }
+    
     if (filters.airline && !schedule.airline.name.toLowerCase().includes(filters.airline.toLowerCase())) {
       return false
     }

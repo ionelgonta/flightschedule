@@ -19,6 +19,8 @@ export function AdBanner({ slot, size, className = '' }: AdBannerProps) {
   const adRef = useRef<HTMLDivElement>(null)
   const [config, setConfig] = useState(adConfig.zones[slot])
   const [mounted, setMounted] = useState(false)
+  const [isActive, setIsActive] = useState(false)
+  const [adLoaded, setAdLoaded] = useState(false)
 
   useEffect(() => {
     // Load saved config
@@ -26,59 +28,65 @@ export function AdBanner({ slot, size, className = '' }: AdBannerProps) {
     
     // Always disable demo mode - no demo banners
     localStorage.setItem('demoAdsEnabled', 'false')
-    setConfig(adConfig.zones[slot])
+    const updatedConfig = adConfig.zones[slot]
+    setConfig(updatedConfig)
+    setIsActive(updatedConfig.mode === 'active')
     
     setMounted(true)
   }, [slot])
 
   useEffect(() => {
-    if (config.mode !== 'active' || !adRef.current) return
+    if (!mounted || !isActive || !adRef.current || adLoaded) return
 
-    try {
-      // Initialize AdSense
-      if (typeof window !== 'undefined' && window.adsbygoogle) {
-        window.adsbygoogle.push({})
+    // Use requestIdleCallback to initialize ads only when browser is idle
+    // This prevents blocking the main thread and causing "page unresponsive" errors
+    const initializeAdWhenIdle = () => {
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          setTimeout(() => {
+            try {
+              if (typeof window !== 'undefined' && window.adsbygoogle) {
+                window.adsbygoogle.push({})
+                setAdLoaded(true)
+              }
+            } catch (error) {
+              console.warn('AdSense initialization error:', error)
+              setAdLoaded(true) // Mark as loaded to prevent retries
+            }
+          }, 3000) // 3 second delay when idle
+        }, { timeout: 15000 }) // Max 15 seconds wait for idle
+      } else {
+        // Fallback for browsers without requestIdleCallback
+        setTimeout(() => {
+          try {
+            if (typeof window !== 'undefined' && window.adsbygoogle) {
+              window.adsbygoogle.push({})
+              setAdLoaded(true)
+            }
+          } catch (error) {
+            console.warn('AdSense initialization error:', error)
+            setAdLoaded(true)
+          }
+        }, 6000) // 6 second delay as fallback
       }
-    } catch (error) {
-      console.error('AdSense error:', error)
     }
-  }, [config.mode])
 
-  // If mode is inactive, don't show anything
-  if (config.mode === 'inactive') {
-    return null
-  }
+    initializeAdWhenIdle()
+  }, [mounted, isActive, adLoaded])
 
-  // During SSR or before mounting, always render AdSense banner to prevent hydration mismatch
-  if (!mounted) {
-    return (
-      <div className={`ad-banner adsense-banner ${className}`} ref={adRef}>
-        <ins
-          className="adsbygoogle"
-          style={{ display: 'block' }}
-          data-ad-client={adConfig.publisherId}
-          data-ad-slot={config.slotId}
-          data-ad-format="auto"
-          data-full-width-responsive="true"
-        />
-      </div>
-    )
-  }
+  // Always render the same structure to prevent hydration mismatch
+  // Use CSS to hide inactive ads instead of conditional rendering
+  const shouldShow = mounted ? isActive : true // Show during SSR to prevent mismatch
+  const displayStyle = shouldShow ? 'block' : 'none'
 
-  // After mounting, only show AdSense or custom banners (no demo mode)
-  // If custom HTML is provided for active mode, use it
-  if (config.customHtml && config.mode === 'active') {
-    return (
-      <div 
-        className={`ad-banner custom-banner ${className}`}
-        dangerouslySetInnerHTML={{ __html: config.customHtml }}
-      />
-    )
-  }
-
-  // Default AdSense banner for active mode
+  // Always render AdSense banner structure for consistency
   return (
-    <div className={`ad-banner adsense-banner ${className}`} ref={adRef}>
+    <div 
+      className={`ad-banner adsense-banner ${className}`} 
+      ref={adRef}
+      style={{ display: displayStyle }}
+      suppressHydrationWarning={true}
+    >
       <ins
         className="adsbygoogle"
         style={{ display: 'block' }}
@@ -86,6 +94,7 @@ export function AdBanner({ slot, size, className = '' }: AdBannerProps) {
         data-ad-slot={config.slotId}
         data-ad-format="auto"
         data-full-width-responsive="true"
+        data-adtest={process.env.NODE_ENV === 'development' ? 'on' : 'off'}
       />
     </div>
   )

@@ -51,7 +51,9 @@ export function AirportStatisticsGrid() {
       setLoading(true)
       setError(null)
       
-      const response = await fetch('/api/statistici-aeroporturi')
+      // Add timestamp to force cache refresh
+      const timestamp = Date.now()
+      const response = await fetch(`/api/statistici-aeroporturi?t=${timestamp}`)
       const data: StatisticsResponse = await response.json()
       
       if (data.success) {
@@ -129,99 +131,121 @@ export function AirportStatisticsGrid() {
       return (
         <div
           key={airport.code}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 p-4 sm:p-6"
         >
-          <div className="text-center mb-4">
-            <div className="text-lg font-bold text-primary-600 dark:text-primary-400 mb-2">
-              {airport.city}
+          {/* Header with City Name Prominent */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xl font-bold text-gray-900 truncate">
+                {airport.city}
+              </h3>
+              <span className="text-xs font-medium text-gray-500 bg-gray-200 px-2 py-1 rounded-full">
+                {airport.code}
+              </span>
             </div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm">
+            <p className="text-sm text-gray-600 truncate">
               {airport.name}
-            </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-4">
-              Cod: {airport.code}
             </p>
           </div>
           
-          <div className="text-center py-8">
-            <AlertTriangle className="h-8 w-8 text-amber-500 mx-auto mb-3" />
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              {airport.message || 'Nu sunt suficiente date pentru a afișa această informație'}
+          <div className="text-center py-6">
+            <AlertTriangle className="h-10 w-10 text-amber-500 mx-auto mb-3" />
+            <p className="text-sm text-gray-600 mb-2">
+              {airport.message || 'Nu sunt suficiente date'}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-500">
-              Datele vor fi disponibile pe măsură ce colectăm mai multe informații
+            <p className="text-xs text-gray-500">
+              Datele vor fi disponibile în curând
             </p>
           </div>
         </div>
       )
     }
 
-    // Has data - show statistics
+    // Has data - show statistics with modern design
     return (
       <Link
         key={airport.code}
         href={`/aeroport/${generateAirportSlug(createAirportForSlug(airport))}/statistici`}
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-all duration-200 hover:scale-105"
+        className="block bg-white rounded-xl border border-gray-200 p-4 sm:p-6 hover:shadow-lg hover:border-blue-300 transition-all duration-300 hover:scale-[1.02] group"
       >
-        <div className="text-center mb-4">
-          <div className="flex items-center justify-center space-x-2 mb-2">
-            <div className="text-lg font-bold text-primary-600 dark:text-primary-400">
+        {/* Header with City Name Prominent */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate">
               {airport.city}
+            </h3>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                {airport.code}
+              </span>
+              {getPerformanceIcon(airport.statistics.onTimePercentage)}
             </div>
-            {getPerformanceIcon(airport.statistics.onTimePercentage)}
           </div>
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm">
+          <p className="text-sm text-gray-600 truncate">
             {airport.name}
-          </h3>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-4">
-            Cod: {airport.code}
           </p>
         </div>
-        
-        <div className="space-y-3">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600 dark:text-gray-400">Punctualitate</span>
-            <div className="flex items-center space-x-1">
-              <span className={`font-semibold ${getPerformanceColor(airport.statistics.onTimePercentage)}`}>
+
+        {/* Performance Badge */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
+            <div>
+              <p className="text-xs text-gray-600 mb-1">Punctualitate</p>
+              <p className={`text-2xl font-bold ${getPerformanceColor(airport.statistics.onTimePercentage)}`}>
                 {airport.statistics.onTimePercentage}%
-              </span>
+              </p>
+            </div>
+            <div className="text-right">
               {airport.statistics.onTimePercentage >= 85 ? 
-                <TrendingUp className="h-3 w-3 text-green-500" /> : 
-                <TrendingDown className="h-3 w-3 text-red-500" />
+                <TrendingUp className="h-6 w-6 text-green-500 mb-1" /> : 
+                <TrendingDown className="h-6 w-6 text-red-500 mb-1" />
               }
+              <p className="text-xs text-gray-500">
+                {airport.statistics.onTimePercentage >= 85 ? 'Excelent' : 
+                 airport.statistics.onTimePercentage >= 70 ? 'Bun' : 'Îmbunătățire'}
+              </p>
             </div>
           </div>
+        </div>
+
+        {/* Statistics Grid */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center mb-1">
+              <Plane className="h-4 w-4 text-blue-500 mr-1" />
+              <p className="text-xs text-gray-600">Zboruri/Zi</p>
+            </div>
+            <p className="text-lg font-bold text-gray-900">
+              {airport.statistics.dailyFlights}
+            </p>
+          </div>
           
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600 dark:text-gray-400">Întârziere Medie</span>
-            <span className={`font-semibold ${getDelayColor(airport.statistics.averageDelay)}`}>
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center mb-1">
+              <Clock className="h-4 w-4 text-orange-500 mr-1" />
+              <p className="text-xs text-gray-600">Întârziere</p>
+            </div>
+            <p className={`text-lg font-bold ${getDelayColor(airport.statistics.averageDelay)}`}>
               {airport.statistics.averageDelay} min
+            </p>
+          </div>
+        </div>
+
+        {/* Bottom Stats */}
+        <div className="pt-3 border-t border-gray-100">
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-600">Total săptămânal</span>
+            <span className="font-semibold text-gray-900">
+              {airport.statistics.totalFlights} zboruri
             </span>
           </div>
           
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600 dark:text-gray-400">Zboruri/Zi</span>
-            <div className="flex items-center space-x-1">
-              <Plane className="h-3 w-3 text-blue-500" />
-              <span className="font-semibold text-blue-600 dark:text-blue-400">
-                {airport.statistics.dailyFlights}
-              </span>
-            </div>
-          </div>
-          
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600 dark:text-gray-400">Total Săptămâna</span>
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {airport.statistics.totalFlights}
-            </span>
-          </div>
-          
-          <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+          {(airport.statistics.delayedFlights > 0 || airport.statistics.cancelledFlights > 0) && (
+            <div className="flex justify-between text-xs text-gray-500 mt-2">
               <span>Întârziate: {airport.statistics.delayedFlights}</span>
               <span>Anulate: {airport.statistics.cancelledFlights}</span>
             </div>
-          </div>
+          )}
         </div>
       </Link>
     )
