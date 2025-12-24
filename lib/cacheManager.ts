@@ -463,7 +463,13 @@ class CacheManager {
       // Import dinamic pentru a evita circular dependencies
       const WeatherService = (await import('./weatherService')).default
       
-      const apiKey = '213057a2c7203b4352a879db4465f273'
+      // Get API key from environment variables
+      const apiKey = process.env.OPENWEATHER_API_KEY
+      if (!apiKey) {
+        console.error('[Cache Manager] OpenWeatherMap API key not found in environment variables')
+        return
+      }
+      
       const weatherService = new WeatherService(apiKey)
       
       // Fetch weather data pentru toate orașele din România și Moldova

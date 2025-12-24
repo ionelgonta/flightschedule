@@ -43,7 +43,7 @@ class WeatherCacheManager {
   private cache: Map<string, WeatherCacheEntry> = new Map()
   private isLoaded: boolean = false
   private readonly CACHE_DURATION_MINUTES = 30
-  private readonly API_KEY = '213057a2c7203b4352a879db4465f273' // OpenWeatherMap API key
+  private readonly API_KEY = process.env.OPENWEATHER_API_KEY || '' // OpenWeatherMap API key from environment
 
   // Destination mapping for flight routes (IATA codes to city names)
   private readonly DESTINATION_MAPPING: { [key: string]: string } = {
