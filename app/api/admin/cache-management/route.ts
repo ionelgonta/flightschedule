@@ -71,6 +71,13 @@ export async function POST(request: NextRequest) {
           )
         }
 
+        if (config.weather?.cronInterval < 5 || config.weather?.cronInterval > 1440) {
+          return NextResponse.json(
+            { success: false, error: 'Weather cron interval must be between 5 and 1440 minutes' },
+            { status: 400 }
+          )
+        }
+
         await cacheManager.updateConfig(config as CacheConfig)
         
         return NextResponse.json({
@@ -86,14 +93,14 @@ export async function POST(request: NextRequest) {
           )
         }
         
-        if (!['flightData', 'analytics', 'aircraft'].includes(category)) {
+        if (!['flightData', 'analytics', 'aircraft', 'weather'].includes(category)) {
           return NextResponse.json(
-            { success: false, error: 'Invalid category. Must be flightData, analytics, or aircraft' },
+            { success: false, error: 'Invalid category. Must be flightData, analytics, aircraft, or weather' },
             { status: 400 }
           )
         }
 
-        await cacheManager.manualRefresh(category as 'flightData' | 'analytics' | 'aircraft', identifier)
+        await cacheManager.manualRefresh(category as 'flightData' | 'analytics' | 'aircraft' | 'weather', identifier)
         
         return NextResponse.json({
           success: true,

@@ -46,10 +46,19 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'clearAll':
-        await cacheManager.clearPersistentCache()
+        const { confirmationToken } = body
+        if (!confirmationToken || confirmationToken !== 'CONFIRM_DELETE_ALL_HISTORICAL_DATA') {
+          return NextResponse.json({
+            success: false,
+            error: 'DANGEROUS OPERATION: Clearing persistent cache requires explicit confirmation token',
+            message: 'This operation will DELETE ALL HISTORICAL FLIGHT DATA permanently. Use confirmationToken: "CONFIRM_DELETE_ALL_HISTORICAL_DATA" if you are absolutely sure.'
+          }, { status: 400 })
+        }
+
+        await cacheManager.clearPersistentCache(confirmationToken)
         return NextResponse.json({
           success: true,
-          message: 'Cleared all persistent cache data'
+          message: '⚠️  CLEARED ALL PERSISTENT CACHE DATA - HISTORICAL DATA PERMANENTLY DELETED!'
         })
 
       case 'clearAirport':

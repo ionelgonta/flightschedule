@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Lock, Eye, EyeOff, Shield } from 'lucide-react'
 import { AdminDashboard } from './AdminDashboard'
 
@@ -9,6 +9,9 @@ const ADMIN_CREDENTIALS = {
   password: 'FlightSchedule2024!'
 }
 
+const ADMIN_SESSION_KEY = 'admin_authenticated'
+const ADMIN_SESSION_EXPIRY = 'admin_session_expiry'
+
 export function AdminLogin() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -16,12 +19,57 @@ export function AdminLogin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [error, setError] = useState('')
   const [attempts, setAttempts] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Check for existing session on component mount
+  useEffect(() => {
+    const checkExistingSession = () => {
+      try {
+        const isAuth = localStorage.getItem(ADMIN_SESSION_KEY)
+        const expiry = localStorage.getItem(ADMIN_SESSION_EXPIRY)
+        
+        if (isAuth === 'true' && expiry) {
+          const expiryTime = parseInt(expiry)
+          const now = Date.now()
+          
+          if (now < expiryTime) {
+            // Session is still valid
+            setIsAuthenticated(true)
+          } else {
+            // Session expired, clear it
+            localStorage.removeItem(ADMIN_SESSION_KEY)
+            localStorage.removeItem(ADMIN_SESSION_EXPIRY)
+          }
+        }
+      } catch (error) {
+        console.error('Error checking admin session:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkExistingSession()
+  }, [])
+
+  // Set session with 2 hour expiry
+  const setAdminSession = () => {
+    const expiryTime = Date.now() + (2 * 60 * 60 * 1000) // 2 hours
+    localStorage.setItem(ADMIN_SESSION_KEY, 'true')
+    localStorage.setItem(ADMIN_SESSION_EXPIRY, expiryTime.toString())
+  }
+
+  // Clear session
+  const clearAdminSession = () => {
+    localStorage.removeItem(ADMIN_SESSION_KEY)
+    localStorage.removeItem(ADMIN_SESSION_EXPIRY)
+  }
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     
     if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
       setIsAuthenticated(true)
+      setAdminSession() // Save session to localStorage
       setError('')
     } else {
       setAttempts(prev => prev + 1)
@@ -36,8 +84,25 @@ export function AdminLogin() {
     }
   }
 
+  const handleLogout = () => {
+    setIsAuthenticated(false)
+    clearAdminSession()
+  }
+
+  // Show loading while checking session
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Verificare sesiune...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (isAuthenticated) {
-    return <AdminDashboard />
+    return <AdminDashboard onLogout={handleLogout} />
   }
 
   return (
@@ -45,7 +110,7 @@ export function AdminLogin() {
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-primary-600 rounded-full flex items-center justify-center">
+          <div className="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center">
             <Shield className="h-8 w-8 text-white" />
           </div>
           <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
@@ -72,7 +137,7 @@ export function AdminLogin() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     disabled={attempts >= 3}
-                    className="w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="Introduceți username-ul"
                     required
                     autoComplete="username"
@@ -93,7 +158,7 @@ export function AdminLogin() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={attempts >= 3}
-                    className="w-full px-3 py-2 pl-10 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-3 py-2 pl-10 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="Introduceți parola"
                     required
                     autoComplete="current-password"
@@ -120,7 +185,7 @@ export function AdminLogin() {
               <button
                 type="submit"
                 disabled={!username || !password || attempts >= 3}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Autentificare
               </button>
@@ -137,7 +202,8 @@ export function AdminLogin() {
               <ul className="space-y-1 text-xs">
                 <li>• Acces restricționat cu username și parolă</li>
                 <li>• Maxim 3 încercări de autentificare</li>
-                <li>• Sesiunea expiră la închiderea browser-ului</li>
+                <li>• Sesiunea persistă 2 ore după autentificare</li>
+                <li>• Sesiunea se păstrează la refresh</li>
               </ul>
             </div>
           </div>

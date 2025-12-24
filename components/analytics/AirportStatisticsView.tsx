@@ -327,7 +327,7 @@ export function AirportStatisticsView({ airport, initialPeriod }: Props) {
                           }
                         </span>
                         <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                          ({route.airlines.slice(0, 2).map(code => getAirlineName(code)).join(', ')})
+                          ({route.airlines.slice(0, 2).map(code => getAirlineName(code)).join(', ')}{route.airlines.length > 2 ? ` +${route.airlines.length - 2}` : ''})
                         </span>
                       </div>
                     </td>

@@ -23,6 +23,24 @@ export interface FlightApiResponse {
   last_updated?: string;
   airport_code: string;
   type: 'arrivals' | 'departures';
+  // Smart weather integration
+  weather_info?: {
+    city: string;
+    temperature: number;
+    feelsLike: number;
+    description: string;
+    icon: string;
+    windSpeed: number;
+    visibility: number;
+    flightImpact: {
+      severity: 'none' | 'low' | 'moderate' | 'high' | 'severe';
+      factors: string[];
+      alertMessage?: string;
+      delayProbability: number;
+    };
+    lastUpdated: string;
+  };
+  hasWeatherAlert?: boolean;
 }
 
 class FlightRepository {
@@ -42,6 +60,28 @@ class FlightRepository {
    * Folosește getCityName pentru a converti codurile IATA în nume de orașe
    */
   private mapCacheDataToRawFlightData(cacheData: any[]): RawFlightData[] {
+    // Handle null, undefined, or non-array data
+    if (!cacheData || !Array.isArray(cacheData)) {
+      console.log('[Flight Repository] Invalid cache data provided to mapCacheDataToRawFlightData:', typeof cacheData);
+      
+      // Try to extract flights from nested structure if it's an object
+      if (cacheData && typeof cacheData === 'object' && 'flights' in cacheData) {
+        let actualData = (cacheData as any).flights
+        
+        // Handle deeply nested flights structure (corruption fix)
+        while (actualData && typeof actualData === 'object' && 'flights' in actualData && !Array.isArray(actualData)) {
+          actualData = (actualData as any).flights
+        }
+        
+        if (Array.isArray(actualData)) {
+          console.log('[Flight Repository] Extracted flights array from nested structure:', actualData.length);
+          return this.mapCacheDataToRawFlightData(actualData)
+        }
+      }
+      
+      return [];
+    }
+
     // Import getCityName function
     const { getCityName } = require('./airports');
     
@@ -86,28 +126,29 @@ class FlightRepository {
   }
 
   /**
-   * Obține sosirile pentru un aeroport (DOAR din cache)
+   * Obține sosirile pentru un aeroport (DOAR din cache) cu informații meteo integrate
    */
   async getArrivals(airportCode: string, filters?: FlightFilters): Promise<FlightApiResponse> {
-    const cacheKey = this.getCacheKey(airportCode, 'arrivals');
-    
     try {
       // Asigură-te că cache manager-ul este inițializat
       await cacheManager.initialize()
       
-      // Citește DOAR din cache - nu face request-uri API
-      const cachedData = cacheManager.getCachedData<any[]>(cacheKey);
+      // Folosește noua metodă care returnează și datele meteo integrate
+      const { flights, weather_info, hasWeatherAlert } = cacheManager.getFlightDataWithWeather<any[]>(airportCode, 'arrivals');
       
-      // Verifică dacă există o intrare în cache (chiar dacă e array gol)
-      if (cachedData !== null) {
-        console.log(`Cache HIT for ${airportCode} arrivals - ${cachedData.length} flights`);
+      // Verifică dacă există date de zboruri în cache
+      if (flights !== null) {
+        console.log(`Cache HIT for ${airportCode} arrivals - ${Array.isArray(flights) ? flights.length : 'unknown'} flights`);
+        
+        // Ensure flights is an array before mapping
+        const flightArray = Array.isArray(flights) ? flights : [];
         
         // Mapează datele din cache la formatul așteptat
-        const mappedData = this.mapCacheDataToRawFlightData(cachedData);
+        const mappedData = this.mapCacheDataToRawFlightData(flightArray);
         
         // Procesează automat codurile IATA noi găsite în datele de zboruri (doar pe server)
         if (typeof window === 'undefined') {
-          this.processNewAirportCodes(cachedData);
+          this.processNewAirportCodes(flights);
         }
         
         return {
@@ -116,7 +157,9 @@ class FlightRepository {
           cached: true,
           last_updated: new Date().toISOString(),
           airport_code: airportCode,
-          type: 'arrivals'
+          type: 'arrivals',
+          weather_info: weather_info || undefined,
+          hasWeatherAlert: hasWeatherAlert || false
         };
       }
 
@@ -149,28 +192,29 @@ class FlightRepository {
   }
 
   /**
-   * Obține plecările pentru un aeroport (DOAR din cache)
+   * Obține plecările pentru un aeroport (DOAR din cache) cu informații meteo integrate
    */
   async getDepartures(airportCode: string, filters?: FlightFilters): Promise<FlightApiResponse> {
-    const cacheKey = this.getCacheKey(airportCode, 'departures');
-    
     try {
       // Asigură-te că cache manager-ul este inițializat
       await cacheManager.initialize()
       
-      // Citește DOAR din cache - nu face request-uri API
-      const cachedData = cacheManager.getCachedData<any[]>(cacheKey);
+      // Folosește noua metodă care returnează și datele meteo integrate
+      const { flights, weather_info, hasWeatherAlert } = cacheManager.getFlightDataWithWeather<any[]>(airportCode, 'departures');
       
-      // Verifică dacă există o intrare în cache (chiar dacă e array gol)
-      if (cachedData !== null) {
-        console.log(`Cache HIT for ${airportCode} departures - ${cachedData.length} flights`);
+      // Verifică dacă există date de zboruri în cache
+      if (flights !== null) {
+        console.log(`Cache HIT for ${airportCode} departures - ${Array.isArray(flights) ? flights.length : 'unknown'} flights`);
+        
+        // Ensure flights is an array before mapping
+        const flightArray = Array.isArray(flights) ? flights : [];
         
         // Mapează datele din cache la formatul așteptat
-        const mappedData = this.mapCacheDataToRawFlightData(cachedData);
+        const mappedData = this.mapCacheDataToRawFlightData(flightArray);
         
         // Procesează automat codurile IATA noi găsite în datele de zboruri (doar pe server)
         if (typeof window === 'undefined') {
-          this.processNewAirportCodes(cachedData);
+          this.processNewAirportCodes(flights);
         }
         
         return {
@@ -179,7 +223,9 @@ class FlightRepository {
           cached: true,
           last_updated: new Date().toISOString(),
           airport_code: airportCode,
-          type: 'departures'
+          type: 'departures',
+          weather_info: weather_info || undefined,
+          hasWeatherAlert: hasWeatherAlert || false
         };
       }
 
@@ -341,7 +387,8 @@ class FlightRepository {
     const currentStats = cacheManager.getCacheStats()
     const currentConfig = currentStats.config || {
       analytics: { cronInterval: 30, cacheMaxAge: 360 },
-      aircraft: { cronInterval: 360, cacheMaxAge: 360 }
+      aircraft: { cronInterval: 360, cacheMaxAge: 360 },
+      weather: { cronInterval: 30 }
     }
     
     await cacheManager.updateConfig({
@@ -349,7 +396,8 @@ class FlightRepository {
         cronInterval: realtimeInterval
       },
       analytics: currentConfig.analytics,
-      aircraft: currentConfig.aircraft
+      aircraft: currentConfig.aircraft,
+      weather: currentConfig.weather || { cronInterval: 30 }
     })
   }
 }

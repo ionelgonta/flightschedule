@@ -32,6 +32,8 @@ export function AdBanner({ slot, size, className = '' }: AdBannerProps) {
     setConfig(updatedConfig)
     setIsActive(updatedConfig.mode === 'active')
     
+    console.log(`AdBanner ${slot}: mode=${updatedConfig.mode}, isActive=${updatedConfig.mode === 'active'}`)
+    
     setMounted(true)
   }, [slot])
 
@@ -74,17 +76,17 @@ export function AdBanner({ slot, size, className = '' }: AdBannerProps) {
     initializeAdWhenIdle()
   }, [mounted, isActive, adLoaded])
 
-  // Always render the same structure to prevent hydration mismatch
-  // Use CSS to hide inactive ads instead of conditional rendering
-  const shouldShow = mounted ? isActive : true // Show during SSR to prevent mismatch
-  const displayStyle = shouldShow ? 'block' : 'none'
+  // Don't render anything if zone is inactive
+  if (!mounted || !isActive) {
+    console.log(`AdBanner ${slot}: Not rendering (mounted=${mounted}, isActive=${isActive})`)
+    return null
+  }
 
-  // Always render AdSense banner structure for consistency
+  // Only render if zone is active
   return (
     <div 
       className={`ad-banner adsense-banner ${className}`} 
       ref={adRef}
-      style={{ display: displayStyle }}
       suppressHydrationWarning={true}
     >
       <ins

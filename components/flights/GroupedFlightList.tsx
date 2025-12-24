@@ -112,6 +112,18 @@ export function GroupedFlightList({
       filtered = filtered.filter(flight => flight.status === selectedStatus);
     }
 
+    // Filtrare pe timp: arată zborurile din ultimele 10 ore și toate zborurile viitoare
+    const now = new Date();
+    const tenHoursAgo = new Date(now.getTime() - 10 * 60 * 60 * 1000); // 10 ore în urmă
+    
+    filtered = filtered.filter(flight => {
+      const scheduledTime = new Date(flight.scheduled_time);
+      // Arată doar zborurile care sunt:
+      // 1. Programate în viitor (scheduledTime > now)
+      // 2. Programate în ultimele 10 ore (scheduledTime > tenHoursAgo)
+      return scheduledTime > tenHoursAgo;
+    });
+
     // Grupează după rută
     const groups: Record<string, FlightGroup> = {};
     

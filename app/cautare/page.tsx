@@ -76,7 +76,7 @@ export default function SearchPage() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/flights/route/${fromAirport.toUpperCase()}/${toAirport.toUpperCase()}?date=${searchDate}`);
+      const response = await fetch(`/api/flights/route/${(fromAirport || '').toUpperCase()}/${(toAirport || '').toUpperCase()}?date=${searchDate}`);
       const data = await response.json();
 
       if (data.success) {

@@ -4,6 +4,8 @@ import { getAirportByCodeOrSlug, generateAirportSlug } from '@/lib/airports'
 import { AirportStatisticsView } from '@/components/analytics/AirportStatisticsView'
 import { AirportSelector } from '@/components/analytics/AirportSelector'
 import { AdBanner } from '@/components/ads/AdBanner'
+import WeatherWidget from '@/components/weather/WeatherWidget'
+import { getWeatherCityForAirport } from '@/lib/weatherUtils'
 
 interface Props {
   params: { code: string }
@@ -48,6 +50,8 @@ export default function AirportStatisticsPage({ params, searchParams }: Props) {
   if (!airport) {
     notFound()
   }
+
+  const weatherCity = getWeatherCityForAirport(airport.code)
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -119,6 +123,9 @@ export default function AirportStatisticsPage({ params, searchParams }: Props) {
 
             {/* Sidebar */}
             <div className="lg:col-span-1 space-y-6">
+              {/* Weather Widget */}
+              <WeatherWidget city={weatherCity} />
+              
               {/* Sidebar Ad */}
               <AdBanner 
                 slot="sidebar-right"

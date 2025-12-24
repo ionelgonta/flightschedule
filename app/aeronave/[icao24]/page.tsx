@@ -9,7 +9,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // In a real app, you'd fetch the aircraft data here
-  const icao24 = params.icao24.toUpperCase()
+  const icao24 = (params.icao24 || '').toUpperCase()
   
   return {
     title: `Aeronavă ${icao24} - Detalii și Istoric Zboruri`,
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default function AircraftDetailPage({ params }: Props) {
-  const icao24 = params.icao24.toUpperCase()
+  const icao24 = (params.icao24 || '').toUpperCase()
 
   const jsonLd = {
     '@context': 'https://schema.org',

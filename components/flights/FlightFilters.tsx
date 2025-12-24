@@ -76,7 +76,7 @@ export function FlightFiltersComponent({
             <option value="">All Statuses</option>
             {statuses.map(status => (
               <option key={status} value={status}>
-                {status.charAt(0).toUpperCase() + status.slice(1)}
+                {status ? status.charAt(0).toUpperCase() + status.slice(1) : status}
               </option>
             ))}
           </select>
@@ -123,7 +123,7 @@ export function FlightFiltersComponent({
             )}
             {filters.status && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200">
-                Status: {filters.status.charAt(0).toUpperCase() + filters.status.slice(1)}
+                Status: {filters.status ? filters.status.charAt(0).toUpperCase() + filters.status.slice(1) : filters.status}
                 <button
                   onClick={() => updateFilter('status', undefined)}
                   className="ml-2 text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200"

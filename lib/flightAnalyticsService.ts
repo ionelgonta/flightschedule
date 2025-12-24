@@ -100,6 +100,9 @@ export function updateCacheConfig(config: CacheConfig) {
     aircraft: {
       cronInterval: 360,
       cacheMaxAge: 360
+    },
+    weather: {
+      cronInterval: 30 // 30 minutes default for weather
     }
   }).catch(console.error)
 }
@@ -163,27 +166,38 @@ export class FlightAnalyticsService {
             code: flight.airline?.code || 'N/A',
             name: flight.airline?.name || 'Unknown'
           },
-          aircraft: flight.aircraft || 'Unknown',
-          origin: flight.origin?.code || flight.origin || 'N/A',
-          destination: flight.destination?.code || flight.destination || 'N/A',
+          origin: {
+            airport: flight.origin?.airport || flight.origin?.code || 'Unknown',
+            code: flight.origin?.code || 'N/A',
+            city: flight.origin?.city || 'Unknown'
+          },
+          destination: {
+            airport: flight.destination?.airport || flight.destination?.code || 'Unknown',
+            code: flight.destination?.code || 'N/A',
+            city: flight.destination?.city || 'Unknown'
+          },
           scheduledTime: flight.scheduled_time || new Date().toISOString(),
           estimatedTime: flight.estimated_time || null,
           actualTime: flight.actual_time || null,
           status: flight.status || 'scheduled',
           gate: flight.gate || null,
           terminal: flight.terminal || null,
-          delay: this.calculateDelay(flight),
-          isCargo: flight.isCargo || false
+          aircraft: flight.aircraft || 'Unknown',
+          delay: this.calculateDelay(flight)
         }))
         
         // Filtrează după perioada solicitată dacă este specificată
-        const fromDateTime = new Date(fromDate)
-        const toDateTime = new Date(toDate)
-        toDateTime.setHours(23, 59, 59, 999) // Include toată ziua
+        const fromDateTime = new Date(fromDate + 'T00:00:00')
+        const toDateTime = new Date(toDate + 'T23:59:59')
         
         const filteredSchedules = schedules.filter(schedule => {
           const flightDate = new Date(schedule.scheduledTime)
-          return flightDate >= fromDateTime && flightDate <= toDateTime
+          // Extract just the date part for comparison (ignore timezone)
+          const flightDateOnly = new Date(flightDate.getFullYear(), flightDate.getMonth(), flightDate.getDate())
+          const fromDateOnly = new Date(fromDateTime.getFullYear(), fromDateTime.getMonth(), fromDateTime.getDate())
+          const toDateOnly = new Date(toDateTime.getFullYear(), toDateTime.getMonth(), toDateTime.getDate())
+          
+          return flightDateOnly >= fromDateOnly && flightDateOnly <= toDateOnly
         })
         
         console.log(`Filtered ${schedules.length} flights to ${filteredSchedules.length} for period ${fromDate} to ${toDate}`)

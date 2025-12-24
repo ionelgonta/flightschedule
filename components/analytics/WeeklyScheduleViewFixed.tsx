@@ -28,7 +28,104 @@ interface DestinationRoute {
   totalFlights: number
 }
 
-export default function WeeklyScheduleView({ className = '', initialAirportFilter = '' }: WeeklyScheduleViewProps) {
+// Funcție pentru pluralul corect în română
+const getRoutesPlural = (count: number): string => {
+  if (count === 1) return 'rută'
+  return 'rute'
+}
+
+const getFlightsPlural = (count: number): string => {
+  if (count === 1) return 'zbor'
+  return 'zboruri'
+}
+
+// Funcție pentru detectarea zborurilor codeshare
+const isCodeshareFlightNumber = (flightNumber: string, airline: string): boolean => {
+  if (!flightNumber || !airline) return false
+  
+  // Codeshare-urile au de obicei numere de zbor cu prefixe diferite pentru același zbor
+  const codesharePatterns = [
+    /\*/, // Asterisk indicates codeshare
+    /operated by/i,
+    /op by/i,
+    /\//, // Slash indicates shared flight
+  ]
+  
+  // Check if flight number contains codeshare indicators
+  if (codesharePatterns.some(pattern => pattern.test(flightNumber))) {
+    return true
+  }
+  
+  // Check if airline code in flight number doesn't match airline name
+  const flightPrefix = flightNumber.substring(0, 2).toUpperCase()
+  const airlineUpper = airline.toUpperCase()
+  
+  // Common codeshare mismatches
+  const codeShareMismatches = [
+    { flight: 'JL', airline: 'BRITISH' }, // Japan Airlines code on British Airways
+    { flight: 'AA', airline: 'BRITISH' }, // American Airlines code on British Airways
+    { flight: 'LH', airline: 'UNITED' },  // Lufthansa code on United
+    { flight: 'UA', airline: 'LUFTHANSA' }, // United code on Lufthansa
+    { flight: 'AF', airline: 'DELTA' },   // Air France code on Delta
+    { flight: 'DL', airline: 'AIR FRANCE' }, // Delta code on Air France
+  ]
+  
+  return codeShareMismatches.some(mismatch => 
+    flightPrefix === mismatch.flight && airlineUpper.includes(mismatch.airline)
+  )
+}
+
+// Funcție pentru eliminarea duplicatelor de codeshare
+const removeDuplicateCodeshares = (routes: WeeklyScheduleData[]): WeeklyScheduleData[] => {
+  const routeMap = new Map<string, WeeklyScheduleData>()
+  
+  routes.forEach(route => {
+    const routeKey = `${route.airport}-${route.destination}`
+    const isCodeshare = isCodeshareFlightNumber(route.flightNumber, route.airline)
+    
+    if (!routeMap.has(routeKey)) {
+      // Prima rută pentru această destinație
+      routeMap.set(routeKey, route)
+    } else {
+      const existingRoute = routeMap.get(routeKey)!
+      const existingIsCodeshare = isCodeshareFlightNumber(existingRoute.flightNumber, existingRoute.airline)
+      
+      // Dacă ruta existentă este codeshare și noua nu este, înlocuiește
+      if (existingIsCodeshare && !isCodeshare) {
+        routeMap.set(routeKey, route)
+      } else if (!existingIsCodeshare && isCodeshare) {
+        // Păstrează ruta existentă (non-codeshare)
+        return
+      } else {
+        // Ambele sunt de același tip, combină datele
+        const combinedRoute: WeeklyScheduleData = {
+          ...existingRoute,
+          airline: existingRoute.airline === route.airline ? 
+            existingRoute.airline : 
+            `${existingRoute.airline}, ${route.airline}`,
+          flightNumber: existingRoute.flightNumber === route.flightNumber ?
+            existingRoute.flightNumber :
+            `${existingRoute.flightNumber}, ${route.flightNumber}`,
+          frequency: existingRoute.frequency + route.frequency,
+          weeklyPattern: {
+            monday: existingRoute.weeklyPattern.monday || route.weeklyPattern.monday,
+            tuesday: existingRoute.weeklyPattern.tuesday || route.weeklyPattern.tuesday,
+            wednesday: existingRoute.weeklyPattern.wednesday || route.weeklyPattern.wednesday,
+            thursday: existingRoute.weeklyPattern.thursday || route.weeklyPattern.thursday,
+            friday: existingRoute.weeklyPattern.friday || route.weeklyPattern.friday,
+            saturday: existingRoute.weeklyPattern.saturday || route.weeklyPattern.saturday,
+            sunday: existingRoute.weeklyPattern.sunday || route.weeklyPattern.sunday,
+          }
+        }
+        routeMap.set(routeKey, combinedRoute)
+      }
+    }
+  })
+  
+  return Array.from(routeMap.values())
+}
+
+export default function WeeklyScheduleViewFixed({ className = '', initialAirportFilter = '' }: WeeklyScheduleViewProps) {
   const [scheduleData, setScheduleData] = useState<WeeklyScheduleData[]>([])
   const [filteredData, setFilteredData] = useState<WeeklyScheduleData[]>([])
   const [loading, setLoading] = useState(true)
@@ -66,337 +163,53 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
 
   // Helper function to convert airport codes to display names
   const getAirportDisplayName = (code: string): string => {
-    // Handle undefined or null code
-    if (!code) return 'Unknown Airport'
+    if (!code) return 'Aeroport necunoscut'
     
-    // Handle cases where code might already be a city name or contain parentheses
     if (code.includes('(') || code.length > 3) {
       return code
     }
     
-    // First check Romanian/Moldovan airports
     const airport = MAJOR_AIRPORTS.find(a => a.code === code.toUpperCase())
     if (airport) {
       return airport.city
     }
     
-    // For international airports, use a basic mapping for common ones
+    // Mapare pentru aeroporturi internaționale comune
     const internationalAirports: { [key: string]: string } = {
-      // France
       'BVA': 'Paris (Beauvais)',
       'CDG': 'Paris (Charles de Gaulle)',
       'ORY': 'Paris (Orly)',
-      'LYS': 'Lyon',
-      'MRS': 'Marseille',
-      'NCE': 'Nisa',
-      'TLS': 'Toulouse',
-      'BOD': 'Bordeaux',
-      'NTE': 'Nantes',
-      'SXB': 'Strasbourg',
-      
-      // UK & Ireland
       'LHR': 'Londra (Heathrow)',
       'LGW': 'Londra (Gatwick)',
-      'STN': 'Londra (Stansted)',
-      'LTN': 'Londra (Luton)',
-      'LBA': 'Leeds',
-      'EDI': 'Edinburgh',
-      'GLA': 'Glasgow',
-      'MAN': 'Manchester',
-      'BHX': 'Birmingham',
-      'LPL': 'Liverpool',
-      'NCL': 'Newcastle',
-      'BRS': 'Bristol',
-      'CWL': 'Cardiff',
-      'BFS': 'Belfast',
-      'DUB': 'Dublin',
-      'ORK': 'Cork',
-      
-      // Italy
       'FCO': 'Roma (Fiumicino)',
-      'CIA': 'Roma (Ciampino)',
       'MXP': 'Milano (Malpensa)',
-      'BGY': 'Milano (Bergamo)',
-      'LIN': 'Milano (Linate)',
-      'VRN': 'Verona',
-      'TSF': 'Treviso',
-      'VCE': 'Veneția',
-      'BLQ': 'Bologna',
-      'FLR': 'Florența',
-      'PSA': 'Pisa',
-      'PSR': 'Pescara',
-      'TRN': 'Torino',
-      'GRO': 'Girona',
-      'NAP': 'Napoli',
-      'CTA': 'Catania',
-      'PMO': 'Palermo',
-      'CAG': 'Cagliari',
-      'BRI': 'Bari',
-      'BDS': 'Brindisi',
-      'REG': 'Reggio Calabria',
-      'LMP': 'Lampedusa',
-      'PNL': 'Pantelleria',
-      
-      // Germany
-      'MUC': 'München',
-      'FRA': 'Frankfurt',
-      'DUS': 'Düsseldorf',
-      'CGN': 'Köln',
-      'DTM': 'Dortmund',
-      'HAM': 'Hamburg',
-      'BER': 'Berlin',
-      'SXF': 'Berlin (Schönefeld)',
-      'TXL': 'Berlin (Tegel)',
-      'STR': 'Stuttgart',
-      'NUE': 'Nürnberg',
-      'HHN': 'Frankfurt (Hahn)',
-      'FKB': 'Karlsruhe/Baden-Baden',
-      'LEJ': 'Leipzig',
-      'DRS': 'Dresden',
-      'HAN': 'Hannover',
-      'BRE': 'Bremen',
-      
-      // Netherlands & Belgium
       'AMS': 'Amsterdam',
-      'RTM': 'Rotterdam',
-      'EIN': 'Eindhoven',
-      'MST': 'Maastricht',
-      'BRU': 'Bruxelles',
-      'CRL': 'Bruxelles (Charleroi)',
-      'ANR': 'Antwerp',
-      'LGG': 'Liège',
-      
-      // Spain & Portugal
-      'MAD': 'Madrid',
-      'BCN': 'Barcelona',
-      'AGP': 'Málaga',
-      'VLC': 'Valencia',
-      'PMI': 'Palma de Mallorca',
-      'SVQ': 'Sevilla',
-      'BIO': 'Bilbao',
-      'SDR': 'Santander',
-      'LCG': 'A Coruña',
-      'VGO': 'Vigo',
-      'LIS': 'Lisabona',
-      'OPO': 'Porto',
-      'FAO': 'Faro',
-      'FNC': 'Funchal',
-      'TER': 'Terceira',
-      
-      // Switzerland & Austria
-      'ZUR': 'Zürich',
-      'ZRH': 'Zürich',
-      'GVA': 'Geneva',
-      'BSL': 'Basel',
-      'BRN': 'Berna',
+      'FRA': 'Frankfurt',
+      'MUC': 'München',
       'VIE': 'Viena',
-      'SZG': 'Salzburg',
-      'GRZ': 'Graz',
-      'INN': 'Innsbruck',
-      'LNZ': 'Linz',
-      'KLU': 'Klagenfurt',
-      
-      // Scandinavia
-      'CPH': 'Copenhaga',
-      'BLL': 'Billund',
-      'AAL': 'Aalborg',
-      'ARN': 'Stockholm',
-      'GOT': 'Göteborg',
-      'MMX': 'Malmö',
-      'OSL': 'Oslo',
-      'BGO': 'Bergen',
-      'TRD': 'Trondheim',
-      'SVG': 'Stavanger',
-      'HEL': 'Helsinki',
-      'TMP': 'Tampere',
-      'TKU': 'Turku',
-      'OUL': 'Oulu',
-      'RVN': 'Rovaniemi',
-      
-      // Turkey
-      'IST': 'Istanbul',
-      'SAW': 'Istanbul (Sabiha)',
-      'AYT': 'Antalya',
-      'ESB': 'Ankara',
-      'ADB': 'Izmir',
-      'BJV': 'Bodrum',
-      'DLM': 'Dalaman',
-      'GZT': 'Gaziantep',
-      'TZX': 'Trabzon',
-      
-      // Greece & Cyprus
+      'ZUR': 'Zürich',
       'ATH': 'Atena',
-      'SKG': 'Thessaloniki',
-      'HER': 'Heraklion',
-      'CHQ': 'Chania',
-      'RHO': 'Rodos',
-      'KOS': 'Kos',
-      'CFU': 'Corfu',
-      'ZTH': 'Zakynthos',
-      'JTR': 'Santorini',
-      'MYK': 'Mykonos',
-      'LCA': 'Larnaca',
-      'PFO': 'Paphos',
-      
-      // Eastern Europe
-      'SOF': 'Sofia',
-      'VAR': 'Varna',
-      'BOJ': 'Burgas',
-      'PDV': 'Plovdiv',
-      'BEG': 'Belgrad',
-      'NIS': 'Niš',
-      'ZAG': 'Zagreb',
-      'SPU': 'Split',
-      'DBV': 'Dubrovnik',
-      'ZAD': 'Zadar',
-      'PUY': 'Pula',
-      'RJK': 'Rijeka',
-      'LJU': 'Ljubljana',
-      'MBX': 'Maribor',
-      'BUD': 'Budapesta',
-      'DEB': 'Debrecen',
-      'PEV': 'Pécs',
-      'SOB': 'Szeged',
-      'PRG': 'Praga',
-      'BRQ': 'Brno',
-      'OSR': 'Ostrava',
-      'PED': 'Pardubice',
-      'WAW': 'Varșovia',
-      'WMI': 'Varșovia (Modlin)',
-      'KRK': 'Cracovia',
-      'GDN': 'Gdansk',
-      'WRO': 'Wrocław',
-      'KTW': 'Katowice',
-      'POZ': 'Poznań',
-      'SZZ': 'Szczecin',
-      'LUZ': 'Lublin',
-      'RZE': 'Rzeszów',
-      
-      // Balkans
-      'SKP': 'Skopje',
-      'OHD': 'Ohrid',
-      'TGD': 'Podgorica',
-      'TIV': 'Tivat',
-      'SJJ': 'Sarajevo',
-      'OMO': 'Mostar',
-      'TZL': 'Tuzla',
-      'BNX': 'Banja Luka',
-      
-      // Middle East & North Africa
-      'TLV': 'Tel Aviv',
-      'VDA': 'Eilat',
-      'HFA': 'Haifa',
-      'DOH': 'Doha',
+      'IST': 'Istanbul',
       'DXB': 'Dubai',
-      'EVN': 'Erevan',
-      'BTS': 'Bratislava',
-      'CAI': 'Cairo',
-      'HRG': 'Hurghada',
-      'SSH': 'Sharm el-Sheikh',
-      'LXR': 'Luxor',
-      'ASW': 'Aswan',
-      'RMF': 'Marsa Alam',
-      'TUN': 'Tunis',
-      'MIR': 'Monastir',
-      'DJE': 'Djerba',
-      'SFA': 'Sfax',
-      'CMN': 'Casablanca',
-      'RAK': 'Marrakech',
-      'AGA': 'Agadir',
-      'FEZ': 'Fez',
-      'TNG': 'Tanger',
-      'NDR': 'Nador',
-      'OUD': 'Oujda',
-      
-      // Luxembourg & Monaco
-      'LUX': 'Luxemburg',
-      'MCM': 'Monaco',
-      
-      // Malta
-      'MLA': 'Malta',
-      
-      // Iceland
-      'KEF': 'Reykjavik',
-      'AEY': 'Akureyri',
-      
-      // Baltic States
-      'RIX': 'Riga',
-      'VNO': 'Vilnius',
-      'KUN': 'Kaunas',
-      'TLL': 'Tallinn',
-      'TRU': 'Tartu',
-      
-      // Russia & CIS
-      'SVO': 'Moscova (Sheremetyevo)',
-      'DME': 'Moscova (Domodedovo)',
-      'VKO': 'Moscova (Vnukovo)',
-      'LED': 'Sankt Petersburg',
-      'KZN': 'Kazan',
-      'ROV': 'Rostov-pe-Don',
-      'VOG': 'Volgograd',
-      'KRR': 'Krasnodar',
-      'AER': 'Soci',
-      'UFA': 'Ufa',
-      'SVX': 'Ekaterinburg',
-      'OVB': 'Novosibirsk',
-      'KJA': 'Krasnoyarsk',
-      'IKT': 'Irkutsk',
-      'VVO': 'Vladivostok',
-      'KHV': 'Habarovsk',
-      'YKS': 'Yakutsk',
-      'MAG': 'Magadan',
-      'PKC': 'Petropavlovsk-Kamchatsky',
-      'KGD': 'Kaliningrad',
-      'MRV': 'Mineralnye Vody',
-      'STW': 'Stavropol',
-      'ASF': 'Astrakhan',
-      'PEE': 'Perm',
-      'CEK': 'Chelyabinsk',
-      'TJM': 'Tyumen',
-      'OMS': 'Omsk',
-      'BAX': 'Barnaul',
-      'TOF': 'Tomsk',
-      'KEJ': 'Kemerovo',
-      'SUR': 'Surgut',
-      'NJC': 'Nizhnevartovsk',
-      'HMA': 'Khanty-Mansiysk',
-      'NYM': 'Nadym',
-      'ABA': 'Abakan',
-      'KYZ': 'Kyzyl',
-      'UUD': 'Ulan-Ude',
-      'CHT': 'Chita',
-      'BQS': 'Blagoveshchensk',
-      'DYR': 'Anadyr',
-      'PWE': 'Pevek',
-      'TIK': 'Tiksi',
-      'ARH': 'Arkhangelsk',
-      'MMK': 'Murmansk',
-      'PES': 'Petrozavodsk',
-      'JOK': 'Yoshkar-Ola',
-      'CSY': 'Cheboksary',
-      'ULV': 'Ulyanovsk',
-      'PZA': 'Penza',
-      'LPK': 'Lipetsk',
-      'VOR': 'Voronezh',
-      'KUF': 'Samara',
-      'TOL': 'Togliatti',
-      'RTW': 'Saratov',
-      'EGO': 'Belgorod',
-      'KUR': 'Kursk',
-      'ORL': 'Orel',
-      'TBW': 'Tambov',
-      'RYB': 'Rybinsk',
-      'IAR': 'Yaroslavl',
-      'KLD': 'Kaluga',
-      'TLA': 'Tula',
-      'VKT': 'Vorkuta',
-      'NNM': 'Naryan-Mar',
-      'AMV': 'Amderma',
-      'KTT': 'Kittilä'
+      'DOH': 'Doha',
+      'TLV': 'Tel Aviv',
+      'AGP': 'Málaga',
+      'BCN': 'Barcelona',
+      'MAD': 'Madrid',
+      'LIS': 'Lisabona',
+      'CPH': 'Copenhaga',
+      'ARN': 'Stockholm',
+      'OSL': 'Oslo',
+      'HEL': 'Helsinki',
+      'WAW': 'Varșovia',
+      'PRG': 'Praga',
+      'BUD': 'Budapesta',
+      'SOF': 'Sofia',
+      'BEG': 'Belgrad'
     }
     
     const upperCode = code ? code.toUpperCase() : ''
-    return internationalAirports[upperCode] || code || 'Unknown'
+    return internationalAirports[upperCode] || code || 'Necunoscut'
   }
 
   // Get Romanian and Moldovan airports for filters
@@ -424,10 +237,14 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
       if (data.success) {
         console.log(`[WeeklySchedule] Received ${data.data.length} schedule entries from API`)
         
-        // Convert airport codes to city names synchronously using MAJOR_AIRPORTS
+        // Elimină duplicatele de codeshare ÎNAINTE de conversie
+        const deduplicatedData = removeDuplicateCodeshares(data.data)
+        console.log(`[WeeklySchedule] After codeshare deduplication: ${deduplicatedData.length} entries (removed ${data.data.length - deduplicatedData.length} duplicates)`)
+        
+        // Convert airport codes to city names
         try {
           console.log('[WeeklySchedule] Starting airport code conversion...')
-          const processedData = data.data.map((item: WeeklyScheduleData, index: number) => {
+          const processedData = deduplicatedData.map((item: WeeklyScheduleData, index: number) => {
             if (index < 5) {
               console.log(`[WeeklySchedule] Processing item ${index}:`, { airport: item.airport, destination: item.destination })
             }
@@ -444,10 +261,10 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
           setFilteredData(processedData)
         } catch (error) {
           console.error('[WeeklySchedule] Error processing schedule data:', error)
-          // Fallback: use raw data without conversion
-          console.log('[WeeklySchedule] Using fallback - raw data without conversion')
-          setScheduleData(data.data)
-          setFilteredData(data.data)
+          // Fallback: use deduplicated data without conversion
+          console.log('[WeeklySchedule] Using fallback - deduplicated data without conversion')
+          setScheduleData(deduplicatedData)
+          setFilteredData(deduplicatedData)
         }
         
         // Set data range if available
@@ -518,58 +335,10 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
       )
     }
     
-    // Group similar routes (same origin-destination pair)
-    const routeGroups = new Map<string, WeeklyScheduleData[]>()
-    
-    filtered.forEach(item => {
-      const routeKey = `${item.airport} → ${item.destination}`
-      if (!routeGroups.has(routeKey)) {
-        routeGroups.set(routeKey, [])
-      }
-      routeGroups.get(routeKey)!.push(item)
-    })
-    
-    // Create grouped data with combined information
-    const groupedData: WeeklyScheduleData[] = []
-    
-    routeGroups.forEach((flights, routeKey) => {
-      if (flights.length === 1) {
-        // Single flight, keep as is
-        groupedData.push(flights[0])
-      } else {
-        // Multiple flights on same route, create grouped entry
-        const airlines = [...new Set(flights.map(f => f.airline))].join(', ')
-        const flightNumbers = flights.map(f => f.flightNumber).join(', ')
-        const totalFrequency = flights.reduce((sum, f) => sum + f.frequency, 0)
-        
-        // Combine weekly patterns (OR operation)
-        const combinedPattern = {
-          monday: flights.some(f => f.weeklyPattern.monday),
-          tuesday: flights.some(f => f.weeklyPattern.tuesday),
-          wednesday: flights.some(f => f.weeklyPattern.wednesday),
-          thursday: flights.some(f => f.weeklyPattern.thursday),
-          friday: flights.some(f => f.weeklyPattern.friday),
-          saturday: flights.some(f => f.weeklyPattern.saturday),
-          sunday: flights.some(f => f.weeklyPattern.sunday)
-        }
-        
-        groupedData.push({
-          airport: flights[0].airport,
-          destination: flights[0].destination,
-          airline: airlines,
-          flightNumber: flightNumbers,
-          weeklyPattern: combinedPattern,
-          frequency: totalFrequency,
-          lastUpdated: flights[0].lastUpdated,
-          dataSource: flights[0].dataSource
-        })
-      }
-    })
-    
     // Sort by destination name for better UX
-    groupedData.sort((a, b) => a.destination.localeCompare(b.destination))
+    filtered.sort((a, b) => a.destination.localeCompare(b.destination))
     
-    setFilteredData(groupedData)
+    setFilteredData(filtered)
   }, [scheduleData, airportFilter, searchQuery])
 
   // Process data for destinations matrix view
@@ -731,7 +500,7 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
                 Program Săptămânal Zboruri
               </h3>
               <p className="text-sm text-gray-600">
-                {filteredData.length} rute disponibile
+                {filteredData.length} {getRoutesPlural(filteredData.length)} disponibile
                 {dataRange && (
                   <span className="ml-2">
                     • Perioada: {new Date(dataRange.from).toLocaleDateString('ro-RO')} - {new Date(dataRange.to).toLocaleDateString('ro-RO')}
@@ -854,7 +623,7 @@ export default function WeeklyScheduleView({ className = '', initialAirportFilte
         <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
           <div className="flex items-center justify-between text-sm text-gray-600">
             <div>
-              Afișate: {filteredData.length} din {scheduleData.length} rute
+              Afișate: {filteredData.length} din {scheduleData.length} {getRoutesPlural(scheduleData.length)}
             </div>
             <div>
               Ultima actualizare: {scheduleData.length > 0 ? new Date(scheduleData[0].lastUpdated).toLocaleString('ro-RO') : 'N/A'}
@@ -882,7 +651,7 @@ function DestinationsMatrixView({ destinations }: DestinationsMatrixViewProps) {
           Matrice Destinații
         </h4>
         <p className="text-sm text-gray-600">
-          {destinations.length} destinații disponibile
+          {destinations.length} {destinations.length === 1 ? 'destinație disponibilă' : 'destinații disponibile'}
         </p>
       </div>
 
@@ -913,7 +682,7 @@ function DestinationsMatrixView({ destinations }: DestinationsMatrixViewProps) {
                     <span>{dest.destination}</span>
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
-                    {dest.routes.length} rută{dest.routes.length !== 1 ? 'e' : ''}
+                    {dest.routes.length} {getRoutesPlural(dest.routes.length)}
                   </div>
                 </td>
                 {days.map((day) => (
@@ -948,14 +717,14 @@ function DestinationsMatrixView({ destinations }: DestinationsMatrixViewProps) {
                 <span className="font-medium text-gray-900">{dest.destination}</span>
               </div>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {dest.totalFlights} zboruri
+                {dest.totalFlights} {getFlightsPlural(dest.totalFlights)}
               </span>
             </div>
             
-            <div className="grid grid-cols-7 gap-2">
-              {days.map((day, index) => (
+            <div className="grid grid-cols-7 gap-1">
+              {days.map((day, dayIndex) => (
                 <div key={day} className="text-center">
-                  <div className="text-xs text-gray-500 mb-1">{dayShortLabels[index]}</div>
+                  <div className="text-xs text-gray-500 mb-1">{dayShortLabels[dayIndex]}</div>
                   <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${
                     dest.weeklyPattern[day]
                       ? 'bg-green-100 text-green-800 border border-green-200'
@@ -993,7 +762,7 @@ function DaysTabView({ selectedDay, onDayChange, dayLabels, dayShortLabels, getD
           Program pe Zile
         </h4>
         <p className="text-sm text-gray-600">
-          {destinationsForSelectedDay.length} destinații în {dayLabels[selectedDay]}
+          {destinationsForSelectedDay.length} {destinationsForSelectedDay.length === 1 ? 'destinație' : 'destinații'} în {dayLabels[selectedDay]}
         </p>
       </div>
 

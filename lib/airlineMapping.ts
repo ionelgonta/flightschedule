@@ -438,6 +438,22 @@ export const AIRPORT_CITY_MAPPING: { [key: string]: string } = {
   'PSA': 'Pisa',
   'BSL': 'Basel',
   
+  // Missing airports from flight data - December 2024
+  'TLV': 'Tel Aviv',
+  'AGP': 'Málaga',
+  'ALC': 'Alicante',
+  'BTS': 'Bratislava',
+  'CRL': 'Charleroi',
+  'DOH': 'Doha',
+  'LBA': 'Leeds',
+  'LUX': 'Luxembourg',
+  'MLA': 'Malta',
+  'PSR': 'Pescara',
+  'TRF': 'Oslo Torp',
+  'ZRH': 'Zurich',
+  'BRS': 'Bristol',
+  'XXX': 'Necunoscut',
+  
   // No fallback codes - only real IATA codes allowed
 }
 

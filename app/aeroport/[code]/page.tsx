@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { getAirportByCodeOrSlug, generateAirportSlug } from '@/lib/airports'
 import { Plane, ArrowRight, MapPin, Clock, Users, Building, TrendingUp } from 'lucide-react'
 import { AdBanner } from '@/components/ads/AdBanner'
+import WeatherWidget from '@/components/weather/WeatherWidget'
+import { getWeatherCityForAirport } from '@/lib/weatherUtils'
 
 interface AirportPageProps {
   params: {
@@ -41,6 +43,8 @@ export default function AirportPage({ params }: AirportPageProps) {
   if (!airport) {
     notFound()
   }
+
+  const weatherCity = getWeatherCityForAirport(airport.code)
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -405,6 +409,9 @@ export default function AirportPage({ params }: AirportPageProps) {
 
             {/* Sidebar - Compact */}
             <div className="lg:col-span-1 space-y-6">
+              {/* Weather Widget */}
+              <WeatherWidget city={weatherCity} />
+              
               {/* Sidebar Ad */}
               <AdBanner 
                 slot="sidebar-right"

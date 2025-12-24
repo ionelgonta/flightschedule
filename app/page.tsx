@@ -4,6 +4,7 @@ import { MAJOR_AIRPORTS, generateAirportSlug } from '@/lib/airports'
 import { AdBanner } from '@/components/ads/AdBanner'
 import { StructuredData, generateOrganizationSchema, generateWebSiteSchema } from '@/components/seo/StructuredData'
 import { InternalLinks } from '@/components/seo/InternalLinks'
+import WeatherWidget from '@/components/weather/WeatherWidget'
 
 export default function HomePage() {
   // Feature Romanian and Moldovan airports
@@ -311,6 +312,9 @@ export default function HomePage() {
 
             {/* Compact Sidebar */}
             <div className="lg:col-span-1 space-y-6">
+              {/* Weather Widget */}
+              <WeatherWidget city="Bucharest" compact={true} />
+              
               {/* Sidebar Ad */}
               <AdBanner slot="sidebar-right" size="300x600" />
               

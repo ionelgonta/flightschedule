@@ -100,25 +100,35 @@ export async function POST(request: NextRequest) {
       
       // Dacă avem configurația completă, actualizează și zonele
       if (config && config.zones) {
-        // Actualizează configurația zonelor
+        // Reconstruiește întreaga secțiune zones pentru a evita problemele de regex
+        let zonesContent = '  zones: {\n'
+        
         for (const [zoneName, zoneConfig] of Object.entries(config.zones)) {
           const zone = zoneConfig as any
+          zonesContent += `    '${zoneName}': {\n`
+          zonesContent += `      mode: '${zone.mode}',\n`
+          zonesContent += `      slotId: '${zone.slotId || ''}',\n`
+          zonesContent += `      size: '${zone.size}',\n`
           
-          // Actualizează mode
-          const modePattern = new RegExp(`('${zoneName}':\\s*{[^}]*mode:\\s*['"\`])([^'"\`]+)(['"\`])`)
-          configContent = configContent.replace(modePattern, `$1${zone.mode}$3`)
-          
-          // Actualizează slotId
-          const slotIdPattern = new RegExp(`('${zoneName}':\\s*{[^}]*slotId:\\s*['"\`])([^'"\`]*)(['"\`])`)
-          configContent = configContent.replace(slotIdPattern, `$1${zone.slotId || ''}$3`)
-          
-          // Actualizează customHtml pentru zone partner
-          if (zoneName.includes('partner') && zone.customHtml !== undefined) {
-            const customHtmlPattern = new RegExp(`('${zoneName}':[^}]*customHtml:\\s*)([^,}]+)`)
-            const newValue = zone.customHtml ? `'${zone.customHtml.replace(/'/g, "\\'")}'` : 'undefined'
-            configContent = configContent.replace(customHtmlPattern, `$1${newValue}`)
+          if (zoneName.includes('partner')) {
+            if (zone.customHtml && zone.customHtml.trim()) {
+              const escapedHtml = zone.customHtml.replace(/'/g, "\\'").replace(/\n/g, '\\n')
+              zonesContent += `      customHtml: '${escapedHtml}'\n`
+            } else {
+              zonesContent += `      customHtml: undefined\n`
+            }
+          } else {
+            zonesContent += `      customHtml: undefined\n`
           }
+          
+          zonesContent += `    },\n`
         }
+        
+        zonesContent += '  }\n'
+        
+        // Înlocuiește întreaga secțiune zones
+        const zonesPattern = /zones:\s*{[\s\S]*?}\s*}/
+        configContent = configContent.replace(zonesPattern, zonesContent.trim())
       }
       
       // Salvează fișierul actualizat

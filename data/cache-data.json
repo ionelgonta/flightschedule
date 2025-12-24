@@ -22,28 +22,6 @@
     "success": true
   },
   {
-    "id": "flight_SUJ_arrivals_1766061880909",
-    "category": "flightData",
-    "key": "SUJ_arrivals",
-    "data": [],
-    "createdAt": "2025-12-18T12:44:40.909Z",
-    "expiresAt": "2026-01-17T12:44:40.909Z",
-    "lastAccessed": "2025-12-18T12:44:40.909Z",
-    "source": "cron",
-    "success": true
-  },
-  {
-    "id": "flight_SUJ_departures_1766061881130",
-    "category": "flightData",
-    "key": "SUJ_departures",
-    "data": [],
-    "createdAt": "2025-12-18T12:44:41.130Z",
-    "expiresAt": "2026-01-17T12:44:41.130Z",
-    "lastAccessed": "2025-12-18T12:44:41.130Z",
-    "source": "cron",
-    "success": true
-  },
-  {
     "id": "analytics_airport-statistics_1766424359561",
     "category": "analytics",
     "key": "airport-statistics",
@@ -520,7 +498,7 @@
     "success": true
   },
   {
-    "id": "flight_OTP_arrivals_1766486345003",
+    "id": "flight_OTP_arrivals_1766569145245",
     "category": "flightData",
     "key": "OTP_arrivals",
     "data": [
@@ -3421,14 +3399,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.003Z",
-    "expiresAt": "2026-01-22T10:39:05.003Z",
-    "lastAccessed": "2025-12-23T10:39:05.003Z",
+    "createdAt": "2025-12-24T09:39:05.245Z",
+    "expiresAt": "2026-01-23T09:39:05.244Z",
+    "lastAccessed": "2025-12-24T09:39:05.245Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_OTP_departures_1766486345010",
+    "id": "flight_OTP_departures_1766569145258",
     "category": "flightData",
     "key": "OTP_departures",
     "data": [
@@ -7171,14 +7149,14 @@
         "delay": 93
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.010Z",
-    "expiresAt": "2026-01-22T10:39:05.010Z",
-    "lastAccessed": "2025-12-23T10:39:05.010Z",
+    "createdAt": "2025-12-24T09:39:05.258Z",
+    "expiresAt": "2026-01-23T09:39:05.258Z",
+    "lastAccessed": "2025-12-24T09:39:05.258Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_BBU_arrivals_1766486345014",
+    "id": "flight_BBU_arrivals_1766569145267",
     "category": "flightData",
     "key": "BBU_arrivals",
     "data": [
@@ -7303,14 +7281,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.014Z",
-    "expiresAt": "2026-01-22T10:39:05.014Z",
-    "lastAccessed": "2025-12-23T10:39:05.014Z",
+    "createdAt": "2025-12-24T09:39:05.267Z",
+    "expiresAt": "2026-01-23T09:39:05.267Z",
+    "lastAccessed": "2025-12-24T09:39:05.267Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_BBU_departures_1766486345017",
+    "id": "flight_BBU_departures_1766569145271",
     "category": "flightData",
     "key": "BBU_departures",
     "data": [
@@ -7515,14 +7493,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.017Z",
-    "expiresAt": "2026-01-22T10:39:05.017Z",
-    "lastAccessed": "2025-12-23T10:39:05.017Z",
+    "createdAt": "2025-12-24T09:39:05.271Z",
+    "expiresAt": "2026-01-23T09:39:05.271Z",
+    "lastAccessed": "2025-12-24T09:39:05.271Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_CLJ_arrivals_1766486345020",
+    "id": "flight_CLJ_arrivals_1766569145283",
     "category": "flightData",
     "key": "CLJ_arrivals",
     "data": [
@@ -7963,14 +7941,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.020Z",
-    "expiresAt": "2026-01-22T10:39:05.020Z",
-    "lastAccessed": "2025-12-23T10:39:05.020Z",
+    "createdAt": "2025-12-24T09:39:05.283Z",
+    "expiresAt": "2026-01-23T09:39:05.283Z",
+    "lastAccessed": "2025-12-24T09:39:05.283Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_CLJ_departures_1766486345022",
+    "id": "flight_CLJ_departures_1766569145287",
     "category": "flightData",
     "key": "CLJ_departures",
     "data": [
@@ -8357,14 +8335,14 @@
         "delay": 15
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.022Z",
-    "expiresAt": "2026-01-22T10:39:05.022Z",
-    "lastAccessed": "2025-12-23T10:39:05.022Z",
+    "createdAt": "2025-12-24T09:39:05.287Z",
+    "expiresAt": "2026-01-23T09:39:05.287Z",
+    "lastAccessed": "2025-12-24T09:39:05.287Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_TSR_arrivals_1766486345026",
+    "id": "flight_TSR_arrivals_1766569145291",
     "category": "flightData",
     "key": "TSR_arrivals",
     "data": [
@@ -8567,14 +8545,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.026Z",
-    "expiresAt": "2026-01-22T10:39:05.026Z",
-    "lastAccessed": "2025-12-23T10:39:05.026Z",
+    "createdAt": "2025-12-24T09:39:05.291Z",
+    "expiresAt": "2026-01-23T09:39:05.291Z",
+    "lastAccessed": "2025-12-24T09:39:05.291Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_TSR_departures_1766486345029",
+    "id": "flight_TSR_departures_1766569145293",
     "category": "flightData",
     "key": "TSR_departures",
     "data": [
@@ -8759,14 +8737,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.029Z",
-    "expiresAt": "2026-01-22T10:39:05.029Z",
-    "lastAccessed": "2025-12-23T10:39:05.029Z",
+    "createdAt": "2025-12-24T09:39:05.293Z",
+    "expiresAt": "2026-01-23T09:39:05.293Z",
+    "lastAccessed": "2025-12-24T09:39:05.293Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_IAS_arrivals_1766486345031",
+    "id": "flight_IAS_arrivals_1766569145296",
     "category": "flightData",
     "key": "IAS_arrivals",
     "data": [
@@ -8987,14 +8965,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.031Z",
-    "expiresAt": "2026-01-22T10:39:05.031Z",
-    "lastAccessed": "2025-12-23T10:39:05.031Z",
+    "createdAt": "2025-12-24T09:39:05.297Z",
+    "expiresAt": "2026-01-23T09:39:05.296Z",
+    "lastAccessed": "2025-12-24T09:39:05.297Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_IAS_departures_1766486345034",
+    "id": "flight_IAS_departures_1766569145300",
     "category": "flightData",
     "key": "IAS_departures",
     "data": [
@@ -9233,14 +9211,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.034Z",
-    "expiresAt": "2026-01-22T10:39:05.034Z",
-    "lastAccessed": "2025-12-23T10:39:05.034Z",
+    "createdAt": "2025-12-24T09:39:05.300Z",
+    "expiresAt": "2026-01-23T09:39:05.300Z",
+    "lastAccessed": "2025-12-24T09:39:05.300Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_CND_arrivals_1766486345036",
+    "id": "flight_CND_arrivals_1766569145302",
     "category": "flightData",
     "key": "CND_arrivals",
     "data": [
@@ -9263,14 +9241,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.036Z",
-    "expiresAt": "2026-01-22T10:39:05.036Z",
-    "lastAccessed": "2025-12-23T10:39:05.036Z",
+    "createdAt": "2025-12-24T09:39:05.302Z",
+    "expiresAt": "2026-01-23T09:39:05.302Z",
+    "lastAccessed": "2025-12-24T09:39:05.302Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_CND_departures_1766486345038",
+    "id": "flight_CND_departures_1766569145305",
     "category": "flightData",
     "key": "CND_departures",
     "data": [
@@ -9293,14 +9271,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.038Z",
-    "expiresAt": "2026-01-22T10:39:05.038Z",
-    "lastAccessed": "2025-12-23T10:39:05.038Z",
+    "createdAt": "2025-12-24T09:39:05.305Z",
+    "expiresAt": "2026-01-23T09:39:05.305Z",
+    "lastAccessed": "2025-12-24T09:39:05.305Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_SBZ_arrivals_1766486345040",
+    "id": "flight_SBZ_arrivals_1766569145308",
     "category": "flightData",
     "key": "SBZ_arrivals",
     "data": [
@@ -9365,14 +9343,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.040Z",
-    "expiresAt": "2026-01-22T10:39:05.040Z",
-    "lastAccessed": "2025-12-23T10:39:05.040Z",
+    "createdAt": "2025-12-24T09:39:05.308Z",
+    "expiresAt": "2026-01-23T09:39:05.308Z",
+    "lastAccessed": "2025-12-24T09:39:05.308Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_SBZ_departures_1766486345042",
+    "id": "flight_SBZ_departures_1766569145310",
     "category": "flightData",
     "key": "SBZ_departures",
     "data": [
@@ -9457,14 +9435,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.042Z",
-    "expiresAt": "2026-01-22T10:39:05.042Z",
-    "lastAccessed": "2025-12-23T10:39:05.042Z",
+    "createdAt": "2025-12-24T09:39:05.310Z",
+    "expiresAt": "2026-01-23T09:39:05.310Z",
+    "lastAccessed": "2025-12-24T09:39:05.310Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_CRA_arrivals_1766486345045",
+    "id": "flight_CRA_arrivals_1766569145313",
     "category": "flightData",
     "key": "CRA_arrivals",
     "data": [
@@ -9523,14 +9501,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.045Z",
-    "expiresAt": "2026-01-22T10:39:05.045Z",
-    "lastAccessed": "2025-12-23T10:39:05.045Z",
+    "createdAt": "2025-12-24T09:39:05.313Z",
+    "expiresAt": "2026-01-23T09:39:05.313Z",
+    "lastAccessed": "2025-12-24T09:39:05.313Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_CRA_departures_1766486345053",
+    "id": "flight_CRA_departures_1766569145316",
     "category": "flightData",
     "key": "CRA_departures",
     "data": [
@@ -9607,14 +9585,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.053Z",
-    "expiresAt": "2026-01-22T10:39:05.053Z",
-    "lastAccessed": "2025-12-23T10:39:05.053Z",
+    "createdAt": "2025-12-24T09:39:05.316Z",
+    "expiresAt": "2026-01-23T09:39:05.316Z",
+    "lastAccessed": "2025-12-24T09:39:05.316Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_BCM_arrivals_1766486345056",
+    "id": "flight_BCM_arrivals_1766569145319",
     "category": "flightData",
     "key": "BCM_arrivals",
     "data": [
@@ -9637,14 +9615,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.056Z",
-    "expiresAt": "2026-01-22T10:39:05.056Z",
-    "lastAccessed": "2025-12-23T10:39:05.056Z",
+    "createdAt": "2025-12-24T09:39:05.319Z",
+    "expiresAt": "2026-01-23T09:39:05.319Z",
+    "lastAccessed": "2025-12-24T09:39:05.319Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_BCM_departures_1766486345058",
+    "id": "flight_BCM_departures_1766569145321",
     "category": "flightData",
     "key": "BCM_departures",
     "data": [
@@ -9667,14 +9645,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.058Z",
-    "expiresAt": "2026-01-22T10:39:05.058Z",
-    "lastAccessed": "2025-12-23T10:39:05.058Z",
+    "createdAt": "2025-12-24T09:39:05.321Z",
+    "expiresAt": "2026-01-23T09:39:05.321Z",
+    "lastAccessed": "2025-12-24T09:39:05.321Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_BAY_arrivals_1766486345061",
+    "id": "flight_BAY_arrivals_1766569145324",
     "category": "flightData",
     "key": "BAY_arrivals",
     "data": [
@@ -9715,14 +9693,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.061Z",
-    "expiresAt": "2026-01-22T10:39:05.061Z",
-    "lastAccessed": "2025-12-23T10:39:05.061Z",
+    "createdAt": "2025-12-24T09:39:05.324Z",
+    "expiresAt": "2026-01-23T09:39:05.324Z",
+    "lastAccessed": "2025-12-24T09:39:05.324Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_BAY_departures_1766486345064",
+    "id": "flight_BAY_departures_1766569145327",
     "category": "flightData",
     "key": "BAY_departures",
     "data": [
@@ -9763,14 +9741,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.064Z",
-    "expiresAt": "2026-01-22T10:39:05.064Z",
-    "lastAccessed": "2025-12-23T10:39:05.064Z",
+    "createdAt": "2025-12-24T09:39:05.327Z",
+    "expiresAt": "2026-01-23T09:39:05.327Z",
+    "lastAccessed": "2025-12-24T09:39:05.327Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_OMR_arrivals_1766486345066",
+    "id": "flight_OMR_arrivals_1766569145329",
     "category": "flightData",
     "key": "OMR_arrivals",
     "data": [
@@ -9849,14 +9827,14 @@
         "delay": 1
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.066Z",
-    "expiresAt": "2026-01-22T10:39:05.066Z",
-    "lastAccessed": "2025-12-23T10:39:05.066Z",
+    "createdAt": "2025-12-24T09:39:05.329Z",
+    "expiresAt": "2026-01-23T09:39:05.329Z",
+    "lastAccessed": "2025-12-24T09:39:05.329Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_OMR_departures_1766486345069",
+    "id": "flight_OMR_departures_1766569145331",
     "category": "flightData",
     "key": "OMR_departures",
     "data": [
@@ -9935,14 +9913,14 @@
         "delay": 20
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.069Z",
-    "expiresAt": "2026-01-22T10:39:05.069Z",
-    "lastAccessed": "2025-12-23T10:39:05.069Z",
+    "createdAt": "2025-12-24T09:39:05.331Z",
+    "expiresAt": "2026-01-23T09:39:05.331Z",
+    "lastAccessed": "2025-12-24T09:39:05.331Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_SCV_arrivals_1766486345071",
+    "id": "flight_SCV_arrivals_1766569145334",
     "category": "flightData",
     "key": "SCV_arrivals",
     "data": [
@@ -10073,14 +10051,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.071Z",
-    "expiresAt": "2026-01-22T10:39:05.071Z",
-    "lastAccessed": "2025-12-23T10:39:05.071Z",
+    "createdAt": "2025-12-24T09:39:05.334Z",
+    "expiresAt": "2026-01-23T09:39:05.334Z",
+    "lastAccessed": "2025-12-24T09:39:05.334Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_SCV_departures_1766486345073",
+    "id": "flight_SCV_departures_1766569145336",
     "category": "flightData",
     "key": "SCV_departures",
     "data": [
@@ -10175,14 +10153,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.073Z",
-    "expiresAt": "2026-01-22T10:39:05.073Z",
-    "lastAccessed": "2025-12-23T10:39:05.073Z",
+    "createdAt": "2025-12-24T09:39:05.336Z",
+    "expiresAt": "2026-01-23T09:39:05.336Z",
+    "lastAccessed": "2025-12-24T09:39:05.336Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_TGM_arrivals_1766486345075",
+    "id": "flight_TGM_arrivals_1766569145338",
     "category": "flightData",
     "key": "TGM_arrivals",
     "data": [
@@ -10205,14 +10183,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.075Z",
-    "expiresAt": "2026-01-22T10:39:05.075Z",
-    "lastAccessed": "2025-12-23T10:39:05.075Z",
+    "createdAt": "2025-12-24T09:39:05.338Z",
+    "expiresAt": "2026-01-23T09:39:05.338Z",
+    "lastAccessed": "2025-12-24T09:39:05.338Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_TGM_departures_1766486345078",
+    "id": "flight_TGM_departures_1766569145341",
     "category": "flightData",
     "key": "TGM_departures",
     "data": [
@@ -10235,14 +10213,74 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:05.078Z",
-    "expiresAt": "2026-01-22T10:39:05.078Z",
-    "lastAccessed": "2025-12-23T10:39:05.078Z",
+    "createdAt": "2025-12-24T09:39:05.341Z",
+    "expiresAt": "2026-01-23T09:39:05.341Z",
+    "lastAccessed": "2025-12-24T09:39:05.341Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_RMO_arrivals_1766486346554",
+    "id": "flight_SUJ_arrivals_1766569146354",
+    "category": "flightData",
+    "key": "SUJ_arrivals",
+    "data": [
+      {
+        "flight_number": "W9 3650",
+        "airline": {
+          "code": "W9",
+          "name": "Wizz Air UK"
+        },
+        "origin": {
+          "code": "LTN",
+          "name": ""
+        },
+        "destination": {
+          "code": "SUJ",
+          "name": ""
+        },
+        "scheduled_time": "2025-12-24 11:10+02:00",
+        "status": "estimated",
+        "delay": 0
+      }
+    ],
+    "createdAt": "2025-12-24T09:39:06.354Z",
+    "expiresAt": "2026-01-23T09:39:06.354Z",
+    "lastAccessed": "2025-12-24T09:39:06.354Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_SUJ_departures_1766569146362",
+    "category": "flightData",
+    "key": "SUJ_departures",
+    "data": [
+      {
+        "flight_number": "W9 3649",
+        "airline": {
+          "code": "W9",
+          "name": "Wizz Air UK"
+        },
+        "origin": {
+          "code": "SUJ",
+          "name": ""
+        },
+        "destination": {
+          "code": "LTN",
+          "name": ""
+        },
+        "scheduled_time": "2025-12-24 11:45+02:00",
+        "status": "estimated",
+        "delay": 0
+      }
+    ],
+    "createdAt": "2025-12-24T09:39:06.362Z",
+    "expiresAt": "2026-01-23T09:39:06.362Z",
+    "lastAccessed": "2025-12-24T09:39:06.362Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_RMO_arrivals_1766569146367",
     "category": "flightData",
     "key": "RMO_arrivals",
     "data": [
@@ -10841,14 +10879,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:06.554Z",
-    "expiresAt": "2026-01-22T10:39:06.554Z",
-    "lastAccessed": "2025-12-23T10:39:06.554Z",
+    "createdAt": "2025-12-24T09:39:06.367Z",
+    "expiresAt": "2026-01-23T09:39:06.367Z",
+    "lastAccessed": "2025-12-24T09:39:06.367Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_RMO_departures_1766486346557",
+    "id": "flight_RMO_departures_1766569146370",
     "category": "flightData",
     "key": "RMO_departures",
     "data": [
@@ -11411,9 +11449,9 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-23T10:39:06.557Z",
-    "expiresAt": "2026-01-22T10:39:06.557Z",
-    "lastAccessed": "2025-12-23T10:39:06.557Z",
+    "createdAt": "2025-12-24T09:39:06.370Z",
+    "expiresAt": "2026-01-23T09:39:06.370Z",
+    "lastAccessed": "2025-12-24T09:39:06.370Z",
     "source": "manual",
     "success": true
   }

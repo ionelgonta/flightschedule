@@ -86,6 +86,7 @@
 4. **NEVER** create demo airports
 5. **NEVER** use test data in production
 6. **NEVER** fill empty cache with fake data
+7. **🚨 NEVER DELETE PERSISTENT CACHE WITHOUT EXPLICIT USER PERMISSION** - Historical data is CRITICAL
 
 ## ✅ ALLOWED ACTIONS
 

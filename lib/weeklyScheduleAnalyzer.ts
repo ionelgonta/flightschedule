@@ -605,6 +605,94 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
     this.tableManager = new ScheduleTableManagerImpl();
   }
 
+  // Funcție pentru detectarea zborurilor codeshare
+  private isCodeshareFlightNumber(flightNumber: string, airline: string): boolean {
+    if (!flightNumber || !airline) return false
+    
+    // Codeshare-urile au de obicei numere de zbor cu prefixe diferite pentru același zbor
+    const codesharePatterns = [
+      /\*/, // Asterisk indicates codeshare
+      /operated by/i,
+      /op by/i,
+    ]
+    
+    // Check if flight number contains codeshare indicators
+    if (codesharePatterns.some(pattern => pattern.test(flightNumber))) {
+      return true
+    }
+    
+    // Extract flight prefix (e.g., "JL" from "JL 6535")
+    const flightPrefix = flightNumber.replace(/\s+/g, ' ').split(' ')[0]?.replace(/\d+/g, '').toUpperCase()
+    const airlineUpper = airline.toUpperCase()
+    
+    // Common codeshare mismatches - flight code doesn't match airline
+    const codeShareMismatches = [
+      { flight: 'JL', airline: 'BRITISH' }, // Japan Airlines code on British Airways
+      { flight: 'AA', airline: 'BRITISH' }, // American Airlines code on British Airways
+      { flight: 'BA', airline: 'JAPAN' }, // British Airways code on Japan Airlines
+      { flight: 'LH', airline: 'UNITED' }, // Lufthansa code on United Airlines
+      { flight: 'UA', airline: 'LUFTHANSA' }, // United Airlines code on Lufthansa
+      { flight: 'AF', airline: 'DELTA' }, // Air France code on Delta
+      { flight: 'DL', airline: 'AIR FRANCE' }, // Delta code on Air France
+      { flight: 'KL', airline: 'BRITISH' }, // KLM code on British Airways
+      { flight: 'KL', airline: 'LUFTHANSA' }, // KLM code on Lufthansa
+      { flight: 'OS', airline: 'BRITISH' }, // Austrian Airlines code on British Airways
+      { flight: 'LH', airline: 'BRITISH' }, // Lufthansa code on British Airways
+      { flight: 'VS', airline: 'DELTA' }, // Virgin Atlantic code on Delta
+      { flight: 'EK', airline: 'BRITISH' }, // Emirates code on British Airways
+      { flight: 'QR', airline: 'BRITISH' }, // Qatar Airways code on British Airways
+    ]
+    
+    const isCodeshare = codeShareMismatches.some(mismatch => 
+      flightPrefix === mismatch.flight && airlineUpper.includes(mismatch.airline)
+    )
+    
+    if (isCodeshare) {
+      console.log(`[Codeshare Detection] Found codeshare: ${flightNumber} on ${airline} (${flightPrefix} mismatch)`)
+    }
+    
+    return isCodeshare
+  }
+
+  // Funcție pentru eliminarea duplicatelor de codeshare din datele brute
+  private removeDuplicateCodeshares(flights: RawFlightData[]): RawFlightData[] {
+    const flightMap = new Map<string, RawFlightData>()
+    
+    flights.forEach(flight => {
+      // Create a unique key based on route, time, and airline
+      const originCode = typeof flight.origin === 'string' ? flight.origin : flight.origin?.code || ''
+      const destinationCode = typeof flight.destination === 'string' ? flight.destination : flight.destination?.code || ''
+      const scheduledTime = new Date(flight.scheduled_time).toISOString().split('T')[0] // Date only
+      const routeKey = `${originCode}-${destinationCode}-${scheduledTime}`
+      
+      const isCodeshare = this.isCodeshareFlightNumber(flight.flight_number, flight.airline?.name || '')
+      
+      if (!flightMap.has(routeKey)) {
+        // First flight for this route/time, add it
+        flightMap.set(routeKey, flight)
+      } else {
+        const existingFlight = flightMap.get(routeKey)!
+        const existingIsCodeshare = this.isCodeshareFlightNumber(existingFlight.flight_number, existingFlight.airline?.name || '')
+        
+        // Dacă zborul existent este codeshare și noul nu este, înlocuiește
+        if (existingIsCodeshare && !isCodeshare) {
+          flightMap.set(routeKey, flight)
+        } else if (!existingIsCodeshare && isCodeshare) {
+          // Păstrează zborul existent (non-codeshare)
+          return
+        } else {
+          // Ambele sunt codeshare sau ambele nu sunt - păstrează primul
+          return
+        }
+      }
+    })
+    
+    const deduplicatedFlights = Array.from(flightMap.values())
+    console.log(`[Weekly Schedule] Codeshare deduplication: ${flights.length} → ${deduplicatedFlights.length} flights (removed ${flights.length - deduplicatedFlights.length} codeshares)`)
+    
+    return deduplicatedFlights
+  }
+
   async analyzeFlightPatterns(): Promise<AggregatedSchedule> {
     console.log('Starting weekly flight pattern analysis...');
     
@@ -640,11 +728,14 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
     
     console.log(`Processing ${flightData.length} flight datasets...`);
     
-    // Group flights by route (origin-destination pair)
+    // Group flights by route (origin-destination pair) and apply codeshare filtering
     flightData.forEach(flightDataSet => {
       console.log(`Processing ${flightDataSet.airport_code} ${flightDataSet.type}: ${flightDataSet.data.length} flights`);
       
-      flightDataSet.data.forEach(flight => {
+      // Apply codeshare deduplication to the flight data
+      const deduplicatedFlights = this.removeDuplicateCodeshares(flightDataSet.data);
+      
+      deduplicatedFlights.forEach(flight => {
         let originCode: string;
         let destinationCode: string;
         
@@ -673,7 +764,7 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
       });
     });
     
-    console.log(`Generated ${routeMap.size} unique routes from flight data`);
+    console.log(`Generated ${routeMap.size} unique routes from flight data (after codeshare deduplication)`);
 
     // Analyze each route
     routeMap.forEach((flights, routeKey) => {
@@ -744,13 +835,20 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
 
       flightGroups.forEach((flights, key) => {
         const [airline, flightNumber] = key.split('-');
+        
+        // Skip codeshare flights at the schedule level as well
+        if (this.isCodeshareFlightNumber(flightNumber, airline)) {
+          console.log(`    Skipping codeshare flight: ${airline} ${flightNumber}`);
+          return;
+        }
+        
         const pattern = this.patternGenerator.generateWeeklyPattern(
           flights.map(f => ({ scheduled_time: f.scheduledTime } as RawFlightData))
         );
 
         const scheduleEntry = {
-          airport: route.route.origin,
-          destination: route.route.destination,
+          airport: this.getAirportDisplayName(route.route.origin),
+          destination: this.getAirportDisplayName(route.route.destination),
           airline,
           flightNumber,
           weeklyPattern: {
@@ -768,13 +866,285 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
         };
 
         scheduleData.push(scheduleEntry);
-        console.log(`    Added: ${airline} ${flightNumber} (${flights.length} flights)`);
+        console.log(`    Added: ${airline} ${flightNumber} (${flights.length} flights) - ${scheduleEntry.airport} → ${scheduleEntry.destination}`);
       });
     });
 
-    console.log(`Generated ${scheduleData.length} schedule entries, saving to storage...`);
+    console.log(`Generated ${scheduleData.length} schedule entries (after codeshare exclusion), saving to storage...`);
     await this.tableManager.updateTable(scheduleData);
     console.log(`=== Weekly schedule table updated successfully with ${scheduleData.length} entries ===`);
+  }
+
+  // Helper function to convert airport codes to display names
+  private getAirportDisplayName(code: string): string {
+    if (!code) return 'Aeroport necunoscut'
+    
+    if (code.includes('(') || code.length > 3) {
+      return code
+    }
+    
+    const airport = MAJOR_AIRPORTS.find(a => a.code === code.toUpperCase())
+    if (airport) {
+      return airport.city
+    }
+    
+    // Mapare pentru aeroporturi internaționale comune
+    const internationalAirports: { [key: string]: string } = {
+      // France
+      'BVA': 'Paris (Beauvais)',
+      'CDG': 'Paris (Charles de Gaulle)',
+      'ORY': 'Paris (Orly)',
+      'LYS': 'Lyon',
+      'MRS': 'Marseille',
+      'NCE': 'Nisa',
+      'TLS': 'Toulouse',
+      'BOD': 'Bordeaux',
+      'NTE': 'Nantes',
+      'SXB': 'Strasbourg',
+      
+      // UK & Ireland
+      'LHR': 'Londra (Heathrow)',
+      'LGW': 'Londra (Gatwick)',
+      'STN': 'Londra (Stansted)',
+      'LTN': 'Londra (Luton)',
+      'LBA': 'Leeds',
+      'EDI': 'Edinburgh',
+      'GLA': 'Glasgow',
+      'MAN': 'Manchester',
+      'BHX': 'Birmingham',
+      'LPL': 'Liverpool',
+      'NCL': 'Newcastle',
+      'BRS': 'Bristol',
+      'CWL': 'Cardiff',
+      'BFS': 'Belfast',
+      'DUB': 'Dublin',
+      'ORK': 'Cork',
+      
+      // Italy
+      'FCO': 'Roma (Fiumicino)',
+      'CIA': 'Roma (Ciampino)',
+      'MXP': 'Milano (Malpensa)',
+      'BGY': 'Milano (Bergamo)',
+      'LIN': 'Milano (Linate)',
+      'VRN': 'Verona',
+      'TSF': 'Treviso',
+      'VCE': 'Venetia',
+      'BLQ': 'Bologna',
+      'FLR': 'Florenta',
+      'PSA': 'Pisa',
+      'PSR': 'Pescara',
+      'TRN': 'Torino',
+      'NAP': 'Napoli',
+      'CTA': 'Catania',
+      'PMO': 'Palermo',
+      'CAG': 'Cagliari',
+      'BRI': 'Bari',
+      'BDS': 'Brindisi',
+      'REG': 'Reggio Calabria',
+      'LMP': 'Lampedusa',
+      'PNL': 'Pantelleria',
+      
+      // Germany
+      'MUC': 'Munchen',
+      'FRA': 'Frankfurt',
+      'DUS': 'Dusseldorf',
+      'CGN': 'Koln',
+      'DTM': 'Dortmund',
+      'HAM': 'Hamburg',
+      'BER': 'Berlin',
+      'SXF': 'Berlin (Schonefeld)',
+      'TXL': 'Berlin (Tegel)',
+      'STR': 'Stuttgart',
+      'NUE': 'Nurnberg',
+      'HHN': 'Frankfurt (Hahn)',
+      'FKB': 'Karlsruhe/Baden-Baden',
+      'LEJ': 'Leipzig',
+      'DRS': 'Dresden',
+      'HAN': 'Hannover',
+      'BRE': 'Bremen',
+      
+      // Netherlands & Belgium
+      'AMS': 'Amsterdam',
+      'RTM': 'Rotterdam',
+      'EIN': 'Eindhoven',
+      'MST': 'Maastricht',
+      'BRU': 'Bruxelles',
+      'CRL': 'Bruxelles (Charleroi)',
+      'ANR': 'Antwerp',
+      'LGG': 'Liege',
+      
+      // Spain & Portugal
+      'MAD': 'Madrid',
+      'BCN': 'Barcelona',
+      'AGP': 'Malaga',
+      'VLC': 'Valencia',
+      'PMI': 'Palma de Mallorca',
+      'SVQ': 'Sevilla',
+      'BIO': 'Bilbao',
+      'SDR': 'Santander',
+      'LCG': 'A Coruna',
+      'VGO': 'Vigo',
+      'LIS': 'Lisabona',
+      'OPO': 'Porto',
+      'FAO': 'Faro',
+      'FNC': 'Funchal',
+      'TER': 'Terceira',
+      
+      // Switzerland & Austria
+      'ZUR': 'Zurich',
+      'ZRH': 'Zurich',
+      'GVA': 'Geneva',
+      'BSL': 'Basel',
+      'BRN': 'Berna',
+      'VIE': 'Viena',
+      'SZG': 'Salzburg',
+      'GRZ': 'Graz',
+      'INN': 'Innsbruck',
+      'LNZ': 'Linz',
+      'KLU': 'Klagenfurt',
+      
+      // Scandinavia
+      'CPH': 'Copenhaga',
+      'BLL': 'Billund',
+      'AAL': 'Aalborg',
+      'ARN': 'Stockholm',
+      'GOT': 'Goteborg',
+      'MMX': 'Malmo',
+      'OSL': 'Oslo',
+      'BGO': 'Bergen',
+      'TRD': 'Trondheim',
+      'SVG': 'Stavanger',
+      'HEL': 'Helsinki',
+      'TMP': 'Tampere',
+      'TKU': 'Turku',
+      'OUL': 'Oulu',
+      'RVN': 'Rovaniemi',
+      
+      // Turkey
+      'IST': 'Istanbul',
+      'SAW': 'Istanbul (Sabiha)',
+      'AYT': 'Antalya',
+      'ESB': 'Ankara',
+      'ADB': 'Izmir',
+      'BJV': 'Bodrum',
+      'DLM': 'Dalaman',
+      'GZT': 'Gaziantep',
+      'TZX': 'Trabzon',
+      
+      // Greece & Cyprus
+      'ATH': 'Atena',
+      'SKG': 'Thessaloniki',
+      'HER': 'Heraklion',
+      'CHQ': 'Chania',
+      'RHO': 'Rodos',
+      'KOS': 'Kos',
+      'CFU': 'Corfu',
+      'ZTH': 'Zakynthos',
+      'JTR': 'Santorini',
+      'MYK': 'Mykonos',
+      'LCA': 'Larnaca',
+      'PFO': 'Paphos',
+      
+      // Eastern Europe
+      'SOF': 'Sofia',
+      'VAR': 'Varna',
+      'BOJ': 'Burgas',
+      'PDV': 'Plovdiv',
+      'BEG': 'Belgrad',
+      'NIS': 'Nis',
+      'ZAG': 'Zagreb',
+      'SPU': 'Split',
+      'DBV': 'Dubrovnik',
+      'ZAD': 'Zadar',
+      'PUY': 'Pula',
+      'RJK': 'Rijeka',
+      'LJU': 'Ljubljana',
+      'MBX': 'Maribor',
+      'BUD': 'Budapesta',
+      'DEB': 'Debrecen',
+      'PEV': 'Pecs',
+      'SOB': 'Szeged',
+      'PRG': 'Praga',
+      'BRQ': 'Brno',
+      'OSR': 'Ostrava',
+      'PED': 'Pardubice',
+      'WAW': 'Varsovia',
+      'WMI': 'Varsovia (Modlin)',
+      'KRK': 'Cracovia',
+      'GDN': 'Gdansk',
+      'WRO': 'Wroclaw',
+      'KTW': 'Katowice',
+      'POZ': 'Poznan',
+      'SZZ': 'Szczecin',
+      'LUZ': 'Lublin',
+      'RZE': 'Rzeszow',
+      
+      // Balkans
+      'SKP': 'Skopje',
+      'OHD': 'Ohrid',
+      'TGD': 'Podgorica',
+      'TIV': 'Tivat',
+      'SJJ': 'Sarajevo',
+      'OMO': 'Mostar',
+      'TZL': 'Tuzla',
+      'BNX': 'Banja Luka',
+      
+      // Middle East & North Africa
+      'TLV': 'Tel Aviv',
+      'VDA': 'Eilat',
+      'HFA': 'Haifa',
+      'DOH': 'Doha',
+      'DXB': 'Dubai',
+      'EVN': 'Erevan',
+      'BTS': 'Bratislava',
+      'CAI': 'Cairo',
+      'HRG': 'Hurghada',
+      'SSH': 'Sharm el-Sheikh',
+      'LXR': 'Luxor',
+      'ASW': 'Aswan',
+      'RMF': 'Marsa Alam',
+      'TUN': 'Tunis',
+      'MIR': 'Monastir',
+      'DJE': 'Djerba',
+      'SFA': 'Sfax',
+      'CMN': 'Casablanca',
+      'RAK': 'Marrakech',
+      'AGA': 'Agadir',
+      'FEZ': 'Fez',
+      'TNG': 'Tanger',
+      'NDR': 'Nador',
+      'OUD': 'Oujda',
+      
+      // Luxembourg & Monaco & Malta
+      'LUX': 'Luxemburg',
+      'MCM': 'Monaco',
+      'MLA': 'Malta',
+      
+      // Iceland
+      'KEF': 'Reykjavik',
+      'AEY': 'Akureyri',
+      
+      // Baltic States
+      'RIX': 'Riga',
+      'VNO': 'Vilnius',
+      'KUN': 'Kaunas',
+      'TLL': 'Tallinn',
+      'TRU': 'Tartu',
+      
+      // Additional European airports from screenshot
+      'ALC': 'Alicante',
+      'FMM': 'Memmingen',
+      
+      // Additional missing airports
+      'GRO': 'Girona',
+      'GYD': 'Baku',
+      'TFS': 'Tenerife',
+      'TRF': 'Oslo (Sandefjord)',
+      'ZAZ': 'Zaragoza'
+    }
+    
+    const upperCode = code ? code.toUpperCase() : ''
+    return internationalAirports[upperCode] || code || 'Necunoscut'
   }
 
   async exportSchedule(format: 'json' | 'csv'): Promise<string> {

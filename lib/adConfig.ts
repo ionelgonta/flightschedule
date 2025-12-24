@@ -27,37 +27,37 @@ export const adConfig: AdConfig = {
   
   zones: {
     'header-banner': {
-      mode: 'active',
+      mode: 'inactive',
       slotId: '1234567890',
       size: '728x90',
       customHtml: undefined
     },
     'sidebar-right': {
-      mode: 'active',
+      mode: 'inactive',
       slotId: '1234567891',
       size: '300x600',
       customHtml: undefined
     },
     'sidebar-square': {
-      mode: 'active',
+      mode: 'inactive',
       slotId: '1234567892',
       size: '300x250',
       customHtml: undefined
     },
     'inline-banner': {
-      mode: 'active',
+      mode: 'inactive',
       slotId: '1234567893',
       size: '728x90',
       customHtml: undefined
     },
     'footer-banner': {
-      mode: 'active',
+      mode: 'inactive',
       slotId: '1234567894',
       size: '970x90',
       customHtml: undefined
     },
     'mobile-banner': {
-      mode: 'active',
+      mode: 'inactive',
       slotId: '1234567895',
       size: '320x50',
       customHtml: undefined

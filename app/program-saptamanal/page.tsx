@@ -1,5 +1,8 @@
 import { Metadata } from 'next'
-import WeeklyScheduleView from '@/components/analytics/WeeklyScheduleView'
+import WeeklyScheduleViewSSRFixed from '@/components/analytics/WeeklyScheduleViewSSRFixed'
+
+// Force dynamic rendering to ensure server-side data fetching works
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Program Săptămânal Zboruri | Anyway.ro',
@@ -58,7 +61,7 @@ export default function WeeklySchedulePage() {
         </div>
 
         {/* Weekly Schedule Component */}
-        <WeeklyScheduleView />
+        <WeeklyScheduleViewSSRFixed />
 
         {/* Information Section */}
         <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">

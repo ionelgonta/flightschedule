@@ -25,6 +25,45 @@ interface AirportStatistics {
 // Cache în memorie pentru statistici
 const statisticsCache = new Map<string, { data: AirportStatistics[], timestamp: number }>()
 
+// Helper function to detect codeshare flights
+function isCodeshareFlightNumber(flightNumber: string, airline: string): boolean {
+  if (!flightNumber || !airline) return false
+  
+  // Codeshare patterns
+  const codesharePatterns = [
+    /\*/, // Asterisk indicates codeshare
+    /operated by/i,
+    /op by/i,
+  ]
+  
+  // Check if flight number contains codeshare indicators
+  if (codesharePatterns.some(pattern => pattern.test(flightNumber))) {
+    return true
+  }
+  
+  // Extract flight prefix (airline code from flight number)
+  const flightPrefix = flightNumber.replace(/[^A-Z]/g, '').substring(0, 2)
+  const airlineUpper = airline.toUpperCase()
+  
+  // Common codeshare mismatches - flight code doesn't match airline
+  const codeShareMismatches = [
+    { flight: 'JL', airline: 'BRITISH' }, // Japan Airlines code on British Airways
+    { flight: 'AA', airline: 'BRITISH' }, // American Airlines code on British Airways
+    { flight: 'KL', airline: 'BRITISH' }, // KLM code on British Airways
+    { flight: 'LH', airline: 'BRITISH' }, // Lufthansa code on British Airways
+    { flight: 'AF', airline: 'BRITISH' }, // Air France code on British Airways
+    { flight: 'BA', airline: 'LUFTHANSA' }, // British Airways code on Lufthansa
+    { flight: 'LH', airline: 'UNITED' }, // Lufthansa code on United
+    { flight: 'UA', airline: 'LUFTHANSA' }, // United code on Lufthansa
+    { flight: 'DL', airline: 'KLM' }, // Delta code on KLM
+    { flight: 'KL', airline: 'DELTA' }, // KLM code on Delta
+  ]
+  
+  return codeShareMismatches.some(mismatch => 
+    flightPrefix === mismatch.flight && airlineUpper.includes(mismatch.airline)
+  )
+}
+
 async function calculateAirportStatistics(airport: any): Promise<AirportStatistics> {
   try {
     console.log(`Calculating statistics for ${airport.code}`)
@@ -43,8 +82,15 @@ async function calculateAirportStatistics(airport: any): Promise<AirportStatisti
     
     const allFlights = [...cachedArrivals, ...cachedDepartures]
     
-    if (allFlights.length === 0) {
-      console.log(`No cached flight data for ${airport.code}, returning placeholder`)
+    // Filter out codeshare flights from statistics
+    const nonCodeshareFlights = allFlights.filter(flight => {
+      const flightNumber = flight.flight_number || flight.flightNumber || ''
+      const airlineName = flight.airline?.name || flight.airlineName || ''
+      return !isCodeshareFlightNumber(flightNumber, airlineName)
+    })
+    
+    if (nonCodeshareFlights.length === 0) {
+      console.log(`No non-codeshare flight data for ${airport.code}, returning placeholder`)
       return {
         code: airport.code,
         name: airport.name,
@@ -55,13 +101,13 @@ async function calculateAirportStatistics(airport: any): Promise<AirportStatisti
       }
     }
     
-    console.log(`Calculating statistics from ${allFlights.length} cached flights for ${airport.code}`)
+    console.log(`Calculating statistics from ${nonCodeshareFlights.length} non-codeshare flights for ${airport.code} (filtered out ${allFlights.length - nonCodeshareFlights.length} codeshare flights)`)
     
-    // Calculează statistici din datele cache-uite
-    const totalFlights = allFlights.length
+    // Calculate statistics from non-codeshare flight data only
+    const totalFlights = nonCodeshareFlights.length
     
     // Calculează zboruri la timp - include estimated and scheduled as on-time
-    const onTimeFlights = allFlights.filter(flight => {
+    const onTimeFlights = nonCodeshareFlights.filter(flight => {
       const status = flight.status?.toLowerCase() || ''
       return status === 'on-time' || status === 'landed' || status === 'departed' || 
              status === 'arrived' || status === 'completed' || status === 'estimated' ||
@@ -69,19 +115,19 @@ async function calculateAirportStatistics(airport: any): Promise<AirportStatisti
     }).length
     
     // Calculează zboruri întârziate
-    const delayedFlights = allFlights.filter(flight => {
+    const delayedFlights = nonCodeshareFlights.filter(flight => {
       const status = flight.status?.toLowerCase() || ''
       return status === 'delayed' || status.includes('delay')
     }).length
     
     // Calculează zboruri anulate
-    const cancelledFlights = allFlights.filter(flight => {
+    const cancelledFlights = nonCodeshareFlights.filter(flight => {
       const status = flight.status?.toLowerCase() || ''
       return status.includes('cancel') || status === 'cancelled'
     }).length
     
     // Calculează zboruri programate (încă în așteptare) - exclude those already counted as on-time
-    const scheduledFlights = allFlights.filter(flight => {
+    const scheduledFlights = nonCodeshareFlights.filter(flight => {
       const status = flight.status?.toLowerCase() || ''
       return status === 'gate-closed' || status === 'taxiing'
     }).length

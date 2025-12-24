@@ -5,6 +5,8 @@ import { Plane, Clock, AlertCircle, CheckCircle } from 'lucide-react'
 import { Airport } from '@/types/flight'
 import { FlightSchedule } from '@/lib/flightAnalyticsService'
 import { getAirlineName, formatAirportDisplay } from '@/lib/airlineMapping'
+import WeatherAlert from '@/components/weather/WeatherAlert'
+import WeatherWidget from '@/components/weather/WeatherWidget'
 
 interface Props {
   airport: Airport
@@ -22,6 +24,7 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
   const [schedules, setSchedules] = useState<FlightSchedule[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [weatherData, setWeatherData] = useState<any>(null)
   
   // Date range state
   const [fromDate, setFromDate] = useState(
@@ -40,6 +43,44 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
   
   // View mode state
   const [viewMode, setViewMode] = useState<'today' | 'week' | 'custom'>('today')
+
+  // Get weather city name from airport code
+  const getWeatherCity = (airportCode: string): string => {
+    const mapping: { [key: string]: string } = {
+      'OTP': 'Bucharest',
+      'BBU': 'Bucharest',
+      'CLJ': 'Cluj-Napoca', 
+      'TSR': 'Timisoara',
+      'IAS': 'Iasi',
+      'CND': 'Constanta',
+      'CRA': 'Craiova',
+      'SBZ': 'Sibiu',
+      'BCM': 'Bacau',
+      'BAY': 'Baia Mare',
+      'OMR': 'Oradea',
+      'SCV': 'Suceava',
+      'TGM': 'Targu Mures',
+      'ARW': 'Arad',
+      'SUJ': 'Satu Mare',
+      'RMO': 'Chisinau'
+    }
+    return mapping[airportCode.toUpperCase()] || airportCode
+  }
+
+  // Load weather data for the airport
+  const loadWeatherData = async () => {
+    try {
+      const city = getWeatherCity(airport.code)
+      const response = await fetch(`/api/weather?city=${encodeURIComponent(city)}`)
+      const data = await response.json()
+
+      if (data.success && data.data) {
+        setWeatherData(data.data)
+      }
+    } catch (error) {
+      console.error('Error loading weather data:', error)
+    }
+  }
 
   // Fetch schedules
   const fetchSchedules = async () => {
@@ -71,6 +112,7 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
   // Effect to fetch data when parameters change
   useEffect(() => {
     fetchSchedules()
+    loadWeatherData()
   }, [type, fromDate, toDate, airport.code])
 
   // Set date ranges based on view mode
@@ -84,9 +126,10 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
         setToDate(todayStr)
         break
       case 'week':
-        const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
-        setFromDate(today.toISOString().split('T')[0])
-        setToDate(weekFromNow.toISOString().split('T')[0])
+        // Pentru săptămână, folosim ultimele 7 zile pentru care avem date
+        const weekAgo = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000)
+        setFromDate(weekAgo.toISOString().split('T')[0])
+        setToDate(today.toISOString().split('T')[0])
         break
       case 'custom':
         // Keep current dates
@@ -96,19 +139,9 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
     setViewMode(mode)
   }
 
-  // Filter schedules based on current filters and time range (10 hours back, all future)
+  // Filter schedules based on current filters (no temporal filtering for program-zboruri)
   const filteredSchedules = schedules.filter(schedule => {
-    // Time-based filtering: show flights from 10 hours ago and all future flights
-    const now = new Date()
-    const scheduledTime = new Date(schedule.scheduledTime)
-    const tenHoursAgo = new Date(now.getTime() - 10 * 60 * 60 * 1000) // 10 hours ago
-    
-    // Only show flights that are either:
-    // 1. Scheduled in the future (scheduledTime > now)
-    // 2. Scheduled within the last 10 hours (scheduledTime > tenHoursAgo)
-    if (scheduledTime < tenHoursAgo) {
-      return false
-    }
+    // No temporal filtering for program-zboruri - show all flights in selected date range
     
     if (filters.airline && !schedule.airline.name.toLowerCase().includes(filters.airline.toLowerCase())) {
       return false
@@ -120,11 +153,14 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
     
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase()
+      const otherAirport = type === 'arrivals' ? schedule.origin : schedule.destination
+      const cityName = formatAirportDisplay(otherAirport.code).toLowerCase()
+      
       return (
         schedule.flightNumber.toLowerCase().includes(searchTerm) ||
         schedule.airline.name.toLowerCase().includes(searchTerm) ||
-        (type === 'arrivals' ? schedule.origin.city : schedule.destination.city)
-          .toLowerCase().includes(searchTerm)
+        cityName.includes(searchTerm) ||
+        otherAirport.code.toLowerCase().includes(searchTerm)
       )
     }
     
@@ -209,6 +245,18 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
 
   return (
     <div className="space-y-6">
+      {/* Weather Alert - Only show if there's a significant weather impact */}
+      <WeatherAlert airportCode={airport.code} />
+
+      {/* Compact Weather Widget */}
+      {weatherData && (
+        <WeatherWidget 
+          city={getWeatherCity(airport.code)} 
+          compact={true}
+          className="mb-4"
+        />
+      )}
+
       {/* Controls */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         {/* Type Toggle */}
@@ -255,8 +303,9 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
                   ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
+              title="Afișează zborurile din ultimele 7 zile (datele pentru zilele viitoare nu sunt disponibile)"
             >
-              Săptămâna
+              Ultimele 7 zile
             </button>
             <button
               onClick={() => handleViewModeChange('custom')}
@@ -347,6 +396,28 @@ export function FlightSchedulesView({ airport, initialType, initialFilters = {} 
           </div>
         </div>
       </div>
+
+      {/* Info message for week mode */}
+      {viewMode === 'week' && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                Informații despre perioada afișată
+              </h3>
+              <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
+                Afișăm zborurile din ultimele 7 zile pentru care avem date disponibile. 
+                Datele pentru zilele viitoare nu sunt disponibile în timp real prin API-ul nostru.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Results */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">

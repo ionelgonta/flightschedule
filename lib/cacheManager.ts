@@ -63,6 +63,11 @@ export interface CacheConfig {
     cronInterval: number // zile
     cacheMaxAge: number // zile
   }
+
+  // Date meteo - cron la 30 minute (configurabil)
+  weather: {
+    cronInterval: number // minute
+  }
 }
 
 // Tipuri pentru tracking request-uri
@@ -70,6 +75,7 @@ export interface RequestCounter {
   flightData: number
   analytics: number
   aircraft: number
+  weather: number
   lastReset: string
   totalRequests: number
 }
@@ -77,8 +83,8 @@ export interface RequestCounter {
 // Tipuri pentru cache entries
 export interface CacheEntry<T = any> {
   id: string
-  category: 'flightData' | 'analytics' | 'aircraft'
-  key: string // airport code, analysis type, aircraft id, etc.
+  category: 'flightData' | 'analytics' | 'aircraft' | 'weather'
+  key: string // airport code, analysis type, aircraft id, weather city, etc.
   data: T
   createdAt: string
   expiresAt: string | null
@@ -183,7 +189,28 @@ class CacheManager {
     
     try {
       const data = await fs.readFile(getCacheConfigPath(), 'utf-8')
-      this.config = JSON.parse(data)
+      const loadedConfig = JSON.parse(data)
+      
+      // Ensure all required properties exist, merge with defaults
+      this.config = {
+        flightData: {
+          cronInterval: loadedConfig.flightData?.cronInterval || 60
+        },
+        analytics: {
+          cronInterval: loadedConfig.analytics?.cronInterval || 7,
+          cacheMaxAge: loadedConfig.analytics?.cacheMaxAge || 30
+        },
+        aircraft: {
+          cronInterval: loadedConfig.aircraft?.cronInterval || 7,
+          cacheMaxAge: loadedConfig.aircraft?.cacheMaxAge || 30
+        },
+        weather: {
+          cronInterval: loadedConfig.weather?.cronInterval || 30
+        }
+      }
+      
+      // Save the merged config to ensure all properties are present
+      await this.saveConfig()
     } catch {
       // Configurație default - TOATE valorile sunt configurabile din admin
       this.config = {
@@ -197,6 +224,9 @@ class CacheManager {
         aircraft: {
           cronInterval: 7, // zile (redus pentru a evita overflow)
           cacheMaxAge: 30 // zile (redus pentru a evita overflow)
+        },
+        weather: {
+          cronInterval: 30 // minute - economisește API requests
         }
       }
       await this.saveConfig()
@@ -226,6 +256,7 @@ class CacheManager {
         flightData: 0,
         analytics: 0,
         aircraft: 0,
+        weather: 0,
         lastReset: new Date().toISOString(),
         totalRequests: 0
       }
@@ -277,7 +308,20 @@ class CacheManager {
    * Pornește cron jobs-urile bazate pe configurație
    */
   private async startCronJobs(): Promise<void> {
-    if (!this.config) return
+    if (!this.config) {
+      console.error('[Cache Manager] No configuration available for cron jobs')
+      return
+    }
+
+    // Validate configuration has all required properties
+    if (!this.config.flightData?.cronInterval || 
+        !this.config.analytics?.cronInterval || 
+        !this.config.aircraft?.cronInterval || 
+        !this.config.weather?.cronInterval) {
+      console.error('[Cache Manager] Invalid configuration - missing required properties')
+      console.log('[Cache Manager] Current config:', JSON.stringify(this.config, null, 2))
+      return
+    }
 
     // Oprește job-urile existente pentru a preveni duplicate
     this.stopCronJobs()
@@ -307,10 +351,18 @@ class CacheManager {
     }, aircraftInterval)
     this.cronJobs.set('aircraft', aircraftJob)
 
+    // Weather Cron - la fiecare X minute
+    const weatherInterval = this.config.weather.cronInterval * 60 * 1000 // convert to ms
+    const weatherJob = setInterval(async () => {
+      await this.runWeatherCron()
+    }, weatherInterval)
+    this.cronJobs.set('weather', weatherJob)
+
     console.log('[Cache Manager] Cron jobs started with intervals:', {
       flightData: `${this.config.flightData.cronInterval} minutes`,
       analytics: `${this.config.analytics.cronInterval} days`,
-      aircraft: `${this.config.aircraft.cronInterval} days`
+      aircraft: `${this.config.aircraft.cronInterval} days`,
+      weather: `${this.config.weather.cronInterval} minutes`
     })
 
     // Rulează imediat pentru a popula cache-ul (doar dacă nu există deja date)
@@ -319,6 +371,7 @@ class CacheManager {
       setTimeout(() => this.runFlightDataCron(), 1000)
       setTimeout(() => this.runAnalyticsCron(), 2000)
       setTimeout(() => this.runAircraftCron(), 3000)
+      setTimeout(() => this.runWeatherCron(), 4000)
     } else {
       console.log(`[Cache Manager] Found ${this.cacheData.size} cached entries, skipping initial population`)
     }
@@ -380,8 +433,208 @@ class CacheManager {
   }
 
   /**
-   * Fetch și cache flight data pentru un aeroport
+   * Cron job pentru weather data
    */
+  private async runWeatherCron(): Promise<void> {
+    console.log('Running weather cron job...')
+    
+    try {
+      // Import dinamic pentru a evita circular dependencies
+      const WeatherService = (await import('./weatherService')).default
+      
+      const apiKey = '213057a2c7203b4352a879db4465f273'
+      const weatherService = new WeatherService(apiKey)
+      
+      // Fetch weather data pentru toate orașele din România și Moldova
+      const allWeatherData = await weatherService.getAllWeatherData()
+      
+      if (Object.keys(allWeatherData).length > 0) {
+        // Incrementează contorul pentru weather requests
+        this.incrementRequestCounter('weather')
+        
+        const cacheKey = 'current_weather'
+        const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes
+        
+        const cacheEntry: CacheEntry = {
+          id: `weather_${cacheKey}_${Date.now()}`,
+          category: 'weather',
+          key: cacheKey,
+          data: allWeatherData,
+          createdAt: new Date().toISOString(),
+          expiresAt,
+          lastAccessed: new Date().toISOString(),
+          source: 'cron',
+          success: true
+        }
+        
+        // Șterge intrarea veche pentru weather
+        const oldEntries = Array.from(this.cacheData.values()).filter(
+          entry => entry.category === 'weather' && entry.key === cacheKey
+        )
+        oldEntries.forEach(entry => this.cacheData.delete(entry.id))
+        
+        this.cacheData.set(cacheEntry.id, cacheEntry)
+        await this.saveCacheData()
+        
+        console.log(`[Cache Manager] Successfully cached weather data for ${Object.keys(allWeatherData).length} cities`)
+        
+        // INTEGRATE WEATHER INTO FLIGHT CACHE - Update existing flight cache entries with weather info
+        await this.integrateWeatherIntoFlightCache(allWeatherData)
+        
+      } else {
+        console.log('[Cache Manager] No weather data received from API')
+      }
+      
+    } catch (error) {
+      console.error('[Cache Manager] Error in weather cron job:', error)
+      this.incrementRequestCounter('weather')
+    }
+  }
+
+  /**
+   * Integrate weather data into existing flight cache entries
+   * This adds weather_info to flight cache for instant access without separate API calls
+   */
+  private async integrateWeatherIntoFlightCache(weatherData: { [cityName: string]: any }): Promise<void> {
+    console.log('[Cache Manager] Integrating weather data into flight cache...')
+    
+    // Airport to city mapping for weather correlation
+    const airportToCityMap: { [key: string]: string } = {
+      'OTP': 'Bucharest',
+      'BBU': 'Bucharest',
+      'CLJ': 'Cluj-Napoca',
+      'TSR': 'Timisoara',
+      'IAS': 'Iasi',
+      'CND': 'Constanta',
+      'CRA': 'Craiova',
+      'SBZ': 'Sibiu',
+      'BCM': 'Bacau',
+      'BAY': 'Baia Mare',
+      'OMR': 'Oradea',
+      'SCV': 'Suceava',
+      'TGM': 'Targu Mures',
+      'ARW': 'Arad',
+      'SUJ': 'Satu Mare',
+      'RMO': 'Chisinau'
+    }
+    
+    let updatedEntries = 0
+    
+    // Find all flight cache entries and add weather info
+    for (const [entryId, entry] of this.cacheData.entries()) {
+      if (entry.category === 'flightData') {
+        // Extract airport code from cache key (format: "OTP_arrivals" or "CLJ_departures")
+        const [airportCode] = entry.key.split('_')
+        const cityName = airportToCityMap[airportCode]
+        
+        if (cityName && weatherData[cityName]) {
+          // Extract actual flight data - handle both old and new formats
+          let actualFlightData = entry.data
+          
+          // If data is already in new format with flights property, extract the flights
+          if (entry.data && typeof entry.data === 'object' && 'flights' in entry.data) {
+            actualFlightData = entry.data.flights
+            
+            // Handle deeply nested flights structure (corruption fix)
+            while (actualFlightData && typeof actualFlightData === 'object' && 'flights' in actualFlightData && !Array.isArray(actualFlightData)) {
+              actualFlightData = actualFlightData.flights
+            }
+          }
+          
+          // Ensure we have an array of flights
+          if (!Array.isArray(actualFlightData)) {
+            actualFlightData = []
+          }
+          
+          // Create updated entry with weather info
+          const updatedEntry: CacheEntry = {
+            ...entry,
+            data: {
+              flights: actualFlightData, // Clean flight data array
+              weather_info: {
+                city: weatherData[cityName].city,
+                temperature: weatherData[cityName].temperature,
+                feelsLike: weatherData[cityName].feelsLike,
+                description: weatherData[cityName].description,
+                icon: weatherData[cityName].icon,
+                windSpeed: weatherData[cityName].windSpeed,
+                visibility: weatherData[cityName].visibility,
+                flightImpact: weatherData[cityName].flightImpact,
+                lastUpdated: weatherData[cityName].lastUpdated
+              }
+            },
+            lastAccessed: new Date().toISOString()
+          }
+          
+          // Replace the entry in cache
+          this.cacheData.set(entryId, updatedEntry)
+          updatedEntries++
+        }
+      }
+    }
+    
+    if (updatedEntries > 0) {
+      await this.saveCacheData()
+      console.log(`[Cache Manager] Updated ${updatedEntries} flight cache entries with weather data`)
+    }
+  }
+
+  /**
+   * Get flight data with integrated weather information
+   * Returns both flight data and weather info in a unified structure
+   */
+  getFlightDataWithWeather<T>(airportCode: string, type: 'arrivals' | 'departures'): {
+    flights: T | null
+    weather_info: any | null
+    hasWeatherAlert: boolean
+  } {
+    const cacheKey = `${airportCode}_${type}`
+    const entry = Array.from(this.cacheData.values()).find(
+      e => e.category === 'flightData' && e.key === cacheKey && !this.isExpired(e)
+    )
+    
+    if (!entry) {
+      return { flights: null, weather_info: null, hasWeatherAlert: false }
+    }
+    
+    // Handle corrupted nested structure and extract clean flight data
+    let actualFlightData = entry.data
+    let weatherInfo = null
+    
+    // Check if entry has integrated weather data (new format)
+    if (entry.data && typeof entry.data === 'object' && 'flights' in entry.data && 'weather_info' in entry.data) {
+      actualFlightData = entry.data.flights
+      weatherInfo = entry.data.weather_info
+      
+      // Handle deeply nested flights structure (corruption fix)
+      while (actualFlightData && typeof actualFlightData === 'object' && 'flights' in actualFlightData && !Array.isArray(actualFlightData)) {
+        actualFlightData = actualFlightData.flights
+      }
+    }
+    // Handle old format or corrupted nested flights
+    else if (entry.data && typeof entry.data === 'object' && 'flights' in entry.data) {
+      actualFlightData = entry.data.flights
+      
+      // Handle deeply nested flights structure (corruption fix)
+      while (actualFlightData && typeof actualFlightData === 'object' && 'flights' in actualFlightData && !Array.isArray(actualFlightData)) {
+        actualFlightData = actualFlightData.flights
+      }
+    }
+    
+    // Ensure we have an array
+    if (!Array.isArray(actualFlightData)) {
+      actualFlightData = []
+    }
+    
+    const hasAlert = weatherInfo?.flightImpact?.severity && 
+                    ['moderate', 'high', 'severe'].includes(weatherInfo.flightImpact.severity)
+    
+    return {
+      flights: actualFlightData as T,
+      weather_info: weatherInfo,
+      hasWeatherAlert: hasAlert || false
+    }
+  }
   private async fetchAndCacheFlightData(
     airportCode: string, 
     type: 'arrivals' | 'departures',
@@ -446,10 +699,8 @@ class CacheManager {
           
           console.log(`[Cache Manager] Loaded ${convertedFlights.length} flights from persistent cache for ${airportCode} ${type}`)
           
-          // Dacă avem date din cache persistent și nu e manual refresh, nu mai facem API call
-          if (source === 'cron') {
-            return
-          }
+          // MODIFICAT: Întotdeauna fă API call pentru a actualiza cache-ul persistent cu date fresh
+          // Nu mai returna aici - continuă cu API call pentru actualizare
         }
       } catch (error) {
         console.error('[Cache Manager] Error loading from persistent cache:', error)
@@ -705,7 +956,19 @@ class CacheManager {
       })
       
       const averageDelay = delayCalculations.length > 0 
-        ? Math.round(delayCalculations.reduce((sum, delay) => sum + delay, 0) / delayCalculations.length)
+        ? (() => {
+            // Use median instead of mean for more realistic delay representation
+            const sortedDelays = delayCalculations.sort((a, b) => a - b)
+            const medianIndex = Math.floor(sortedDelays.length / 2)
+            
+            if (sortedDelays.length % 2 === 0) {
+              // Even number of values - average of two middle values
+              return Math.round((sortedDelays[medianIndex - 1] + sortedDelays[medianIndex]) / 2)
+            } else {
+              // Odd number of values - middle value
+              return sortedDelays[medianIndex]
+            }
+          })()
         : 0
       
       const onTimePercentage = totalFlights > 0 ? Math.round((onTimeFlights / totalFlights) * 100) : 0
@@ -820,7 +1083,7 @@ class CacheManager {
   /**
    * Refresh manual pentru o categorie specifică
    */
-  async manualRefresh(category: 'flightData' | 'analytics' | 'aircraft', identifier?: string): Promise<void> {
+  async manualRefresh(category: 'flightData' | 'analytics' | 'aircraft' | 'weather', identifier?: string): Promise<void> {
     console.log(`Manual refresh triggered for ${category}${identifier ? ` (${identifier})` : ''}`)
 
     switch (category) {
@@ -849,6 +1112,11 @@ class CacheManager {
         } else {
           await this.runAircraftCron()
         }
+        break
+
+      case 'weather':
+        // Weather nu are identifier specific - refresh pentru toate orașele
+        await this.runWeatherCron()
         break
     }
   }
@@ -888,12 +1156,14 @@ class CacheManager {
       flightData: number
       analytics: number
       aircraft: number
+      weather: number
       total: number
     }
     lastUpdated: {
       flightData: string | null
       analytics: string | null
       aircraft: string | null
+      weather: string | null
     }
   } {
     const entries = Array.from(this.cacheData.values())
@@ -901,6 +1171,7 @@ class CacheManager {
     const flightDataEntries = entries.filter(e => e.category === 'flightData')
     const analyticsEntries = entries.filter(e => e.category === 'analytics')
     const aircraftEntries = entries.filter(e => e.category === 'aircraft')
+    const weatherEntries = entries.filter(e => e.category === 'weather')
 
     return {
       config: this.config,
@@ -909,6 +1180,7 @@ class CacheManager {
         flightData: flightDataEntries.length,
         analytics: analyticsEntries.length,
         aircraft: aircraftEntries.length,
+        weather: weatherEntries.length,
         total: entries.length
       },
       lastUpdated: {
@@ -920,6 +1192,9 @@ class CacheManager {
           : null,
         aircraft: aircraftEntries.length > 0
           ? aircraftEntries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0].createdAt
+          : null,
+        weather: weatherEntries.length > 0
+          ? weatherEntries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0].createdAt
           : null
       }
     }
@@ -961,17 +1236,24 @@ class CacheManager {
   }
 
   /**
-   * Șterge tot cache-ul persistent (doar pentru admin)
+   * Șterge tot cache-ul persistent (DOAR CU CONFIRMARE EXPLICITĂ!)
+   * ATENȚIE: Această funcție șterge TOATE datele istorice!
    */
-  async clearPersistentCache(): Promise<void> {
+  async clearPersistentCache(confirmationToken?: string): Promise<void> {
     if (!persistentFlightCache) {
       console.log('[Cache Manager] Persistent cache not available')
       return
     }
 
+    // PROTECȚIE: Necesită token de confirmare explicit
+    if (confirmationToken !== 'CONFIRM_DELETE_ALL_HISTORICAL_DATA') {
+      console.error('[Cache Manager] REJECTED: Persistent cache clear requires explicit confirmation token')
+      throw new Error('Persistent cache clear requires explicit confirmation. This will delete ALL historical flight data!')
+    }
+
     try {
       await persistentFlightCache.clearAllCache()
-      console.log('[Cache Manager] Cleared all persistent cache data')
+      console.log('[Cache Manager] ⚠️  CLEARED ALL PERSISTENT CACHE DATA - HISTORICAL DATA LOST!')
     } catch (error) {
       console.error('[Cache Manager] Error clearing persistent cache:', error)
     }
@@ -1278,13 +1560,26 @@ class CacheManager {
       
       const onTimePercentage = flightCount > 0 ? Math.round((onTimeCount / flightCount) * 100) : 0
       
+      // Count flights per airline to show most frequent operators
+      const airlineFlightCount = new Map<string, number>()
+      route.flights.forEach(flight => {
+        const airlineCode = flight.airline?.code || flight.airline || 'XX'
+        airlineFlightCount.set(airlineCode, (airlineFlightCount.get(airlineCode) || 0) + 1)
+      })
+      
+      // Sort airlines by flight count and take top 2 most frequent
+      const topAirlines = Array.from(airlineFlightCount.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 2)
+        .map(([code]) => code)
+      
       routes.push({
         origin: route.origin,
         destination: route.destination,
         flightCount,
         averageDelay,
         onTimePercentage,
-        airlines: Array.from(route.airlines)
+        airlines: topAirlines // Show only top 2 airlines by flight count
       })
     })
     
@@ -1323,6 +1618,26 @@ class CacheManager {
     // First try main cache
     const mainData = this.getCachedData<T>(key)
     if (mainData) {
+      // Handle corrupted nested structure for flight data
+      if ((key.includes('_arrivals') || key.includes('_departures')) && mainData && typeof mainData === 'object') {
+        let actualData = mainData
+        
+        // If data has flights property, extract it
+        if ('flights' in mainData) {
+          actualData = (mainData as any).flights
+          
+          // Handle deeply nested flights structure (corruption fix)
+          while (actualData && typeof actualData === 'object' && 'flights' in actualData && !Array.isArray(actualData)) {
+            actualData = (actualData as any).flights
+          }
+        }
+        
+        // Ensure we return an array for flight data
+        if (Array.isArray(actualData)) {
+          return actualData as T
+        }
+      }
+      
       return mainData
     }
 
@@ -1374,7 +1689,7 @@ class CacheManager {
   /**
    * Increment request counter
    */
-  incrementRequestCounter(category: 'flightData' | 'analytics' | 'aircraft'): void {
+  incrementRequestCounter(category: 'flightData' | 'analytics' | 'aircraft' | 'weather'): void {
     if (this.requestCounter) {
       this.requestCounter[category]++
       this.requestCounter.totalRequests++

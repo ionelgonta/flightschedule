@@ -26,7 +26,7 @@ export function AirlineLogo({
 }: AirlineLogoProps) {
   const [primaryError, setPrimaryError] = useState(false)
   const [fallbackError, setFallbackError] = useState(false)
-  const airlineInfo = getAirlineInfo(airlineCode)
+  const airlineInfo = getAirlineInfo(airlineCode || '')
   
   const displayName = airlineName || airlineInfo.name
   const primaryLogoUrl = airlineInfo.logo
@@ -49,7 +49,7 @@ export function AirlineLogo({
     'VY': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Vueling_logo-2013.svg/200px-Vueling_logo-2013.svg.png'
   }
 
-  const fallbackLogoUrl = wikimediaFallbacks[airlineCode.toUpperCase()]
+  const fallbackLogoUrl = airlineCode ? wikimediaFallbacks[airlineCode.toUpperCase()] : undefined
 
   // Size configurations
   const sizeClasses = {
@@ -66,6 +66,7 @@ export function AirlineLogo({
 
   // Generate initials from airline name
   const getInitials = (name: string) => {
+    if (!name) return 'XX' // Fallback pentru nume undefined
     return name
       .split(' ')
       .map(word => word.charAt(0))

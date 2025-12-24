@@ -39,8 +39,49 @@ function calculatePeakDelayHours(flights: any[]): number[] {
     .map(item => item.hour)
 }
 
-// Helper function to calculate most frequent routes
+// Helper function to detect codeshare flights
+function isCodeshareFlightNumber(flightNumber: string, airline: string): boolean {
+  if (!flightNumber || !airline) return false
+  
+  // Codeshare patterns
+  const codesharePatterns = [
+    /\*/, // Asterisk indicates codeshare
+    /operated by/i,
+    /op by/i,
+  ]
+  
+  // Check if flight number contains codeshare indicators
+  if (codesharePatterns.some(pattern => pattern.test(flightNumber))) {
+    return true
+  }
+  
+  // Extract flight prefix (airline code from flight number)
+  const flightPrefix = flightNumber.replace(/[^A-Z]/g, '').substring(0, 2)
+  const airlineUpper = airline.toUpperCase()
+  
+  // Common codeshare mismatches - flight code doesn't match airline
+  const codeShareMismatches = [
+    { flight: 'JL', airline: 'BRITISH' }, // Japan Airlines code on British Airways
+    { flight: 'AA', airline: 'BRITISH' }, // American Airlines code on British Airways
+    { flight: 'KL', airline: 'BRITISH' }, // KLM code on British Airways
+    { flight: 'LH', airline: 'BRITISH' }, // Lufthansa code on British Airways
+    { flight: 'AF', airline: 'BRITISH' }, // Air France code on British Airways
+    { flight: 'BA', airline: 'LUFTHANSA' }, // British Airways code on Lufthansa
+    { flight: 'LH', airline: 'UNITED' }, // Lufthansa code on United
+    { flight: 'UA', airline: 'LUFTHANSA' }, // United code on Lufthansa
+    { flight: 'DL', airline: 'KLM' }, // Delta code on KLM
+    { flight: 'KL', airline: 'DELTA' }, // KLM code on Delta
+  ]
+  
+  return codeShareMismatches.some(mismatch => 
+    flightPrefix === mismatch.flight && airlineUpper.includes(mismatch.airline)
+  )
+}
+
+// Helper function to calculate most frequent routes (excluding codeshare flights)
 function calculateMostFrequentRoutes(flights: any[], airportCode: string): any[] {
+  console.log(`[ROUTE CALC] Starting calculation for ${airportCode} with ${flights.length} flights`)
+  
   const routeMap = new Map<string, {
     flights: any[]
     origin: string
@@ -51,8 +92,15 @@ function calculateMostFrequentRoutes(flights: any[], airportCode: string): any[]
   flights.forEach(flight => {
     const origin = flight.origin?.code || flight.originCode
     const destination = flight.destination?.code || flight.destinationCode
+    const flightNumber = flight.flight_number || flight.flightNumber || ''
+    const airlineName = flight.airline?.name || flight.airlineName || ''
     
     if (!origin || !destination || origin === destination) return
+    
+    // Skip codeshare flights
+    if (isCodeshareFlightNumber(flightNumber, airlineName)) {
+      return
+    }
     
     // Determine the other airport (not the current one)
     let otherAirport: string
@@ -115,13 +163,28 @@ function calculateMostFrequentRoutes(flights: any[], airportCode: string): any[]
     
     const onTimePercentage = flightCount > 0 ? Math.round((onTimeCount / flightCount) * 100) : 0
     
+    // Count flights per airline to show most frequent operators
+    const airlineFlightCount = new Map<string, number>()
+    route.flights.forEach(flight => {
+      const airlineCode = flight.airline?.code || flight.airlineCode || 'XX'
+      airlineFlightCount.set(airlineCode, (airlineFlightCount.get(airlineCode) || 0) + 1)
+    })
+    
+    // Sort airlines by flight count and take top 2 most frequent
+    const topAirlines = Array.from(airlineFlightCount.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(([code]) => code)
+    
+    console.log(`Route ${route.destination}: ${airlineFlightCount.size} total airlines, showing top 2: ${topAirlines.join(', ')}`)
+    
     routes.push({
       origin: route.origin,
       destination: route.destination,
       flightCount,
       averageDelay,
       onTimePercentage,
-      airlines: Array.from(route.airlines)
+      airlines: topAirlines // Show only top 2 airlines by flight count
     })
   })
   
@@ -154,6 +217,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { code: string } }
 ) {
+  console.log(`[STATISTICS API] Request for airport: ${params.code}`)
+  
   try {
     const { code } = params
     const { searchParams } = new URL(request.url)
@@ -189,10 +254,14 @@ export async function GET(
     const arrivalsKey = `${airport.code}_arrivals`
     const departuresKey = `${airport.code}_departures`
     
-    const cachedArrivals = await cacheManager.getCachedDataWithPersistent<any[]>(arrivalsKey) || []
-    const cachedDepartures = await cacheManager.getCachedDataWithPersistent<any[]>(departuresKey) || []
+    const cachedArrivals = await cacheManager.getCachedDataWithPersistent<any>(arrivalsKey) || []
+    const cachedDepartures = await cacheManager.getCachedDataWithPersistent<any>(departuresKey) || []
     
-    let allFlights = [...cachedArrivals, ...cachedDepartures]
+    // Handle both old format (array) and new format (object with flights + weather_info)
+    const arrivalsFlights = Array.isArray(cachedArrivals) ? cachedArrivals : (cachedArrivals?.flights || [])
+    const departuresFlights = Array.isArray(cachedDepartures) ? cachedDepartures : (cachedDepartures?.flights || [])
+    
+    let allFlights = [...arrivalsFlights, ...departuresFlights]
     
     // Filter flights based on period
     const now = new Date()
@@ -263,10 +332,17 @@ export async function GET(
       return flightDate >= startDate && flightDate <= endDate
     })
     
-    console.log(`Filtered ${allFlights.length} flights for period ${period} (from ${startDate.toISOString()} to ${endDate.toISOString()})`)
+    // Filter out codeshare flights from all statistics calculations
+    const nonCodeshareFlights = allFlights.filter(flight => {
+      const flightNumber = flight.flight_number || flight.flightNumber || ''
+      const airlineName = flight.airline?.name || flight.airlineName || ''
+      return !isCodeshareFlightNumber(flightNumber, airlineName)
+    })
     
-    if (allFlights.length === 0) {
-      console.log(`No flight data available for ${airport.code} in period ${period}`)
+    console.log(`Filtered out codeshare flights: ${allFlights.length} → ${nonCodeshareFlights.length} flights (removed ${allFlights.length - nonCodeshareFlights.length} codeshare flights)`)
+    
+    if (nonCodeshareFlights.length === 0) {
+      console.log(`No non-codeshare flight data available for ${airport.code} in period ${period}`)
       
       // Return message instead of zeros
       return NextResponse.json({
@@ -283,11 +359,11 @@ export async function GET(
       })
     }
 
-    // Calculate statistics from cached flight data
-    const totalFlights = allFlights.length
+    // Calculate statistics from non-codeshare flight data only
+    const totalFlights = nonCodeshareFlights.length
     
     // Calculate on-time flights - include estimated and scheduled as on-time
-    const onTimeFlights = allFlights.filter(flight => {
+    const onTimeFlights = nonCodeshareFlights.filter(flight => {
       const status = flight.status?.toLowerCase() || ''
       return status === 'on-time' || status === 'landed' || status === 'departed' || 
              status === 'arrived' || status === 'completed' || status === 'estimated' ||
@@ -295,13 +371,13 @@ export async function GET(
     }).length
     
     // Calculate delayed flights
-    const delayedFlights = allFlights.filter(flight => {
+    const delayedFlights = nonCodeshareFlights.filter(flight => {
       const status = flight.status?.toLowerCase() || ''
       return status === 'delayed' || status.includes('delay')
     }).length
     
     // Calculate cancelled flights
-    const cancelledFlights = allFlights.filter(flight => {
+    const cancelledFlights = nonCodeshareFlights.filter(flight => {
       const status = flight.status?.toLowerCase() || ''
       return status.includes('cancel') || status === 'cancelled'
     }).length
@@ -310,16 +386,57 @@ export async function GET(
     let averageDelay = 0
     if (delayedFlights > 0) {
       // Calculate actual average delay from flight data if available
-      const delayedFlightsList = allFlights.filter(flight => {
+      const delayedFlightsList = nonCodeshareFlights.filter(flight => {
         const status = flight.status?.toLowerCase() || ''
         return status === 'delayed' || status.includes('delay')
       })
       
       if (delayedFlightsList.length > 0) {
-        const totalDelay = delayedFlightsList.reduce((sum, flight) => {
-          return sum + (flight.delayMinutes || flight.delay || 30) // Default 30 min if no delay info
-        }, 0)
-        averageDelay = Math.round(totalDelay / delayedFlightsList.length)
+        const delayValues: number[] = []
+        
+        delayedFlightsList.forEach(flight => {
+          let delayMinutes = 0
+          
+          // Try to get delay from various fields
+          if (flight.delayMinutes && typeof flight.delayMinutes === 'number') {
+            delayMinutes = flight.delayMinutes
+          } else if (flight.delay && typeof flight.delay === 'number') {
+            delayMinutes = flight.delay
+          } else if (flight.scheduled_time && (flight.actual_time || flight.estimated_time)) {
+            // Calculate delay from time difference
+            const scheduledTime = new Date(flight.scheduled_time)
+            const actualTime = new Date(flight.actual_time || flight.estimated_time)
+            delayMinutes = Math.max(0, (actualTime.getTime() - scheduledTime.getTime()) / (1000 * 60))
+          } else {
+            // Default delay for flights marked as delayed but no specific time
+            delayMinutes = 25
+          }
+          
+          // Cap extreme delays to avoid distortion (max 4 hours = 240 minutes)
+          delayMinutes = Math.min(delayMinutes, 240)
+          
+          if (delayMinutes > 0) {
+            delayValues.push(delayMinutes)
+          }
+        })
+        
+        if (delayValues.length > 0) {
+          // Use median instead of mean for more realistic delay representation
+          // This avoids distortion from extreme delays
+          const sortedDelays = delayValues.sort((a, b) => a - b)
+          const medianIndex = Math.floor(sortedDelays.length / 2)
+          
+          if (sortedDelays.length % 2 === 0) {
+            // Even number of values - average of two middle values
+            averageDelay = Math.round((sortedDelays[medianIndex - 1] + sortedDelays[medianIndex]) / 2)
+          } else {
+            // Odd number of values - middle value
+            averageDelay = sortedDelays[medianIndex]
+          }
+          
+          // Ensure minimum realistic delay for delayed flights
+          averageDelay = Math.max(averageDelay, 15)
+        }
       }
     }
     
@@ -331,14 +448,14 @@ export async function GET(
     // Calculate delay index (higher is worse)
     const delayIndex = totalFlights > 0 ? Math.round((delayedFlights / totalFlights) * 100) : 0
     
-    // Calculate peak delay hours from flight data
-    const peakDelayHours = calculatePeakDelayHours(allFlights)
+    // Calculate peak delay hours from non-codeshare flight data
+    const peakDelayHours = calculatePeakDelayHours(nonCodeshareFlights)
     
-    // Calculate most frequent routes
-    const mostFrequentRoutes = calculateMostFrequentRoutes(allFlights, airport.code)
+    // Calculate most frequent routes (already excludes codeshare)
+    const mostFrequentRoutes = calculateMostFrequentRoutes(nonCodeshareFlights, airport.code)
     
-    // Calculate busy hours
-    const busyHours = calculateBusyHours(allFlights)
+    // Calculate busy hours from non-codeshare flights
+    const busyHours = calculateBusyHours(nonCodeshareFlights)
     
     // Basic statistics structure
     const statistics = {

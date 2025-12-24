@@ -243,9 +243,9 @@ export function FlightList({
     
     filtered = filtered.filter(flight => {
       const scheduledTime = new Date(flight.scheduled_time);
-      // Arată doar zborurile care sunt:
-      // 1. Programate în viitor (scheduledTime > now)
-      // 2. Programate în ultimele 10 ore (scheduledTime > tenHoursAgo)
+      // Arată zborurile care sunt:
+      // 1. În viitor (scheduledTime > now) SAU
+      // 2. Din ultimele 10 ore (scheduledTime > tenHoursAgo)
       return scheduledTime > tenHoursAgo;
     });
 
@@ -481,7 +481,7 @@ export function FlightList({
               {filteredAndSortedFlights.length} {type === 'arrivals' ? 'sosiri' : 'plecări'}
             </div>
             <div className="text-sm text-gray-600">
-              din {flights.length} total
+              {lastUpdated && `Actualizat: ${formatLastUpdated(lastUpdated)}`}
             </div>
           </div>
         </div>

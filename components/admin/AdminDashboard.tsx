@@ -7,7 +7,11 @@ import { AdManagement } from './AdManagement'
 import AirportManagement from './AirportManagement'
 import { Save, Settings, Key, TestTube, CheckCircle, XCircle, Clock, TrendingUp, Calendar, LogOut, Globe, MapPin } from 'lucide-react'
 
-export function AdminDashboard() {
+interface AdminDashboardProps {
+  onLogout?: () => void
+}
+
+export function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState('api')
   
   // API Key Management State
@@ -52,7 +56,11 @@ export function AdminDashboard() {
 
   const handleLogout = () => {
     if (confirm('Sigur doriți să vă deconectați?')) {
-      window.location.reload()
+      if (onLogout) {
+        onLogout() // Use the logout function from props
+      } else {
+        window.location.reload() // Fallback
+      }
     }
   }
 
