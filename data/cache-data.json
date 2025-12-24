@@ -18,12 +18,12 @@
           "factors": [],
           "delayProbability": 0
         },
-        "lastUpdated": "2025-12-24T16:32:24.667Z"
+        "lastUpdated": "2025-12-24T16:40:18.195Z"
       }
     },
     "createdAt": "2025-12-18T12:44:40.360Z",
     "expiresAt": "2026-01-17T12:44:40.360Z",
-    "lastAccessed": "2025-12-24T16:32:25.029Z",
+    "lastAccessed": "2025-12-24T16:40:19.395Z",
     "source": "cron",
     "success": true
   },
@@ -46,12 +46,12 @@
           "factors": [],
           "delayProbability": 0
         },
-        "lastUpdated": "2025-12-24T16:32:24.667Z"
+        "lastUpdated": "2025-12-24T16:40:18.195Z"
       }
     },
     "createdAt": "2025-12-18T12:44:40.556Z",
     "expiresAt": "2026-01-17T12:44:40.556Z",
-    "lastAccessed": "2025-12-24T16:32:25.029Z",
+    "lastAccessed": "2025-12-24T16:40:19.395Z",
     "source": "cron",
     "success": true
   },
@@ -532,33 +532,10 @@
     "success": true
   },
   {
-    "id": "weather_current_weather_1766593945026",
+    "id": "weather_current_weather_1766594419080",
     "category": "weather",
     "key": "current_weather",
     "data": {
-      "Bucharest": {
-        "city": "Bucharest",
-        "country": "RO",
-        "temperature": 1,
-        "humidity": 94,
-        "description": "ninsoare puternică",
-        "icon": "13n",
-        "windSpeed": 43,
-        "pressure": 1025,
-        "feelsLike": -6,
-        "visibility": 3,
-        "lastUpdated": "2025-12-24T16:32:24.284Z",
-        "flightImpact": {
-          "severity": "moderate",
-          "factors": [
-            "Vânt puternic (43 km/h)",
-            "Vizibilitate limitată (3 km)",
-            "Ninsoare"
-          ],
-          "alertMessage": "Condiții meteo dificile în București. Posibile întârzieri minore.",
-          "delayProbability": 45
-        }
-      },
       "Cluj-Napoca": {
         "city": "Cluj-Napoca",
         "country": "RO",
@@ -570,7 +547,7 @@
         "pressure": 1025,
         "feelsLike": 0,
         "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.290Z",
+        "lastUpdated": "2025-12-24T16:40:17.430Z",
         "flightImpact": {
           "severity": "none",
           "factors": [],
@@ -588,7 +565,7 @@
         "pressure": 1026,
         "feelsLike": 3,
         "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.291Z",
+        "lastUpdated": "2025-12-24T16:40:17.437Z",
         "flightImpact": {
           "severity": "moderate",
           "factors": [
@@ -609,7 +586,7 @@
         "pressure": 1033,
         "feelsLike": -4,
         "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.305Z",
+        "lastUpdated": "2025-12-24T16:40:17.443Z",
         "flightImpact": {
           "severity": "none",
           "factors": [],
@@ -627,32 +604,34 @@
         "pressure": 1021,
         "feelsLike": 0,
         "visibility": 6,
-        "lastUpdated": "2025-12-24T16:32:24.311Z",
+        "lastUpdated": "2025-12-24T16:40:17.445Z",
         "flightImpact": {
           "severity": "none",
           "factors": [],
           "delayProbability": 0
         }
       },
-      "Craiova": {
-        "city": "Craiova",
+      "Bucharest": {
+        "city": "Bucharest",
         "country": "RO",
-        "temperature": 4,
-        "humidity": 93,
-        "description": "ploaie moderată",
-        "icon": "10n",
-        "windSpeed": 39,
-        "pressure": 1022,
-        "feelsLike": -1,
-        "visibility": 6,
-        "lastUpdated": "2025-12-24T16:32:24.481Z",
+        "temperature": 1,
+        "humidity": 94,
+        "description": "ninsoare puternică",
+        "icon": "13n",
+        "windSpeed": 43,
+        "pressure": 1025,
+        "feelsLike": -6,
+        "visibility": 3,
+        "lastUpdated": "2025-12-24T16:40:17.453Z",
         "flightImpact": {
           "severity": "moderate",
           "factors": [
-            "Vânt puternic (39 km/h)"
+            "Vânt puternic (43 km/h)",
+            "Vizibilitate limitată (3 km)",
+            "Ninsoare"
           ],
-          "alertMessage": "Condiții meteo dificile în Craioviţa. Posibile întârzieri minore.",
-          "delayProbability": 35
+          "alertMessage": "Condiții meteo dificile în București. Posibile întârzieri minore.",
+          "delayProbability": 45
         }
       },
       "Brasov": {
@@ -666,7 +645,7 @@
         "pressure": 1025,
         "feelsLike": -7,
         "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.483Z",
+        "lastUpdated": "2025-12-24T16:40:17.810Z",
         "flightImpact": {
           "severity": "moderate",
           "factors": [
@@ -676,18 +655,39 @@
           "delayProbability": 45
         }
       },
-      "Oradea": {
-        "city": "Oradea",
+      "Craiova": {
+        "city": "Craiova",
         "country": "RO",
-        "temperature": 6,
-        "humidity": 71,
-        "description": "cer senin",
-        "icon": "01n",
-        "windSpeed": 21,
+        "temperature": 4,
+        "humidity": 93,
+        "description": "ploaie moderată",
+        "icon": "10n",
+        "windSpeed": 39,
         "pressure": 1022,
-        "feelsLike": 2,
-        "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.488Z",
+        "feelsLike": -1,
+        "visibility": 6,
+        "lastUpdated": "2025-12-24T16:40:17.811Z",
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Vânt puternic (39 km/h)"
+          ],
+          "alertMessage": "Condiții meteo dificile în Craioviţa. Posibile întârzieri minore.",
+          "delayProbability": 35
+        }
+      },
+      "Galati": {
+        "city": "Galati",
+        "country": "RO",
+        "temperature": 2,
+        "humidity": 92,
+        "description": "cer acoperit de nori",
+        "icon": "04n",
+        "windSpeed": 27,
+        "pressure": 1029,
+        "feelsLike": -3,
+        "visibility": 9,
+        "lastUpdated": "2025-12-24T16:40:17.813Z",
         "flightImpact": {
           "severity": "none",
           "factors": [],
@@ -705,25 +705,25 @@
         "pressure": 1026,
         "feelsLike": -3,
         "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.491Z",
+        "lastUpdated": "2025-12-24T16:40:17.813Z",
         "flightImpact": {
           "severity": "none",
           "factors": [],
           "delayProbability": 0
         }
       },
-      "Galati": {
-        "city": "Galati",
+      "Oradea": {
+        "city": "Oradea",
         "country": "RO",
-        "temperature": 2,
-        "humidity": 92,
-        "description": "cer acoperit de nori",
-        "icon": "04n",
-        "windSpeed": 27,
-        "pressure": 1029,
-        "feelsLike": -3,
-        "visibility": 9,
-        "lastUpdated": "2025-12-24T16:32:24.492Z",
+        "temperature": 6,
+        "humidity": 71,
+        "description": "cer senin",
+        "icon": "01n",
+        "windSpeed": 21,
+        "pressure": 1022,
+        "feelsLike": 2,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:40:17.816Z",
         "flightImpact": {
           "severity": "none",
           "factors": [],
@@ -741,7 +741,7 @@
         "pressure": 1028,
         "feelsLike": -2,
         "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.665Z",
+        "lastUpdated": "2025-12-24T16:40:18.194Z",
         "flightImpact": {
           "severity": "none",
           "factors": [],
@@ -759,7 +759,7 @@
         "pressure": 1021,
         "feelsLike": 3,
         "visibility": 5,
-        "lastUpdated": "2025-12-24T16:32:24.667Z",
+        "lastUpdated": "2025-12-24T16:40:18.195Z",
         "flightImpact": {
           "severity": "none",
           "factors": [],
@@ -777,7 +777,7 @@
         "pressure": 1032,
         "feelsLike": -5,
         "visibility": 5,
-        "lastUpdated": "2025-12-24T16:32:24.668Z",
+        "lastUpdated": "2025-12-24T16:40:18.195Z",
         "flightImpact": {
           "severity": "high",
           "factors": [
@@ -798,7 +798,7 @@
         "pressure": 1024,
         "feelsLike": -5,
         "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.668Z",
+        "lastUpdated": "2025-12-24T16:40:18.196Z",
         "flightImpact": {
           "severity": "moderate",
           "factors": [
@@ -819,7 +819,7 @@
         "pressure": 1023,
         "feelsLike": -1,
         "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.670Z",
+        "lastUpdated": "2025-12-24T16:40:18.196Z",
         "flightImpact": {
           "severity": "none",
           "factors": [],
@@ -837,25 +837,7 @@
         "pressure": 1025,
         "feelsLike": 3,
         "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.841Z",
-        "flightImpact": {
-          "severity": "none",
-          "factors": [],
-          "delayProbability": 0
-        }
-      },
-      "Targu Mures": {
-        "city": "Targu Mures",
-        "country": "RO",
-        "temperature": 4,
-        "humidity": 75,
-        "description": "cer fragmentat",
-        "icon": "04n",
-        "windSpeed": 11,
-        "pressure": 1025,
-        "feelsLike": 1,
-        "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.842Z",
+        "lastUpdated": "2025-12-24T16:40:18.634Z",
         "flightImpact": {
           "severity": "none",
           "factors": [],
@@ -873,25 +855,7 @@
         "pressure": 1033,
         "feelsLike": -4,
         "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.863Z",
-        "flightImpact": {
-          "severity": "none",
-          "factors": [],
-          "delayProbability": 0
-        }
-      },
-      "Satu Mare": {
-        "city": "Satu Mare",
-        "country": "RO",
-        "temperature": 4,
-        "humidity": 70,
-        "description": "cer fragmentat",
-        "icon": "04n",
-        "windSpeed": 13,
-        "pressure": 1024,
-        "feelsLike": 1,
-        "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:24.865Z",
+        "lastUpdated": "2025-12-24T16:40:18.635Z",
         "flightImpact": {
           "severity": "none",
           "factors": [],
@@ -909,7 +873,7 @@
         "pressure": 1028,
         "feelsLike": -5,
         "visibility": 0,
-        "lastUpdated": "2025-12-24T16:32:24.867Z",
+        "lastUpdated": "2025-12-24T16:40:18.652Z",
         "flightImpact": {
           "severity": "severe",
           "factors": [
@@ -917,6 +881,42 @@
           ],
           "alertMessage": "Condiții meteo severe în Buzău. Întârzieri și anulări de zboruri foarte probabile.",
           "delayProbability": 90
+        }
+      },
+      "Targu Mures": {
+        "city": "Targu Mures",
+        "country": "RO",
+        "temperature": 4,
+        "humidity": 75,
+        "description": "cer fragmentat",
+        "icon": "04n",
+        "windSpeed": 11,
+        "pressure": 1025,
+        "feelsLike": 1,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:40:18.653Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Satu Mare": {
+        "city": "Satu Mare",
+        "country": "RO",
+        "temperature": 4,
+        "humidity": 70,
+        "description": "cer fragmentat",
+        "icon": "04n",
+        "windSpeed": 13,
+        "pressure": 1024,
+        "feelsLike": 1,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:40:18.657Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
         }
       },
       "Chisinau": {
@@ -930,7 +930,7 @@
         "pressure": 1032,
         "feelsLike": -6,
         "visibility": 10,
-        "lastUpdated": "2025-12-24T16:32:25.025Z",
+        "lastUpdated": "2025-12-24T16:40:19.071Z",
         "flightImpact": {
           "severity": "none",
           "factors": [],
@@ -938,14 +938,14 @@
         }
       }
     },
-    "createdAt": "2025-12-24T16:32:25.026Z",
-    "expiresAt": "2025-12-24T17:02:25.026Z",
-    "lastAccessed": "2025-12-24T16:32:25.026Z",
+    "createdAt": "2025-12-24T16:40:19.080Z",
+    "expiresAt": "2025-12-24T17:10:19.080Z",
+    "lastAccessed": "2025-12-24T16:40:19.080Z",
     "source": "cron",
     "success": true
   },
   {
-    "id": "flight_OTP_arrivals_1766594543973",
+    "id": "flight_OTP_arrivals_1766595032034",
     "category": "flightData",
     "key": "OTP_arrivals",
     "data": [
@@ -1172,14 +1172,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:23.973Z",
-    "expiresAt": "2026-01-23T16:42:23.973Z",
-    "lastAccessed": "2025-12-24T16:42:23.973Z",
+    "createdAt": "2025-12-24T16:50:32.034Z",
+    "expiresAt": "2026-01-23T16:50:32.034Z",
+    "lastAccessed": "2025-12-24T16:50:32.034Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_OTP_departures_1766594543987",
+    "id": "flight_OTP_departures_1766595032047",
     "category": "flightData",
     "key": "OTP_departures",
     "data": [
@@ -1408,14 +1408,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:23.987Z",
-    "expiresAt": "2026-01-23T16:42:23.987Z",
-    "lastAccessed": "2025-12-24T16:42:23.987Z",
+    "createdAt": "2025-12-24T16:50:32.047Z",
+    "expiresAt": "2026-01-23T16:50:32.047Z",
+    "lastAccessed": "2025-12-24T16:50:32.047Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_BBU_arrivals_1766594543998",
+    "id": "flight_BBU_arrivals_1766595032065",
     "category": "flightData",
     "key": "BBU_arrivals",
     "data": [
@@ -1448,14 +1448,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:23.998Z",
-    "expiresAt": "2026-01-23T16:42:23.998Z",
-    "lastAccessed": "2025-12-24T16:42:23.998Z",
+    "createdAt": "2025-12-24T16:50:32.065Z",
+    "expiresAt": "2026-01-23T16:50:32.065Z",
+    "lastAccessed": "2025-12-24T16:50:32.065Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_BBU_departures_1766594544013",
+    "id": "flight_BBU_departures_1766595032077",
     "category": "flightData",
     "key": "BBU_departures",
     "data": [
@@ -1488,14 +1488,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.013Z",
-    "expiresAt": "2026-01-23T16:42:24.013Z",
-    "lastAccessed": "2025-12-24T16:42:24.013Z",
+    "createdAt": "2025-12-24T16:50:32.077Z",
+    "expiresAt": "2026-01-23T16:50:32.077Z",
+    "lastAccessed": "2025-12-24T16:50:32.077Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_CLJ_arrivals_1766594544023",
+    "id": "flight_CLJ_arrivals_1766595032085",
     "category": "flightData",
     "key": "CLJ_arrivals",
     "data": [
@@ -1526,14 +1526,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.023Z",
-    "expiresAt": "2026-01-23T16:42:24.023Z",
-    "lastAccessed": "2025-12-24T16:42:24.023Z",
+    "createdAt": "2025-12-24T16:50:32.085Z",
+    "expiresAt": "2026-01-23T16:50:32.085Z",
+    "lastAccessed": "2025-12-24T16:50:32.085Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_CLJ_departures_1766594544029",
+    "id": "flight_CLJ_departures_1766595032095",
     "category": "flightData",
     "key": "CLJ_departures",
     "data": [
@@ -1552,14 +1552,14 @@
         "delayMinutes": 48
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.029Z",
-    "expiresAt": "2026-01-23T16:42:24.029Z",
-    "lastAccessed": "2025-12-24T16:42:24.029Z",
+    "createdAt": "2025-12-24T16:50:32.095Z",
+    "expiresAt": "2026-01-23T16:50:32.095Z",
+    "lastAccessed": "2025-12-24T16:50:32.095Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_TSR_arrivals_1766594544036",
+    "id": "flight_TSR_arrivals_1766595032103",
     "category": "flightData",
     "key": "TSR_arrivals",
     "data": [
@@ -1576,14 +1576,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.036Z",
-    "expiresAt": "2026-01-23T16:42:24.036Z",
-    "lastAccessed": "2025-12-24T16:42:24.036Z",
+    "createdAt": "2025-12-24T16:50:32.103Z",
+    "expiresAt": "2026-01-23T16:50:32.103Z",
+    "lastAccessed": "2025-12-24T16:50:32.103Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_TSR_departures_1766594544040",
+    "id": "flight_TSR_departures_1766595032107",
     "category": "flightData",
     "key": "TSR_departures",
     "data": [
@@ -1768,14 +1768,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.040Z",
-    "expiresAt": "2026-01-23T16:42:24.040Z",
-    "lastAccessed": "2025-12-24T16:42:24.040Z",
+    "createdAt": "2025-12-24T16:50:32.107Z",
+    "expiresAt": "2026-01-23T16:50:32.107Z",
+    "lastAccessed": "2025-12-24T16:50:32.107Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_IAS_arrivals_1766594544535",
+    "id": "flight_IAS_arrivals_1766595032314",
     "category": "flightData",
     "key": "IAS_arrivals",
     "data": [
@@ -1804,14 +1804,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.535Z",
-    "expiresAt": "2026-01-23T16:42:24.535Z",
-    "lastAccessed": "2025-12-24T16:42:24.535Z",
+    "createdAt": "2025-12-24T16:50:32.314Z",
+    "expiresAt": "2026-01-23T16:50:32.314Z",
+    "lastAccessed": "2025-12-24T16:50:32.314Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_IAS_departures_1766594544540",
+    "id": "flight_IAS_departures_1766595032370",
     "category": "flightData",
     "key": "IAS_departures",
     "data": [
@@ -1852,14 +1852,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.540Z",
-    "expiresAt": "2026-01-23T16:42:24.540Z",
-    "lastAccessed": "2025-12-24T16:42:24.540Z",
+    "createdAt": "2025-12-24T16:50:32.370Z",
+    "expiresAt": "2026-01-23T16:50:32.370Z",
+    "lastAccessed": "2025-12-24T16:50:32.371Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_CND_arrivals_1766594544547",
+    "id": "flight_CND_arrivals_1766595032385",
     "category": "flightData",
     "key": "CND_arrivals",
     "data": [
@@ -1876,14 +1876,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.547Z",
-    "expiresAt": "2026-01-23T16:42:24.547Z",
-    "lastAccessed": "2025-12-24T16:42:24.547Z",
+    "createdAt": "2025-12-24T16:50:32.385Z",
+    "expiresAt": "2026-01-23T16:50:32.385Z",
+    "lastAccessed": "2025-12-24T16:50:32.385Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_CND_departures_1766594544552",
+    "id": "flight_CND_departures_1766595032396",
     "category": "flightData",
     "key": "CND_departures",
     "data": [
@@ -1900,14 +1900,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.552Z",
-    "expiresAt": "2026-01-23T16:42:24.552Z",
-    "lastAccessed": "2025-12-24T16:42:24.552Z",
+    "createdAt": "2025-12-24T16:50:32.396Z",
+    "expiresAt": "2026-01-23T16:50:32.396Z",
+    "lastAccessed": "2025-12-24T16:50:32.396Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_SBZ_arrivals_1766594544559",
+    "id": "flight_SBZ_arrivals_1766595032414",
     "category": "flightData",
     "key": "SBZ_arrivals",
     "data": [
@@ -1926,14 +1926,14 @@
         "delayMinutes": 15
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.559Z",
-    "expiresAt": "2026-01-23T16:42:24.559Z",
-    "lastAccessed": "2025-12-24T16:42:24.559Z",
+    "createdAt": "2025-12-24T16:50:32.414Z",
+    "expiresAt": "2026-01-23T16:50:32.413Z",
+    "lastAccessed": "2025-12-24T16:50:32.414Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_SBZ_departures_1766594544565",
+    "id": "flight_SBZ_departures_1766595032422",
     "category": "flightData",
     "key": "SBZ_departures",
     "data": [
@@ -1966,14 +1966,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.565Z",
-    "expiresAt": "2026-01-23T16:42:24.565Z",
-    "lastAccessed": "2025-12-24T16:42:24.565Z",
+    "createdAt": "2025-12-24T16:50:32.422Z",
+    "expiresAt": "2026-01-23T16:50:32.422Z",
+    "lastAccessed": "2025-12-24T16:50:32.422Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_CRA_arrivals_1766594544571",
+    "id": "flight_CRA_arrivals_1766595032430",
     "category": "flightData",
     "key": "CRA_arrivals",
     "data": [
@@ -1990,14 +1990,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.571Z",
-    "expiresAt": "2026-01-23T16:42:24.571Z",
-    "lastAccessed": "2025-12-24T16:42:24.571Z",
+    "createdAt": "2025-12-24T16:50:32.430Z",
+    "expiresAt": "2026-01-23T16:50:32.430Z",
+    "lastAccessed": "2025-12-24T16:50:32.430Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_CRA_departures_1766594544577",
+    "id": "flight_CRA_departures_1766595032437",
     "category": "flightData",
     "key": "CRA_departures",
     "data": [
@@ -2014,14 +2014,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.577Z",
-    "expiresAt": "2026-01-23T16:42:24.577Z",
-    "lastAccessed": "2025-12-24T16:42:24.577Z",
+    "createdAt": "2025-12-24T16:50:32.437Z",
+    "expiresAt": "2026-01-23T16:50:32.437Z",
+    "lastAccessed": "2025-12-24T16:50:32.437Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_BCM_arrivals_1766594544582",
+    "id": "flight_BCM_arrivals_1766595032444",
     "category": "flightData",
     "key": "BCM_arrivals",
     "data": [
@@ -2038,14 +2038,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.582Z",
-    "expiresAt": "2026-01-23T16:42:24.582Z",
-    "lastAccessed": "2025-12-24T16:42:24.582Z",
+    "createdAt": "2025-12-24T16:50:32.444Z",
+    "expiresAt": "2026-01-23T16:50:32.444Z",
+    "lastAccessed": "2025-12-24T16:50:32.444Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_BCM_departures_1766594544589",
+    "id": "flight_BCM_departures_1766595032452",
     "category": "flightData",
     "key": "BCM_departures",
     "data": [
@@ -2062,14 +2062,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.589Z",
-    "expiresAt": "2026-01-23T16:42:24.589Z",
-    "lastAccessed": "2025-12-24T16:42:24.589Z",
+    "createdAt": "2025-12-24T16:50:32.452Z",
+    "expiresAt": "2026-01-23T16:50:32.452Z",
+    "lastAccessed": "2025-12-24T16:50:32.452Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_BAY_arrivals_1766594544592",
+    "id": "flight_BAY_arrivals_1766595032455",
     "category": "flightData",
     "key": "BAY_arrivals",
     "data": [
@@ -2110,14 +2110,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.592Z",
-    "expiresAt": "2026-01-23T16:42:24.592Z",
-    "lastAccessed": "2025-12-24T16:42:24.592Z",
+    "createdAt": "2025-12-24T16:50:32.455Z",
+    "expiresAt": "2026-01-23T16:50:32.455Z",
+    "lastAccessed": "2025-12-24T16:50:32.455Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_BAY_departures_1766594544999",
+    "id": "flight_BAY_departures_1766595032656",
     "category": "flightData",
     "key": "BAY_departures",
     "data": [
@@ -2158,14 +2158,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:24.999Z",
-    "expiresAt": "2026-01-23T16:42:24.999Z",
-    "lastAccessed": "2025-12-24T16:42:24.999Z",
+    "createdAt": "2025-12-24T16:50:32.656Z",
+    "expiresAt": "2026-01-23T16:50:32.655Z",
+    "lastAccessed": "2025-12-24T16:50:32.656Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_OMR_arrivals_1766594545562",
+    "id": "flight_OMR_arrivals_1766595032874",
     "category": "flightData",
     "key": "OMR_arrivals",
     "data": [
@@ -2196,14 +2196,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:25.562Z",
-    "expiresAt": "2026-01-23T16:42:25.562Z",
-    "lastAccessed": "2025-12-24T16:42:25.562Z",
+    "createdAt": "2025-12-24T16:50:32.874Z",
+    "expiresAt": "2026-01-23T16:50:32.874Z",
+    "lastAccessed": "2025-12-24T16:50:32.874Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_OMR_departures_1766594545571",
+    "id": "flight_OMR_departures_1766595032883",
     "category": "flightData",
     "key": "OMR_departures",
     "data": [
@@ -2220,14 +2220,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:25.571Z",
-    "expiresAt": "2026-01-23T16:42:25.571Z",
-    "lastAccessed": "2025-12-24T16:42:25.571Z",
+    "createdAt": "2025-12-24T16:50:32.883Z",
+    "expiresAt": "2026-01-23T16:50:32.883Z",
+    "lastAccessed": "2025-12-24T16:50:32.883Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_SCV_arrivals_1766594545577",
+    "id": "flight_SCV_arrivals_1766595032891",
     "category": "flightData",
     "key": "SCV_arrivals",
     "data": [
@@ -2244,14 +2244,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:25.577Z",
-    "expiresAt": "2026-01-23T16:42:25.577Z",
-    "lastAccessed": "2025-12-24T16:42:25.577Z",
+    "createdAt": "2025-12-24T16:50:32.891Z",
+    "expiresAt": "2026-01-23T16:50:32.891Z",
+    "lastAccessed": "2025-12-24T16:50:32.891Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_SCV_departures_1766594545582",
+    "id": "flight_SCV_departures_1766595032899",
     "category": "flightData",
     "key": "SCV_departures",
     "data": [
@@ -2268,14 +2268,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:25.582Z",
-    "expiresAt": "2026-01-23T16:42:25.582Z",
-    "lastAccessed": "2025-12-24T16:42:25.582Z",
+    "createdAt": "2025-12-24T16:50:32.899Z",
+    "expiresAt": "2026-01-23T16:50:32.899Z",
+    "lastAccessed": "2025-12-24T16:50:32.899Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_TGM_arrivals_1766594545585",
+    "id": "flight_TGM_arrivals_1766595032903",
     "category": "flightData",
     "key": "TGM_arrivals",
     "data": [
@@ -2298,14 +2298,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:25.585Z",
-    "expiresAt": "2026-01-23T16:42:25.585Z",
-    "lastAccessed": "2025-12-24T16:42:25.585Z",
+    "createdAt": "2025-12-24T16:50:32.903Z",
+    "expiresAt": "2026-01-23T16:50:32.903Z",
+    "lastAccessed": "2025-12-24T16:50:32.903Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_TGM_departures_1766594545828",
+    "id": "flight_TGM_departures_1766595033097",
     "category": "flightData",
     "key": "TGM_departures",
     "data": [
@@ -2328,14 +2328,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:25.828Z",
-    "expiresAt": "2026-01-23T16:42:25.828Z",
-    "lastAccessed": "2025-12-24T16:42:25.828Z",
+    "createdAt": "2025-12-24T16:50:33.097Z",
+    "expiresAt": "2026-01-23T16:50:33.097Z",
+    "lastAccessed": "2025-12-24T16:50:33.097Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_SUJ_arrivals_1766594546728",
+    "id": "flight_SUJ_arrivals_1766595033862",
     "category": "flightData",
     "key": "SUJ_arrivals",
     "data": [
@@ -2358,14 +2358,14 @@
         "delay": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:26.728Z",
-    "expiresAt": "2026-01-23T16:42:26.728Z",
-    "lastAccessed": "2025-12-24T16:42:26.728Z",
+    "createdAt": "2025-12-24T16:50:33.862Z",
+    "expiresAt": "2026-01-23T16:50:33.862Z",
+    "lastAccessed": "2025-12-24T16:50:33.862Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_SUJ_departures_1766594547002",
+    "id": "flight_SUJ_departures_1766595034058",
     "category": "flightData",
     "key": "SUJ_departures",
     "data": [
@@ -2382,14 +2382,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:27.002Z",
-    "expiresAt": "2026-01-23T16:42:27.002Z",
-    "lastAccessed": "2025-12-24T16:42:27.002Z",
+    "createdAt": "2025-12-24T16:50:34.058Z",
+    "expiresAt": "2026-01-23T16:50:34.058Z",
+    "lastAccessed": "2025-12-24T16:50:34.058Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_RMO_arrivals_1766594547013",
+    "id": "flight_RMO_arrivals_1766595034066",
     "category": "flightData",
     "key": "RMO_arrivals",
     "data": [
@@ -2490,14 +2490,14 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:27.013Z",
-    "expiresAt": "2026-01-23T16:42:27.013Z",
-    "lastAccessed": "2025-12-24T16:42:27.013Z",
+    "createdAt": "2025-12-24T16:50:34.066Z",
+    "expiresAt": "2026-01-23T16:50:34.066Z",
+    "lastAccessed": "2025-12-24T16:50:34.066Z",
     "source": "manual",
     "success": true
   },
   {
-    "id": "flight_RMO_departures_1766594547022",
+    "id": "flight_RMO_departures_1766595034073",
     "category": "flightData",
     "key": "RMO_departures",
     "data": [
@@ -2586,9 +2586,9 @@
         "delayMinutes": 0
       }
     ],
-    "createdAt": "2025-12-24T16:42:27.022Z",
-    "expiresAt": "2026-01-23T16:42:27.022Z",
-    "lastAccessed": "2025-12-24T16:42:27.022Z",
+    "createdAt": "2025-12-24T16:50:34.073Z",
+    "expiresAt": "2026-01-23T16:50:34.073Z",
+    "lastAccessed": "2025-12-24T16:50:34.073Z",
     "source": "manual",
     "success": true
   }

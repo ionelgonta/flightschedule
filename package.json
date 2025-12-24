@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "node server.js",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:properties": "jest __tests__/persistent-flight-system.test.ts --verbose"
   },
   "dependencies": {
     "@types/node": "^20",
@@ -24,8 +27,12 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
+    "@types/jest": "^29.5.8",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
-    "fast-check": "^3.15.0"
+    "fast-check": "^3.15.0",
+    "jest": "^29.7.0",
+    "jest-environment-node": "^29.7.0",
+    "ts-jest": "^29.1.1"
   }
 }

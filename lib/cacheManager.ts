@@ -10,9 +10,19 @@ let fs: any = null
 let path: any = null
 let historicalCacheManager: any = null
 let persistentFlightCache: any = null
+let persistentFlightSystem: any = null
 
-// Initialize historical cache manager only on server-side
+// Initialize persistent flight system and related components only on server-side
 if (typeof window === 'undefined') {
+  try {
+    // Load the new persistent flight system
+    const { persistentFlightSystem: pfs } = require('./persistentFlightSystem')
+    persistentFlightSystem = pfs
+    console.log('[Cache Manager] Persistent flight system loaded')
+  } catch (error) {
+    console.error('[Cache Manager] Failed to load persistent flight system:', error)
+  }
+
   try {
     // Try to load the real historical cache manager (with SQLite)
     const historicalModule = require('./historicalCacheManager')
@@ -139,6 +149,17 @@ class CacheManager {
     await this.loadRequestCounter()
     await this.loadCacheData()
     
+    // Initialize persistent flight system first
+    if (persistentFlightSystem) {
+      try {
+        await persistentFlightSystem.initialize()
+        console.log('[Cache Manager] Persistent flight system initialized')
+      } catch (error) {
+        console.error('[Cache Manager] Failed to initialize persistent flight system:', error)
+        // Continue without persistent system if it fails
+      }
+    }
+
     // Initialize historical cache manager
     if (historicalCacheManager) {
       try {
@@ -642,13 +663,56 @@ class CacheManager {
   ): Promise<void> {
     console.log(`[Cache Manager] Fetching flight data for ${airportCode} ${type} (${source})`)
     
-    // PRIMUL PAS: Încearcă să încarce datele din cache-ul persistent
-    if (persistentFlightCache) {
+    // PRIMUL PAS: Încearcă să încarce datele din noul sistem persistent
+    if (persistentFlightSystem) {
+      try {
+        const persistentData = await persistentFlightSystem.getFlightData(airportCode, type)
+        
+        if (persistentData.length > 0) {
+          console.log(`[Cache Manager] Found ${persistentData.length} flights in persistent system for ${airportCode} ${type}`)
+          
+          // Salvează în cache-ul în memorie pentru acces rapid
+          const cacheKey = `${airportCode}_${type}`
+          const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+
+          const cacheEntry: CacheEntry = {
+            id: `flight_${cacheKey}_${Date.now()}`,
+            category: 'flightData',
+            key: cacheKey,
+            data: persistentData,
+            createdAt: new Date().toISOString(),
+            expiresAt,
+            lastAccessed: new Date().toISOString(),
+            source: 'manual', // Marchează ca manual pentru că vine din sistemul persistent
+            success: true
+          }
+
+          // Remove old entry and add new one
+          const oldEntries = Array.from(this.cacheData.values()).filter(
+            entry => entry.category === 'flightData' && entry.key === cacheKey
+          )
+          oldEntries.forEach(entry => this.cacheData.delete(entry.id))
+          
+          this.cacheData.set(cacheEntry.id, cacheEntry)
+          await this.saveCacheData()
+          
+          console.log(`[Cache Manager] Loaded ${persistentData.length} flights from persistent system for ${airportCode} ${type}`)
+          
+          // MODIFICAT: Întotdeauna fă API call pentru a actualiza sistemul persistent cu date fresh
+          // Nu mai returna aici - continuă cu API call pentru actualizare
+        }
+      } catch (error) {
+        console.error('[Cache Manager] Error loading from persistent system:', error)
+      }
+    }
+    
+    // PASUL SECUNDAR: Încearcă să încarce datele din cache-ul persistent legacy
+    if (persistentFlightCache && !persistentFlightSystem) {
       try {
         const cachedFlights = await persistentFlightCache.getFlightData(airportCode, type)
         
         if (cachedFlights.length > 0) {
-          console.log(`[Cache Manager] Found ${cachedFlights.length} flights in persistent cache for ${airportCode} ${type}`)
+          console.log(`[Cache Manager] Found ${cachedFlights.length} flights in legacy persistent cache for ${airportCode} ${type}`)
           
           // Convertește datele din cache-ul persistent la formatul curent
           const convertedFlights = cachedFlights.map((flight: any) => ({
@@ -697,13 +761,13 @@ class CacheManager {
           this.cacheData.set(cacheEntry.id, cacheEntry)
           await this.saveCacheData()
           
-          console.log(`[Cache Manager] Loaded ${convertedFlights.length} flights from persistent cache for ${airportCode} ${type}`)
+          console.log(`[Cache Manager] Loaded ${convertedFlights.length} flights from legacy persistent cache for ${airportCode} ${type}`)
           
           // MODIFICAT: Întotdeauna fă API call pentru a actualiza cache-ul persistent cu date fresh
           // Nu mai returna aici - continuă cu API call pentru actualizare
         }
       } catch (error) {
-        console.error('[Cache Manager] Error loading from persistent cache:', error)
+        console.error('[Cache Manager] Error loading from legacy persistent cache:', error)
       }
     }
     
@@ -796,13 +860,22 @@ class CacheManager {
       
       // NU ȘTERGE NICIODATĂ datele vechi automat - doar prin comandă manuală din admin
       if (response.success && response.data && response.data.length > 0) {
-        // SALVEAZĂ ÎN CACHE-UL PERSISTENT ÎNAINTE DE ORICE
-        if (persistentFlightCache) {
+        // SALVEAZĂ ÎN NOUL SISTEM PERSISTENT ÎNAINTE DE ORICE
+        if (persistentFlightSystem) {
+          try {
+            const ingestionResult = await persistentFlightSystem.ingestFlightData(response.data, airportCode, type)
+            console.log(`[Cache Manager] Ingested ${ingestionResult.savedToDatabase} flights into persistent system`)
+          } catch (error) {
+            console.error('[Cache Manager] Failed to ingest into persistent system:', error)
+          }
+        }
+        // FALLBACK: Salvează în cache-ul persistent legacy dacă noul sistem nu e disponibil
+        else if (persistentFlightCache) {
           try {
             await persistentFlightCache.addFlightData(airportCode, type, response.data, 'api')
-            console.log(`[Cache Manager] Saved ${response.data.length} flights to persistent cache`)
+            console.log(`[Cache Manager] Saved ${response.data.length} flights to legacy persistent cache`)
           } catch (error) {
-            console.error('[Cache Manager] Failed to save to persistent cache:', error)
+            console.error('[Cache Manager] Failed to save to legacy persistent cache:', error)
           }
         }
 

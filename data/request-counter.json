@@ -1,8 +1,8 @@
 {
-  "flightData": 271,
+  "flightData": 287,
   "analytics": 0,
   "aircraft": 0,
   "lastReset": "2025-12-18T10:37:07.295Z",
-  "totalRequests": 273,
-  "weather": 1
+  "totalRequests": 288,
+  "weather": null
 }
