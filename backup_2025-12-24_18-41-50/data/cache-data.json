@@ -1,0 +1,2956 @@
+[
+  {
+    "id": "flight_ARW_arrivals_1766061880360",
+    "category": "flightData",
+    "key": "ARW_arrivals",
+    "data": {
+      "flights": [],
+      "weather_info": {
+        "city": "Arad",
+        "temperature": 4,
+        "feelsLike": 3,
+        "description": "ploaie moderată",
+        "icon": "10n",
+        "windSpeed": 6,
+        "visibility": 5,
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        },
+        "lastUpdated": "2025-12-24T16:41:41.054Z"
+      }
+    },
+    "createdAt": "2025-12-18T12:44:40.360Z",
+    "expiresAt": "2026-01-17T12:44:40.360Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "cron",
+    "success": true
+  },
+  {
+    "id": "flight_ARW_departures_1766061880556",
+    "category": "flightData",
+    "key": "ARW_departures",
+    "data": {
+      "flights": [],
+      "weather_info": {
+        "city": "Arad",
+        "temperature": 4,
+        "feelsLike": 3,
+        "description": "ploaie moderată",
+        "icon": "10n",
+        "windSpeed": 6,
+        "visibility": 5,
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        },
+        "lastUpdated": "2025-12-24T16:41:41.054Z"
+      }
+    },
+    "createdAt": "2025-12-18T12:44:40.556Z",
+    "expiresAt": "2026-01-17T12:44:40.556Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "cron",
+    "success": true
+  },
+  {
+    "id": "analytics_airport-statistics_1766424359561",
+    "category": "analytics",
+    "key": "airport-statistics",
+    "data": [
+      {
+        "code": "OTP",
+        "name": "Aeroportul Internațional Henri Coandă",
+        "city": "București",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 317,
+          "onTimePercentage": 95,
+          "averageDelay": 44,
+          "dailyFlights": 45,
+          "cancelledFlights": 0,
+          "delayedFlights": 16,
+          "lastUpdated": "2025-12-22T17:25:59.451Z"
+        }
+      },
+      {
+        "code": "BBU",
+        "name": "Aeroportul Internațional Aurel Vlaicu",
+        "city": "București",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 16,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 2,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.465Z"
+        }
+      },
+      {
+        "code": "CLJ",
+        "name": "Aeroportul Internațional Cluj-Napoca",
+        "city": "Cluj-Napoca",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 39,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 6,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.475Z"
+        }
+      },
+      {
+        "code": "TSR",
+        "name": "Aeroportul Internațional Timișoara Traian Vuia",
+        "city": "Timișoara",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 23,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 3,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.506Z"
+        }
+      },
+      {
+        "code": "IAS",
+        "name": "Aeroportul Internațional Iași",
+        "city": "Iași",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 25,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 4,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.435Z"
+        }
+      },
+      {
+        "code": "CND",
+        "name": "Aeroportul Internațional Mihail Kogălniceanu",
+        "city": "Constanța",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 2,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 0,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.483Z"
+        }
+      },
+      {
+        "code": "SBZ",
+        "name": "Aeroportul Internațional Sibiu",
+        "city": "Sibiu",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 7,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 1,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.522Z"
+        }
+      },
+      {
+        "code": "CRA",
+        "name": "Aeroportul Craiova",
+        "city": "Craiova",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 7,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 1,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.443Z"
+        }
+      },
+      {
+        "code": "BCM",
+        "name": "Aeroportul Bacău",
+        "city": "Bacău",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 2,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 0,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.514Z"
+        }
+      },
+      {
+        "code": "BAY",
+        "name": "Aeroportul Baia Mare",
+        "city": "Baia Mare",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 4,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 1,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.539Z"
+        }
+      },
+      {
+        "code": "OMR",
+        "name": "Aeroportul Internațional Oradea",
+        "city": "Oradea",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 8,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 1,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.527Z"
+        }
+      },
+      {
+        "code": "SCV",
+        "name": "Aeroportul Suceava Ștefan cel Mare",
+        "city": "Suceava",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 12,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 2,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.561Z"
+        }
+      },
+      {
+        "code": "TGM",
+        "name": "Aeroportul Târgu Mureș Transilvania",
+        "city": "Târgu Mureș",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 2,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 0,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.491Z"
+        }
+      },
+      {
+        "code": "ARW",
+        "name": "Aeroportul Arad",
+        "city": "Arad",
+        "country": "România",
+        "statistics": null,
+        "message": "Nu sunt suficiente date pentru a afișa această informație"
+      },
+      {
+        "code": "SUJ",
+        "name": "Aeroportul Satu Mare",
+        "city": "Satu Mare",
+        "country": "România",
+        "statistics": null,
+        "message": "Nu sunt suficiente date pentru a afișa această informație"
+      },
+      {
+        "code": "RMO",
+        "name": "Aeroportul Internațional Chișinău",
+        "city": "Chișinău",
+        "country": "Moldova",
+        "statistics": {
+          "totalFlights": 64,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 9,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:25:59.553Z"
+        }
+      }
+    ],
+    "createdAt": "2025-12-22T17:25:59.561Z",
+    "expiresAt": "2026-01-21T17:25:59.561Z",
+    "lastAccessed": "2025-12-22T17:25:59.561Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "analytics_airport-statistics_1766424586870",
+    "category": "analytics",
+    "key": "airport-statistics",
+    "data": [
+      {
+        "code": "OTP",
+        "name": "Aeroportul Internațional Henri Coandă",
+        "city": "București",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 317,
+          "onTimePercentage": 95,
+          "averageDelay": 26,
+          "dailyFlights": 45,
+          "cancelledFlights": 0,
+          "delayedFlights": 16,
+          "lastUpdated": "2025-12-22T17:29:46.811Z"
+        }
+      },
+      {
+        "code": "BBU",
+        "name": "Aeroportul Internațional Aurel Vlaicu",
+        "city": "București",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 16,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 2,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.834Z"
+        }
+      },
+      {
+        "code": "CLJ",
+        "name": "Aeroportul Internațional Cluj-Napoca",
+        "city": "Cluj-Napoca",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 39,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 6,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.806Z"
+        }
+      },
+      {
+        "code": "TSR",
+        "name": "Aeroportul Internațional Timișoara Traian Vuia",
+        "city": "Timișoara",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 23,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 3,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.839Z"
+        }
+      },
+      {
+        "code": "IAS",
+        "name": "Aeroportul Internațional Iași",
+        "city": "Iași",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 25,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 4,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.816Z"
+        }
+      },
+      {
+        "code": "CND",
+        "name": "Aeroportul Internațional Mihail Kogălniceanu",
+        "city": "Constanța",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 2,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 0,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.821Z"
+        }
+      },
+      {
+        "code": "SBZ",
+        "name": "Aeroportul Internațional Sibiu",
+        "city": "Sibiu",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 7,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 1,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.830Z"
+        }
+      },
+      {
+        "code": "CRA",
+        "name": "Aeroportul Craiova",
+        "city": "Craiova",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 7,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 1,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.826Z"
+        }
+      },
+      {
+        "code": "BCM",
+        "name": "Aeroportul Bacău",
+        "city": "Bacău",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 2,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 0,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.847Z"
+        }
+      },
+      {
+        "code": "BAY",
+        "name": "Aeroportul Baia Mare",
+        "city": "Baia Mare",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 4,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 1,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.863Z"
+        }
+      },
+      {
+        "code": "OMR",
+        "name": "Aeroportul Internațional Oradea",
+        "city": "Oradea",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 8,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 1,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.860Z"
+        }
+      },
+      {
+        "code": "SCV",
+        "name": "Aeroportul Suceava Ștefan cel Mare",
+        "city": "Suceava",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 12,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 2,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.843Z"
+        }
+      },
+      {
+        "code": "TGM",
+        "name": "Aeroportul Târgu Mureș Transilvania",
+        "city": "Târgu Mureș",
+        "country": "România",
+        "statistics": {
+          "totalFlights": 2,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 0,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.856Z"
+        }
+      },
+      {
+        "code": "ARW",
+        "name": "Aeroportul Arad",
+        "city": "Arad",
+        "country": "România",
+        "statistics": null,
+        "message": "Nu sunt suficiente date pentru a afișa această informație"
+      },
+      {
+        "code": "SUJ",
+        "name": "Aeroportul Satu Mare",
+        "city": "Satu Mare",
+        "country": "România",
+        "statistics": null,
+        "message": "Nu sunt suficiente date pentru a afișa această informație"
+      },
+      {
+        "code": "RMO",
+        "name": "Aeroportul Internațional Chișinău",
+        "city": "Chișinău",
+        "country": "Moldova",
+        "statistics": {
+          "totalFlights": 64,
+          "onTimePercentage": 100,
+          "averageDelay": 0,
+          "dailyFlights": 9,
+          "cancelledFlights": 0,
+          "delayedFlights": 0,
+          "lastUpdated": "2025-12-22T17:29:46.867Z"
+        }
+      }
+    ],
+    "createdAt": "2025-12-22T17:29:46.870Z",
+    "expiresAt": "2026-01-21T17:29:46.870Z",
+    "lastAccessed": "2025-12-22T17:29:46.870Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_OTP_arrivals_1766594500509",
+    "category": "flightData",
+    "key": "OTP_arrivals",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "LX 1888",
+          "airlineCode": "LX",
+          "airlineName": "SWISS",
+          "originCode": "ZRH",
+          "originName": "ZRH",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 15:45+02:00",
+          "actualTime": "2025-12-24 16:08+02:00",
+          "estimatedTime": "2025-12-24 16:08+02:00",
+          "status": "landed",
+          "delayMinutes": 23
+        },
+        {
+          "flightNumber": "RO 382",
+          "airlineCode": "RO",
+          "airlineName": "TAROM",
+          "originCode": "CDG",
+          "originName": "CDG",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 15:50+02:00",
+          "actualTime": "2025-12-24 15:50+02:00",
+          "estimatedTime": "2025-12-24 15:50+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "FR 5470",
+          "airlineCode": "FR",
+          "airlineName": "Ryanair",
+          "originCode": "PSR",
+          "originName": "PSR",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 16:30+02:00",
+          "actualTime": "2025-12-24 16:04+02:00",
+          "estimatedTime": "2025-12-24 16:04+02:00",
+          "status": "landed",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "H4 246",
+          "airlineCode": "H4",
+          "airlineName": "HiSky",
+          "originCode": "BRU",
+          "originName": "BRU",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 17:00+02:00",
+          "actualTime": "2025-12-24 17:00+02:00",
+          "estimatedTime": "2025-12-24 17:00+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "A2 117",
+          "airlineCode": "XX",
+          "airlineName": "Airwego",
+          "originCode": "OMR",
+          "originName": "OMR",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 17:05+02:00",
+          "actualTime": "2025-12-24 17:05+02:00",
+          "estimatedTime": "2025-12-24 17:05+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "KL 1375",
+          "airlineCode": "KL",
+          "airlineName": "KLM",
+          "originCode": "AMS",
+          "originName": "AMS",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 17:10+02:00",
+          "actualTime": "2025-12-24 17:10+02:00",
+          "estimatedTime": "2025-12-24 17:10+02:00",
+          "status": "landed",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "W4 3110",
+          "airlineCode": "W4",
+          "airlineName": "Wizz Air Malta",
+          "originCode": "BER",
+          "originName": "BER",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 17:35+02:00",
+          "actualTime": "2025-12-24 17:35+02:00",
+          "estimatedTime": "2025-12-24 17:35+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "LO 645",
+          "airlineCode": "LO",
+          "airlineName": "LOT - Polish",
+          "originCode": "WAW",
+          "originName": "WAW",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 17:40+02:00",
+          "actualTime": "2025-12-24 18:00+02:00",
+          "estimatedTime": "2025-12-24 18:00+02:00",
+          "status": "delayed",
+          "delayMinutes": 20
+        },
+        {
+          "flightNumber": "OS 697",
+          "airlineCode": "OS",
+          "airlineName": "Austrian",
+          "originCode": "VIE",
+          "originName": "VIE",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 18:25+02:00",
+          "actualTime": "2025-12-24 18:25+02:00",
+          "estimatedTime": "2025-12-24 18:25+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "VL 1652",
+          "airlineCode": "VL",
+          "airlineName": "Lufthansa City",
+          "originCode": "MUC",
+          "originName": "MUC",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 18:35+02:00",
+          "actualTime": "2025-12-24 18:35+02:00",
+          "estimatedTime": "2025-12-24 18:35+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "A3 962",
+          "airlineCode": "A3",
+          "airlineName": "Aegean",
+          "originCode": "ATH",
+          "originName": "ATH",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 20:20+02:00",
+          "actualTime": "2025-12-24 20:20+02:00",
+          "estimatedTime": "2025-12-24 20:20+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "TK 1045",
+          "airlineCode": "TK",
+          "airlineName": "Turkish",
+          "originCode": "IST",
+          "originName": "IST",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 20:30+02:00",
+          "actualTime": "2025-12-24 20:30+02:00",
+          "estimatedTime": "2025-12-24 20:30+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "FZ 1795",
+          "airlineCode": "FZ",
+          "airlineName": "flydubai",
+          "originCode": "DXB",
+          "originName": "DXB",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 22:05+02:00",
+          "actualTime": "2025-12-24 22:08+02:00",
+          "estimatedTime": "2025-12-24 22:08+02:00",
+          "status": "estimated",
+          "delayMinutes": 3
+        },
+        {
+          "flightNumber": "AF 1088",
+          "airlineCode": "AF",
+          "airlineName": "Air France",
+          "originCode": "CDG",
+          "originName": "CDG",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 22:50+02:00",
+          "actualTime": "2025-12-24 22:50+02:00",
+          "estimatedTime": "2025-12-24 22:50+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "BA 888",
+          "airlineCode": "BA",
+          "airlineName": "British",
+          "originCode": "LHR",
+          "originName": "LHR",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-24 22:55+02:00",
+          "actualTime": "2025-12-24 22:55+02:00",
+          "estimatedTime": "2025-12-24 22:55+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "JU 106",
+          "airlineCode": "JU",
+          "airlineName": "Air Serbia",
+          "originCode": "BEG",
+          "originName": "BEG",
+          "destinationCode": "OTP",
+          "destinationName": "OTP",
+          "scheduledTime": "2025-12-25 03:10+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Bucharest",
+        "temperature": 1,
+        "feelsLike": -6,
+        "description": "ninsoare puternică",
+        "icon": "13n",
+        "windSpeed": 43,
+        "visibility": 3,
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Vânt puternic (43 km/h)",
+            "Vizibilitate limitată (3 km)",
+            "Ninsoare"
+          ],
+          "alertMessage": "Condiții meteo dificile în București. Posibile întârzieri minore.",
+          "delayProbability": 45
+        },
+        "lastUpdated": "2025-12-24T16:41:40.674Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:40.509Z",
+    "expiresAt": "2026-01-23T16:41:40.509Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_OTP_departures_1766594500519",
+    "category": "flightData",
+    "key": "OTP_departures",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "OE 7501",
+          "airlineCode": "XX",
+          "airlineName": "Fly One Romania",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "BRU",
+          "destinationName": "BRU",
+          "scheduledTime": "2025-12-24 13:40+02:00",
+          "actualTime": "2025-12-24 16:08+02:00",
+          "estimatedTime": "2025-12-24 16:08+02:00",
+          "status": "departed",
+          "delayMinutes": 148
+        },
+        {
+          "flightNumber": "QS 1011",
+          "airlineCode": "QS",
+          "airlineName": "SmartWings",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "PRG",
+          "destinationName": "PRG",
+          "scheduledTime": "2025-12-24 15:45+02:00",
+          "actualTime": "2025-12-24 16:23+02:00",
+          "estimatedTime": "2025-12-24 16:23+02:00",
+          "status": "departed",
+          "delayMinutes": 38
+        },
+        {
+          "flightNumber": "FR 67",
+          "airlineCode": "FR",
+          "airlineName": "Ryanair",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "CRL",
+          "destinationName": "CRL",
+          "scheduledTime": "2025-12-24 15:50+02:00",
+          "actualTime": "2025-12-24 15:58+02:00",
+          "estimatedTime": "2025-12-24 15:58+02:00",
+          "status": "departed",
+          "delayMinutes": 8
+        },
+        {
+          "flightNumber": "BA 885",
+          "airlineCode": "BA",
+          "airlineName": "British",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "LHR",
+          "destinationName": "LHR",
+          "scheduledTime": "2025-12-24 15:50+02:00",
+          "actualTime": "2025-12-24 15:59+02:00",
+          "estimatedTime": "2025-12-24 15:59+02:00",
+          "status": "departed",
+          "delayMinutes": 9
+        },
+        {
+          "flightNumber": "JU 103",
+          "airlineCode": "JU",
+          "airlineName": "Air Serbia",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "BEG",
+          "destinationName": "BEG",
+          "scheduledTime": "2025-12-24 16:05+02:00",
+          "actualTime": "2025-12-24 16:35+02:00",
+          "estimatedTime": "2025-12-24 16:35+02:00",
+          "status": "departed",
+          "delayMinutes": 30
+        },
+        {
+          "flightNumber": "QR 222",
+          "airlineCode": "QR",
+          "airlineName": "Qatar",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "DOH",
+          "destinationName": "DOH",
+          "scheduledTime": "2025-12-24 16:20+02:00",
+          "actualTime": "2025-12-24 16:21+02:00",
+          "estimatedTime": "2025-12-24 16:21+02:00",
+          "status": "departed",
+          "delayMinutes": 1
+        },
+        {
+          "flightNumber": "LX 1889",
+          "airlineCode": "LX",
+          "airlineName": "SWISS",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "ZRH",
+          "destinationName": "ZRH",
+          "scheduledTime": "2025-12-24 16:35+02:00",
+          "actualTime": "2025-12-24 17:00+02:00",
+          "estimatedTime": "2025-12-24 17:00+02:00",
+          "status": "delayed",
+          "delayMinutes": 25
+        },
+        {
+          "flightNumber": "W4 3187",
+          "airlineCode": "W4",
+          "airlineName": "W4",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "ALC",
+          "destinationName": "ALC",
+          "scheduledTime": "2025-12-24 16:40+02:00",
+          "actualTime": "2025-12-24 16:43+02:00",
+          "estimatedTime": "2025-12-24 16:43+02:00",
+          "status": "departed",
+          "delayMinutes": 3
+        },
+        {
+          "flightNumber": "RO 273",
+          "airlineCode": "RO",
+          "airlineName": "TAROM",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "ATH",
+          "destinationName": "ATH",
+          "scheduledTime": "2025-12-24 16:40+02:00",
+          "actualTime": "2025-12-24 17:29+02:00",
+          "estimatedTime": "2025-12-24 17:29+02:00",
+          "status": "delayed",
+          "delayMinutes": 49
+        },
+        {
+          "flightNumber": "KL 1376",
+          "airlineCode": "KL",
+          "airlineName": "KLM",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "AMS",
+          "destinationName": "AMS",
+          "scheduledTime": "2025-12-24 18:00+02:00",
+          "actualTime": "2025-12-24 18:00+02:00",
+          "estimatedTime": "2025-12-24 18:00+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "H4 762",
+          "airlineCode": "H4",
+          "airlineName": "HiSky",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "OMR",
+          "destinationName": "OMR",
+          "scheduledTime": "2025-12-24 19:00+02:00",
+          "actualTime": "2025-12-24 19:00+02:00",
+          "estimatedTime": "2025-12-24 19:00+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "OS 698",
+          "airlineCode": "OS",
+          "airlineName": "Austrian",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "VIE",
+          "destinationName": "VIE",
+          "scheduledTime": "2025-12-24 19:10+02:00",
+          "actualTime": "2025-12-24 19:10+02:00",
+          "estimatedTime": "2025-12-24 19:10+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "VL 1653",
+          "airlineCode": "VL",
+          "airlineName": "Lufthansa City",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "MUC",
+          "destinationName": "MUC",
+          "scheduledTime": "2025-12-24 19:20+02:00",
+          "actualTime": "2025-12-24 19:35+02:00",
+          "estimatedTime": "2025-12-24 19:35+02:00",
+          "status": "estimated",
+          "delayMinutes": 15
+        },
+        {
+          "flightNumber": "A3 963",
+          "airlineCode": "A3",
+          "airlineName": "Aegean",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "ATH",
+          "destinationName": "ATH",
+          "scheduledTime": "2025-12-24 21:15+02:00",
+          "actualTime": "2025-12-24 21:15+02:00",
+          "estimatedTime": "2025-12-24 21:15+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "LY 572",
+          "airlineCode": "LY",
+          "airlineName": "El Al",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "TLV",
+          "destinationName": "TLV",
+          "scheduledTime": "2025-12-24 21:45+02:00",
+          "actualTime": "2025-12-24 21:45+02:00",
+          "estimatedTime": "2025-12-24 21:45+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "TK 1046",
+          "airlineCode": "TK",
+          "airlineName": "Turkish",
+          "originCode": "OTP",
+          "originName": "OTP",
+          "destinationCode": "IST",
+          "destinationName": "IST",
+          "scheduledTime": "2025-12-24 21:50+02:00",
+          "actualTime": "2025-12-24 21:50+02:00",
+          "estimatedTime": "2025-12-24 21:50+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Bucharest",
+        "temperature": 1,
+        "feelsLike": -6,
+        "description": "ninsoare puternică",
+        "icon": "13n",
+        "windSpeed": 43,
+        "visibility": 3,
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Vânt puternic (43 km/h)",
+            "Vizibilitate limitată (3 km)",
+            "Ninsoare"
+          ],
+          "alertMessage": "Condiții meteo dificile în București. Posibile întârzieri minore.",
+          "delayProbability": 45
+        },
+        "lastUpdated": "2025-12-24T16:41:40.674Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:40.519Z",
+    "expiresAt": "2026-01-23T16:41:40.519Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_BBU_arrivals_1766594500527",
+    "category": "flightData",
+    "key": "BBU_arrivals",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "W4 3100",
+          "airlineCode": "W4",
+          "airlineName": "Wizz Air Malta",
+          "originCode": "FMM",
+          "originName": "FMM",
+          "destinationCode": "BBU",
+          "destinationName": "BBU",
+          "scheduledTime": "2025-12-24 17:45+02:00",
+          "actualTime": "2025-12-24 17:45+02:00",
+          "estimatedTime": "2025-12-24 17:45+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "W6 1583",
+          "airlineCode": "W6",
+          "airlineName": "Wizz Air",
+          "originCode": "WAW",
+          "originName": "WAW",
+          "destinationCode": "BBU",
+          "destinationName": "BBU",
+          "scheduledTime": "2025-12-24 21:20+02:00",
+          "actualTime": "2025-12-24 21:20+02:00",
+          "estimatedTime": "2025-12-24 21:20+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Bucharest",
+        "temperature": 1,
+        "feelsLike": -6,
+        "description": "ninsoare puternică",
+        "icon": "13n",
+        "windSpeed": 43,
+        "visibility": 3,
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Vânt puternic (43 km/h)",
+            "Vizibilitate limitată (3 km)",
+            "Ninsoare"
+          ],
+          "alertMessage": "Condiții meteo dificile în București. Posibile întârzieri minore.",
+          "delayProbability": 45
+        },
+        "lastUpdated": "2025-12-24T16:41:40.674Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:40.527Z",
+    "expiresAt": "2026-01-23T16:41:40.527Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_BBU_departures_1766594500535",
+    "category": "flightData",
+    "key": "BBU_departures",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "W4 3177",
+          "airlineCode": "W4",
+          "airlineName": "Wizz Air Malta",
+          "originCode": "BBU",
+          "originName": "BBU",
+          "destinationCode": "BCN",
+          "destinationName": "BCN",
+          "scheduledTime": "2025-12-24 18:10+02:00",
+          "actualTime": "2025-12-24 18:10+02:00",
+          "estimatedTime": "2025-12-24 18:10+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "W6 1584",
+          "airlineCode": "W6",
+          "airlineName": "Wizz Air",
+          "originCode": "BBU",
+          "originName": "BBU",
+          "destinationCode": "WAW",
+          "destinationName": "WAW",
+          "scheduledTime": "2025-12-24 21:55+02:00",
+          "actualTime": "2025-12-24 21:55+02:00",
+          "estimatedTime": "2025-12-24 21:55+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Bucharest",
+        "temperature": 1,
+        "feelsLike": -6,
+        "description": "ninsoare puternică",
+        "icon": "13n",
+        "windSpeed": 43,
+        "visibility": 3,
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Vânt puternic (43 km/h)",
+            "Vizibilitate limitată (3 km)",
+            "Ninsoare"
+          ],
+          "alertMessage": "Condiții meteo dificile în București. Posibile întârzieri minore.",
+          "delayProbability": 45
+        },
+        "lastUpdated": "2025-12-24T16:41:40.674Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:40.535Z",
+    "expiresAt": "2026-01-23T16:41:40.535Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_CLJ_arrivals_1766594500542",
+    "category": "flightData",
+    "key": "CLJ_arrivals",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "W4 3374",
+          "airlineCode": "W4",
+          "airlineName": "Wizz Air Malta",
+          "originCode": "FMM",
+          "originName": "FMM",
+          "destinationCode": "CLJ",
+          "destinationName": "CLJ",
+          "scheduledTime": "2025-12-24 16:30+02:00",
+          "actualTime": "2025-12-24 17:14+02:00",
+          "estimatedTime": "2025-12-24 17:14+02:00",
+          "status": "landed",
+          "delayMinutes": 44
+        },
+        {
+          "flightNumber": "FR 845",
+          "airlineCode": "FR",
+          "airlineName": "Ryanair",
+          "originCode": "BGY",
+          "originName": "BGY",
+          "destinationCode": "CLJ",
+          "destinationName": "CLJ",
+          "scheduledTime": "2025-12-24 17:15+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Cluj-Napoca",
+        "temperature": 3,
+        "feelsLike": 0,
+        "description": "cer acoperit de nori",
+        "icon": "04n",
+        "windSpeed": 11,
+        "visibility": 10,
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        },
+        "lastUpdated": "2025-12-24T16:41:40.694Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:40.542Z",
+    "expiresAt": "2026-01-23T16:41:40.542Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_CLJ_departures_1766594500550",
+    "category": "flightData",
+    "key": "CLJ_departures",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "W4 3407",
+          "airlineCode": "W4",
+          "airlineName": "Wizz Air Malta",
+          "originCode": "CLJ",
+          "originName": "CLJ",
+          "destinationCode": "CDT",
+          "destinationName": "CDT",
+          "scheduledTime": "2025-12-24 15:15+02:00",
+          "actualTime": "2025-12-24 16:03+02:00",
+          "estimatedTime": "2025-12-24 16:03+02:00",
+          "status": "departed",
+          "delayMinutes": 48
+        }
+      ],
+      "weather_info": {
+        "city": "Cluj-Napoca",
+        "temperature": 3,
+        "feelsLike": 0,
+        "description": "cer acoperit de nori",
+        "icon": "04n",
+        "windSpeed": 11,
+        "visibility": 10,
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        },
+        "lastUpdated": "2025-12-24T16:41:40.694Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:40.550Z",
+    "expiresAt": "2026-01-23T16:41:40.550Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_TSR_arrivals_1766594500557",
+    "category": "flightData",
+    "key": "TSR_arrivals",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "W4 3564",
+          "airlineCode": "W4",
+          "airlineName": "Wizz Air Malta",
+          "originCode": "BCN",
+          "originName": "BCN",
+          "destinationCode": "TSR",
+          "destinationName": "TSR",
+          "scheduledTime": "2025-12-24 20:15+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Timisoara",
+        "temperature": 4,
+        "feelsLike": 0,
+        "description": "ploaie moderată",
+        "icon": "10n",
+        "windSpeed": 20,
+        "visibility": 6,
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        },
+        "lastUpdated": "2025-12-24T16:41:40.711Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:40.557Z",
+    "expiresAt": "2026-01-23T16:41:40.557Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_TSR_departures_1766594500559",
+    "category": "flightData",
+    "key": "TSR_departures",
+    "data": {
+      "flights": [
+        {
+          "flight_number": "W4 3553",
+          "airline": {
+            "code": "W4",
+            "name": "Wizz Air Malta"
+          },
+          "origin": {
+            "code": "TSR",
+            "name": "TSR"
+          },
+          "destination": {
+            "code": "FCO",
+            "name": "FCO"
+          },
+          "scheduled_time": "2025-12-18 21:00+02:00",
+          "status": "estimated",
+          "delay": 0
+        },
+        {
+          "flight_number": "H4 256",
+          "airline": {
+            "code": "H4",
+            "name": "HiSky"
+          },
+          "origin": {
+            "code": "TSR",
+            "name": "TSR"
+          },
+          "destination": {
+            "code": "OTP",
+            "name": "OTP"
+          },
+          "scheduled_time": "2025-12-18 20:20+02:00",
+          "status": "estimated",
+          "delay": 0
+        },
+        {
+          "flight_number": "W4 3551",
+          "airline": {
+            "code": "W4",
+            "name": "Wizz Air Malta"
+          },
+          "origin": {
+            "code": "TSR",
+            "name": "TSR"
+          },
+          "destination": {
+            "code": "BGY",
+            "name": "BGY"
+          },
+          "scheduled_time": "2025-12-18 20:10+02:00",
+          "status": "estimated",
+          "delay": 0
+        },
+        {
+          "flight_number": "RO 608",
+          "airline": {
+            "code": "RO",
+            "name": "TAROM"
+          },
+          "origin": {
+            "code": "TSR",
+            "name": "TSR"
+          },
+          "destination": {
+            "code": "OTP",
+            "name": "OTP"
+          },
+          "scheduled_time": "2025-12-18 18:45+02:00",
+          "status": "estimated",
+          "delay": 0
+        },
+        {
+          "flight_number": "VL 1659",
+          "airline": {
+            "code": "VL",
+            "name": "Lufthansa City"
+          },
+          "origin": {
+            "code": "TSR",
+            "name": "TSR"
+          },
+          "destination": {
+            "code": "MUC",
+            "name": "MUC"
+          },
+          "scheduled_time": "2025-12-18 18:25+02:00",
+          "status": "estimated",
+          "delay": 0
+        },
+        {
+          "flight_number": "W4 3561",
+          "airline": {
+            "code": "W4",
+            "name": "Wizz Air Malta"
+          },
+          "origin": {
+            "code": "TSR",
+            "name": "TSR"
+          },
+          "destination": {
+            "code": "MAD",
+            "name": "MAD"
+          },
+          "scheduled_time": "2025-12-18 17:30+02:00",
+          "status": "estimated",
+          "delay": 0
+        },
+        {
+          "flight_number": "W4 3555",
+          "airline": {
+            "code": "W4",
+            "name": "Wizz Air Malta"
+          },
+          "origin": {
+            "code": "TSR",
+            "name": "TSR"
+          },
+          "destination": {
+            "code": "NAP",
+            "name": "NAP"
+          },
+          "scheduled_time": "2025-12-18 16:15+02:00",
+          "status": "estimated",
+          "delay": 0
+        },
+        {
+          "flight_number": "VL 1657",
+          "airline": {
+            "code": "VL",
+            "name": "Lufthansa City"
+          },
+          "origin": {
+            "code": "TSR",
+            "name": "TSR"
+          },
+          "destination": {
+            "code": "MUC",
+            "name": "MUC"
+          },
+          "scheduled_time": "2025-12-18 14:40+02:00",
+          "status": "estimated",
+          "delay": 0
+        },
+        {
+          "flight_number": "RO 604",
+          "airline": {
+            "code": "RO",
+            "name": "TAROM"
+          },
+          "origin": {
+            "code": "TSR",
+            "name": "TSR"
+          },
+          "destination": {
+            "code": "OTP",
+            "name": "OTP"
+          },
+          "scheduled_time": "2025-12-18 14:25+02:00",
+          "status": "estimated",
+          "delay": 0
+        },
+        {
+          "flight_number": "W4 3521",
+          "airline": {
+            "code": "W4",
+            "name": "Wizz Air Malta"
+          },
+          "origin": {
+            "code": "TSR",
+            "name": "TSR"
+          },
+          "destination": {
+            "code": "BVA",
+            "name": "BVA"
+          },
+          "scheduled_time": "2025-12-18 14:05+02:00",
+          "status": "estimated",
+          "delay": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Timisoara",
+        "temperature": 4,
+        "feelsLike": 0,
+        "description": "ploaie moderată",
+        "icon": "10n",
+        "windSpeed": 20,
+        "visibility": 6,
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        },
+        "lastUpdated": "2025-12-24T16:41:40.711Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:40.559Z",
+    "expiresAt": "2026-01-23T16:41:40.559Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_IAS_arrivals_1766594501208",
+    "category": "flightData",
+    "key": "IAS_arrivals",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "H4 244",
+          "airlineCode": "H4",
+          "airlineName": "HiSky",
+          "originCode": "DUB",
+          "originName": "DUB",
+          "destinationCode": "IAS",
+          "destinationName": "IAS",
+          "scheduledTime": "2025-12-24 16:00+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "W4 3696",
+          "airlineCode": "W4",
+          "airlineName": "Wizz Air Malta",
+          "originCode": "BLL",
+          "originName": "BLL",
+          "destinationCode": "IAS",
+          "destinationName": "IAS",
+          "scheduledTime": "2025-12-24 17:00+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Iasi",
+        "temperature": 1,
+        "feelsLike": -4,
+        "description": "cer fragmentat",
+        "icon": "04n",
+        "windSpeed": 19,
+        "visibility": 10,
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        },
+        "lastUpdated": "2025-12-24T16:41:40.695Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:41.208Z",
+    "expiresAt": "2026-01-23T16:41:41.208Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_IAS_departures_1766594501217",
+    "category": "flightData",
+    "key": "IAS_departures",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "OS 704",
+          "airlineCode": "OS",
+          "airlineName": "Austrian",
+          "originCode": "IAS",
+          "originName": "IAS",
+          "destinationCode": "VIE",
+          "destinationName": "VIE",
+          "scheduledTime": "2025-12-24 16:05+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "H4 243",
+          "airlineCode": "H4",
+          "airlineName": "HiSky",
+          "originCode": "IAS",
+          "originName": "IAS",
+          "destinationCode": "DUB",
+          "destinationName": "DUB",
+          "scheduledTime": "2025-12-24 16:40+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "W4 3653",
+          "airlineCode": "W4",
+          "airlineName": "Wizz Air Malta",
+          "originCode": "IAS",
+          "originName": "IAS",
+          "destinationCode": "LTN",
+          "destinationName": "LTN",
+          "scheduledTime": "2025-12-24 18:50+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Iasi",
+        "temperature": 1,
+        "feelsLike": -4,
+        "description": "cer fragmentat",
+        "icon": "04n",
+        "windSpeed": 19,
+        "visibility": 10,
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        },
+        "lastUpdated": "2025-12-24T16:41:40.695Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:41.217Z",
+    "expiresAt": "2026-01-23T16:41:41.217Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_CND_arrivals_1766594501223",
+    "category": "flightData",
+    "key": "CND_arrivals",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "TK 1067",
+          "airlineCode": "TK",
+          "airlineName": "Turkish",
+          "originCode": "IST",
+          "originName": "IST",
+          "destinationCode": "CND",
+          "destinationName": "CND",
+          "scheduledTime": "2025-12-24 20:20+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Constanta",
+        "temperature": 7,
+        "feelsLike": 3,
+        "description": "ploaie ușoară",
+        "icon": "10n",
+        "windSpeed": 39,
+        "visibility": 10,
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Vânt puternic (39 km/h)"
+          ],
+          "alertMessage": "Condiții meteo dificile în Constanța. Posibile întârzieri minore.",
+          "delayProbability": 35
+        },
+        "lastUpdated": "2025-12-24T16:41:40.666Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:41.223Z",
+    "expiresAt": "2026-01-23T16:41:41.223Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_CND_departures_1766594501230",
+    "category": "flightData",
+    "key": "CND_departures",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "TK 1068",
+          "airlineCode": "TK",
+          "airlineName": "Turkish",
+          "originCode": "CND",
+          "originName": "CND",
+          "destinationCode": "IST",
+          "destinationName": "IST",
+          "scheduledTime": "2025-12-24 21:10+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Constanta",
+        "temperature": 7,
+        "feelsLike": 3,
+        "description": "ploaie ușoară",
+        "icon": "10n",
+        "windSpeed": 39,
+        "visibility": 10,
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Vânt puternic (39 km/h)"
+          ],
+          "alertMessage": "Condiții meteo dificile în Constanța. Posibile întârzieri minore.",
+          "delayProbability": 35
+        },
+        "lastUpdated": "2025-12-24T16:41:40.666Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:41.230Z",
+    "expiresAt": "2026-01-23T16:41:41.230Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_SBZ_arrivals_1766594501239",
+    "category": "flightData",
+    "key": "SBZ_arrivals",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "W4 3818",
+          "airlineCode": "W4",
+          "airlineName": "Wizz Air Malta",
+          "originCode": "DTM",
+          "originName": "DTM",
+          "destinationCode": "SBZ",
+          "destinationName": "SBZ",
+          "scheduledTime": "2025-12-24 17:25+02:00",
+          "actualTime": "2025-12-24 17:40+02:00",
+          "estimatedTime": "2025-12-24 17:40+02:00",
+          "status": "estimated",
+          "delayMinutes": 15
+        }
+      ],
+      "weather_info": {
+        "city": "Sibiu",
+        "temperature": 3,
+        "feelsLike": -1,
+        "description": "cer fragmentat",
+        "icon": "04n",
+        "windSpeed": 19,
+        "visibility": 10,
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        },
+        "lastUpdated": "2025-12-24T16:41:41.055Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:41.239Z",
+    "expiresAt": "2026-01-23T16:41:41.239Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_SBZ_departures_1766594501246",
+    "category": "flightData",
+    "key": "SBZ_departures",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "OS 708",
+          "airlineCode": "OS",
+          "airlineName": "Austrian",
+          "originCode": "SBZ",
+          "originName": "SBZ",
+          "destinationCode": "VIE",
+          "destinationName": "VIE",
+          "scheduledTime": "2025-12-24 16:05+02:00",
+          "actualTime": "2025-12-24 15:54+02:00",
+          "estimatedTime": "2025-12-24 15:54+02:00",
+          "status": "departed",
+          "delayMinutes": 0
+        },
+        {
+          "flightNumber": "W4 3801",
+          "airlineCode": "W4",
+          "airlineName": "Wizz Air Malta",
+          "originCode": "SBZ",
+          "originName": "SBZ",
+          "destinationCode": "LTN",
+          "destinationName": "LTN",
+          "scheduledTime": "2025-12-24 18:15+02:00",
+          "actualTime": "2025-12-24 18:15+02:00",
+          "estimatedTime": "2025-12-24 18:15+02:00",
+          "status": "boarding",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Sibiu",
+        "temperature": 3,
+        "feelsLike": -1,
+        "description": "cer fragmentat",
+        "icon": "04n",
+        "windSpeed": 19,
+        "visibility": 10,
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        },
+        "lastUpdated": "2025-12-24T16:41:41.055Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:41.246Z",
+    "expiresAt": "2026-01-23T16:41:41.246Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_CRA_arrivals_1766594501254",
+    "category": "flightData",
+    "key": "CRA_arrivals",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "W4 3886",
+          "airlineCode": "W4",
+          "airlineName": "Wizz Air Malta",
+          "originCode": "BVA",
+          "originName": "BVA",
+          "destinationCode": "CRA",
+          "destinationName": "CRA",
+          "scheduledTime": "2025-12-24 16:55+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Craiova",
+        "temperature": 4,
+        "feelsLike": -1,
+        "description": "ploaie moderată",
+        "icon": "10n",
+        "windSpeed": 39,
+        "visibility": 6,
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Vânt puternic (39 km/h)"
+          ],
+          "alertMessage": "Condiții meteo dificile în Craioviţa. Posibile întârzieri minore.",
+          "delayProbability": 35
+        },
+        "lastUpdated": "2025-12-24T16:41:40.882Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:41.254Z",
+    "expiresAt": "2026-01-23T16:41:41.254Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_CRA_departures_1766594501260",
+    "category": "flightData",
+    "key": "CRA_departures",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "W4 3765",
+          "airlineCode": "W4",
+          "airlineName": "Wizz Air Malta",
+          "originCode": "CRA",
+          "originName": "CRA",
+          "destinationCode": "BHX",
+          "destinationName": "BHX",
+          "scheduledTime": "2025-12-24 17:45+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Craiova",
+        "temperature": 4,
+        "feelsLike": -1,
+        "description": "ploaie moderată",
+        "icon": "10n",
+        "windSpeed": 39,
+        "visibility": 6,
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Vânt puternic (39 km/h)"
+          ],
+          "alertMessage": "Condiții meteo dificile în Craioviţa. Posibile întârzieri minore.",
+          "delayProbability": 35
+        },
+        "lastUpdated": "2025-12-24T16:41:40.882Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:41.260Z",
+    "expiresAt": "2026-01-23T16:41:41.260Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_BCM_arrivals_1766594501266",
+    "category": "flightData",
+    "key": "BCM_arrivals",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "W9 3904",
+          "airlineCode": "W9",
+          "airlineName": "Wizz Air UK",
+          "originCode": "LTN",
+          "originName": "LTN",
+          "destinationCode": "BCM",
+          "destinationName": "BCM",
+          "scheduledTime": "2025-12-24 20:30+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Bacau",
+        "temperature": -1,
+        "feelsLike": -5,
+        "description": "ceață",
+        "icon": "50n",
+        "windSpeed": 13,
+        "visibility": 5,
+        "flightImpact": {
+          "severity": "high",
+          "factors": [
+            "Ceață densă"
+          ],
+          "alertMessage": "Condiții meteo nefavorabile în Bacău. Pot apărea întârzieri semnificative.",
+          "delayProbability": 80
+        },
+        "lastUpdated": "2025-12-24T16:41:41.054Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:41.266Z",
+    "expiresAt": "2026-01-23T16:41:41.266Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_BCM_departures_1766594501272",
+    "category": "flightData",
+    "key": "BCM_departures",
+    "data": {
+      "flights": [
+        {
+          "flightNumber": "W9 3903",
+          "airlineCode": "W9",
+          "airlineName": "Wizz Air UK",
+          "originCode": "BCM",
+          "originName": "BCM",
+          "destinationCode": "LTN",
+          "destinationName": "LTN",
+          "scheduledTime": "2025-12-24 21:15+02:00",
+          "status": "estimated",
+          "delayMinutes": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Bacau",
+        "temperature": -1,
+        "feelsLike": -5,
+        "description": "ceață",
+        "icon": "50n",
+        "windSpeed": 13,
+        "visibility": 5,
+        "flightImpact": {
+          "severity": "high",
+          "factors": [
+            "Ceață densă"
+          ],
+          "alertMessage": "Condiții meteo nefavorabile în Bacău. Pot apărea întârzieri semnificative.",
+          "delayProbability": 80
+        },
+        "lastUpdated": "2025-12-24T16:41:41.054Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:41.272Z",
+    "expiresAt": "2026-01-23T16:41:41.272Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_BAY_arrivals_1766594501275",
+    "category": "flightData",
+    "key": "BAY_arrivals",
+    "data": {
+      "flights": [
+        {
+          "flight_number": "RO 617",
+          "airline": {
+            "code": "RO",
+            "name": "TAROM"
+          },
+          "origin": {
+            "code": "OTP",
+            "name": "OTP"
+          },
+          "destination": {
+            "code": "BAY",
+            "name": "BAY"
+          },
+          "scheduled_time": "2025-12-18 16:25+02:00",
+          "status": "estimated",
+          "delay": 0
+        },
+        {
+          "flight_number": "H4 226",
+          "airline": {
+            "code": "H4",
+            "name": "HiSky"
+          },
+          "origin": {
+            "code": "BVA",
+            "name": "BVA"
+          },
+          "destination": {
+            "code": "BAY",
+            "name": "BAY"
+          },
+          "scheduled_time": "2025-12-18 12:45+02:00",
+          "status": "estimated",
+          "delay": 0
+        }
+      ],
+      "weather_info": {
+        "city": "Baia Mare",
+        "temperature": 6,
+        "feelsLike": 3,
+        "description": "cer acoperit de nori",
+        "icon": "04n",
+        "windSpeed": 11,
+        "visibility": 10,
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        },
+        "lastUpdated": "2025-12-24T16:41:41.232Z"
+      }
+    },
+    "createdAt": "2025-12-24T16:41:41.275Z",
+    "expiresAt": "2026-01-23T16:41:41.275Z",
+    "lastAccessed": "2025-12-24T16:41:41.416Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "weather_current_weather_1766594501414",
+    "category": "weather",
+    "key": "current_weather",
+    "data": {
+      "Constanta": {
+        "city": "Constanta",
+        "country": "RO",
+        "temperature": 7,
+        "humidity": 93,
+        "description": "ploaie ușoară",
+        "icon": "10n",
+        "windSpeed": 39,
+        "pressure": 1026,
+        "feelsLike": 3,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:40.666Z",
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Vânt puternic (39 km/h)"
+          ],
+          "alertMessage": "Condiții meteo dificile în Constanța. Posibile întârzieri minore.",
+          "delayProbability": 35
+        }
+      },
+      "Bucharest": {
+        "city": "Bucharest",
+        "country": "RO",
+        "temperature": 1,
+        "humidity": 94,
+        "description": "ninsoare puternică",
+        "icon": "13n",
+        "windSpeed": 43,
+        "pressure": 1025,
+        "feelsLike": -6,
+        "visibility": 3,
+        "lastUpdated": "2025-12-24T16:41:40.674Z",
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Vânt puternic (43 km/h)",
+            "Vizibilitate limitată (3 km)",
+            "Ninsoare"
+          ],
+          "alertMessage": "Condiții meteo dificile în București. Posibile întârzieri minore.",
+          "delayProbability": 45
+        }
+      },
+      "Cluj-Napoca": {
+        "city": "Cluj-Napoca",
+        "country": "RO",
+        "temperature": 3,
+        "humidity": 81,
+        "description": "cer acoperit de nori",
+        "icon": "04n",
+        "windSpeed": 11,
+        "pressure": 1025,
+        "feelsLike": 0,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:40.694Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Iasi": {
+        "city": "Iasi",
+        "country": "RO",
+        "temperature": 1,
+        "humidity": 80,
+        "description": "cer fragmentat",
+        "icon": "04n",
+        "windSpeed": 19,
+        "pressure": 1033,
+        "feelsLike": -4,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:40.695Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Timisoara": {
+        "city": "Timisoara",
+        "country": "RO",
+        "temperature": 4,
+        "humidity": 100,
+        "description": "ploaie moderată",
+        "icon": "10n",
+        "windSpeed": 20,
+        "pressure": 1021,
+        "feelsLike": 0,
+        "visibility": 6,
+        "lastUpdated": "2025-12-24T16:41:40.711Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Brasov": {
+        "city": "Brasov",
+        "country": "RO",
+        "temperature": 0,
+        "humidity": 82,
+        "description": "ninsoare",
+        "icon": "13n",
+        "windSpeed": 34,
+        "pressure": 1025,
+        "feelsLike": -7,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:40.881Z",
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Ninsoare"
+          ],
+          "alertMessage": "Condiții meteo dificile în Atias. Posibile întârzieri minore.",
+          "delayProbability": 45
+        }
+      },
+      "Craiova": {
+        "city": "Craiova",
+        "country": "RO",
+        "temperature": 4,
+        "humidity": 93,
+        "description": "ploaie moderată",
+        "icon": "10n",
+        "windSpeed": 39,
+        "pressure": 1022,
+        "feelsLike": -1,
+        "visibility": 6,
+        "lastUpdated": "2025-12-24T16:41:40.882Z",
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Vânt puternic (39 km/h)"
+          ],
+          "alertMessage": "Condiții meteo dificile în Craioviţa. Posibile întârzieri minore.",
+          "delayProbability": 35
+        }
+      },
+      "Ploiesti": {
+        "city": "Ploiesti",
+        "country": "RO",
+        "temperature": 3,
+        "humidity": 93,
+        "description": "ploaie ușoară",
+        "icon": "10n",
+        "windSpeed": 32,
+        "pressure": 1026,
+        "feelsLike": -3,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:40.882Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Galati": {
+        "city": "Galati",
+        "country": "RO",
+        "temperature": 2,
+        "humidity": 92,
+        "description": "cer acoperit de nori",
+        "icon": "04n",
+        "windSpeed": 27,
+        "pressure": 1029,
+        "feelsLike": -3,
+        "visibility": 9,
+        "lastUpdated": "2025-12-24T16:41:40.882Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Oradea": {
+        "city": "Oradea",
+        "country": "RO",
+        "temperature": 6,
+        "humidity": 71,
+        "description": "cer senin",
+        "icon": "01n",
+        "windSpeed": 21,
+        "pressure": 1022,
+        "feelsLike": 2,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:40.886Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Bacau": {
+        "city": "Bacau",
+        "country": "RO",
+        "temperature": -1,
+        "humidity": 100,
+        "description": "ceață",
+        "icon": "50n",
+        "windSpeed": 13,
+        "pressure": 1032,
+        "feelsLike": -5,
+        "visibility": 5,
+        "lastUpdated": "2025-12-24T16:41:41.054Z",
+        "flightImpact": {
+          "severity": "high",
+          "factors": [
+            "Ceață densă"
+          ],
+          "alertMessage": "Condiții meteo nefavorabile în Bacău. Pot apărea întârzieri semnificative.",
+          "delayProbability": 80
+        }
+      },
+      "Arad": {
+        "city": "Arad",
+        "country": "RO",
+        "temperature": 4,
+        "humidity": 100,
+        "description": "ploaie moderată",
+        "icon": "10n",
+        "windSpeed": 6,
+        "pressure": 1021,
+        "feelsLike": 3,
+        "visibility": 5,
+        "lastUpdated": "2025-12-24T16:41:41.054Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Sibiu": {
+        "city": "Sibiu",
+        "country": "RO",
+        "temperature": 3,
+        "humidity": 93,
+        "description": "cer fragmentat",
+        "icon": "04n",
+        "windSpeed": 19,
+        "pressure": 1023,
+        "feelsLike": -1,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:41.055Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Braila": {
+        "city": "Braila",
+        "country": "RO",
+        "temperature": 3,
+        "humidity": 89,
+        "description": "cer acoperit de nori",
+        "icon": "04n",
+        "windSpeed": 28,
+        "pressure": 1028,
+        "feelsLike": -2,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:41.063Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Pitesti": {
+        "city": "Pitesti",
+        "country": "RO",
+        "temperature": 1,
+        "humidity": 95,
+        "description": "ninsoare",
+        "icon": "13n",
+        "windSpeed": 31,
+        "pressure": 1024,
+        "feelsLike": -5,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:41.067Z",
+        "flightImpact": {
+          "severity": "moderate",
+          "factors": [
+            "Ninsoare"
+          ],
+          "alertMessage": "Condiții meteo dificile în Pitești. Posibile întârzieri minore.",
+          "delayProbability": 45
+        }
+      },
+      "Botosani": {
+        "city": "Botosani",
+        "country": "RO",
+        "temperature": 0,
+        "humidity": 94,
+        "description": "cer acoperit de nori",
+        "icon": "04n",
+        "windSpeed": 12,
+        "pressure": 1033,
+        "feelsLike": -4,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:41.232Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Baia Mare": {
+        "city": "Baia Mare",
+        "country": "RO",
+        "temperature": 6,
+        "humidity": 52,
+        "description": "cer acoperit de nori",
+        "icon": "04n",
+        "windSpeed": 11,
+        "pressure": 1025,
+        "feelsLike": 3,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:41.232Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Satu Mare": {
+        "city": "Satu Mare",
+        "country": "RO",
+        "temperature": 4,
+        "humidity": 70,
+        "description": "cer fragmentat",
+        "icon": "04n",
+        "windSpeed": 13,
+        "pressure": 1024,
+        "feelsLike": 1,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:41.236Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Targu Mures": {
+        "city": "Targu Mures",
+        "country": "RO",
+        "temperature": 4,
+        "humidity": 75,
+        "description": "cer fragmentat",
+        "icon": "04n",
+        "windSpeed": 11,
+        "pressure": 1025,
+        "feelsLike": 1,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:41.237Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      },
+      "Buzau": {
+        "city": "Buzau",
+        "country": "RO",
+        "temperature": 1,
+        "humidity": 100,
+        "description": "cer acoperit de nori",
+        "icon": "04n",
+        "windSpeed": 33,
+        "pressure": 1028,
+        "feelsLike": -5,
+        "visibility": 0,
+        "lastUpdated": "2025-12-24T16:41:41.241Z",
+        "flightImpact": {
+          "severity": "severe",
+          "factors": [
+            "Vizibilitate foarte redusă (0 km)"
+          ],
+          "alertMessage": "Condiții meteo severe în Buzău. Întârzieri și anulări de zboruri foarte probabile.",
+          "delayProbability": 90
+        }
+      },
+      "Chisinau": {
+        "city": "Chisinau",
+        "country": "MD",
+        "temperature": -1,
+        "humidity": 71,
+        "description": "cer senin",
+        "icon": "01n",
+        "windSpeed": 17,
+        "pressure": 1032,
+        "feelsLike": -6,
+        "visibility": 10,
+        "lastUpdated": "2025-12-24T16:41:41.413Z",
+        "flightImpact": {
+          "severity": "none",
+          "factors": [],
+          "delayProbability": 0
+        }
+      }
+    },
+    "createdAt": "2025-12-24T16:41:41.414Z",
+    "expiresAt": "2025-12-24T17:11:41.413Z",
+    "lastAccessed": "2025-12-24T16:41:41.414Z",
+    "source": "cron",
+    "success": true
+  },
+  {
+    "id": "flight_BAY_departures_1766594501590",
+    "category": "flightData",
+    "key": "BAY_departures",
+    "data": [
+      {
+        "flight_number": "RO 618",
+        "airline": {
+          "code": "RO",
+          "name": "TAROM"
+        },
+        "origin": {
+          "code": "BAY",
+          "name": "BAY"
+        },
+        "destination": {
+          "code": "OTP",
+          "name": "OTP"
+        },
+        "scheduled_time": "2025-12-18 16:50+02:00",
+        "status": "estimated",
+        "delay": 0
+      },
+      {
+        "flight_number": "H4 225",
+        "airline": {
+          "code": "H4",
+          "name": "HiSky"
+        },
+        "origin": {
+          "code": "BAY",
+          "name": "BAY"
+        },
+        "destination": {
+          "code": "BVA",
+          "name": "BVA"
+        },
+        "scheduled_time": "2025-12-18 13:15+02:00",
+        "status": "estimated",
+        "delay": 0
+      }
+    ],
+    "createdAt": "2025-12-24T16:41:41.590Z",
+    "expiresAt": "2026-01-23T16:41:41.590Z",
+    "lastAccessed": "2025-12-24T16:41:41.590Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_OMR_arrivals_1766594501795",
+    "category": "flightData",
+    "key": "OMR_arrivals",
+    "data": [
+      {
+        "flightNumber": "AWG 116P",
+        "airlineCode": "XX",
+        "airlineName": "AWG",
+        "originCode": "OTP",
+        "originName": "OTP",
+        "destinationCode": "OMR",
+        "destinationName": "OMR",
+        "scheduledTime": "2025-12-24 16:00+02:00",
+        "actualTime": "2025-12-24 16:00+02:00",
+        "estimatedTime": "2025-12-24 16:00+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "H4 762",
+        "airlineCode": "H4",
+        "airlineName": "HiSky",
+        "originCode": "OTP",
+        "originName": "OTP",
+        "destinationCode": "OMR",
+        "destinationName": "OMR",
+        "scheduledTime": "2025-12-24 19:50+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      }
+    ],
+    "createdAt": "2025-12-24T16:41:41.795Z",
+    "expiresAt": "2026-01-23T16:41:41.795Z",
+    "lastAccessed": "2025-12-24T16:41:41.795Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_OMR_departures_1766594501810",
+    "category": "flightData",
+    "key": "OMR_departures",
+    "data": [
+      {
+        "flightNumber": "A2 117",
+        "airlineCode": "XX",
+        "airlineName": "Astra Airlines",
+        "originCode": "OMR",
+        "originName": "OMR",
+        "destinationCode": "OTP",
+        "destinationName": "OTP",
+        "scheduledTime": "2025-12-24 16:05+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      }
+    ],
+    "createdAt": "2025-12-24T16:41:41.810Z",
+    "expiresAt": "2026-01-23T16:41:41.810Z",
+    "lastAccessed": "2025-12-24T16:41:41.810Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_SCV_arrivals_1766594501819",
+    "category": "flightData",
+    "key": "SCV_arrivals",
+    "data": [
+      {
+        "flightNumber": "W9 3606",
+        "airlineCode": "W9",
+        "airlineName": "Wizz Air UK",
+        "originCode": "LTN",
+        "originName": "LTN",
+        "destinationCode": "SCV",
+        "destinationName": "SCV",
+        "scheduledTime": "2025-12-25 00:50+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      }
+    ],
+    "createdAt": "2025-12-24T16:41:41.819Z",
+    "expiresAt": "2026-01-23T16:41:41.819Z",
+    "lastAccessed": "2025-12-24T16:41:41.819Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_SCV_departures_1766594501827",
+    "category": "flightData",
+    "key": "SCV_departures",
+    "data": [
+      {
+        "flightNumber": "W9 3605",
+        "airlineCode": "W9",
+        "airlineName": "Wizz Air UK",
+        "originCode": "SCV",
+        "originName": "SCV",
+        "destinationCode": "LTN",
+        "destinationName": "LTN",
+        "scheduledTime": "2025-12-25 01:25+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      }
+    ],
+    "createdAt": "2025-12-24T16:41:41.827Z",
+    "expiresAt": "2026-01-23T16:41:41.827Z",
+    "lastAccessed": "2025-12-24T16:41:41.827Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_TGM_arrivals_1766594501830",
+    "category": "flightData",
+    "key": "TGM_arrivals",
+    "data": [
+      {
+        "flight_number": "W6 2485",
+        "airline": {
+          "code": "W6",
+          "name": "Wizz Air"
+        },
+        "origin": {
+          "code": "BUD",
+          "name": "BUD"
+        },
+        "destination": {
+          "code": "TGM",
+          "name": "TGM"
+        },
+        "scheduled_time": "2025-12-18 13:50+02:00",
+        "status": "estimated",
+        "delay": 0
+      }
+    ],
+    "createdAt": "2025-12-24T16:41:41.830Z",
+    "expiresAt": "2026-01-23T16:41:41.830Z",
+    "lastAccessed": "2025-12-24T16:41:41.830Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_TGM_departures_1766594502197",
+    "category": "flightData",
+    "key": "TGM_departures",
+    "data": [
+      {
+        "flight_number": "W6 2486",
+        "airline": {
+          "code": "W6",
+          "name": "Wizz Air"
+        },
+        "origin": {
+          "code": "TGM",
+          "name": "TGM"
+        },
+        "destination": {
+          "code": "BUD",
+          "name": "BUD"
+        },
+        "scheduled_time": "2025-12-18 14:25+02:00",
+        "status": "estimated",
+        "delay": 0
+      }
+    ],
+    "createdAt": "2025-12-24T16:41:42.197Z",
+    "expiresAt": "2026-01-23T16:41:42.197Z",
+    "lastAccessed": "2025-12-24T16:41:42.197Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_SUJ_arrivals_1766594503017",
+    "category": "flightData",
+    "key": "SUJ_arrivals",
+    "data": [
+      {
+        "flight_number": "W9 3650",
+        "airline": {
+          "code": "W9",
+          "name": "Wizz Air UK"
+        },
+        "origin": {
+          "code": "LTN",
+          "name": ""
+        },
+        "destination": {
+          "code": "SUJ",
+          "name": ""
+        },
+        "scheduled_time": "2025-12-24 11:10+02:00",
+        "status": "estimated",
+        "delay": 0
+      }
+    ],
+    "createdAt": "2025-12-24T16:41:43.017Z",
+    "expiresAt": "2026-01-23T16:41:43.017Z",
+    "lastAccessed": "2025-12-24T16:41:43.017Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_SUJ_departures_1766594503314",
+    "category": "flightData",
+    "key": "SUJ_departures",
+    "data": [
+      {
+        "flightNumber": "W9 3649",
+        "airlineCode": "W9",
+        "airlineName": "Wizz Air UK",
+        "originCode": "SUJ",
+        "originName": "SUJ",
+        "destinationCode": "LTN",
+        "destinationName": "LTN",
+        "scheduledTime": "2025-12-24 11:45+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      }
+    ],
+    "createdAt": "2025-12-24T16:41:43.314Z",
+    "expiresAt": "2026-01-23T16:41:43.314Z",
+    "lastAccessed": "2025-12-24T16:41:43.314Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_RMO_arrivals_1766594503323",
+    "category": "flightData",
+    "key": "RMO_arrivals",
+    "data": [
+      {
+        "flightNumber": "W4 3976",
+        "airlineCode": "W4",
+        "airlineName": "Wizz Air Malta",
+        "originCode": "BER",
+        "originName": "BER",
+        "destinationCode": "RMO",
+        "destinationName": "RMO",
+        "scheduledTime": "2025-12-24 17:05+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "5F 5616",
+        "airlineCode": "5F",
+        "airlineName": "FlyOne",
+        "originCode": "MUC",
+        "originName": "MUC",
+        "destinationCode": "RMO",
+        "destinationName": "RMO",
+        "scheduledTime": "2025-12-24 18:15+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "LY 5129",
+        "airlineCode": "LY",
+        "airlineName": "El Al",
+        "originCode": "TLV",
+        "originName": "TLV",
+        "destinationCode": "RMO",
+        "destinationName": "RMO",
+        "scheduledTime": "2025-12-24 20:10+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "W9 5483",
+        "airlineCode": "W9",
+        "airlineName": "Wizz Air UK",
+        "originCode": "LTN",
+        "originName": "LTN",
+        "destinationCode": "RMO",
+        "destinationName": "RMO",
+        "scheduledTime": "2025-12-24 20:40+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "U5 464",
+        "airlineCode": "XX",
+        "airlineName": "Aura Airlines",
+        "originCode": "PRG",
+        "originName": "PRG",
+        "destinationCode": "RMO",
+        "destinationName": "RMO",
+        "scheduledTime": "2025-12-24 20:40+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "TK 271",
+        "airlineCode": "TK",
+        "airlineName": "Turkish",
+        "originCode": "IST",
+        "originName": "IST",
+        "destinationCode": "RMO",
+        "destinationName": "RMO",
+        "scheduledTime": "2025-12-24 20:45+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "H4 474",
+        "airlineCode": "H4",
+        "airlineName": "HiSky",
+        "originCode": "DUB",
+        "originName": "DUB",
+        "destinationCode": "RMO",
+        "destinationName": "RMO",
+        "scheduledTime": "2025-12-25 00:25+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "OS 719",
+        "airlineCode": "OS",
+        "airlineName": "Austrian",
+        "originCode": "VIE",
+        "originName": "VIE",
+        "destinationCode": "RMO",
+        "destinationName": "RMO",
+        "scheduledTime": "2025-12-25 01:20+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      }
+    ],
+    "createdAt": "2025-12-24T16:41:43.323Z",
+    "expiresAt": "2026-01-23T16:41:43.323Z",
+    "lastAccessed": "2025-12-24T16:41:43.323Z",
+    "source": "manual",
+    "success": true
+  },
+  {
+    "id": "flight_RMO_departures_1766594503331",
+    "category": "flightData",
+    "key": "RMO_departures",
+    "data": [
+      {
+        "flightNumber": "U5 463",
+        "airlineCode": "XX",
+        "airlineName": "Aura Airlines",
+        "originCode": "RMO",
+        "originName": "RMO",
+        "destinationCode": "PRG",
+        "destinationName": "PRG",
+        "scheduledTime": "2025-12-24 15:55+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "OS 716",
+        "airlineCode": "OS",
+        "airlineName": "Austrian",
+        "originCode": "RMO",
+        "originName": "RMO",
+        "destinationCode": "VIE",
+        "destinationName": "VIE",
+        "scheduledTime": "2025-12-24 16:00+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "W4 3941",
+        "airlineCode": "W4",
+        "airlineName": "Wizz Air Malta",
+        "originCode": "RMO",
+        "originName": "RMO",
+        "destinationCode": "ATH",
+        "destinationName": "ATH",
+        "scheduledTime": "2025-12-24 18:45+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "5F 5811",
+        "airlineCode": "5F",
+        "airlineName": "FlyOne",
+        "originCode": "RMO",
+        "originName": "RMO",
+        "destinationCode": "LIS",
+        "destinationName": "LIS",
+        "scheduledTime": "2025-12-24 19:10+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "LY 5130",
+        "airlineCode": "LY",
+        "airlineName": "El Al",
+        "originCode": "RMO",
+        "originName": "RMO",
+        "destinationCode": "TLV",
+        "destinationName": "TLV",
+        "scheduledTime": "2025-12-24 21:15+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "W9 5484",
+        "airlineCode": "W9",
+        "airlineName": "Wizz Air UK",
+        "originCode": "RMO",
+        "originName": "RMO",
+        "destinationCode": "LTN",
+        "destinationName": "LTN",
+        "scheduledTime": "2025-12-24 21:25+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      },
+      {
+        "flightNumber": "TK 272",
+        "airlineCode": "TK",
+        "airlineName": "Turkish",
+        "originCode": "RMO",
+        "originName": "RMO",
+        "destinationCode": "IST",
+        "destinationName": "IST",
+        "scheduledTime": "2025-12-24 21:35+02:00",
+        "status": "estimated",
+        "delayMinutes": 0
+      }
+    ],
+    "createdAt": "2025-12-24T16:41:43.331Z",
+    "expiresAt": "2026-01-23T16:41:43.331Z",
+    "lastAccessed": "2025-12-24T16:41:43.331Z",
+    "source": "manual",
+    "success": true
+  }
+]

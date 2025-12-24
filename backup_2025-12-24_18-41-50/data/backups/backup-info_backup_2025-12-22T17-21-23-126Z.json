@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-12-22T17:21:23.134Z",
+  "files": [
+    "cache-data.json",
+    "flights_cache.json",
+    "cache-config.json",
+    "request-counter.json",
+    "api-tracker.json"
+  ],
+  "purpose": "Backup înainte de restabilirea cache-ului din SQLite",
+  "restoreInstructions": "Pentru a restaura, copiază fișierele din acest director înapoi în data/"
+}
