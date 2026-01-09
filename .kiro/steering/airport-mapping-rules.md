@@ -12,7 +12,7 @@
 
 ### **Supported Airports:**
 ```
-IATA → City
+IATA → City (Cache/Statistics - România și Moldova)
 OTP  → București (Henri Coandă)
 BBU  → București (Aurel Vlaicu)
 CLJ  → Cluj-Napoca
@@ -28,7 +28,15 @@ SCV  → Suceava
 TGM  → Târgu Mureș
 ARW  → Arad
 SUJ  → Satu Mare
+GHV  → Brașov
 RMO  → Chișinău
+
+International Airports (Doar pentru denumiri în baza de date):
+TKU  → Turku
+SUF  → Lamezia Terme
+RIX  → Riga
+HRG  → Hurghada
+LUX  → Luxembourg
 ```
 
 ## 🔄 FLOW LOGIC (FIXED)
@@ -86,7 +94,7 @@ grep -o '"key":"[^"]*"' data/cache-data.json
 ## 📊 CURRENT STATUS VERIFICATION
 
 ### **Working Flow:**
-1. ✅ **Airport list exists**: All 16 airports supported
+1. ✅ **Airport list exists**: All 22 airports supported
 2. ✅ **Cache populated**: API requests made
 3. ✅ **Keys correct**: `OTP_arrivals` format
 4. ✅ **Data structure**: Real API responses (may be empty arrays)

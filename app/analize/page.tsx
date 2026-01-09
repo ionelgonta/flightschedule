@@ -8,7 +8,7 @@ import { StructuredData, generateBreadcrumbSchema } from '@/components/seo/Struc
 
 export const metadata: Metadata = {
   title: 'Analize și Statistici Complete Zboruri România - Toate Aeroporturile',
-  description: 'Analize avansate și statistici detaliate pentru toate aeroporturile din România și Moldova. Performanță zboruri, punctualitate, program complet, analize istorice, catalog aeronave și statistici comparative pentru OTP, CLJ, TSR, IAS, RMO și toate aeroporturile naționale.',
+  description: 'Analize avansate și statistici detaliate pentru toate aeroporturile din România și Moldova. Performanță zboruri, punctualitate, program complet, analize istorice, catalog aeronave și statistici comparative pentru Aeroportul Internațional Henri Coandă București, Aeroportul Internațional Cluj-Napoca, Aeroportul Internațional Timișoara, Aeroportul Internațional Iași, Aeroportul Internațional Chișinău și toate aeroporturile naționale.',
   keywords: [
     'analize zboruri romania complete',
     'statistici aeroporturi romania',

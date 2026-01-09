@@ -8,7 +8,7 @@ import { StructuredData, generateBreadcrumbSchema } from '@/components/seo/Struc
 
 export const metadata: Metadata = {
   title: 'Analize Istorice Zboruri România - Tendințe și Evoluție Aeroporturi',
-  description: 'Analize istorice complete pentru zborurile din România și Moldova. Urmărește tendințele, evoluția traficului aerian, sezonalitatea și performanța pe termen lung pentru OTP, CLJ, TSR, IAS, RMO și toate aeroporturile naționale.',
+  description: 'Analize istorice complete pentru zborurile din România și Moldova. Urmărește tendințele, evoluția traficului aerian, sezonalitatea și performanța pe termen lung pentru Aeroportul Internațional Henri Coandă București, Aeroportul Internațional Cluj-Napoca, Aeroportul Internațional Timișoara, Aeroportul Internațional Iași, Aeroportul Internațional Chișinău și toate aeroporturile naționale.',
   keywords: [
     'analize istorice zboruri romania',
     'tendinte trafic aerian romania',
@@ -198,7 +198,7 @@ export default function AnalizeIstoricePage() {
                       Pentru aeroporturile cu date limitate, va fi afișat mesajul "Nu sunt suficiente date pentru a afișa această informație".
                     </p>
                     <p className="text-xs text-amber-600">
-                      Datele istorice se actualizează automat pe măsură ce colectăm mai multe informații despre zboruri.
+                      Datele istorice se colectează pe măsură ce monitorizăm zborurile.
                     </p>
                   </div>
                 </div>
@@ -309,21 +309,21 @@ export default function AnalizeIstoricePage() {
                     href="/aeroport/bucuresti-henri-coanda/istoric-zboruri"
                     className="block p-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   >
-                    <div className="font-medium">OTP - București</div>
+                    <div className="font-medium">Aeroportul Internațional Henri Coandă București</div>
                     <div className="text-xs text-gray-500">Analize Istorice</div>
                   </Link>
                   <Link
                     href="/aeroport/cluj-napoca/istoric-zboruri"
                     className="block p-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   >
-                    <div className="font-medium">CLJ - Cluj-Napoca</div>
+                    <div className="font-medium">Aeroportul Internațional Cluj-Napoca</div>
                     <div className="text-xs text-gray-500">Analize Istorice</div>
                   </Link>
                   <Link
                     href="/aeroport/timisoara-traian-vuia/istoric-zboruri"
                     className="block p-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   >
-                    <div className="font-medium">TSR - Timișoara</div>
+                    <div className="font-medium">Aeroportul Internațional Timișoara</div>
                     <div className="text-xs text-gray-500">Analize Istorice</div>
                   </Link>
                 </div>

@@ -7,6 +7,7 @@ let cacheExpiry: number = 0
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minute
 
 // Fallback airports pentru când baza de date nu este disponibilă
+// DOAR aeroporturi din România și Moldova pentru cache/statistici
 export const FALLBACK_AIRPORTS: Airport[] = [
   // Romanian Airports
   {
@@ -128,6 +129,14 @@ export const FALLBACK_AIRPORTS: Airport[] = [
     country: 'România',
     timezone: 'Europe/Bucharest',
     coordinates: { lat: 47.7033, lng: 22.8857 }
+  },
+  {
+    code: 'GHV',
+    name: 'Aeroportul Internațional Brașov-Ghimbav',
+    city: 'Brașov',
+    country: 'România',
+    timezone: 'Europe/Bucharest',
+    coordinates: { lat: 45.6997, lng: 25.6150 }
   },
   
   // Moldova Airport
@@ -327,7 +336,7 @@ export const getAirportByCodeOrSlug = (identifier: string): Airport | undefined 
 }
 
 /**
- * Verifică dacă un cod de aeroport este suportat (IATA codes only)
+ * Verifică dacă un cod de aeroport este suportat pentru cache/statistici (DOAR România și Moldova)
  */
 export const isAirportSupported = (code: string): boolean => {
   return FALLBACK_AIRPORTS.some(airport => airport.code === code.toUpperCase())

@@ -6,7 +6,7 @@
 import { RawFlightData } from './flightApiService'
 import FlightApiService from './flightApiService'
 import AeroDataBoxService from './aerodataboxService'
-import { cacheManager } from './cacheManager'
+import { fixedCacheManager as cacheManager } from './cacheManagerFixed'
 import { getAirlineName, getCityName, formatAirportDisplay, formatAirlineDisplay } from './airlineMapping'
 
 // Cache TTL constants
@@ -109,9 +109,12 @@ export function updateCacheConfig(config: CacheConfig) {
 
 export function getCacheConfig(): CacheConfig {
   const stats = cacheManager.getCacheStats()
+  // Always use environment variable for flight interval
+  const defaultFlightInterval = Math.floor((parseInt(process.env.NEXT_PUBLIC_AUTO_REFRESH_INTERVAL || '600000') / 1000) / 60)
+  
   return {
     analyticsInterval: stats.config?.analytics.cacheMaxAge || 30,
-    realtimeInterval: stats.config?.flightData.cronInterval || 15
+    realtimeInterval: defaultFlightInterval // Always use environment variable
   }
 }
 
@@ -153,36 +156,36 @@ export class FlightAnalyticsService {
       // Folosește IATA direct pentru cache lookup
       const cacheKey = `${airportCode}_${type}`
       
-      // Citește datele din cache
-      const cachedFlights = cacheManager.getCachedData<any[]>(cacheKey) || []
+      // Use async method to access persistent cache
+      const cachedFlights = await cacheManager.getCachedDataWithPersistent<any[]>(cacheKey) || []
       
       if (cachedFlights.length > 0) {
         console.log(`Cache hit for flight schedules: ${cacheKey} (${cachedFlights.length} flights)`)
         
         // Convertește datele de zbor la format FlightSchedule
         const schedules: FlightSchedule[] = cachedFlights.map((flight: any) => ({
-          flightNumber: flight.flight_number || 'N/A',
+          flightNumber: flight.flight_number || flight.flightNumber || '',
           airline: {
-            code: flight.airline?.code || 'N/A',
-            name: flight.airline?.name || 'Unknown'
+            code: flight.airline?.code || '',
+            name: getAirlineName(flight.airline?.code) || flight.airline?.name || ''
           },
           origin: {
-            airport: flight.origin?.airport || flight.origin?.code || 'Unknown',
-            code: flight.origin?.code || 'N/A',
-            city: flight.origin?.city || 'Unknown'
+            airport: flight.origin?.airport || flight.origin?.code || '',
+            code: flight.origin?.code || '',
+            city: formatAirportDisplay(flight.origin?.code) || flight.origin?.city || ''
           },
           destination: {
-            airport: flight.destination?.airport || flight.destination?.code || 'Unknown',
-            code: flight.destination?.code || 'N/A',
-            city: flight.destination?.city || 'Unknown'
+            airport: flight.destination?.airport || flight.destination?.code || '',
+            code: flight.destination?.code || '',
+            city: formatAirportDisplay(flight.destination?.code) || flight.destination?.city || ''
           },
-          scheduledTime: flight.scheduled_time || new Date().toISOString(),
-          estimatedTime: flight.estimated_time || null,
-          actualTime: flight.actual_time || null,
+          scheduledTime: flight.scheduled_time || flight.scheduledTime || new Date().toISOString(),
+          estimatedTime: flight.estimated_time || flight.estimatedTime || null,
+          actualTime: flight.actual_time || flight.actualTime || null,
           status: flight.status || 'scheduled',
           gate: flight.gate || null,
           terminal: flight.terminal || null,
-          aircraft: flight.aircraft || 'Unknown',
+          aircraft: flight.aircraft || null,
           delay: this.calculateDelay(flight)
         }))
         
@@ -192,12 +195,17 @@ export class FlightAnalyticsService {
         
         const filteredSchedules = schedules.filter(schedule => {
           const flightDate = new Date(schedule.scheduledTime)
-          // Extract just the date part for comparison (ignore timezone)
-          const flightDateOnly = new Date(flightDate.getFullYear(), flightDate.getMonth(), flightDate.getDate())
-          const fromDateOnly = new Date(fromDateTime.getFullYear(), fromDateTime.getMonth(), fromDateTime.getDate())
-          const toDateOnly = new Date(toDateTime.getFullYear(), toDateTime.getMonth(), toDateTime.getDate())
           
-          return flightDateOnly >= fromDateOnly && flightDateOnly <= toDateOnly
+          // For debugging - log the first few comparisons
+          if (schedules.indexOf(schedule) < 3) {
+            console.log(`[Flight Schedule Filter] Flight ${schedule.flightNumber}: ${schedule.scheduledTime}`)
+            console.log(`[Flight Schedule Filter] Flight date: ${flightDate.toISOString()}`)
+            console.log(`[Flight Schedule Filter] From date: ${fromDateTime.toISOString()}`)
+            console.log(`[Flight Schedule Filter] To date: ${toDateTime.toISOString()}`)
+          }
+          
+          // Use simpler date comparison - just check if flight is within the date range
+          return flightDate >= fromDateTime && flightDate <= toDateTime
         })
         
         console.log(`Filtered ${schedules.length} flights to ${filteredSchedules.length} for period ${fromDate} to ${toDate}`)
@@ -249,7 +257,7 @@ export class FlightAnalyticsService {
 
       // Nu există date în cache - aruncă eroare
       console.log(`No cached statistics for ${airportCode}`)
-      throw new Error('Nu sunt disponibile statistici pentru acest aeroport. Cache-ul se actualizează automat.')
+      throw new Error('Nu sunt disponibile statistici pentru acest aeroport.')
       
     } catch (error) {
       console.error('Error getting cached airport statistics:', error)
@@ -299,10 +307,24 @@ export class FlightAnalyticsService {
 
     try {
       console.log(`Analyzing LIVE routes for ${airportCode}`)
-      const routes = await this.analyzeLiveRoutes(airportCode)
-      cacheManager.setCachedData(cacheKey, routes, 'analytics', ANALYTICS_CACHE_TTL)
+      
+      // Use the helper function instead of the problematic method
+      const { analyzeRoutes } = require('./routeAnalysisHelper')
+      const routes = await analyzeRoutes(airportCode)
+      
+      // Convert to RouteAnalysis format
+      const routeAnalysis: RouteAnalysis[] = routes.map((route: any) => ({
+        origin: route.origin,
+        destination: route.destination,
+        flightCount: route.flightCount,
+        averageDelay: route.averageDelay,
+        onTimePercentage: route.onTimePercentage,
+        airlines: route.airlines
+      }))
+      
+      cacheManager.setCachedData(cacheKey, routeAnalysis, 'analytics', ANALYTICS_CACHE_TTL)
       console.log(`Cached route analysis for ${airportCode} with TTL: ${ANALYTICS_CACHE_TTL}ms`)
-      return routes
+      return routeAnalysis
     } catch (error) {
       console.error('Error analyzing live routes:', error)
       return []
@@ -399,8 +421,9 @@ export class FlightAnalyticsService {
       const arrivalsKey = `${airportCode}_arrivals`
       const departuresKey = `${airportCode}_departures`
       
-      const cachedArrivals = cacheManager.getCachedData<RawFlightData[]>(arrivalsKey) || []
-      const cachedDepartures = cacheManager.getCachedData<RawFlightData[]>(departuresKey) || []
+      // Use async method to access persistent cache
+      const cachedArrivals = await cacheManager.getCachedDataWithPersistent<RawFlightData[]>(arrivalsKey) || []
+      const cachedDepartures = await cacheManager.getCachedDataWithPersistent<RawFlightData[]>(departuresKey) || []
       
       const allFlights = [...cachedArrivals, ...cachedDepartures]
       
@@ -479,8 +502,9 @@ export class FlightAnalyticsService {
       const arrivalsKey = `${airportCode}_arrivals`
       const departuresKey = `${airportCode}_departures`
       
-      const cachedArrivals = cacheManager.getCachedData<RawFlightData[]>(arrivalsKey) || []
-      const cachedDepartures = cacheManager.getCachedData<RawFlightData[]>(departuresKey) || []
+      // Use async method to access persistent cache
+      const cachedArrivals = await cacheManager.getCachedDataWithPersistent<RawFlightData[]>(arrivalsKey) || []
+      const cachedDepartures = await cacheManager.getCachedDataWithPersistent<RawFlightData[]>(departuresKey) || []
       
       if (cachedArrivals.length === 0 && cachedDepartures.length === 0) {
         console.warn(`No cached historical data available for ${airportCode}`)
@@ -527,34 +551,44 @@ export class FlightAnalyticsService {
 
   private async analyzeLiveRoutes(airportCode: string): Promise<RouteAnalysis[]> {
     try {
-      // NU MAI FACE REQUESTURI API DIRECTE - folosește doar cache-ul
-      console.log(`Getting cached flight data for route analysis: ${airportCode}`)
+      console.log(`[Route Analysis] Getting flight data for route analysis: ${airportCode}`)
       
-      const arrivalsKey = `${airportCode}_arrivals`
-      const departuresKey = `${airportCode}_departures`
+      // Use the same flight repository that works in the API
+      const { getFlightRepository } = require('./flightRepository')
+      const flightRepository = getFlightRepository()
       
-      const cachedArrivals = cacheManager.getCachedData<RawFlightData[]>(arrivalsKey) || []
-      const cachedDepartures = cacheManager.getCachedData<RawFlightData[]>(departuresKey) || []
+      // Get flight data using the same method as the working API
+      const arrivalsResult = await flightRepository.getArrivals(airportCode, {})
+      const departuresResult = await flightRepository.getDepartures(airportCode, {})
       
-      const allFlights = [...cachedArrivals, ...cachedDepartures]
+      const arrivals = arrivalsResult.data || []
+      const departures = departuresResult.data || []
+      const allFlights = [...arrivals, ...departures]
+      
+      console.log(`[Route Analysis] Found ${arrivals.length} arrivals, ${departures.length} departures, total: ${allFlights.length}`)
       
       if (allFlights.length === 0) {
-        console.warn(`No live flight data available for route analysis of ${airportCode}`)
-        // Return empty array instead of demo data
+        console.warn(`[Route Analysis] No flight data available for route analysis of ${airportCode}`)
         return []
       }
       
+      console.log(`[Route Analysis] Processing ${allFlights.length} flights for route analysis`)
+      
       // Group flights by route
       const routeMap = new Map<string, {
-        flights: RawFlightData[]
+        flights: any[]
         origin: string
         destination: string
         airlines: Set<string>
       }>()
       
-      allFlights.forEach(flight => {
-        const origin = flight.origin.code
-        const destination = flight.destination.code
+      allFlights.forEach((flight, index) => {
+        const origin = flight.origin?.code || flight.origin
+        const destination = flight.destination?.code || flight.destination
+        
+        if (index < 3) { // Log first 3 flights for debugging
+          console.log(`[Route Analysis] Flight ${index + 1}: ${flight.flight_number} from ${origin} to ${destination}`)
+        }
         
         // Skip internal routes (same origin and destination) as they don't make sense
         if (origin === destination) {
@@ -563,16 +597,13 @@ export class FlightAnalyticsService {
         
         // For the current airport, we want to show routes TO other destinations
         // So we need to determine the "other" airport (not the current one)
-        let otherAirport: string
         let routeKey: string
         
         if (origin === airportCode) {
           // This is a departure, destination is the other airport
-          otherAirport = destination
           routeKey = `${airportCode}-${destination}`
         } else if (destination === airportCode) {
           // This is an arrival, origin is the other airport  
-          otherAirport = origin
           routeKey = `${origin}-${airportCode}`
         } else {
           // This flight doesn't involve our airport, skip it
@@ -590,14 +621,18 @@ export class FlightAnalyticsService {
         
         const route = routeMap.get(routeKey)!
         route.flights.push(flight)
-        route.airlines.add(flight.airline.code)
+        route.airlines.add(flight.airline?.code || 'Unknown')
       })
+      
+      console.log(`[Route Analysis] Found ${routeMap.size} unique routes`)
       
       // Convert to RouteAnalysis format
       const routes: RouteAnalysis[] = []
       
       routeMap.forEach((route, routeKey) => {
         const flightCount = route.flights.length
+        
+        console.log(`[Route Analysis] Processing route ${routeKey} with ${flightCount} flights`)
         
         // Better status mapping for on-time calculation
         const onTimeFlights = route.flights.filter((f: any) => {
@@ -638,7 +673,11 @@ export class FlightAnalyticsService {
       })
       
       // Sort by flight count (most frequent routes first) and return top 15
-      return routes.sort((a, b) => b.flightCount - a.flightCount).slice(0, 15)
+      const sortedRoutes = routes.sort((a, b) => b.flightCount - a.flightCount).slice(0, 15)
+      
+      console.log(`[Route Analysis] Returning ${sortedRoutes.length} routes for ${airportCode}`)
+      
+      return sortedRoutes
       
     } catch (error) {
       console.error(`Error analyzing live routes for ${airportCode}:`, error)

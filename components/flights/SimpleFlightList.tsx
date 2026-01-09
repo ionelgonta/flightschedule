@@ -52,6 +52,24 @@ const formatTime = (timeString: string) => {
   }
 };
 
+const formatDateInRomanian = (timeString: string) => {
+  try {
+    const date = new Date(timeString);
+    
+    const romanianMonths = [
+      'ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie',
+      'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'
+    ];
+    
+    const day = date.getDate();
+    const month = romanianMonths[date.getMonth()];
+    
+    return `${day} ${month}`;
+  } catch {
+    return '';
+  }
+};
+
 export default function SimpleFlightList({ airportCode, type }: SimpleFlightListProps) {
   const [flights, setFlights] = useState<RawFlightData[]>([])
   const [loading, setLoading] = useState(true)
@@ -62,22 +80,24 @@ export default function SimpleFlightList({ airportCode, type }: SimpleFlightList
       try {
         setLoading(true)
         
-        // Calculează intervalul de timp: 7 zile în urmă + toate din viitor
-        // (pentru a include zborurile din 18 decembrie)
-        const now = new Date()
-        const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000))
-        const tomorrow = new Date(now.getTime() + (24 * 60 * 60 * 1000))
-        
-        // Construiește URL cu filtrele de timp
+        // Fetch all available flights (no time filtering on API level)
         const url = new URL(`/api/flights/${airportCode}/${type}`, window.location.origin)
-        url.searchParams.set('start_time', sevenDaysAgo.toISOString())
-        url.searchParams.set('end_time', tomorrow.toISOString())
         
         const response = await fetch(url.toString())
         const data = await response.json()
         
         if (data.success && data.data) {
-          setFlights(data.data)
+          // Filter flights on client side: last 10 hours + ALL future flights (no limit)
+          const now = new Date()
+          const tenHoursAgo = new Date(now.getTime() - (10 * 60 * 60 * 1000))
+          
+          const filteredFlights = data.data.filter((flight: any) => {
+            const flightTime = new Date(flight.scheduled_time)
+            // Show flights from last 10 hours OR ALL future flights (no limit)
+            return flightTime > now || flightTime >= tenHoursAgo
+          })
+          
+          setFlights(filteredFlights)
           setError(null)
         } else {
           setError('Nu am putut încărca datele zborurilor')
@@ -147,7 +167,7 @@ export default function SimpleFlightList({ airportCode, type }: SimpleFlightList
               {flights.length} {type === 'arrivals' ? 'sosiri' : 'plecări'}
             </div>
             <div className="text-sm text-blue-700 dark:text-blue-300">
-              Ultimele 7 zile + programate
+              Ultimele 10 ore + toate viitoare (fără limitare)
             </div>
           </div>
         </div>
@@ -220,6 +240,9 @@ export default function SimpleFlightList({ airportCode, type }: SimpleFlightList
                     <div className="font-bold text-gray-900 dark:text-gray-100">
                       {formatTime(flight.scheduled_time)}
                     </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {formatDateInRomanian(flight.scheduled_time)}
+                    </div>
                     {flight.estimated_time && flight.estimated_time !== flight.scheduled_time && (
                       <div className="text-xs text-orange-600 dark:text-orange-400">
                         Est: {formatTime(flight.estimated_time)}
@@ -267,6 +290,9 @@ export default function SimpleFlightList({ airportCode, type }: SimpleFlightList
                 <div className="text-right">
                   <div className="font-bold text-gray-900 dark:text-gray-100">
                     {formatTime(flight.scheduled_time)}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {formatDateInRomanian(flight.scheduled_time)}
                   </div>
                   {flight.estimated_time && flight.estimated_time !== flight.scheduled_time && (
                     <div className="text-xs text-orange-600 dark:text-orange-400">

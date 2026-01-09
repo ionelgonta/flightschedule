@@ -10,7 +10,7 @@ import { GlobalStatusDistribution } from '@/components/statistics/GlobalStatusDi
 
 export const metadata: Metadata = {
   title: 'Statistici Aeroporturi România - Performanță și Punctualitate',
-  description: 'Statistici complete de performanță pentru toate aeroporturile din România și Moldova. Indice întârzieri, punctualitate, ore de vârf și distribuția statusurilor pentru OTP, CLJ, TSR, IAS, RMO și toate aeroporturile naționale.',
+  description: 'Statistici complete de performanță pentru toate aeroporturile din România și Moldova. Indice întârzieri, punctualitate, ore de vârf și distribuția statusurilor pentru Aeroportul Internațional Henri Coandă București, Aeroportul Internațional Cluj-Napoca, Aeroportul Internațional Timișoara, Aeroportul Internațional Iași, Aeroportul Internațional Chișinău și toate aeroporturile naționale.',
   keywords: [
     'statistici aeroporturi romania',
     'performanta aeroporturi',

@@ -1,0 +1,25 @@
+{
+  "id": "BP_1767456568117_29566bc04f53dbb4",
+  "filename": "BP_1767456568117_29566bc04f53dbb4_BoardingCard_450103837_RMO_OTP (1).pdf",
+  "originalName": "BoardingCard_450103837_RMO_OTP (1).pdf",
+  "uploadedAt": "2026-01-03T16:09:28.120Z",
+  "size": 309977,
+  "processed": true,
+  "data": {
+    "passengerName": "POPESCU/IONMR",
+    "flightNumber": "RO123",
+    "airline": "TAROM",
+    "from": "OTP",
+    "to": "LHR",
+    "date": "2024-01-15",
+    "time": "14:30",
+    "gate": "A12",
+    "seat": "15A",
+    "bookingReference": "ABC123",
+    "class": "Y",
+    "status": "CONFIRMED",
+    "barcode": "M1POPESCU/IONMR    EABC123 OTPLHR RO 0123 015Y015A0025 147>5180WW6225BAC 2A   29",
+    "extractedAt": "2026-01-03T16:09:28.120Z",
+    "filename": "BP_1767456568117_29566bc04f53dbb4_BoardingCard_450103837_RMO_OTP (1).pdf"
+  }
+}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { MAJOR_AIRPORTS } from '@/lib/airports'
-import { cacheManager } from '@/lib/cacheManager'
+import { fixedCacheManager as cacheManager } from '@/lib/cacheManagerFixed'
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic'

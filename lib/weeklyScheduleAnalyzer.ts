@@ -112,15 +112,54 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
   private flightRepository = getFlightRepository();
 
   async getAllCachedFlights(): Promise<CachedFlightData[]> {
-    console.log('[Weekly Schedule] Getting all cached flights - prioritizing persistent cache...');
+    console.log('[Weekly Schedule] Getting all cached flights from multiple sources...');
     
-    // First try persistent cache directly (contains today's data)
+    const allFlights: CachedFlightData[] = [];
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    
+    // PRIORITY 1: Read from main cache (cache-data.json) - contains TODAY's flights
     try {
-      const fs = await import('fs/promises');
-      const path = await import('path');
-      const persistentCachePath = path.join(process.cwd(), 'data', 'flights_cache.json');
+      const mainCachePath = path.join(process.cwd(), 'data', 'cache-data.json');
+      console.log(`[Weekly Schedule] Reading main cache from: ${mainCachePath}`);
+      const mainCacheContent = await fs.readFile(mainCachePath, 'utf8');
+      const mainCacheEntries = JSON.parse(mainCacheContent);
       
-      console.log(`[Weekly Schedule] Reading persistent cache from: ${persistentCachePath}`);
+      // Process main cache entries (format: array of cache entries with key like "OTP_arrivals")
+      if (Array.isArray(mainCacheEntries)) {
+        mainCacheEntries.forEach((entry: any) => {
+          if (entry.category === 'flightData' && entry.key && entry.data) {
+            const [airportCode, type] = entry.key.split('_');
+            if (airportCode && (type === 'arrivals' || type === 'departures')) {
+              // Extract flight data - handle both array and nested formats
+              let flightData = entry.data;
+              if (flightData && typeof flightData === 'object' && 'flights' in flightData) {
+                flightData = flightData.flights;
+              }
+              
+              if (Array.isArray(flightData) && flightData.length > 0) {
+                allFlights.push({
+                  airport_code: airportCode,
+                  type: type as 'arrivals' | 'departures',
+                  data: flightData,
+                  updated_at: entry.createdAt || new Date().toISOString(),
+                  expires_at: entry.expiresAt || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                  success: entry.success !== false
+                });
+              }
+            }
+          }
+        });
+      }
+      
+      console.log(`[Weekly Schedule] Found ${allFlights.length} flight datasets from main cache`);
+    } catch (error) {
+      console.warn('[Weekly Schedule] Could not read main cache:', error);
+    }
+    
+    // PRIORITY 2: Also read from persistent cache (flights_cache.json) for historical data
+    try {
+      const persistentCachePath = path.join(process.cwd(), 'data', 'flights_cache.json');
       const persistentCacheContent = await fs.readFile(persistentCachePath, 'utf8');
       const persistentCache = JSON.parse(persistentCacheContent);
       
@@ -144,9 +183,7 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
         }
       });
       
-      const allFlights: CachedFlightData[] = [];
-      
-      // Convert to CachedFlightData format
+      // Convert to CachedFlightData format and add to allFlights
       flightsByAirportType.forEach((data, airportCode) => {
         if (data.arrivals.length > 0) {
           allFlights.push({
@@ -171,13 +208,14 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
         }
       });
       
-      console.log(`[Weekly Schedule] Converted ${allFlights.length} flight datasets from persistent cache`);
-      
-      if (allFlights.length > 0) {
-        return allFlights;
-      }
+      console.log(`[Weekly Schedule] Total flight datasets after persistent cache: ${allFlights.length}`);
     } catch (error) {
       console.warn('[Weekly Schedule] Could not read persistent cache:', error);
+    }
+    
+    // If we have data from caches, return it
+    if (allFlights.length > 0) {
+      return allFlights;
     }
     
     // Fallback to historical data
@@ -190,7 +228,6 @@ export class CacheDataExtractorImpl implements CacheDataExtractor {
     
     // Final fallback to flight repository
     console.log('[Weekly Schedule] Falling back to flight repository...');
-    const allFlights: CachedFlightData[] = [];
     
     // Iterate through all airports and get cached data
     for (const airport of MAJOR_AIRPORTS) {
@@ -815,6 +852,18 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
     console.log(`Total flights analyzed: ${analysis.summary.totalFlights}`);
     console.log(`Airports analyzed: ${analysis.summary.airportsAnalyzed.join(', ')}`);
     
+    // IMPROVED: Load existing schedule data to MERGE patterns instead of overwriting
+    const existingScheduleData = await this.tableManager.getScheduleData();
+    const existingScheduleMap = new Map<string, WeeklyScheduleData>();
+    
+    // Create a map of existing entries by unique key (airport-destination-airline-flightNumber)
+    existingScheduleData.forEach(entry => {
+      const key = `${entry.airport}-${entry.destination}-${entry.airline}-${entry.flightNumber}`;
+      existingScheduleMap.set(key, entry);
+    });
+    
+    console.log(`[Weekly Schedule] Loaded ${existingScheduleMap.size} existing schedule entries for merging`);
+    
     const scheduleData: WeeklyScheduleData[] = [];
 
     analysis.routes.forEach((route, routeIndex) => {
@@ -842,35 +891,87 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
           return;
         }
         
-        const pattern = this.patternGenerator.generateWeeklyPattern(
+        const newPattern = this.patternGenerator.generateWeeklyPattern(
           flights.map(f => ({ scheduled_time: f.scheduledTime } as RawFlightData))
         );
 
-        const scheduleEntry = {
-          airport: this.getAirportDisplayName(route.route.origin),
-          destination: this.getAirportDisplayName(route.route.destination),
+        const airportDisplay = this.getAirportDisplayName(route.route.origin);
+        const destinationDisplay = this.getAirportDisplayName(route.route.destination);
+        const entryKey = `${airportDisplay}-${destinationDisplay}-${airline}-${flightNumber}`;
+        
+        // IMPROVED: Merge with existing pattern if it exists
+        const existingEntry = existingScheduleMap.get(entryKey);
+        
+        // Create merged pattern with explicit type
+        let mergedPattern: {
+          monday: boolean;
+          tuesday: boolean;
+          wednesday: boolean;
+          thursday: boolean;
+          friday: boolean;
+          saturday: boolean;
+          sunday: boolean;
+        };
+        
+        if (existingEntry) {
+          // Merge patterns: keep existing TRUE values and add new TRUE values
+          mergedPattern = {
+            monday: existingEntry.weeklyPattern.monday || newPattern.monday || false,
+            tuesday: existingEntry.weeklyPattern.tuesday || newPattern.tuesday || false,
+            wednesday: existingEntry.weeklyPattern.wednesday || newPattern.wednesday || false,
+            thursday: existingEntry.weeklyPattern.thursday || newPattern.thursday || false,
+            friday: existingEntry.weeklyPattern.friday || newPattern.friday || false,
+            saturday: existingEntry.weeklyPattern.saturday || newPattern.saturday || false,
+            sunday: existingEntry.weeklyPattern.sunday || newPattern.sunday || false
+          };
+          console.log(`    Merged pattern for ${airline} ${flightNumber}: existing + new days`);
+        } else {
+          mergedPattern = {
+            monday: newPattern.monday || false,
+            tuesday: newPattern.tuesday || false,
+            wednesday: newPattern.wednesday || false,
+            thursday: newPattern.thursday || false,
+            friday: newPattern.friday || false,
+            saturday: newPattern.saturday || false,
+            sunday: newPattern.sunday || false
+          };
+        }
+
+        const scheduleEntry: WeeklyScheduleData = {
+          airport: airportDisplay,
+          destination: destinationDisplay,
           airline,
           flightNumber,
-          weeklyPattern: {
-            monday: pattern.monday,
-            tuesday: pattern.tuesday,
-            wednesday: pattern.wednesday,
-            thursday: pattern.thursday,
-            friday: pattern.friday,
-            saturday: pattern.saturday,
-            sunday: pattern.sunday
-          },
-          frequency: flights.length,
+          weeklyPattern: mergedPattern,
+          frequency: flights.length + (existingEntry?.frequency || 0),
           lastUpdated: new Date().toISOString(),
           dataSource: 'cache' as const
         };
 
         scheduleData.push(scheduleEntry);
+        
+        // Remove from existing map (we've processed it)
+        existingScheduleMap.delete(entryKey);
+        
         console.log(`    Added: ${airline} ${flightNumber} (${flights.length} flights) - ${scheduleEntry.airport} → ${scheduleEntry.destination}`);
       });
     });
 
-    console.log(`Generated ${scheduleData.length} schedule entries (after codeshare exclusion), saving to storage...`);
+    // IMPROVED: Keep existing entries that weren't in the new data (preserve historical patterns)
+    existingScheduleMap.forEach((existingEntry, key) => {
+      // Only keep if the entry is less than 30 days old
+      const lastUpdated = new Date(existingEntry.lastUpdated);
+      const daysSinceUpdate = (Date.now() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24);
+      
+      if (daysSinceUpdate < 30) {
+        scheduleData.push(existingEntry);
+        console.log(`    Preserved existing entry: ${existingEntry.airline} ${existingEntry.flightNumber} (${Math.round(daysSinceUpdate)} days old)`);
+      } else {
+        console.log(`    Expired entry removed: ${existingEntry.airline} ${existingEntry.flightNumber} (${Math.round(daysSinceUpdate)} days old)`);
+      }
+    });
+
+    console.log(`Generated ${scheduleData.length} schedule entries (after codeshare exclusion and merging), saving to storage...`);
     await this.tableManager.updateTable(scheduleData);
     console.log(`=== Weekly schedule table updated successfully with ${scheduleData.length} entries ===`);
   }
@@ -1192,7 +1293,83 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
   }
 
   async getScheduleData(): Promise<WeeklyScheduleData[]> {
-    return await this.tableManager.getScheduleData();
+    // Get existing schedule data
+    const existingData = await this.tableManager.getScheduleData();
+    
+    // Check if data needs refresh (empty or outdated)
+    const needsRefresh = await this.checkIfNeedsRefresh(existingData);
+    
+    if (needsRefresh) {
+      console.log('[Weekly Schedule] Data is outdated or empty, auto-refreshing...');
+      try {
+        await this.updateScheduleTable();
+        return await this.tableManager.getScheduleData();
+      } catch (error) {
+        console.error('[Weekly Schedule] Auto-refresh failed:', error);
+        // Return existing data if refresh fails
+        return existingData;
+      }
+    }
+    
+    return existingData;
+  }
+
+  private async checkIfNeedsRefresh(existingData: WeeklyScheduleData[]): Promise<boolean> {
+    // If no data, needs refresh
+    if (!existingData || existingData.length === 0) {
+      console.log('[Weekly Schedule] No existing data, needs refresh');
+      return true;
+    }
+    
+    // Check if today's day of week has any flights
+    const today = new Date();
+    const dayNames: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const todayDayName = dayNames[today.getDay()];
+    
+    const todayFlights = existingData.filter(item => item.weeklyPattern[todayDayName]);
+    
+    // If no flights for today but we have flights in cache, needs refresh
+    if (todayFlights.length === 0) {
+      // Check if main cache has flights for today
+      try {
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        const mainCachePath = path.join(process.cwd(), 'data', 'cache-data.json');
+        const mainCacheContent = await fs.readFile(mainCachePath, 'utf8');
+        const mainCacheEntries = JSON.parse(mainCacheContent);
+        
+        // Check if any flight data exists in main cache
+        let hasFlightData = false;
+        if (Array.isArray(mainCacheEntries)) {
+          hasFlightData = mainCacheEntries.some((entry: any) => 
+            entry.category === 'flightData' && 
+            entry.data && 
+            (Array.isArray(entry.data) ? entry.data.length > 0 : 
+              (entry.data.flights && Array.isArray(entry.data.flights) && entry.data.flights.length > 0))
+          );
+        }
+        
+        if (hasFlightData) {
+          console.log(`[Weekly Schedule] No flights for ${todayDayName} but cache has data, needs refresh`);
+          return true;
+        }
+      } catch (error) {
+        console.warn('[Weekly Schedule] Could not check main cache:', error);
+      }
+    }
+    
+    // Check if lastUpdated is older than 1 hour
+    if (existingData.length > 0 && existingData[0].lastUpdated) {
+      const lastUpdated = new Date(existingData[0].lastUpdated);
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      
+      if (lastUpdated < oneHourAgo) {
+        console.log('[Weekly Schedule] Data is older than 1 hour, needs refresh');
+        return true;
+      }
+    }
+    
+    return false;
   }
 
   async clearScheduleTable(): Promise<void> {

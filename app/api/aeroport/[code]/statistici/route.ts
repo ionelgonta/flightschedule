@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAirportByCodeOrSlug } from '@/lib/airports'
-import { cacheManager } from '@/lib/cacheManager'
+import { fixedCacheManager as cacheManager } from '@/lib/cacheManagerFixed'
 
 // Helper function to calculate peak delay hours
 function calculatePeakDelayHours(flights: any[]): number[] {
@@ -353,7 +353,7 @@ export async function GET(
           country: airport.country
         },
         statistics: null,
-        message: `Nu sunt suficiente date pentru perioada ${period === 'daily' ? 'zilnică' : period === 'weekly' ? 'săptămânală' : 'lunară'}. Datele se actualizează automat.`,
+        message: `Nu sunt suficiente date pentru perioada ${period === 'daily' ? 'zilnică' : period === 'weekly' ? 'săptămânală' : 'lunară'}.`,
         hasData: false,
         period: period
       })

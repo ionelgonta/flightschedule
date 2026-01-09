@@ -98,7 +98,7 @@ export default function ParcariIasiPage() {
             ← Toate Parcările Aeroporturi
           </Link>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 flex items-center justify-center gap-3">
-            🅿️ Parcări Aeroport Iași (IAS)
+            🅿️ Parcări Aeroport Iași
           </h1>
           <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
             Găsește cea mai potrivită parcare pentru călătoria ta din Iași. 

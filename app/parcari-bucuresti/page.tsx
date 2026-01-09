@@ -99,11 +99,11 @@ export default function ParcariBucurestiPage() {
             ← Toate Parcările Aeroporturi
           </Link>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 flex items-center justify-center gap-3">
-            🅿️ Parcări Aeroport București (OTP & BBU)
+            🅿️ Parcări Aeroport București
           </h1>
           <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
             Găsește cea mai potrivită parcare pentru călătoria ta din București. 
-            Compară opțiunile oficiale și private pentru Aeroportul Henri Coandă (OTP) și Aurel Vlaicu (BBU).
+            Compară opțiunile oficiale și private pentru Aeroportul Henri Coandă și Aurel Vlaicu.
           </p>
         </div>
 

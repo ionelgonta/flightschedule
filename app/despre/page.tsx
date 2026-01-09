@@ -227,13 +227,13 @@ export default function AboutPage() {
                         🇷🇴 Aeroporturi România
                       </h3>
                       <ul className="space-y-1 text-gray-600 text-sm">
-                        <li>• <strong>OTP</strong> - Aeroportul Internațional Henri Coandă (București)</li>
-                        <li>• <strong>BBU</strong> - Aeroportul Internațional Aurel Vlaicu (București)</li>
-                        <li>• <strong>CLJ</strong> - Aeroportul Internațional Cluj-Napoca</li>
-                        <li>• <strong>TSR</strong> - Aeroportul Internațional Timișoara Traian Vuia</li>
-                        <li>• <strong>IAS</strong> - Aeroportul Internațional Iași</li>
-                        <li>• <strong>CND</strong> - Aeroportul Internațional Mihail Kogălniceanu (Constanța)</li>
-                        <li>• <strong>SBZ</strong> - Aeroportul Internațional Sibiu</li>
+                        <li>• <strong>Aeroportul Internațional Henri Coandă București</strong></li>
+                        <li>• <strong>Aeroportul Internațional Aurel Vlaicu București</strong></li>
+                        <li>• <strong>Aeroportul Internațional Cluj-Napoca</strong></li>
+                        <li>• <strong>Aeroportul Internațional Timișoara Traian Vuia</strong></li>
+                        <li>• <strong>Aeroportul Internațional Iași</strong></li>
+                        <li>• <strong>Aeroportul Internațional Mihail Kogălniceanu Constanța</strong></li>
+                        <li>• <strong>Aeroportul Internațional Sibiu</strong></li>
                         <li>• Și multe altele...</li>
                       </ul>
                     </div>
@@ -242,7 +242,7 @@ export default function AboutPage() {
                         🇲🇩 Moldova
                       </h3>
                       <ul className="space-y-1 text-gray-600 text-sm">
-                        <li>• <strong>RMO</strong> - Aeroportul Internațional Chișinău</li>
+                        <li>• <strong>Aeroportul Internațional Chișinău</strong></li>
                       </ul>
                       
                       <h3 className="text-xl font-semibold text-gray-900 mb-3 mt-4">

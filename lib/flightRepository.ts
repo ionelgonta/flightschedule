@@ -3,7 +3,7 @@
  * NU mai face request-uri API direct - doar citește din cache
  */
 
-import { cacheManager } from './cacheManager';
+import { fixedCacheManager as cacheManager } from './cacheManagerFixed';
 import { RawFlightData } from './flightApiService';
 
 export interface FlightFilters {
@@ -169,7 +169,7 @@ class FlightRepository {
       return {
         success: false,
         data: [],
-        error: 'Nu sunt disponibile date pentru acest aeroport. Cache-ul se actualizează automat.',
+        error: 'Nu sunt disponibile date pentru acest aeroport.',
         cached: false,
         last_updated: new Date().toISOString(),
         airport_code: airportCode,
@@ -235,7 +235,7 @@ class FlightRepository {
       return {
         success: false,
         data: [],
-        error: 'Nu sunt disponibile date pentru acest aeroport. Cache-ul se actualizează automat.',
+        error: 'Nu sunt disponibile date pentru acest aeroport.',
         cached: false,
         last_updated: new Date().toISOString(),
         airport_code: airportCode,

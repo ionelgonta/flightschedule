@@ -239,7 +239,7 @@ export default function AirportPage({ params }: AirportPageProps) {
                           Program Zboruri
                         </h3>
                         <p className="text-xs text-blue-700 mb-1">
-                          Calendar interactiv cu filtre pentru zborurile de la {airport.code}
+                          Calendar interactiv cu filtre pentru zborurile de la {airport.name}
                         </p>
                         <div className="text-xs text-blue-600 font-medium">
                           Vezi programul →
@@ -350,7 +350,7 @@ export default function AirportPage({ params }: AirportPageProps) {
                 </div>
 
                 <h3 className="text-lg font-bold text-gray-900 mt-6 mb-3">
-                  Companii Aeriene care Operează la {airport.code}
+                  Companii Aeriene care Operează la {airport.name}
                 </h3>
                 <p className="text-gray-600 mb-3 text-sm">
                   {airport.name} servește ca hub pentru numeroase companii aeriene internaționale și interne, oferind conexiuni 
@@ -380,12 +380,12 @@ export default function AirportPage({ params }: AirportPageProps) {
               {/* FAQ Section - Compact */}
               <section>
                 <h2 className="text-xl font-bold text-gray-900 mb-4">
-                  Întrebări Frecvente - {airport.code}
+                  Întrebări Frecvente - {airport.name}
                 </h2>
                 <div className="space-y-4">
                   <div className="bg-white rounded-lg border border-gray-200 p-4">
                     <h3 className="text-sm font-semibold text-gray-900 mb-2">
-                      Cum verific statusul zborurilor în timp real la {airport.code}?
+                      Cum verific statusul zborurilor în timp real la {airport.name}?
                     </h3>
                     <p className="text-xs text-gray-600">
                       Folosește paginile noastre de sosiri și plecări pentru a obține informații în timp real despre zboruri pentru {airport.name}. 

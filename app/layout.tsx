@@ -2,10 +2,9 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
-import { Navbar } from '@/components/Navbar'
-import { Footer } from '@/components/Footer'
 import { AdSenseScript } from '@/components/ads/AdSenseScript'
 import { FlightSchedulerProvider } from '@/components/FlightSchedulerProvider'
+import MainLayout from '@/components/MainLayout'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,7 +13,7 @@ export const metadata: Metadata = {
     default: 'Orarul Zborurilor România - Informații Zboruri în Timp Real',
     template: '%s | Orarul Zborurilor România'
   },
-  description: 'Platforma românească #1 pentru monitorizarea zborurilor în timp real. Informații complete despre sosiri și plecări de la toate aeroporturile din România și Moldova: OTP Otopeni, CLJ Cluj, TSR Timișoara, IAS Iași, RMO Chișinău. Date actualizate la fiecare minut, statistici detaliate și analize complete.',
+  description: 'Platforma românească #1 pentru monitorizarea zborurilor în timp real. Informații complete despre sosiri și plecări de la toate aeroporturile din România și Moldova: Aeroportul Internațional Henri Coandă București, Aeroportul Internațional Cluj-Napoca, Aeroportul Internațional Timișoara, Aeroportul Internațional Iași, Aeroportul Internațional Chișinău. Date actualizate la fiecare minut, statistici detaliate și analize complete.',
   keywords: [
     'orarul zborurilor romania',
     'aeroporturi romania timp real', 
@@ -111,13 +110,9 @@ export default function RootLayout({
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider>
           <FlightSchedulerProvider>
-            <div className="min-h-screen bg-surface transition-colors duration-200">
-              <Navbar />
-              <main className="pt-16">
-                {children}
-              </main>
-              <Footer />
-            </div>
+            <MainLayout>
+              {children}
+            </MainLayout>
           </FlightSchedulerProvider>
         </ThemeProvider>
       </body>

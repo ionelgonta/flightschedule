@@ -90,7 +90,7 @@ export default function WeatherWidget({ city = 'Bucharest', className = '', comp
           </span>
         </div>
         <div className="text-xs text-gray-500 mt-1">
-          Datele se actualizează automat la 30 min
+          Meteo indisponibil
         </div>
       </div>
     )
@@ -214,8 +214,7 @@ export default function WeatherWidget({ city = 'Bucharest', className = '', comp
 
       <div className="mt-3 pt-3 border-t border-blue-200">
         <div className="text-xs text-blue-600">
-          Actualizat: {formatLastUpdated(weatherData.lastUpdated)} • 
-          <span className="ml-1">Se actualizează automat la 30 min</span>
+          Actualizat: {formatLastUpdated(weatherData.lastUpdated)}
         </div>
       </div>
     </div>

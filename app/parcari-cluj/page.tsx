@@ -99,7 +99,7 @@ export default function ParcariClujPage() {
             ← Toate Parcările Aeroporturi
           </Link>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 flex items-center justify-center gap-3">
-            🅿️ Parcări Aeroport Cluj-Napoca (CLJ)
+            🅿️ Parcări Aeroport Cluj-Napoca
           </h1>
           <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
             Găsește cea mai potrivită parcare pentru călătoria ta din Cluj-Napoca. 

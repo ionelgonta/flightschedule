@@ -154,6 +154,12 @@ class FlightPlannerService {
 
       const destinationMap = new Map<string, FlightOption>()
 
+      // Helper function to normalize strings for comparison (remove diacritics)
+      const normalizeString = (str: string): string => {
+        if (!str) return ''
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+      }
+
       // Get origin airports (default to Chișinău if none specified)
       const originAirports = filters.originAirports || ['RMO']
       console.log(`🛫 Searching flights from ${originAirports.length} origin airports:`, originAirports.map(code => getCityName(code)).join(', '))
@@ -162,8 +168,18 @@ class FlightPlannerService {
       const matchingOutboundFlights = scheduleData.filter((flight: any) => {
         // Check if origin airport matches - try both airport code and city name
         const originMatches = originAirports.some(origin => {
-          // Match by airport code directly
-          return flight.airport === origin
+          const originCity = getCityName(origin) // Convert IATA to city name
+          const normalizedOrigin = normalizeString(origin)
+          const normalizedOriginCity = normalizeString(originCity)
+          const normalizedFlightAirport = normalizeString(flight.airport)
+          
+          // Match by airport code directly OR by city name (normalized for diacritics)
+          return flight.airport === origin || 
+                 flight.airport === originCity ||
+                 normalizedFlightAirport === normalizedOrigin ||
+                 normalizedFlightAirport === normalizedOriginCity ||
+                 normalizedFlightAirport.includes(normalizedOriginCity) ||
+                 normalizedOriginCity.includes(normalizedFlightAirport)
         })
         
         if (!originMatches) return false
@@ -174,6 +190,40 @@ class FlightPlannerService {
       })
 
       console.log(`✈️ Found ${matchingOutboundFlights.length} matching outbound flights`)
+      
+      // Debug: Log sample of matching flights
+      if (matchingOutboundFlights.length > 0) {
+        console.log(`📋 Sample outbound flights:`, matchingOutboundFlights.slice(0, 3).map((f: any) => ({
+          airport: f.airport,
+          destination: f.destination,
+          airline: f.airline,
+          pattern: f.weeklyPattern
+        })))
+      } else {
+        // Debug: Show why no flights matched
+        const originAirportsList = originAirports.map(o => `${o} (${getCityName(o)})`).join(', ')
+        console.log(`⚠️ No outbound flights found. Origin airports: ${originAirportsList}, Departure days: ${filters.departureDays.join(', ')}`)
+        
+        // Check if there are any flights from these origins regardless of day
+        const anyOriginFlights = scheduleData.filter((flight: any) => 
+          originAirports.some(origin => {
+            const originCity = getCityName(origin)
+            return flight.airport === origin || flight.airport === originCity
+          })
+        )
+        console.log(`📊 Total flights from selected origins (any day): ${anyOriginFlights.length}`)
+        
+        if (anyOriginFlights.length > 0) {
+          // Show which days have flights
+          const daysWithFlights = new Set<string>()
+          anyOriginFlights.forEach((f: any) => {
+            Object.entries(f.weeklyPattern).forEach(([day, hasFlights]) => {
+              if (hasFlights) daysWithFlights.add(day)
+            })
+          })
+          console.log(`📅 Days with flights from selected origins: ${Array.from(daysWithFlights).join(', ')}`)
+        }
+      }
 
       // Process each outbound flight to find destinations and return options
       for (const outboundFlight of matchingOutboundFlights) {
@@ -186,19 +236,29 @@ class FlightPlannerService {
         const returnFlights = scheduleData.filter((returnFlight: any) => {
           // Check if this is a return flight (destination -> origin)
           const returnMatches = originAirports.some(origin => {
-            const originCity = getCityName(origin)
-            // Match by airport code directly or by city name
+            const originCity = getCityName(origin) // Convert IATA to city name
+            const normalizedOrigin = normalizeString(origin)
+            const normalizedOriginCity = normalizeString(originCity)
+            const normalizedReturnDest = normalizeString(returnFlight.destination)
+            
+            // Match by airport code directly or by city name (normalized)
             return returnFlight.destination === origin || 
                    returnFlight.destination === originCity || 
-                   returnFlight.destination.includes(originCity) ||
-                   returnFlight.destination.includes(origin)
+                   normalizedReturnDest === normalizedOrigin ||
+                   normalizedReturnDest === normalizedOriginCity ||
+                   normalizedReturnDest.includes(normalizedOriginCity) ||
+                   normalizedOriginCity.includes(normalizedReturnDest)
           })
           
           if (!returnMatches) return false
           
-          // Check if origin is our destination - also try both code and city matching
+          // Check if origin is our destination - also try both code and city matching (normalized)
+          const normalizedReturnAirport = normalizeString(returnFlight.airport)
+          const normalizedDestCity = normalizeString(destCity)
           const originMatches = returnFlight.airport === destCity || 
-                               returnFlight.airport.includes(destCity)
+                               normalizedReturnAirport === normalizedDestCity ||
+                               normalizedReturnAirport.includes(normalizedDestCity) ||
+                               normalizedDestCity.includes(normalizedReturnAirport)
           if (!originMatches) return false
 
           // Check return days with flexibility

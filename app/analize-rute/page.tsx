@@ -8,7 +8,7 @@ import { StructuredData, generateBreadcrumbSchema } from '@/components/seo/Struc
 
 export const metadata: Metadata = {
   title: 'Analize Rute Zboruri România - Destinații și Companii Aeriene',
-  description: 'Analize complete de rute și destinații pentru zborurile din România și Moldova. Explorează rutele populare, companiile aeriene active, frecvența zborurilor și conectivitatea pentru OTP, CLJ, TSR, IAS, RMO și toate aeroporturile naționale.',
+  description: 'Analize complete de rute și destinații pentru zborurile din România și Moldova. Explorează rutele populare, companiile aeriene active, frecvența zborurilor și conectivitatea pentru Aeroportul Internațional Henri Coandă București, Aeroportul Internațional Cluj-Napoca, Aeroportul Internațional Timișoara, Aeroportul Internațional Iași, Aeroportul Internațional Chișinău și toate aeroporturile naționale.',
   keywords: [
     'analize rute zboruri romania',
     'destinatii populare romania',
@@ -309,21 +309,21 @@ export default function AnalizeRutePage() {
                     href="/aeroport/bucuresti-henri-coanda/analize-zboruri"
                     className="block p-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   >
-                    <div className="font-medium">OTP - București</div>
+                    <div className="font-medium">Aeroportul Internațional Henri Coandă București</div>
                     <div className="text-xs text-gray-500">Analize Rute</div>
                   </Link>
                   <Link
                     href="/aeroport/cluj-napoca/analize-zboruri"
                     className="block p-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   >
-                    <div className="font-medium">CLJ - Cluj-Napoca</div>
+                    <div className="font-medium">Aeroportul Internațional Cluj-Napoca</div>
                     <div className="text-xs text-gray-500">Analize Rute</div>
                   </Link>
                   <Link
                     href="/aeroport/timisoara-traian-vuia/analize-zboruri"
                     className="block p-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   >
-                    <div className="font-medium">TSR - Timișoara</div>
+                    <div className="font-medium">Aeroportul Internațional Timișoara</div>
                     <div className="text-xs text-gray-500">Analize Rute</div>
                   </Link>
                 </div>

@@ -29,7 +29,15 @@ export const STATIC_AIRPORT_DATABASE: Record<string, StaticAirportInfo> = {
   'TGM': { iata: 'TGM', name: 'Târgu Mureș Transilvania Airport', city: 'Târgu Mureș', country: 'România' },
   'ARW': { iata: 'ARW', name: 'Arad Airport', city: 'Arad', country: 'România' },
   'SUJ': { iata: 'SUJ', name: 'Satu Mare Airport', city: 'Satu Mare', country: 'România' },
+  'GHV': { iata: 'GHV', name: 'Brașov-Ghimbav International Airport', city: 'Brașov', country: 'România' },
   'RMO': { iata: 'RMO', name: 'Chișinău International Airport', city: 'Chișinău', country: 'Moldova' },
+
+  // International Airports
+  'TKU': { iata: 'TKU', name: 'Turku Airport', city: 'Turku', country: 'Finlanda' },
+  'SUF': { iata: 'SUF', name: 'Lamezia Terme Airport', city: 'Lamezia Terme', country: 'Italia' },
+  'RIX': { iata: 'RIX', name: 'Riga Airport', city: 'Riga', country: 'Letonia' },
+  'HRG': { iata: 'HRG', name: 'Hurghada Airport', city: 'Hurghada', country: 'Egipt' },
+  'LUX': { iata: 'LUX', name: 'Luxembourg Airport', city: 'Luxembourg', country: 'Luxemburg' },
 
   // Major European Airports (found in flight data)
   'FRA': { iata: 'FRA', name: 'Frankfurt Airport', city: 'Frankfurt', country: 'Germany' },

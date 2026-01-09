@@ -4,7 +4,7 @@ import { MAJOR_AIRPORTS } from '@/lib/airports'
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://anyway.ro'
   
-  // Static pages
+  // Static pages - prioritize Romanian URLs
   const staticPages = [
     {
       url: baseUrl,
@@ -17,12 +17,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/airports`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
     },
     {
       url: `${baseUrl}/despre`,
@@ -79,12 +73,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/search`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    },
-    {
       url: `${baseUrl}/aeronave`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
@@ -96,10 +84,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
+    {
+      url: `${baseUrl}/statistici`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
   ]
 
-  // Airport pages - Romanian URLs
-  const romanianAirportPages = MAJOR_AIRPORTS.flatMap(airport => {
+  // Airport pages - Only Romanian URLs (English URLs redirect to these)
+  const airportPages = MAJOR_AIRPORTS.flatMap(airport => {
     const slug = airport.name.toLowerCase()
       .replace(/aeroportul internațional /gi, '')
       .replace(/aeroportul /gi, '')
@@ -159,27 +153,45 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ]
   })
 
-  // English airport pages for international SEO
-  const englishAirportPages = MAJOR_AIRPORTS.flatMap(airport => [
+  // Parking pages
+  const parkingPages = [
     {
-      url: `${baseUrl}/airport/${airport.code.toLowerCase()}`,
+      url: `${baseUrl}/parcari-bucuresti`,
       lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 0.8,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
     },
     {
-      url: `${baseUrl}/airport/${airport.code.toLowerCase()}/arrivals`,
+      url: `${baseUrl}/parcari-cluj`,
       lastModified: new Date(),
-      changeFrequency: 'hourly' as const,
-      priority: 0.7,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
     },
     {
-      url: `${baseUrl}/airport/${airport.code.toLowerCase()}/departures`,
+      url: `${baseUrl}/parcari-timisoara`,
       lastModified: new Date(),
-      changeFrequency: 'hourly' as const,
-      priority: 0.7,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
     },
-  ])
+    {
+      url: `${baseUrl}/parcari-iasi`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/parcari-chisinau`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/parcari-aeroporturi`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+  ]
 
-  return [...staticPages, ...romanianAirportPages, ...englishAirportPages]
+  return [...staticPages, ...airportPages, ...parkingPages]
 }

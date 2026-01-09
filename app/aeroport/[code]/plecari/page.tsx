@@ -1,12 +1,17 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getAirportByCodeOrSlug, generateAirportSlug } from '@/lib/airports'
+import { getClientFlightService, ClientFlightFilters } from '@/lib/clientFlightService'
+import { RawFlightData } from '@/lib/flightApiService'
+import FlightList from '@/components/flights/FlightList'
 import { AdBanner } from '@/components/ads/AdBanner'
 import WeatherWidget from '@/components/weather/WeatherWidget'
 import WeatherAlert from '@/components/weather/WeatherAlert'
 import { getWeatherCityForAirport } from '@/lib/weatherUtils'
 import { ArrowLeft, Plane } from 'lucide-react'
-import SimpleFlightList from '@/components/flights/SimpleFlightList'
 
 interface DeparturesPageProps {
   params: {
@@ -14,14 +19,63 @@ interface DeparturesPageProps {
   }
 }
 
-export default async function DeparturesPage({ params }: DeparturesPageProps) {
+export default function DeparturesPage({ params }: DeparturesPageProps) {
+  const [flights, setFlights] = useState<RawFlightData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
   const airport = getAirportByCodeOrSlug(params.code)
+  const clientFlightService = getClientFlightService()
 
   if (!airport) {
     notFound()
   }
 
   const weatherCity = getWeatherCityForAirport(airport.code)
+
+  const fetchFlights = async (filters?: ClientFlightFilters) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const response = await clientFlightService.getDepartures(airport.code, filters)
+      
+      if (response.success) {
+        setFlights(response.data)
+        setLastUpdated(response.last_updated)
+        setError(null)
+      } else {
+        setError(response.error || 'Nu am putut încărca datele zborurilor')
+        // Păstrează datele existente dacă sunt din cache
+        if (response.data.length > 0) {
+          setFlights(response.data)
+          setLastUpdated(response.last_updated)
+        }
+      }
+    } catch (err) {
+      setError('Eroare la încărcarea datelor de zbor')
+      console.error('Error fetching departures:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchFlights()
+    
+    // Auto-refresh every 10 minutes
+    const interval = setInterval(() => {
+      fetchFlights()
+    }, 10 * 60 * 1000)
+
+    return () => clearInterval(interval)
+  }, [airport.code])
+
+  const handleFiltersChange = (filters: any) => {
+    // Filtrele sunt aplicate local în FlightList
+    // Aici putem adăuga logică suplimentară dacă e necesar
+  }
 
   return (
     <div className="min-h-screen">
@@ -57,15 +111,8 @@ export default async function DeparturesPage({ params }: DeparturesPageProps) {
             </div>
           </div>
           
-          {/* Quick Navigation - Added higher up */}
+          {/* Quick Navigation - Removed Vezi Sosiri button */}
           <div className="flex flex-col sm:flex-row gap-2 mt-4">
-            <Link
-              href={`/aeroport/${generateAirportSlug(airport)}/sosiri`}
-              className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-1 text-sm"
-            >
-              <Plane className="h-3 w-3" />
-              <span>Vezi Sosiri</span>
-            </Link>
             <Link
               href={`/aeroport/${generateAirportSlug(airport)}`}
               className="border border-white text-white px-4 py-2 rounded-lg font-medium hover:bg-white/10 transition-colors flex items-center justify-center space-x-1 text-sm"
@@ -83,10 +130,22 @@ export default async function DeparturesPage({ params }: DeparturesPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Simple client-side flight list */}
-            <SimpleFlightList 
-              airportCode={airport.code}
+            {/* Last Updated Info */}
+            {lastUpdated && (
+              <div className="md:hidden mb-6">
+                <p className="text-sm text-gray-600">
+                  Actualizat: {new Date(lastUpdated).toLocaleTimeString()}
+                </p>
+              </div>
+            )}
+
+            <FlightList
+              flights={flights}
               type="departures"
+              loading={loading}
+              error={error || undefined}
+              lastUpdated={lastUpdated || undefined}
+              onFiltersChange={handleFiltersChange}
             />
           </div>
 
@@ -101,24 +160,34 @@ export default async function DeparturesPage({ params }: DeparturesPageProps) {
               size="300x600"
             />
             
-            {/* Quick Links - Compact */}
+            {/* Flight Statistics */}
             <div className="bg-white rounded-lg border border-gray-200 p-4">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                Linkuri Rapide
+                Statistici Plecări
               </h3>
               <div className="space-y-2">
-                <Link
-                  href={`/aeroport/${generateAirportSlug(airport)}/sosiri`}
-                  className="block w-full text-left px-3 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-xs"
-                >
-                  Vezi Sosiri
-                </Link>
-                <Link
-                  href={`/aeroport/${generateAirportSlug(airport)}`}
-                  className="block w-full text-left px-3 py-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors text-xs"
-                >
-                  Prezentare Aeroport
-                </Link>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 text-xs">Total Zboruri</span>
+                  <span className="font-semibold text-gray-900 text-xs">{flights.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 text-xs">La timp</span>
+                  <span className="font-semibold text-green-600 text-xs">
+                    {flights.filter(f => f.status === 'scheduled' || f.status === 'active' || f.status === 'departed').length}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 text-xs">Întârziate</span>
+                  <span className="font-semibold text-orange-600 text-xs">
+                    {flights.filter(f => f.status === 'delayed').length}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 text-xs">Anulate</span>
+                  <span className="font-semibold text-red-600 text-xs">
+                    {flights.filter(f => f.status === 'cancelled').length}
+                  </span>
+                </div>
               </div>
             </div>
 

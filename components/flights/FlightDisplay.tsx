@@ -126,17 +126,17 @@ export function FlightDisplay({ flights, loading, type, onFiltersChange }: Fligh
   const filteredFlights = useMemo(() => {
     let filtered = flights
 
-    // Filtrare pe timp: arată zborurile din ultimele 10 ore și toate zborurile viitoare
+    // Filtrare pe timp: arată zborurile din ultimele 10 ore și TOATE zborurile viitoare (fără limitare)
     const now = new Date()
     const tenHoursAgo = new Date(now.getTime() - 10 * 60 * 60 * 1000) // 10 ore în urmă
     
     filtered = filtered.filter(flight => {
       const relevantTime = type === 'arrivals' ? flight.arrival : flight.departure
       const scheduledTime = new Date(relevantTime.scheduled)
-      // Arată doar zborurile care sunt:
-      // 1. Programate în viitor (scheduledTime > now)
-      // 2. Programate în ultimele 10 ore (scheduledTime > tenHoursAgo)
-      return scheduledTime > tenHoursAgo
+      // Arată zborurile care sunt:
+      // 1. În viitor (scheduledTime > now) - TOATE, fără limitare SAU
+      // 2. Din ultimele 10 ore (scheduledTime > tenHoursAgo)
+      return scheduledTime > now || scheduledTime > tenHoursAgo
     })
 
     if (searchTerm) {

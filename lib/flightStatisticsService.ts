@@ -4,7 +4,7 @@
  * Integrates with Historical Cache Manager for long-term data analysis
  */
 
-import { cacheManager } from './cacheManager'
+import { fixedCacheManager as cacheManager } from './cacheManagerFixed'
 import { persistentFlightCache } from './persistentFlightCache'
 import { getAirlineName } from './airlineMapping'
 import {

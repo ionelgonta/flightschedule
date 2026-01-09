@@ -1,16 +1,21 @@
 /**
- * Flight API Service - REAL-TIME AeroDataBox via API.Market
- * No demo data - only live flight information
+ * Flight API Service - REAL-TIME cu backup AviationStack
+ * Folosește AeroDataBox ca provider principal și AviationStack ca backup
  */
 
 import AeroDataBoxService from './aerodataboxService';
+import AviationStackService from './aviationStackService';
 import { formatDelayInRomanian } from './flightUtils';
 
 export interface FlightApiConfig {
-  provider: 'aerodatabox';
+  provider: 'aerodatabox' | 'aviationstack';
   apiKey: string;
   baseUrl: string;
   rateLimit: number;
+  backupProvider?: {
+    type: 'aviationstack';
+    apiKey: string;
+  };
 }
 
 export interface RawFlightData {
@@ -61,24 +66,34 @@ export interface FlightApiResponse {
 
 class FlightApiService {
   private aeroDataBoxService: AeroDataBoxService;
+  private aviationStackService?: AviationStackService;
+  private config: FlightApiConfig;
 
   constructor(config: FlightApiConfig) {
+    this.config = config;
+    
     // Initialize AeroDataBox service with correct API.Market configuration
     this.aeroDataBoxService = new AeroDataBoxService({
       apiKey: config.apiKey,
       baseUrl: config.baseUrl,
       rateLimit: config.rateLimit
     });
+
+    // Initialize backup AviationStack service if configured
+    if (config.backupProvider?.type === 'aviationstack' && config.backupProvider.apiKey) {
+      this.aviationStackService = new AviationStackService(config.backupProvider.apiKey);
+      console.log('AviationStack backup service initialized');
+    }
   }
 
   /**
-   * Fetch arrivals pentru un aeroport - REAL-TIME AeroDataBox
+   * Fetch arrivals pentru un aeroport - REAL-TIME cu backup
    */
   async getArrivals(airportCode: string): Promise<FlightApiResponse> {
     console.log(`Fetching REAL-TIME arrivals for ${airportCode} from AeroDataBox`);
     
     try {
-      // Get real-time data from AeroDataBox via API.Market
+      // Try primary provider (AeroDataBox)
       const flights = await this.aeroDataBoxService.getFlights(airportCode, 'arrivals');
       
       // Convert to our standard format with Romanian delay formatting
@@ -90,7 +105,7 @@ class FlightApiService {
           delay: converted.delay ? converted.delay : undefined
         }));
 
-      console.log(`Successfully fetched ${convertedFlights.length} real arrivals for ${airportCode}`);
+      console.log(`Successfully fetched ${convertedFlights.length} real arrivals for ${airportCode} from AeroDataBox`);
       
       return {
         success: true,
@@ -105,11 +120,36 @@ class FlightApiService {
     } catch (error) {
       console.error(`AeroDataBox API failed for ${airportCode} arrivals:`, error);
       
-      // NO DEMO DATA - Return error if real-time fails
+      // Try backup provider (AviationStack) if available
+      if (this.aviationStackService) {
+        console.log(`Trying backup AviationStack for ${airportCode} arrivals`);
+        
+        try {
+          const backupFlights = await this.aviationStackService.getArrivals(airportCode);
+          const convertedBackupFlights = this.aviationStackService.convertToStandardFormat(backupFlights, 'arrivals');
+          
+          console.log(`Successfully fetched ${convertedBackupFlights.length} real arrivals for ${airportCode} from AviationStack backup`);
+          
+          return {
+            success: true,
+            data: convertedBackupFlights,
+            cached: false,
+            last_updated: new Date().toISOString(),
+            airport_code: airportCode,
+            type: 'arrivals',
+            source: 'AviationStack (backup)'
+          };
+          
+        } catch (backupError) {
+          console.error(`AviationStack backup also failed for ${airportCode} arrivals:`, backupError);
+        }
+      }
+      
+      // Both providers failed - return error
       return {
         success: false,
         data: [],
-        error: `Real-time data unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error: `Real-time data unavailable from all providers: ${error instanceof Error ? error.message : 'Unknown error'}`,
         cached: false,
         last_updated: new Date().toISOString(),
         airport_code: airportCode,
@@ -119,13 +159,13 @@ class FlightApiService {
   }
 
   /**
-   * Fetch departures pentru un aeroport - REAL-TIME AeroDataBox
+   * Fetch departures pentru un aeroport - REAL-TIME cu backup
    */
   async getDepartures(airportCode: string): Promise<FlightApiResponse> {
     console.log(`Fetching REAL-TIME departures for ${airportCode} from AeroDataBox`);
     
     try {
-      // Get real-time data from AeroDataBox via API.Market
+      // Try primary provider (AeroDataBox)
       const flights = await this.aeroDataBoxService.getFlights(airportCode, 'departures');
       
       // Convert to our standard format with Romanian delay formatting
@@ -137,7 +177,7 @@ class FlightApiService {
           delay: converted.delay ? converted.delay : undefined
         }));
 
-      console.log(`Successfully fetched ${convertedFlights.length} real departures for ${airportCode}`);
+      console.log(`Successfully fetched ${convertedFlights.length} real departures for ${airportCode} from AeroDataBox`);
       
       return {
         success: true,
@@ -152,11 +192,36 @@ class FlightApiService {
     } catch (error) {
       console.error(`AeroDataBox API failed for ${airportCode} departures:`, error);
       
-      // NO DEMO DATA - Return error if real-time fails
+      // Try backup provider (AviationStack) if available
+      if (this.aviationStackService) {
+        console.log(`Trying backup AviationStack for ${airportCode} departures`);
+        
+        try {
+          const backupFlights = await this.aviationStackService.getDepartures(airportCode);
+          const convertedBackupFlights = this.aviationStackService.convertToStandardFormat(backupFlights, 'departures');
+          
+          console.log(`Successfully fetched ${convertedBackupFlights.length} real departures for ${airportCode} from AviationStack backup`);
+          
+          return {
+            success: true,
+            data: convertedBackupFlights,
+            cached: false,
+            last_updated: new Date().toISOString(),
+            airport_code: airportCode,
+            type: 'departures',
+            source: 'AviationStack (backup)'
+          };
+          
+        } catch (backupError) {
+          console.error(`AviationStack backup also failed for ${airportCode} departures:`, backupError);
+        }
+      }
+      
+      // Both providers failed - return error
       return {
         success: false,
         data: [],
-        error: `Real-time data unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error: `Real-time data unavailable from all providers: ${error instanceof Error ? error.message : 'Unknown error'}`,
         cached: false,
         last_updated: new Date().toISOString(),
         airport_code: airportCode,

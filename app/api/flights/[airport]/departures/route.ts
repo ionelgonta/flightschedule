@@ -16,7 +16,7 @@ export async function GET(
   { params }: { params: { airport: string } }
 ) {
   try {
-    const airportCode = params.airport.toUpperCase();
+    const airportCode = params.airport?.toUpperCase();
     const { searchParams } = new URL(request.url);
 
     // Validare și conversie cod aeroport
@@ -24,7 +24,12 @@ export async function GET(
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Airport code is required' 
+          error: 'Airport code is required',
+          data: [],
+          cached: false,
+          last_updated: new Date().toISOString(),
+          airport_code: '',
+          type: 'departures'
         },
         { status: 400 }
       );
@@ -35,13 +40,17 @@ export async function GET(
       return NextResponse.json(
         { 
           success: false, 
-          error: `Airport code ${airportCode} is not supported. Please use IATA codes like OTP, CLJ, TSR.` 
+          error: `Airport code ${airportCode} is not supported. Please use IATA codes like OTP, CLJ, TSR.`,
+          data: [],
+          cached: false,
+          last_updated: new Date().toISOString(),
+          airport_code: airportCode,
+          type: 'departures'
         },
         { status: 400 }
       );
     }
 
-    // Folosește IATA direct pentru cache lookup
     // Construiește filtrele din query parameters
     const filters: FlightFilters = {};
     
@@ -67,31 +76,39 @@ export async function GET(
     // Setează codul IATA în răspuns pentru client
     result.airport_code = airportCode;
 
-    // Adaugă headers pentru cache
+    // Adaugă headers pentru cache și SEO
     const headers = new Headers();
     headers.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=600'); // 5 min cache
     headers.set('X-Cache-Status', result.cached ? 'HIT' : 'MISS');
     headers.set('X-Last-Updated', result.last_updated || new Date().toISOString());
+    headers.set('X-Robots-Tag', 'noindex'); // API endpoints should not be indexed
 
     return NextResponse.json(result, { 
-      status: 200, // Always return 200, let the client handle success/error based on result.success
+      status: 200,
       headers 
     });
 
   } catch (error) {
     console.error('API Error - Departures:', error);
     
+    // Return structured error response instead of 500
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: 'Service temporarily unavailable. Please try again later.',
         data: [],
         cached: false,
         last_updated: new Date().toISOString(),
-        airport_code: params.airport.toUpperCase(),
+        airport_code: params.airport?.toUpperCase() || '',
         type: 'departures'
       },
-      { status: 500 }
+      { 
+        status: 200, // Return 200 to avoid 5xx errors affecting SEO
+        headers: {
+          'X-Robots-Tag': 'noindex',
+          'Cache-Control': 'no-cache'
+        }
+      }
     );
   }
 }
@@ -104,6 +121,7 @@ export async function OPTIONS() {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
+      'X-Robots-Tag': 'noindex'
     },
   });
 }

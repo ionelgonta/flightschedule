@@ -8,7 +8,7 @@ import { StructuredData, generateBreadcrumbSchema } from '@/components/seo/Struc
 
 export const metadata: Metadata = {
   title: 'Program Zboruri România - Calendar Interactiv Toate Aeroporturile',
-  description: 'Program complet de zboruri pentru toate aeroporturile din România și Moldova. Calendar interactiv cu filtre avansate pentru dată, companie aeriană, destinație și status. Planifică călătoriile cu informații actualizate pentru OTP, CLJ, TSR, IAS, RMO.',
+  description: 'Program complet de zboruri pentru toate aeroporturile din România și Moldova. Calendar interactiv cu filtre avansate pentru dată, companie aeriană, destinație și status. Planifică călătoriile cu informații actualizate pentru Aeroportul Internațional Henri Coandă București, Aeroportul Internațional Cluj-Napoca, Aeroportul Internațional Timișoara, Aeroportul Internațional Iași, Aeroportul Internațional Chișinău.',
   keywords: [
     'program zboruri romania',
     'calendar zboruri',
@@ -290,21 +290,21 @@ export default function ProgramZboruriPage() {
                     href="/aeroport/bucuresti-henri-coanda/program-zboruri"
                     className="block p-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   >
-                    <div className="font-medium">OTP - București</div>
+                    <div className="font-medium">Aeroportul Internațional Henri Coandă București</div>
                     <div className="text-xs text-gray-500">Henri Coandă</div>
                   </Link>
                   <Link
                     href="/aeroport/cluj-napoca/program-zboruri"
                     className="block p-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   >
-                    <div className="font-medium">CLJ - Cluj-Napoca</div>
+                    <div className="font-medium">Aeroportul Internațional Cluj-Napoca</div>
                     <div className="text-xs text-gray-500">Avram Iancu</div>
                   </Link>
                   <Link
                     href="/aeroport/timisoara-traian-vuia/program-zboruri"
                     className="block p-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   >
-                    <div className="font-medium">TSR - Timișoara</div>
+                    <div className="font-medium">Aeroportul Internațional Timișoara</div>
                     <div className="text-xs text-gray-500">Traian Vuia</div>
                   </Link>
                 </div>

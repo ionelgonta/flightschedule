@@ -53,7 +53,7 @@ export default function WeeklySchedulePage() {
                   🔄 Actualizare Automată
                 </h3>
                 <p className="text-xs text-purple-700">
-                  Programul se actualizează automat la fiecare 30 de minute
+                  Program săptămânal pentru toate aeroporturile
                 </p>
               </div>
             </div>

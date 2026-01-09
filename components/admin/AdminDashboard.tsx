@@ -5,7 +5,8 @@ import WeeklyScheduleView from '@/components/analytics/WeeklyScheduleView'
 import CacheManagement from './CacheManagement'
 import { AdManagement } from './AdManagement'
 import AirportManagement from './AirportManagement'
-import { Save, Settings, Key, TestTube, CheckCircle, XCircle, Clock, TrendingUp, Calendar, LogOut, Globe, MapPin } from 'lucide-react'
+import { OTAManagement } from './OTAManagement'
+import { Save, Settings, Key, TestTube, CheckCircle, XCircle, Clock, TrendingUp, Calendar, LogOut, Globe, MapPin, Plane } from 'lucide-react'
 
 interface AdminDashboardProps {
   onLogout?: () => void
@@ -545,6 +546,17 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 Aeroporturi
               </button>
               <button
+                onClick={() => setActiveTab('ota')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'ota'
+                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                <Plane className="h-4 w-4 inline mr-2" />
+                Boarding Pass/G Wallet
+              </button>
+              <button
                 onClick={() => setActiveTab('ads')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'ads'
@@ -869,6 +881,10 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
             {activeTab === 'airports' && (
               <AirportManagement />
+            )}
+
+            {activeTab === 'ota' && (
+              <OTAManagement />
             )}
 
             {activeTab === 'ads' && (

@@ -8,7 +8,7 @@ import { StructuredData, generateBreadcrumbSchema } from '@/components/seo/Struc
 
 export const metadata: Metadata = {
   title: 'Toate Aeroporturile din România și Moldova - Director Complet',
-  description: 'Director complet cu toate aeroporturile din România și Moldova. Informații în timp real despre zboruri, sosiri și plecări de la OTP Otopeni, CLJ Cluj, TSR Timișoara, IAS Iași, RMO Chișinău și toate aeroporturile naționale. Coduri IATA, statistici și programe de zbor.',
+  description: 'Director complet cu toate aeroporturile din România și Moldova. Informații în timp real despre zboruri, sosiri și plecări de la Aeroportul Internațional Henri Coandă București, Aeroportul Internațional Cluj-Napoca, Aeroportul Internațional Timișoara, Aeroportul Internațional Iași, Aeroportul Internațional Chișinău și toate aeroporturile naționale. Coduri IATA, statistici și programe de zbor.',
   keywords: [
     'aeroporturi romania lista completa',
     'aeroporturi moldova',
@@ -260,7 +260,7 @@ export default function AirportsPage() {
                     despre zboruri de la toate aeroporturile naționale și regionale.
                   </p>
                   <p>
-                    De la hub-ul principal Aeroportul Internațional Henri Coandă (OTP) din București 
+                    De la hub-ul principal Aeroportul Internațional Henri Coandă din București 
                     la aeroporturi regionale precum Cluj-Napoca, Timișoara, Iași și Chișinău, 
                     baza noastră de date acoperă toate facilitățile de aviație importante din România și Moldova.
                   </p>

@@ -25,6 +25,7 @@ export function getWeatherCityForAirport(airportCode: string): string {
     'TGM': 'Targu Mures',
     'ARW': 'Arad',
     'SUJ': 'Satu Mare',
+    'GHV': 'Brasov',
     'RMO': 'Chisinau'
   }
   

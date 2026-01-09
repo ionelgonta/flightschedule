@@ -166,7 +166,7 @@ export function Navbar() {
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     onClick={() => setIsParkingOpen(false)}
                   >
-                    <div className="font-medium">București (OTP & BBU)</div>
+                    <div className="font-medium">București</div>
                     <div className="text-xs text-gray-500">Henri Coandă & Aurel Vlaicu</div>
                   </Link>
                   <Link
@@ -174,7 +174,7 @@ export function Navbar() {
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     onClick={() => setIsParkingOpen(false)}
                   >
-                    <div className="font-medium">Cluj-Napoca (CLJ)</div>
+                    <div className="font-medium">Cluj-Napoca</div>
                     <div className="text-xs text-gray-500">Avram Iancu</div>
                   </Link>
                   <Link
@@ -182,7 +182,7 @@ export function Navbar() {
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     onClick={() => setIsParkingOpen(false)}
                   >
-                    <div className="font-medium">Timișoara (TSR)</div>
+                    <div className="font-medium">Timișoara</div>
                     <div className="text-xs text-gray-500">Traian Vuia</div>
                   </Link>
                   <Link
@@ -190,7 +190,7 @@ export function Navbar() {
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     onClick={() => setIsParkingOpen(false)}
                   >
-                    <div className="font-medium">Iași (IAS)</div>
+                    <div className="font-medium">Iași</div>
                     <div className="text-xs text-gray-500">Internațional Iași</div>
                   </Link>
                   <Link
@@ -198,7 +198,7 @@ export function Navbar() {
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     onClick={() => setIsParkingOpen(false)}
                   >
-                    <div className="font-medium">Chișinău (RMO)</div>
+                    <div className="font-medium">Chișinău</div>
                     <div className="text-xs text-gray-500">Internațional Chișinău</div>
                   </Link>
                   <div className="border-t border-gray-200 my-1"></div>
@@ -343,35 +343,35 @@ export function Navbar() {
                     className="block px-2 py-1 rounded text-xs text-gray-600 hover:text-blue-600 hover:bg-white transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    București (OTP & BBU)
+                    București
                   </Link>
                   <Link 
                     href="/parcari-cluj" 
                     className="block px-2 py-1 rounded text-xs text-gray-600 hover:text-blue-600 hover:bg-white transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Cluj-Napoca (CLJ)
+                    Cluj-Napoca
                   </Link>
                   <Link 
                     href="/parcari-timisoara" 
                     className="block px-2 py-1 rounded text-xs text-gray-600 hover:text-blue-600 hover:bg-white transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Timișoara (TSR)
+                    Timișoara
                   </Link>
                   <Link 
                     href="/parcari-iasi" 
                     className="block px-2 py-1 rounded text-xs text-gray-600 hover:text-blue-600 hover:bg-white transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Iași (IAS)
+                    Iași
                   </Link>
                   <Link 
                     href="/parcari-chisinau" 
                     className="block px-2 py-1 rounded text-xs text-gray-600 hover:text-blue-600 hover:bg-white transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Chișinău (RMO)
+                    Chișinău
                   </Link>
                   <Link 
                     href="/parcari-otopeni" 

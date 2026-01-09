@@ -135,6 +135,14 @@ class AeroDataBoxService {
   private config: AeroDataBoxConfig;
   private requestCount: number = 0;
   private lastReset: number = Date.now();
+  private requestQueue: Array<{
+    resolve: (value: any) => void;
+    reject: (error: any) => void;
+    endpoint: string;
+    requestType: 'arrivals' | 'departures' | 'statistics' | 'analytics' | 'aircraft' | 'routes';
+    airportCode?: string;
+  }> = [];
+  private isProcessingQueue: boolean = false;
   
   // Airports that have been discovered to have limited or no data in AeroDataBox (dynamically populated)
   private limitedDataAirports = new Set<string>();
@@ -155,11 +163,37 @@ class AeroDataBoxService {
     return this.requestCount < this.config.rateLimit;
   }
 
-  private async makeRequest<T>(endpoint: string, requestType: 'arrivals' | 'departures' | 'statistics' | 'analytics' | 'aircraft' | 'routes' = 'statistics', airportCode?: string): Promise<T> {
-    if (!this.canMakeRequest()) {
-      throw new Error('Rate limit exceeded');
+  private async processQueue(): Promise<void> {
+    if (this.isProcessingQueue || this.requestQueue.length === 0) {
+      return;
     }
 
+    this.isProcessingQueue = true;
+
+    while (this.requestQueue.length > 0) {
+      if (!this.canMakeRequest()) {
+        // Wait until next minute to continue processing
+        const waitTime = 60000 - ((Date.now() - this.lastReset) % 60000);
+        console.log(`[AeroDataBox] Rate limit reached, waiting ${Math.round(waitTime/1000)}s before continuing queue processing`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+
+      const queueItem = this.requestQueue.shift();
+      if (!queueItem) break;
+
+      try {
+        const result = await this.makeRequestDirect(queueItem.endpoint, queueItem.requestType, queueItem.airportCode);
+        queueItem.resolve(result);
+      } catch (error) {
+        queueItem.reject(error);
+      }
+    }
+
+    this.isProcessingQueue = false;
+  }
+
+  private async makeRequestDirect<T>(endpoint: string, requestType: 'arrivals' | 'departures' | 'statistics' | 'analytics' | 'aircraft' | 'routes' = 'statistics', airportCode?: string): Promise<T> {
     this.requestCount++;
     const startTime = Date.now();
 
@@ -263,6 +297,30 @@ class AeroDataBoxService {
     }
   }
 
+  private async makeRequest<T>(endpoint: string, requestType: 'arrivals' | 'departures' | 'statistics' | 'analytics' | 'aircraft' | 'routes' = 'statistics', airportCode?: string): Promise<T> {
+    if (this.canMakeRequest()) {
+      // Can make request immediately
+      return this.makeRequestDirect<T>(endpoint, requestType, airportCode);
+    } else {
+      // Add to queue and wait
+      console.log(`[AeroDataBox] Rate limit reached, queueing request for ${endpoint}`);
+      return new Promise<T>((resolve, reject) => {
+        this.requestQueue.push({
+          resolve,
+          reject,
+          endpoint,
+          requestType,
+          airportCode
+        });
+        
+        // Start processing queue if not already processing
+        this.processQueue().catch(error => {
+          console.error('[AeroDataBox] Queue processing error:', error);
+        });
+      });
+    }
+  }
+
   /**
    * Obține zborurile pentru un aeroport (arrivals/departures)
    */
@@ -284,12 +342,12 @@ class AeroDataBoxService {
       
       const flights = type === 'arrivals' ? (response.arrivals || []) : (response.departures || []);
       
-      // Filter out codeshare flights - keep only IsOperator
+      // Filter out codeshare flights - keep only IsOperator and Unknown (many real flights have Unknown status)
       const operatorFlights = flights.filter(flight => {
         const codeshareStatus = flight.codeshareStatus || '';
-        // Only keep flights where this airline is the actual operator
-        // Exclude all codeshare variants except IsOperator
-        return codeshareStatus === 'IsOperator';
+        // Keep flights where this airline is the actual operator OR status is unknown (many real flights)
+        // Only exclude explicit codeshare variants like IsCodeshared
+        return codeshareStatus === 'IsOperator' || codeshareStatus === 'Unknown' || codeshareStatus === '';
       });
       
       // Enhanced deduplication based on multiple criteria to handle all duplicate scenarios

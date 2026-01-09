@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { cacheManager, CacheConfig } from '@/lib/cacheManager'
+import { fixedCacheManager as cacheManager, CacheConfig } from '@/lib/cacheManagerFixed'
 
 export async function GET() {
   try {
