@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "dev:with-ota": "node start-with-ota.js",
     "build": "next build",
     "build:fast": "SKIP_ENV_VALIDATION=1 next build",

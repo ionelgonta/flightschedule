@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { Plane, Menu, X, ChevronDown, BarChart3, Car } from 'lucide-react'
+import { Plane, Menu, X, ChevronDown, BarChart3, Car, Sparkles } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 export function Navbar() {
@@ -215,6 +215,13 @@ export function Navbar() {
             </div>
             
             <Link 
+              href="/fly-finder" 
+              className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center space-x-1"
+            >
+              <Sparkles className="h-4 w-4 text-purple-500" />
+              <span>FlyFinder</span>
+            </Link>
+            <Link 
               href="/planificator-zboruri" 
               className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
@@ -383,6 +390,14 @@ export function Navbar() {
                 </div>
               </div>
               
+              <Link 
+                href="/fly-finder" 
+                className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center space-x-1"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Sparkles className="h-4 w-4 text-purple-500" />
+                <span>FlyFinder</span>
+              </Link>
               <Link 
                 href="/planificator-zboruri" 
                 className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
