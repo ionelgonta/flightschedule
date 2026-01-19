@@ -64,8 +64,12 @@ export function AirlineLogo({
     lg: 'h-6 w-6'
   }
 
-  // Generate initials from airline name
-  const getInitials = (name: string) => {
+  // Generate initials from airline name or use IATA code
+  const getInitials = (name: string, code: string) => {
+    // Prefer IATA code (2 characters) over name initials
+    if (code && code.length >= 2) {
+      return code.substring(0, 2).toUpperCase()
+    }
     if (!name) return 'XX' // Fallback pentru nume undefined
     return name
       .split(' ')
@@ -75,7 +79,7 @@ export function AirlineLogo({
       .toUpperCase()
   }
 
-  const initials = getInitials(displayName)
+  const initials = getInitials(displayName, airlineCode)
 
   // Fallback component when no logo or error loading
   const FallbackLogo = () => (

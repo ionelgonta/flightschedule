@@ -332,6 +332,8 @@ class AeroDataBoxService {
   ): Promise<Flight[]> {
     try {
       // Use IATA codes directly for API calls
+      // API.Market AeroDataBox endpoint format: /flights/airports/Iata/{code}
+      // Note: Time range parameters are NOT supported by API.Market wrapper
       const endpoint = `/flights/airports/Iata/${airportCode}`;
       console.log(`Making API request to: ${this.config.baseUrl}${endpoint}`);
       

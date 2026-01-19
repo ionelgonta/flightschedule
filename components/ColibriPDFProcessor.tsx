@@ -12,6 +12,7 @@ interface FlightData {
   seatNumber: string;
   confirmationCode: string;
   compartment: string;
+  flightDate?: string;
 }
 
 interface ProcessResult {

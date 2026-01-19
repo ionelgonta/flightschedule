@@ -29,5 +29,5 @@
     "preserveValueImports": false
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", ".next", "out", "dist", "build", "backup_*", "**/backup_*", "**/__tests__/**", "__tests__"]
+  "exclude": ["node_modules", ".next", "out", "dist", "build", "backup_*", "**/backup_*", "**/__tests__/**", "__tests__", "modules/boarding-pass"]
 }

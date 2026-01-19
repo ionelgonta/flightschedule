@@ -163,6 +163,131 @@ class PersistentApiRequestTracker {
       console.error('Failed to cleanup old logs:', error);
     }
   }
+
+  /**
+   * Get detailed statistics including breakdown by type and airport
+   */
+  getDetailedStats(): { stats: ApiStats; byType: Record<string, number>; byAirport: Record<string, number>; recentRequests: ApiRequestLog[] } {
+    try {
+      const stats = this.getStats();
+      const requests = this.getAllRequests();
+      
+      // Group by type (endpoint pattern)
+      const byType: Record<string, number> = {};
+      const byAirport: Record<string, number> = {};
+      
+      requests.forEach(req => {
+        // Extract type from endpoint
+        const type = req.source || 'unknown';
+        byType[type] = (byType[type] || 0) + 1;
+        
+        // Extract airport code from endpoint if present
+        const airportMatch = req.endpoint.match(/\/([A-Z]{3})\//i);
+        if (airportMatch) {
+          const airport = airportMatch[1].toUpperCase();
+          byAirport[airport] = (byAirport[airport] || 0) + 1;
+        }
+      });
+      
+      // Get last 20 requests
+      const recentRequests = requests.slice(-20).reverse();
+      
+      return {
+        stats,
+        byType,
+        byAirport,
+        recentRequests
+      };
+    } catch (error) {
+      console.error('Failed to get detailed stats:', error);
+      return {
+        stats: this.getStats(),
+        byType: {},
+        byAirport: {},
+        recentRequests: []
+      };
+    }
+  }
+
+  /**
+   * Get recent requests
+   */
+  getRecentRequests(limit: number = 50): ApiRequestLog[] {
+    try {
+      const requests = this.getAllRequests();
+      return requests.slice(-limit).reverse();
+    } catch (error) {
+      console.error('Failed to get recent requests:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get requests by airport code
+   */
+  getRequestsByAirport(airportCode: string): ApiRequestLog[] {
+    try {
+      const requests = this.getAllRequests();
+      return requests.filter(req => 
+        req.endpoint.toUpperCase().includes(airportCode.toUpperCase())
+      );
+    } catch (error) {
+      console.error('Failed to get requests by airport:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get requests by type
+   */
+  getRequestsByType(requestType: string): ApiRequestLog[] {
+    try {
+      const requests = this.getAllRequests();
+      return requests.filter(req => req.source === requestType);
+    } catch (error) {
+      console.error('Failed to get requests by type:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Reset the request counter (clear log file)
+   */
+  resetCounter(): void {
+    try {
+      if (fs.existsSync(this.logFile)) {
+        fs.writeFileSync(this.logFile, '');
+        console.log('API request counter reset');
+      }
+    } catch (error) {
+      console.error('Failed to reset counter:', error);
+    }
+  }
+
+  /**
+   * Get all requests from log file
+   */
+  private getAllRequests(): ApiRequestLog[] {
+    try {
+      if (!fs.existsSync(this.logFile)) {
+        return [];
+      }
+
+      const logContent = fs.readFileSync(this.logFile, 'utf-8');
+      const lines = logContent.trim().split('\n').filter(line => line.length > 0);
+      
+      return lines.map(line => {
+        try {
+          return JSON.parse(line);
+        } catch {
+          return null;
+        }
+      }).filter(req => req !== null) as ApiRequestLog[];
+    } catch (error) {
+      console.error('Failed to get all requests:', error);
+      return [];
+    }
+  }
 }
 
 // Singleton instance

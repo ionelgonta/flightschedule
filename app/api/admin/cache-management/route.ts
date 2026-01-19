@@ -123,6 +123,32 @@ export async function POST(request: NextRequest) {
           message: `Cleaned ${cleanedCount} expired cache entries`
         })
 
+      case 'aviationStackRomania':
+        // Manual trigger for AviationStack scan of all Romanian airports
+        console.log('[API] Manual trigger for AviationStack Romanian airports scan')
+        const scanResult = await cacheManager.triggerAviationStackRomanianScan()
+        
+        return NextResponse.json({
+          success: scanResult.success,
+          message: scanResult.message
+        })
+
+      case 'aviationStackSingle':
+        // Manual trigger for AviationStack scan of a single airport
+        if (!identifier) {
+          return NextResponse.json(
+            { success: false, error: 'Airport identifier is required for aviationStackSingle action' },
+            { status: 400 }
+          )
+        }
+        console.log(`[API] Manual trigger for AviationStack single airport: ${identifier}`)
+        const singleResult = await cacheManager.triggerAviationStackSingleAirport(identifier)
+        
+        return NextResponse.json({
+          success: singleResult.success,
+          message: singleResult.message
+        })
+
       default:
         return NextResponse.json(
           { success: false, error: 'Invalid action' },

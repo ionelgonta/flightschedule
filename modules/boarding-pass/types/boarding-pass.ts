@@ -69,6 +69,10 @@ export interface FlightClass {
     airportIataCode: string;
   };
   localScheduledDepartureDateTime: string;
+  boardingAndSeatingPolicy?: {
+    boardingPolicy?: 'ZONE_BASED' | 'GROUP_BASED' | 'BOARDING_POLICY_UNSPECIFIED';
+    seatClassPolicy?: 'CABIN_BASED' | 'CLASS_BASED' | 'TIER_BASED' | 'SEAT_CLASS_POLICY_UNSPECIFIED';
+  };
 }
 
 export interface FlightObject {
@@ -83,6 +87,14 @@ export interface FlightObject {
   barcode?: {
     type: 'QR_CODE' | 'PDF417';
     value: string;
+  };
+  boardingAndSeatingInfo?: {
+    seatNumber?: string;
+    boardingGroup?: string;
+    boardingPosition?: string;
+    sequenceNumber?: string;
+    boardingDoor?: string;
+    seatClass?: string;
   };
 }
 

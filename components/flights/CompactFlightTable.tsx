@@ -267,16 +267,12 @@ export function CompactFlightTable({
 
                   {/* Ora estimată */}
                   <div className="flex items-center justify-center px-0">
-                    {flight.actual_time && flight.status === 'landed' ? (
+                    {flight.actual_time && (flight.status === 'landed' || flight.status === 'arrived') ? (
                       <div className="text-sm font-semibold text-green-600">
                         {formatTime(flight.actual_time)}
                       </div>
-                    ) : flight.estimated_time && flight.status === 'estimated' ? (
+                    ) : flight.estimated_time && formatTime(flight.estimated_time) !== formatTime(flight.scheduled_time) ? (
                       <div className="text-sm font-semibold text-orange-600">
-                        {formatTime(flight.estimated_time)}
-                      </div>
-                    ) : flight.estimated_time && flight.estimated_time !== flight.scheduled_time ? (
-                      <div className="text-sm font-semibold text-blue-600">
                         {formatTime(flight.estimated_time)}
                       </div>
                     ) : (

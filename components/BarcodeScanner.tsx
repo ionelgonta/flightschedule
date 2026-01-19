@@ -2,18 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Camera, Upload, X, CheckCircle, AlertCircle } from 'lucide-react';
-
-interface BCBPData {
-  passengerName: string;
-  flightNumber: string;
-  origin: string;
-  destination: string;
-  carrier: string;
-  seatNumber?: string;
-  boardingGroup?: string;
-  confirmationCode?: string;
-  rawData: string;
-}
+import { BCBPData } from '../lib/mlkit-barcode';
 
 interface BarcodeScannerProps {
   onBarcodeDetected: (bcbpData: BCBPData) => void;
@@ -70,7 +59,7 @@ export default function BarcodeScanner({ onBarcodeDetected, onError }: BarcodeSc
 
       // Extract carrier code (2 letters)
       const carrierMatch = rawData.match(/\s([A-Z]{2})\s/);
-      const carrier = carrierMatch?.[1] || '';
+      const carrierCode = carrierMatch?.[1] || '';
 
       // Extract flight number (from carrier code context)
       const flightMatch = rawData.match(/([A-Z]{2})(\d{1,4})/);
@@ -90,18 +79,21 @@ export default function BarcodeScanner({ onBarcodeDetected, onError }: BarcodeSc
       const boardingGroup = boardingMatch?.[1] || '';
 
       // Generate confirmation code from flight data
-      const confirmationCode = `${carrier}${flightNumber.slice(-2)}${Math.random().toString(36).substring(2, 4).toUpperCase()}`;
+      const confirmationCode = `${carrierCode}${flightNumber.slice(-2)}${Math.random().toString(36).substring(2, 4).toUpperCase()}`;
 
       return {
         passengerName,
+        lastName,
+        firstName,
         flightNumber,
+        carrierCode,
         origin,
         destination,
-        carrier,
         seatNumber,
         boardingGroup,
         confirmationCode,
-        rawData
+        rawBCBP: rawData,
+        parsedSuccessfully: true
       };
     } catch (error) {
       console.error('BCBP parsing error:', error);
@@ -286,7 +278,7 @@ export default function BarcodeScanner({ onBarcodeDetected, onError }: BarcodeSc
             </div>
             <div className="text-sm text-gray-600 space-y-1">
               <p><strong>Pasager:</strong> {detectedData.passengerName}</p>
-              <p><strong>Zbor:</strong> {detectedData.carrier}{detectedData.flightNumber}</p>
+              <p><strong>Zbor:</strong> {detectedData.carrierCode}{detectedData.flightNumber}</p>
               <p><strong>Rută:</strong> {detectedData.origin} → {detectedData.destination}</p>
               {detectedData.seatNumber && <p><strong>Loc:</strong> {detectedData.seatNumber}</p>}
             </div>

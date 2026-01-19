@@ -345,10 +345,14 @@ class FixedCacheManager {
     // FIXED: Staggered start times to prevent simultaneous API calls
     
     // Flight Data Cron - starts immediately, then every X minutes
+    console.log(`[FLIGHT CRON] Scheduling flight data cron to start in 1 second, then every ${this.config.flightData.cronInterval} minutes`)
     setTimeout(async () => {
+      console.log(`[FLIGHT CRON] Initial flight data cron starting NOW`)
       await this.runFlightDataCron()
       const flightDataInterval = this.config!.flightData.cronInterval * 60 * 1000
+      console.log(`[FLIGHT CRON] Setting up recurring cron every ${flightDataInterval / 1000 / 60} minutes`)
       const flightDataJob = setInterval(async () => {
+        console.log(`[FLIGHT CRON] Recurring flight data cron triggered`)
         await this.runFlightDataCron()
       }, flightDataInterval)
       this.cronJobs.set('flightData', flightDataJob)
@@ -389,26 +393,42 @@ class FixedCacheManager {
    * FIXED: Flight data cron cu rate limiting și error handling îmbunătățit
    */
   private async runFlightDataCron(): Promise<void> {
-    console.log('[Cache Manager - OPTIMIZED] Running flight data cron job...')
+    const startTime = new Date()
+    console.log(`[FLIGHT CRON] ========== STARTING FLIGHT DATA CRON ==========`)
+    console.log(`[FLIGHT CRON] Start time: ${startTime.toISOString()}`)
+    console.log(`[FLIGHT CRON] Interval configured: ${this.config?.flightData.cronInterval} minutes`)
     
     const airports = await this.getAllSupportedAirports()
+    console.log(`[FLIGHT CRON] Processing ${airports.length} airports: ${airports.join(', ')}`)
+    
+    let successCount = 0
+    let errorCount = 0
     
     // FIXED: Process airports sequentially to avoid API rate limiting
     for (const airport of airports) {
       try {
+        console.log(`[FLIGHT CRON] Processing ${airport}...`)
         await this.fetchAndCacheFlightDataSafe(airport, 'arrivals', 'cron')
         await this.delay(1000) // 1 second delay between airport requests
         
         await this.fetchAndCacheFlightDataSafe(airport, 'departures', 'cron')
         await this.delay(1000) // 1 second delay between requests
         
+        successCount++
       } catch (error) {
-        console.error(`[Cache Manager - OPTIMIZED] Error processing ${airport}:`, error)
+        errorCount++
+        console.error(`[FLIGHT CRON] Error processing ${airport}:`, error)
         // Continue with next airport instead of failing completely
       }
     }
     
-    console.log('[Cache Manager - OPTIMIZED] Flight data cron job completed')
+    const endTime = new Date()
+    const durationMs = endTime.getTime() - startTime.getTime()
+    console.log(`[FLIGHT CRON] ========== FLIGHT DATA CRON COMPLETED ==========`)
+    console.log(`[FLIGHT CRON] End time: ${endTime.toISOString()}`)
+    console.log(`[FLIGHT CRON] Duration: ${Math.round(durationMs / 1000)} seconds`)
+    console.log(`[FLIGHT CRON] Success: ${successCount}/${airports.length}, Errors: ${errorCount}`)
+    console.log(`[FLIGHT CRON] Next run in: ${this.config?.flightData.cronInterval} minutes`)
   }
 
   /**

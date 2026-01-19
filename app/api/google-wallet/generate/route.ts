@@ -36,6 +36,7 @@ interface BoardingPassRequest {
   compartment?: string;
   confirmationCode?: string;
   flightDate?: string;
+  departureTime?: string;
   raw?: string;
 }
 
@@ -69,6 +70,17 @@ export async function POST(request: NextRequest) {
       departureDate = futureDate.toISOString().split('T')[0];
     }
 
+    // Use provided departure time or default to 10:00
+    const departureTimeStr = body.departureTime || '10:00';
+    
+    // Calculate arrival time (add ~2.5 hours as estimate)
+    const [depHours, depMinutes] = departureTimeStr.split(':').map(Number);
+    const arrivalHours = (depHours + 2) % 24;
+    const arrivalMinutes = (depMinutes + 30) % 60;
+    const arrivalTimeStr = `${arrivalHours.toString().padStart(2, '0')}:${arrivalMinutes.toString().padStart(2, '0')}`;
+
+    console.log(`🕐 Using departure time: ${departureTimeStr}, arrival time: ${arrivalTimeStr}`);
+
     // Create JWT payload using CONFIRMED WORKING FORMULA
     const payload = {
       iss: serviceAccount.client_email,
@@ -91,8 +103,8 @@ export async function POST(request: NextRequest) {
           },
           origin: { airportIataCode: body.origin, terminal: "1" },
           destination: { airportIataCode: body.destination, terminal: "1" },
-          localScheduledDepartureDateTime: `${departureDate}T10:00:00`,
-          localScheduledArrivalDateTime: `${departureDate}T12:30:00`
+          localScheduledDepartureDateTime: `${departureDate}T${departureTimeStr}:00`,
+          localScheduledArrivalDateTime: `${departureDate}T${arrivalTimeStr}:00`
         }],
         flightObjects: [{
           id: `${ISSUER_ID}.OBJ_${timestamp}`,
@@ -118,6 +130,7 @@ export async function POST(request: NextRequest) {
       flight: `${body.carrierCode}${body.flightNumber}`,
       route: `${body.origin}-${body.destination}`,
       date: departureDate,
+      time: departureTimeStr,
       linkLength: walletLink.length
     });
 
@@ -129,6 +142,7 @@ export async function POST(request: NextRequest) {
         flight: `${body.carrierCode}${body.flightNumber}`,
         route: `${body.origin} → ${body.destination}`,
         date: departureDate,
+        time: departureTimeStr,
         confirmationCode
       }
     });

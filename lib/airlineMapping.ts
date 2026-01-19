@@ -89,6 +89,9 @@ export const AIRLINE_MAPPING: { [key: string]: string } = {
   
   // Additional European Airlines
   '5F': 'FlyOne',
+  'FIA': 'FlyOne',  // ICAO code for FlyOne Moldova
+  'OE': 'FlyOne Romania',  // IATA code for FlyOne Romania
+  'FOE': 'FlyOne Romania',  // ICAO code for FlyOne Romania
   'HV': 'Transavia',
   'TRA': 'Transavia',
   'EN': 'Air Dolomiti',
@@ -230,6 +233,9 @@ export const AIRLINE_LOGO_MAPPING: { [key: string]: string } = {
   
   // Additional European Airlines
   '5F': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/5F.svg',
+  'FIA': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/5F.svg',  // FlyOne Moldova ICAO
+  'OE': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/5F.svg',  // FlyOne Romania IATA (uses same logo)
+  'FOE': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/5F.svg',  // FlyOne Romania ICAO
   'HV': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/HV.svg',
   'TRA': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/HV.svg',
   'EN': 'https://raw.githubusercontent.com/airline-logos/airline-logos/main/logos/EN.svg',
@@ -518,4 +524,89 @@ export function formatAirlineDisplay(airlineCode: string): string {
     return airlineCode // Return code if no mapping found
   }
   return `${airlineName} (${airlineCode.toUpperCase()})`
+}
+
+/**
+ * ICAO to IATA code mapping for flight number normalization
+ * Some APIs return ICAO codes (3 letters) instead of IATA codes (2 letters)
+ */
+const ICAO_TO_IATA_MAPPING: { [key: string]: string } = {
+  'FOE': 'OE',   // FlyOne Romania
+  'FIA': '5F',   // FlyOne Moldova
+  'ROT': 'RO',   // TAROM
+  'WZZ': 'W4',   // Wizz Air
+  'RYR': 'FR',   // Ryanair
+  'DLH': 'LH',   // Lufthansa
+  'AFR': 'AF',   // Air France
+  'BAW': 'BA',   // British Airways
+  'THY': 'TK',   // Turkish Airlines
+  'AUA': 'OS',   // Austrian Airlines
+  'SWR': 'LX',   // Swiss
+  'KLM': 'KL',   // KLM
+  'IBE': 'IB',   // Iberia
+  'AEE': 'A3',   // Aegean
+  'BTI': 'BT',   // Air Baltic
+  'LOT': 'LO',   // LOT Polish
+  'MLD': '9U',   // Air Moldova
+  'PGT': 'PC',   // Pegasus
+  'EZY': 'U2',   // easyJet
+  'VLG': 'VY',   // Vueling
+  'EWG': 'EW',   // Eurowings
+  'QTR': 'QR',   // Qatar Airways
+  'UAE': 'EK',   // Emirates
+  'ETD': 'EY',   // Etihad
+  'FDB': 'FZ',   // flydubai
+}
+
+/**
+ * Normalize flight number to use IATA codes instead of ICAO codes
+ * Converts "FOE 7805" to "OE 7805", "FOOE 7805" to "OE 7805", etc.
+ */
+export function normalizeFlightNumber(flightNumber: string): string {
+  if (!flightNumber) return flightNumber
+  
+  const trimmed = flightNumber.trim().toUpperCase()
+  
+  // Pattern 1: "FOE 7805" or "FOE7805" - ICAO code with space or without
+  const icaoMatch = trimmed.match(/^([A-Z]{3})\s*(\d+)$/)
+  if (icaoMatch) {
+    const icaoCode = icaoMatch[1]
+    const number = icaoMatch[2]
+    const iataCode = ICAO_TO_IATA_MAPPING[icaoCode]
+    if (iataCode) {
+      return `${iataCode} ${number}`
+    }
+  }
+  
+  // Pattern 2: "FOOE 7805" - Combined ICAO+IATA (corrupted data)
+  // This handles cases like "FOOE" which is FOE + OE combined
+  const corruptedMatch = trimmed.match(/^([A-Z]{3})([A-Z]{2})\s*(\d+)$/)
+  if (corruptedMatch) {
+    const possibleIcao = corruptedMatch[1]
+    const possibleIata = corruptedMatch[2]
+    const number = corruptedMatch[3]
+    
+    // Check if the first 3 chars are a known ICAO code
+    const iataFromIcao = ICAO_TO_IATA_MAPPING[possibleIcao]
+    if (iataFromIcao) {
+      return `${iataFromIcao} ${number}`
+    }
+    
+    // Check if the 2-char part is a valid IATA code
+    if (AIRLINE_MAPPING[possibleIata]) {
+      return `${possibleIata} ${number}`
+    }
+  }
+  
+  // Pattern 3: Already correct IATA format "OE 7805" or "OE7805"
+  const iataMatch = trimmed.match(/^([A-Z0-9]{2})\s*(\d+)$/)
+  if (iataMatch) {
+    const code = iataMatch[1]
+    const number = iataMatch[2]
+    // Add space if missing
+    return `${code} ${number}`
+  }
+  
+  // Return original if no pattern matches
+  return flightNumber
 }
