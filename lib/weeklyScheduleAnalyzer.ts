@@ -34,6 +34,26 @@ export interface WeeklyScheduleData {
     saturday: boolean;
     sunday: boolean;
   };
+  // Scheduled times for each day (HH:MM format)
+  scheduledTimes?: {
+    monday?: string[];
+    tuesday?: string[];
+    wednesday?: string[];
+    thursday?: string[];
+    friday?: string[];
+    saturday?: string[];
+    sunday?: string[];
+  };
+  // Last seen date for each day (ISO date string) - for expiration tracking
+  lastSeenDates?: {
+    monday?: string;
+    tuesday?: string;
+    wednesday?: string;
+    thursday?: string;
+    friday?: string;
+    saturday?: string;
+    sunday?: string;
+  };
   frequency: number;
   lastUpdated: string;
   dataSource: 'cache' | 'historical';
@@ -658,37 +678,110 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
       return true
     }
     
-    // Extract flight prefix (e.g., "JL" from "JL 6535")
-    const flightPrefix = flightNumber.replace(/\s+/g, ' ').split(' ')[0]?.replace(/\d+/g, '').toUpperCase()
+    // Extract flight prefix and number (e.g., "TK" and "9019" from "TK 9019")
+    const cleanFlightNumber = flightNumber.replace(/\s+/g, ' ').trim()
+    const match = cleanFlightNumber.match(/^([A-Z0-9]{2})\s*(\d+)$/i)
+    
+    if (!match) return false
+    
+    const flightPrefix = match[1].toUpperCase()
+    const flightNum = parseInt(match[2], 10)
     const airlineUpper = airline.toUpperCase()
     
-    // Common codeshare mismatches - flight code doesn't match airline
+    // PATTERN 1: Flight numbers >= threshold are typically codeshares for major airlines
+    // Different airlines have different codeshare number ranges
+    const highNumberCodeshareAirlines = ['TK', 'AF', 'LH', 'UA', 'AC', 'SQ', 'ET', 'JU', 'LY', 'BT', 'EK', 'OS', 'SK', 'AY']
+    if (highNumberCodeshareAirlines.includes(flightPrefix) && flightNum >= 5000) {
+      console.log(`[Codeshare Detection] High number codeshare: ${flightNumber} (${flightPrefix} ${flightNum} >= 5000)`)
+      return true
+    }
+    
+    // KLM uses 2xxx-9xxx for codeshares (their own flights are typically < 2000)
+    if (flightPrefix === 'KL' && flightNum >= 2000) {
+      console.log(`[Codeshare Detection] KLM codeshare: ${flightNumber} (KL ${flightNum} >= 2000)`)
+      return true
+    }
+    
+    // Air France uses 6xxx-9xxx for codeshares
+    if (flightPrefix === 'AF' && flightNum >= 6000) {
+      console.log(`[Codeshare Detection] Air France codeshare: ${flightNumber} (AF ${flightNum} >= 6000)`)
+      return true
+    }
+    
+    // PATTERN 2: Airline code in flight number doesn't match operating airline
+    // Map of airline codes to their names
+    const airlineCodeMap: { [key: string]: string[] } = {
+      'RO': ['TAROM'],
+      'W4': ['WIZZ', 'W4', 'WIZZ AIR MALTA'],
+      'W9': ['WIZZ'],
+      'FR': ['RYANAIR'],
+      'LH': ['LUFTHANSA'],
+      'AF': ['AIR FRANCE'],
+      'KL': ['KLM'],
+      'TK': ['TURKISH'],
+      'EK': ['EMIRATES'],
+      'FZ': ['FLYDUBAI'],
+      'A3': ['AEGEAN'],
+      'H4': ['HISKY'],
+      'A2': ['ANIMAWINGS', 'AWG'],
+      'JU': ['AIR SERBIA'],
+      'LY': ['EL AL'],
+      'UA': ['UNITED'],
+      'AC': ['AIR CANADA'],
+      'SQ': ['SINGAPORE'],
+      'ET': ['ETHIOPIAN'],
+      'BT': ['AIRBALTIC'],
+      'BZ': ['BLUE BIRD', 'BZ'],
+      '5F': ['FLYONE'],
+      'U5': ['SKYUP', 'SKY UP', 'AURA'],
+    }
+    
+    // Check if the flight prefix matches the airline name
+    const expectedAirlineNames = airlineCodeMap[flightPrefix]
+    if (expectedAirlineNames) {
+      const airlineMatches = expectedAirlineNames.some(name => airlineUpper.includes(name))
+      if (!airlineMatches) {
+        console.log(`[Codeshare Detection] Airline mismatch: ${flightNumber} operated by ${airline} (expected ${expectedAirlineNames.join(' or ')})`)
+        return true
+      }
+    }
+    
+    // PATTERN 3: Known codeshare partnerships - specific mismatches
     const codeShareMismatches = [
-      { flight: 'JL', airline: 'BRITISH' }, // Japan Airlines code on British Airways
-      { flight: 'AA', airline: 'BRITISH' }, // American Airlines code on British Airways
-      { flight: 'BA', airline: 'JAPAN' }, // British Airways code on Japan Airlines
-      { flight: 'LH', airline: 'UNITED' }, // Lufthansa code on United Airlines
-      { flight: 'UA', airline: 'LUFTHANSA' }, // United Airlines code on Lufthansa
-      { flight: 'AF', airline: 'DELTA' }, // Air France code on Delta
-      { flight: 'DL', airline: 'AIR FRANCE' }, // Delta code on Air France
-      { flight: 'KL', airline: 'BRITISH' }, // KLM code on British Airways
-      { flight: 'KL', airline: 'LUFTHANSA' }, // KLM code on Lufthansa
-      { flight: 'OS', airline: 'BRITISH' }, // Austrian Airlines code on British Airways
-      { flight: 'LH', airline: 'BRITISH' }, // Lufthansa code on British Airways
-      { flight: 'VS', airline: 'DELTA' }, // Virgin Atlantic code on Delta
-      { flight: 'EK', airline: 'BRITISH' }, // Emirates code on British Airways
-      { flight: 'QR', airline: 'BRITISH' }, // Qatar Airways code on British Airways
+      // Star Alliance codeshares
+      { flight: 'LH', airline: 'UNITED' },
+      { flight: 'UA', airline: 'LUFTHANSA' },
+      { flight: 'AC', airline: 'LUFTHANSA' },
+      { flight: 'SQ', airline: 'LUFTHANSA' },
+      { flight: 'ET', airline: 'LUFTHANSA' },
+      { flight: 'TK', airline: 'TAROM' },
+      { flight: 'TK', airline: 'LUFTHANSA' },
+      
+      // SkyTeam codeshares
+      { flight: 'AF', airline: 'TAROM' },
+      { flight: 'AF', airline: 'KLM' },
+      { flight: 'KL', airline: 'TAROM' },
+      { flight: 'KL', airline: 'AIR FRANCE' },
+      { flight: 'RO', airline: 'AIR FRANCE' },
+      { flight: 'RO', airline: 'KLM' },
+      
+      // Other codeshares
+      { flight: 'JU', airline: 'TAROM' },
+      { flight: 'LY', airline: 'TAROM' },
+      { flight: 'EK', airline: 'FLYDUBAI' },
+      { flight: 'BT', airline: 'TAROM' },
     ]
     
-    const isCodeshare = codeShareMismatches.some(mismatch => 
+    const isKnownCodeshare = codeShareMismatches.some(mismatch => 
       flightPrefix === mismatch.flight && airlineUpper.includes(mismatch.airline)
     )
     
-    if (isCodeshare) {
-      console.log(`[Codeshare Detection] Found codeshare: ${flightNumber} on ${airline} (${flightPrefix} mismatch)`)
+    if (isKnownCodeshare) {
+      console.log(`[Codeshare Detection] Known codeshare partnership: ${flightNumber} on ${airline}`)
+      return true
     }
     
-    return isCodeshare
+    return false
   }
 
   // Funcție pentru eliminarea duplicatelor de codeshare din datele brute
@@ -895,6 +988,55 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
           flights.map(f => ({ scheduled_time: f.scheduledTime } as RawFlightData))
         );
 
+        // Extract scheduled times for each day
+        // CRITICAL: Keep only ONE time per day per flight number
+        // A flight operates once per day - prefer the MOST RECENT data
+        const newScheduledTimes: {
+          monday?: string[];
+          tuesday?: string[];
+          wednesday?: string[];
+          thursday?: string[];
+          friday?: string[];
+          saturday?: string[];
+          sunday?: string[];
+        } = {};
+        
+        // Collect times with their timestamps to find the most recent one
+        const timesPerDay: { [day: string]: { time: string; timestamp: Date }[] } = {};
+        
+        // Get airport code for timezone conversion (use origin airport)
+        const airportCode = route.route.origin;
+        
+        flights.forEach(flight => {
+          const dayOfWeek = this.patternGenerator.extractDayOfWeek(flight.scheduledTime);
+          const timeStr = this.extractTimeFromSchedule(flight.scheduledTime, airportCode);
+          const flightDate = new Date(flight.scheduledTime);
+          
+          if (timeStr) {
+            if (!timesPerDay[dayOfWeek]) {
+              timesPerDay[dayOfWeek] = [];
+            }
+            timesPerDay[dayOfWeek].push({ time: timeStr, timestamp: flightDate });
+          }
+        });
+        
+        // For each day, keep only the time from the MOST RECENT flight data
+        // This ensures we use the latest schedule, not old/outdated times
+        Object.keys(timesPerDay).forEach(day => {
+          const timesWithDates = timesPerDay[day];
+          if (timesWithDates.length > 0) {
+            // Sort by timestamp descending (newest first)
+            timesWithDates.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+            
+            // Use the time from the most recent data
+            const mostRecentTime = timesWithDates[0].time;
+            
+            // Store only ONE time per day (the most recent)
+            const dayKey = day as keyof typeof newScheduledTimes;
+            newScheduledTimes[dayKey] = [mostRecentTime];
+          }
+        });
+
         const airportDisplay = this.getAirportDisplayName(route.route.origin);
         const destinationDisplay = this.getAirportDisplayName(route.route.destination);
         const entryKey = `${airportDisplay}-${destinationDisplay}-${airline}-${flightNumber}`;
@@ -913,6 +1055,9 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
           sunday: boolean;
         };
         
+        // Merge scheduled times
+        let mergedScheduledTimes: typeof newScheduledTimes = { ...newScheduledTimes };
+        
         if (existingEntry) {
           // Merge patterns: keep existing TRUE values and add new TRUE values
           mergedPattern = {
@@ -924,6 +1069,26 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
             saturday: existingEntry.weeklyPattern.saturday || newPattern.saturday || false,
             sunday: existingEntry.weeklyPattern.sunday || newPattern.sunday || false
           };
+          
+          // Merge scheduled times from existing entry
+          // CRITICAL FIX: Keep only ONE time per day - prefer newer data
+          if (existingEntry.scheduledTimes) {
+            const days: (keyof typeof mergedScheduledTimes)[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            days.forEach(day => {
+              const existingTimes = existingEntry.scheduledTimes?.[day] || [];
+              const newTimes = mergedScheduledTimes[day] || [];
+              
+              // Prefer new times over existing (newer data is more accurate)
+              if (newTimes.length > 0) {
+                // Keep only the first new time (most common/accurate)
+                mergedScheduledTimes[day] = [newTimes[0]];
+              } else if (existingTimes.length > 0) {
+                // Fall back to existing time if no new data
+                mergedScheduledTimes[day] = [existingTimes[0]];
+              }
+            });
+          }
+          
           console.log(`    Merged pattern for ${airline} ${flightNumber}: existing + new days`);
         } else {
           mergedPattern = {
@@ -937,12 +1102,55 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
           };
         }
 
+        // Corectează numele companiilor aeriene greșite din API
+        const correctedAirline = this.correctAirlineName(airline, flightNumber);
+
+        // Calculate lastSeenDates for each day based on flight data
+        const newLastSeenDates: {
+          monday?: string;
+          tuesday?: string;
+          wednesday?: string;
+          thursday?: string;
+          friday?: string;
+          saturday?: string;
+          sunday?: string;
+        } = {};
+        
+        // Set lastSeenDate for each day that has flights in the new data
+        const today = new Date().toISOString().split('T')[0];
+        flights.forEach(flight => {
+          const dayOfWeek = this.patternGenerator.extractDayOfWeek(flight.scheduledTime) as keyof typeof newLastSeenDates;
+          const flightDate = new Date(flight.scheduledTime).toISOString().split('T')[0];
+          // Use the most recent date for each day
+          if (!newLastSeenDates[dayOfWeek] || flightDate > newLastSeenDates[dayOfWeek]!) {
+            newLastSeenDates[dayOfWeek] = flightDate;
+          }
+        });
+        
+        // Merge lastSeenDates with existing entry
+        let mergedLastSeenDates: typeof newLastSeenDates = { ...newLastSeenDates };
+        if (existingEntry?.lastSeenDates) {
+          const days: (keyof typeof mergedLastSeenDates)[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+          days.forEach(day => {
+            const existingDate = existingEntry.lastSeenDates?.[day];
+            const newDate = newLastSeenDates[day];
+            // Keep the more recent date
+            if (existingDate && newDate) {
+              mergedLastSeenDates[day] = existingDate > newDate ? existingDate : newDate;
+            } else if (existingDate && !newDate) {
+              mergedLastSeenDates[day] = existingDate;
+            }
+          });
+        }
+
         const scheduleEntry: WeeklyScheduleData = {
           airport: airportDisplay,
           destination: destinationDisplay,
-          airline,
+          airline: correctedAirline,
           flightNumber,
           weeklyPattern: mergedPattern,
+          scheduledTimes: Object.keys(mergedScheduledTimes).length > 0 ? mergedScheduledTimes : undefined,
+          lastSeenDates: Object.keys(mergedLastSeenDates).length > 0 ? mergedLastSeenDates : undefined,
           frequency: flights.length + (existingEntry?.frequency || 0),
           lastUpdated: new Date().toISOString(),
           dataSource: 'cache' as const
@@ -971,16 +1179,250 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
       }
     });
 
-    console.log(`Generated ${scheduleData.length} schedule entries (after codeshare exclusion and merging), saving to storage...`);
-    await this.tableManager.updateTable(scheduleData);
-    console.log(`=== Weekly schedule table updated successfully with ${scheduleData.length} entries ===`);
+    // FINAL DEDUPLICATION: Remove any remaining duplicates by unique key
+    const finalDeduplicatedData = this.deduplicateScheduleEntries(scheduleData);
+    
+    console.log(`Generated ${finalDeduplicatedData.length} schedule entries (after final deduplication from ${scheduleData.length}), saving to storage...`);
+    await this.tableManager.updateTable(finalDeduplicatedData);
+    console.log(`=== Weekly schedule table updated successfully with ${finalDeduplicatedData.length} entries ===`);
+  }
+
+  // Helper function to correct airline names from API errors
+  private correctAirlineName(airline: string, flightNumber: string): string {
+    // Extract flight prefix (e.g., "U5" from "U5 708")
+    const match = flightNumber.match(/^([A-Z0-9]{2})\s*\d+$/i)
+    if (!match) return airline
+    
+    const flightPrefix = match[1].toUpperCase()
+    
+    // Map of flight prefixes to correct airline names
+    const airlineCorrections: { [key: string]: string } = {
+      'U5': 'SkyUp Airlines',
+      'A2': 'Animawings',
+      // Add more corrections as needed
+    }
+    
+    if (airlineCorrections[flightPrefix]) {
+      return airlineCorrections[flightPrefix]
+    }
+    
+    return airline
+  }
+
+  // FINAL DEDUPLICATION: Merge entries with same airport-destination-flightNumber
+  // CRITICAL FIX: Each flight number should only have ONE scheduled time per day
+  // Prefer the MOST RECENT data (based on lastUpdated timestamp)
+  private deduplicateScheduleEntries(entries: WeeklyScheduleData[]): WeeklyScheduleData[] {
+    const entryMap = new Map<string, WeeklyScheduleData>();
+    
+    entries.forEach(entry => {
+      // Create unique key based on airport, destination, and flight number (ignore airline variations)
+      const key = `${entry.airport}-${entry.destination}-${entry.flightNumber}`;
+      
+      if (!entryMap.has(key)) {
+        entryMap.set(key, entry);
+      } else {
+        // Merge with existing entry
+        const existing = entryMap.get(key)!;
+        
+        // Determine which entry is newer
+        const existingDate = new Date(existing.lastUpdated);
+        const newDate = new Date(entry.lastUpdated);
+        const newerEntry = newDate > existingDate ? entry : existing;
+        const olderEntry = newDate > existingDate ? existing : entry;
+        
+        // Merge weekly patterns (OR operation)
+        const mergedPattern = {
+          monday: existing.weeklyPattern.monday || entry.weeklyPattern.monday,
+          tuesday: existing.weeklyPattern.tuesday || entry.weeklyPattern.tuesday,
+          wednesday: existing.weeklyPattern.wednesday || entry.weeklyPattern.wednesday,
+          thursday: existing.weeklyPattern.thursday || entry.weeklyPattern.thursday,
+          friday: existing.weeklyPattern.friday || entry.weeklyPattern.friday,
+          saturday: existing.weeklyPattern.saturday || entry.weeklyPattern.saturday,
+          sunday: existing.weeklyPattern.sunday || entry.weeklyPattern.sunday,
+        };
+        
+        // CRITICAL FIX: For scheduled times, prefer the NEWER data
+        // If newer entry has a time for a day, use it; otherwise fall back to older
+        const mergedTimes: typeof entry.scheduledTimes = {};
+        const days: (keyof typeof mergedTimes)[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        
+        days.forEach(day => {
+          const newerTimes = newerEntry.scheduledTimes?.[day] || [];
+          const olderTimes = olderEntry.scheduledTimes?.[day] || [];
+          
+          // Prefer newer data, fall back to older if newer doesn't have this day
+          if (newerTimes.length > 0) {
+            mergedTimes[day] = [newerTimes[0]]; // Keep only ONE time
+          } else if (olderTimes.length > 0) {
+            mergedTimes[day] = [olderTimes[0]]; // Keep only ONE time
+          }
+        });
+        
+        const mergedEntry: WeeklyScheduleData = {
+          airport: existing.airport,
+          destination: existing.destination,
+          // Keep the airline from the newer entry
+          airline: newerEntry.airline,
+          flightNumber: existing.flightNumber,
+          weeklyPattern: mergedPattern,
+          scheduledTimes: Object.keys(mergedTimes).length > 0 ? mergedTimes : undefined,
+          lastSeenDates: this.mergeLastSeenDates(existing.lastSeenDates, entry.lastSeenDates),
+          frequency: Math.max(existing.frequency, entry.frequency),
+          lastUpdated: newerEntry.lastUpdated, // Use the newer timestamp
+          dataSource: existing.dataSource,
+        };
+        
+        entryMap.set(key, mergedEntry);
+        console.log(`    Merged duplicate: ${entry.flightNumber} (${entry.airport} → ${entry.destination}) - using newer data`);
+      }
+    });
+    
+    return Array.from(entryMap.values());
+  }
+
+  // Helper function to merge lastSeenDates from two entries
+  private mergeLastSeenDates(
+    existing?: WeeklyScheduleData['lastSeenDates'], 
+    newDates?: WeeklyScheduleData['lastSeenDates']
+  ): WeeklyScheduleData['lastSeenDates'] {
+    if (!existing && !newDates) return undefined;
+    if (!existing) return newDates;
+    if (!newDates) return existing;
+    
+    const merged: WeeklyScheduleData['lastSeenDates'] = {};
+    const days: (keyof NonNullable<WeeklyScheduleData['lastSeenDates']>)[] = 
+      ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    
+    days.forEach(day => {
+      const existingDate = existing[day];
+      const newDate = newDates[day];
+      
+      if (existingDate && newDate) {
+        // Keep the more recent date
+        merged[day] = existingDate > newDate ? existingDate : newDate;
+      } else if (existingDate) {
+        merged[day] = existingDate;
+      } else if (newDate) {
+        merged[day] = newDate;
+      }
+    });
+    
+    return Object.keys(merged).length > 0 ? merged : undefined;
+  }
+
+  // Helper function to extract time (HH:MM) from scheduled time string
+  // IMPORTANT: Converts UTC time to local airport time (Europe/Bucharest for Romanian airports)
+  private extractTimeFromSchedule(scheduledTime: string, airportCode?: string): string | null {
+    if (!scheduledTime) return null
+    
+    try {
+      // Handle various date formats from API
+      // Format 1: "2026-01-09T12:30:00.000Z" (ISO UTC)
+      // Format 2: "2026-01-09T12:30:00+02:00" (ISO with offset)
+      // Format 3: "2026-01-09 12:30+02:00" (with space and timezone)
+      // Format 4: "2026-01-09 12:30" (with space, no timezone)
+      
+      // Check if time already has a non-UTC timezone offset (like +02:00, +03:00)
+      // In this case, extract the time directly as it's already local
+      const offsetMatch = scheduledTime.match(/T(\d{2}):(\d{2})(?::\d{2})?([+-]\d{2}:\d{2})/)
+      if (offsetMatch && offsetMatch[3] !== '+00:00') {
+        // Time has a non-UTC offset, use it directly
+        return `${offsetMatch[1]}:${offsetMatch[2]}`
+      }
+      
+      // If time ends with Z or has no offset, it's UTC - convert to local time
+      const isUTC = scheduledTime.endsWith('Z') || scheduledTime.endsWith('.000Z') || 
+                    !scheduledTime.match(/[+-]\d{2}:\d{2}$/)
+      
+      if (isUTC) {
+        const date = new Date(scheduledTime)
+        if (isNaN(date.getTime())) return null
+        
+        // Determine timezone based on airport code
+        // Romanian airports: Europe/Bucharest (UTC+2 winter, UTC+3 summer)
+        // Moldovan airports: Europe/Chisinau (UTC+2 winter, UTC+3 summer)
+        const romanianAirports = ['OTP', 'CLJ', 'TSR', 'IAS', 'CND', 'SBZ', 'CRA', 'BCM', 'OMR', 'SCV', 'TGM', 'ARW', 'SUJ', 'GHV', 'BBU', 'BAY']
+        const moldovanAirports = ['RMO', 'KIV']
+        
+        let timezone = 'Europe/Bucharest' // Default for Romanian airports
+        if (airportCode) {
+          const upperCode = airportCode.toUpperCase()
+          if (moldovanAirports.includes(upperCode)) {
+            timezone = 'Europe/Chisinau'
+          } else if (!romanianAirports.includes(upperCode)) {
+            // For international airports, try to use their local timezone
+            // For now, default to Europe/Bucharest as most flights are to/from Romania
+            timezone = 'Europe/Bucharest'
+          }
+        }
+        
+        // Convert to local time using Intl.DateTimeFormat
+        const localTime = date.toLocaleTimeString('en-GB', {
+          timeZone: timezone,
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        })
+        
+        return localTime
+      }
+      
+      // Fallback: extract time directly from string
+      const timeMatch = scheduledTime.match(/(\d{2}):(\d{2})/)
+      if (timeMatch) {
+        return `${timeMatch[1]}:${timeMatch[2]}`
+      }
+      
+      return null
+    } catch {
+      return null
+    }
+  }
+
+  // Helper function to correct known IATA code/name mismatches
+  // DUB = Dublin (Ireland), DWC = Dubai Al Maktoum, DXB = Dubai International
+  private correctAirportCodeMismatch(code: string, name?: string): string {
+    if (!code) return code
+    
+    const upperCode = code.toUpperCase()
+    
+    // If we have a name that doesn't match the code, use the correct mapping
+    if (name) {
+      const lowerName = name.toLowerCase()
+      
+      // If name contains "Dubai" but code is DUB (Dublin), this is wrong data
+      // Return the correct name based on the IATA code
+      if (upperCode === 'DUB' && lowerName.includes('dubai')) {
+        // The code DUB is Dublin, not Dubai - return Dublin
+        return 'Dublin'
+      }
+      
+      // If code is DWC, it's Dubai Al Maktoum
+      if (upperCode === 'DWC') {
+        return 'Dubai (Al Maktoum)'
+      }
+      
+      // If code is DXB, it's Dubai International
+      if (upperCode === 'DXB') {
+        return 'Dubai'
+      }
+    }
+    
+    return code
   }
 
   // Helper function to convert airport codes to display names
   private getAirportDisplayName(code: string): string {
     if (!code) return 'Aeroport necunoscut'
     
+    // First check if it's already a display name (contains parentheses or long)
     if (code.includes('(') || code.length > 3) {
+      // Apply correction for known mismatches in display names
+      if (code.toLowerCase().includes('dubai') && code.toUpperCase().startsWith('DUB')) {
+        // This is likely a mismatch - DUB should be Dublin
+        return 'Dublin'
+      }
       return code
     }
     
@@ -1108,7 +1550,8 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
       'CPH': 'Copenhaga',
       'BLL': 'Billund',
       'AAL': 'Aalborg',
-      'ARN': 'Stockholm',
+      'ARN': 'Stockholm (Arlanda)',
+      'NYO': 'Stockholm (Skavsta)',
       'GOT': 'Goteborg',
       'MMX': 'Malmo',
       'OSL': 'Oslo',
@@ -1194,9 +1637,14 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
       'TLV': 'Tel Aviv',
       'VDA': 'Eilat',
       'HFA': 'Haifa',
+      'AMM': 'Amman',
+      'BEY': 'Beirut',
+      'DAM': 'Damasc',
       'DOH': 'Doha',
       'DXB': 'Dubai',
+      'DWC': 'Dubai (Al Maktoum)',
       'EVN': 'Erevan',
+      'TBS': 'Tbilisi',
       'BTS': 'Bratislava',
       'CAI': 'Cairo',
       'HRG': 'Hurghada',
@@ -1234,11 +1682,18 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
       
       // Additional European airports from screenshot
       'ALC': 'Alicante',
+      'CDT': 'Castellón',
+      'LPA': 'Las Palmas (Gran Canaria)',
       'FMM': 'Memmingen',
       
       // Additional missing airports
       'GRO': 'Girona',
       'GYD': 'Baku',
+      
+      // USA airports
+      'JFK': 'New York (JFK)',
+      'EWR': 'New York (Newark)',
+      'LGA': 'New York (LaGuardia)',
       'TFS': 'Tenerife',
       'TRF': 'Oslo (Sandefjord)',
       'ZAZ': 'Zaragoza'
@@ -1303,15 +1758,70 @@ export class WeeklyScheduleAnalyzerImpl implements WeeklyScheduleAnalyzer {
       console.log('[Weekly Schedule] Data is outdated or empty, auto-refreshing...');
       try {
         await this.updateScheduleTable();
-        return await this.tableManager.getScheduleData();
+        const refreshedData = await this.tableManager.getScheduleData();
+        return this.filterExpiredFlights(refreshedData);
       } catch (error) {
         console.error('[Weekly Schedule] Auto-refresh failed:', error);
         // Return existing data if refresh fails
-        return existingData;
+        return this.filterExpiredFlights(existingData);
       }
     }
     
-    return existingData;
+    return this.filterExpiredFlights(existingData);
+  }
+
+  // Filter out expired flights - flights not seen in the last 7 days for a specific day
+  private filterExpiredFlights(data: WeeklyScheduleData[]): WeeklyScheduleData[] {
+    const EXPIRATION_DAYS = 7; // Flights not seen for 7 days are considered expired
+    const today = new Date();
+    const expirationThreshold = new Date(today.getTime() - EXPIRATION_DAYS * 24 * 60 * 60 * 1000);
+    const expirationDateStr = expirationThreshold.toISOString().split('T')[0];
+    
+    return data.map(entry => {
+      // If no lastSeenDates, keep the entry as-is (legacy data)
+      if (!entry.lastSeenDates) {
+        return entry;
+      }
+      
+      // Filter weeklyPattern based on lastSeenDates
+      const filteredPattern = { ...entry.weeklyPattern };
+      const filteredTimes = entry.scheduledTimes ? { ...entry.scheduledTimes } : undefined;
+      const days: (keyof typeof filteredPattern)[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      
+      let hasActiveDay = false;
+      
+      days.forEach(day => {
+        const lastSeen = entry.lastSeenDates?.[day];
+        
+        // If the day was marked as active but hasn't been seen recently, mark as inactive
+        if (filteredPattern[day] && lastSeen) {
+          if (lastSeen < expirationDateStr) {
+            // Flight expired for this day
+            filteredPattern[day] = false;
+            if (filteredTimes) {
+              delete filteredTimes[day];
+            }
+            console.log(`[Expiration] ${entry.flightNumber} ${entry.airport}→${entry.destination}: ${day} expired (last seen: ${lastSeen})`);
+          } else {
+            hasActiveDay = true;
+          }
+        } else if (filteredPattern[day]) {
+          // Day is active but no lastSeenDate - keep it (legacy data)
+          hasActiveDay = true;
+        }
+      });
+      
+      // If no active days remain, return null to filter out entirely
+      if (!hasActiveDay) {
+        return null;
+      }
+      
+      return {
+        ...entry,
+        weeklyPattern: filteredPattern,
+        scheduledTimes: filteredTimes && Object.keys(filteredTimes).length > 0 ? filteredTimes : undefined
+      };
+    }).filter((entry): entry is WeeklyScheduleData => entry !== null);
   }
 
   private async checkIfNeedsRefresh(existingData: WeeklyScheduleData[]): Promise<boolean> {

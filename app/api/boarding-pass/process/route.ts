@@ -8,7 +8,7 @@ const serviceAccount = {
   private_key: (process.env.GOOGLE_WALLET_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
 };
 
-// Lista completă de companii aeriene cunoscute
+// Lista completă de companii aeriene cunoscute (include și coduri de 3 caractere)
 const KNOWN_CARRIERS: Record<string, string> = {
   '5F': 'FlyOne', 'RO': 'TAROM', 'W4': 'Wizz Air', 'W6': 'Wizz Air', 'WZ': 'Wizz Air',
   'H4': 'HiSky', '0B': 'Blue Air', '9U': 'Air Moldova',
@@ -27,7 +27,22 @@ const KNOWN_CARRIERS: Record<string, string> = {
   'TG': 'Thai Airways', 'MH': 'Malaysia Airlines', 'AI': 'Air India', 'ET': 'Ethiopian',
   'QF': 'Qantas', 'NZ': 'Air New Zealand', 'LA': 'LATAM', 'AV': 'Avianca',
   'AM': 'Aeromexico', 'WN': 'Southwest', 'B6': 'JetBlue', 'AS': 'Alaska Airlines',
-  'UC': 'LAN Chile'
+  'UC': 'LAN Chile',
+  // 3-character ICAO carrier codes (some airlines use these in BCBP)
+  'EJU': 'easyJet', 'EZY': 'easyJet', 'EZS': 'easyJet',
+  'WZZ': 'Wizz Air', 'RYR': 'Ryanair', 'DLH': 'Lufthansa', 'BAW': 'British Airways',
+  'AFR': 'Air France', 'KLM': 'KLM', 'SWR': 'Swiss', 'AUA': 'Austrian',
+  'TAP': 'TAP Portugal', 'THY': 'Turkish Airlines', 'UAE': 'Emirates',
+  'QTR': 'Qatar Airways', 'AAL': 'American Airlines', 'DAL': 'Delta', 'UAL': 'United'
+};
+
+// Mapare ICAO (3 char) la IATA (2 char) pentru Google Wallet
+const ICAO_TO_IATA: Record<string, string> = {
+  'EJU': 'U2', 'EZY': 'U2', 'EZS': 'U2',
+  'WZZ': 'W6', 'RYR': 'FR', 'DLH': 'LH', 'BAW': 'BA',
+  'AFR': 'AF', 'KLM': 'KL', 'SWR': 'LX', 'AUA': 'OS',
+  'TAP': 'TP', 'THY': 'TK', 'UAE': 'EK',
+  'QTR': 'QR', 'AAL': 'AA', 'DAL': 'DL', 'UAL': 'UA'
 };
 
 // Lista de aeroporturi IATA cunoscute
@@ -70,6 +85,298 @@ function isValidAirport(code: string): boolean {
   return KNOWN_AIRPORTS.has(code.toUpperCase());
 }
 
+/**
+ * Extrage ora de plecare din textul PDF-ului (OCR)
+ * IMPORTANT: Ora NU se afla in barcode (BCBP), ci doar in textul vizibil!
+ * Cauta cuvinte cheie: Departing, Depart, Departure, DEP
+ */
+function extractDepartureTimeFromPDFText(pdfText: string): string | null {
+  if (!pdfText) {
+    console.error('[TIME] No PDF text provided');
+    return null;
+  }
+
+  console.error('[TIME] ========== DEPARTURE TIME EXTRACTION ==========');
+  console.error('[TIME] PDF text length:', pdfText.length);
+  console.error('[TIME] PDF text (first 3000 chars):', pdfText.substring(0, 3000));
+
+  // Versiune fara newlines pentru pattern matching
+  const singleLineText = pdfText.replace(/\s+/g, ' ').trim();
+  
+  // Colecteaza toate orele gasite cu context
+  const foundTimes: { time: string; context: string; priority: number; source: string }[] = [];
+
+  // ===== STRATEGIA 1: Cauta ora DUPA cuvinte cheie de plecare =====
+  // Pattern: "Departing 05:55" sau "Depart: 06:00" sau "Departure 19:00" sau "DEPART TIME ... 09:00"
+  const departureKeywords = [
+    /(?:departing|depart|departure|dep\.?|plecare)[:\s]*(\d{1,2})[:\.](\d{2})(?:\s*(?:AM|PM)?)?/gi,
+    /(?:departing|depart|departure|dep\.?|plecare)[:\s]*(\d{1,2})[:\.](\d{2})\s*(AM|PM)/gi,
+    // HiSky format: "DEPART TIME" as column header, time appears later in row
+    /depart\s+time[^0-9]*(\d{1,2})[:\.](\d{2})/gi,
+  ];
+
+  for (const pattern of departureKeywords) {
+    let match;
+    while ((match = pattern.exec(singleLineText)) !== null) {
+      let hours = parseInt(match[1]);
+      const minutes = parseInt(match[2]);
+      const ampm = match[3]?.toUpperCase();
+      
+      // Converteste AM/PM la format 24h
+      if (ampm === 'PM' && hours < 12) hours += 12;
+      if (ampm === 'AM' && hours === 12) hours = 0;
+      
+      if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        const idx = match.index;
+        const context = singleLineText.substring(Math.max(0, idx - 10), Math.min(singleLineText.length, idx + 50));
+        
+        foundTimes.push({ time: formattedTime, context: context.trim(), priority: 1, source: 'departure-keyword' });
+        console.error('[TIME] Found after departure keyword: ' + formattedTime + ' context: "' + context.trim() + '"');
+      }
+    }
+  }
+
+  // ===== STRATEGIA 2: HiSky table format - ora apare dupa ruta (BUCHAREST - CHISINAU 09:00 08:30) =====
+  // Prima ora dupa un oras/ruta este departure, a doua este boarding
+  const hiskyTablePattern = /(?:BUCHAREST|CHISINAU|BUCURESTI|OTOPENI|[A-Z]{3}\s*-\s*[A-Z]{3})[^0-9]*(\d{2})[:\.](\d{2})\s+(\d{2})[:\.](\d{2})/gi;
+  let match1;
+  while ((match1 = hiskyTablePattern.exec(singleLineText)) !== null) {
+    const depHours = parseInt(match1[1]);
+    const depMinutes = parseInt(match1[2]);
+    // match1[3] and match1[4] would be boarding time - we skip it
+    
+    if (depHours >= 0 && depHours <= 23 && depMinutes >= 0 && depMinutes <= 59) {
+      const formattedTime = `${depHours.toString().padStart(2, '0')}:${depMinutes.toString().padStart(2, '0')}`;
+      foundTimes.push({ time: formattedTime, context: match1[0], priority: 1, source: 'hisky-table' });
+      console.error('[TIME] Found HiSky table format: ' + formattedTime);
+    }
+  }
+
+  // ===== STRATEGIA 3: Cauta ora langa "Flight" sau numar de zbor =====
+  const flightPattern = /(?:flight|zbor|vol)[:\s]*[A-Z]{2}\s*\d{2,4}[:\s]*(\d{1,2})[:\.](\d{2})/gi;
+  let match2;
+  while ((match2 = flightPattern.exec(singleLineText)) !== null) {
+    const hours = parseInt(match2[1]);
+    const minutes = parseInt(match2[2]);
+    
+    if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      foundTimes.push({ time: formattedTime, context: match2[0], priority: 2, source: 'flight-context' });
+      console.error('[TIME] Found near flight: ' + formattedTime);
+    }
+  }
+
+  // ===== STRATEGIA 4: Cauta ora langa "Gate" sau "Boarding" =====
+  const boardingPattern = /(?:gate|boarding|poarta)[:\s]*[A-Z0-9]*[:\s]*(\d{1,2})[:\.](\d{2})/gi;
+  while ((match2 = boardingPattern.exec(singleLineText)) !== null) {
+    const hours = parseInt(match2[1]);
+    const minutes = parseInt(match2[2]);
+    
+    if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      foundTimes.push({ time: formattedTime, context: match2[0], priority: 3, source: 'boarding-context' });
+      console.error('[TIME] Found near boarding/gate: ' + formattedTime);
+    }
+  }
+
+  // ===== STRATEGIA 5: Cauta toate orele standalone si filtreaza =====
+  const timeRegex = /\b(\d{1,2})[:\.](\d{2})\b/g;
+  let match3;
+  while ((match3 = timeRegex.exec(singleLineText)) !== null) {
+    const hours = parseInt(match3[1]);
+    const minutes = parseInt(match3[2]);
+    
+    // Doar ore rezonabile pentru zboruri (05:00 - 23:59)
+    if (hours >= 5 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      const idx = match3.index;
+      const contextBefore = singleLineText.substring(Math.max(0, idx - 40), idx).toLowerCase();
+      const contextAfter = singleLineText.substring(idx, Math.min(singleLineText.length, idx + 40)).toLowerCase();
+      const context = contextBefore + contextAfter;
+      
+      // Exclude daca e parte dintr-o data (2026-01-13, 13/01/2026)
+      if (/\d{4}[-\/]\d{2}[-\/]/.test(context) || /[-\/]\d{2}[-\/]\d{4}/.test(context)) {
+        console.error('[TIME] Skipping ' + formattedTime + ' - part of date');
+        continue;
+      }
+      
+      // Exclude daca e ora de sosire (arriving, arrival, arr)
+      if (contextBefore.includes('arriving') || contextBefore.includes('arrival') || contextBefore.includes('arr ')) {
+        console.error('[TIME] Skipping ' + formattedTime + ' - arrival time');
+        continue;
+      }
+      
+      // Verifica daca e langa cuvinte de plecare
+      let priority = 10;
+      let source = 'standalone';
+      
+      if (contextBefore.includes('depart') || contextBefore.includes('plecare')) {
+        priority = 1; source = 'departure-context';
+      } else if (contextBefore.includes('board') || contextBefore.includes('gate')) {
+        priority = 3; source = 'boarding-context';
+      } else if (contextBefore.includes('time') || contextBefore.includes('ora')) {
+        priority = 4; source = 'time-context';
+      }
+      
+      // Evita duplicate
+      if (!foundTimes.some(t => t.time === formattedTime && t.priority <= priority)) {
+        foundTimes.push({ time: formattedTime, context: context.trim(), priority, source });
+        console.error('[TIME] Found standalone: ' + formattedTime + ' (' + source + ', priority ' + priority + ')');
+      }
+    }
+  }
+
+  // ===== STRATEGIA 6: Format AM/PM explicit =====
+  const ampmRegex = /\b(\d{1,2})[:\.](\d{2})\s*(AM|PM)\b/gi;
+  let match4;
+  while ((match4 = ampmRegex.exec(singleLineText)) !== null) {
+    let hours = parseInt(match4[1]);
+    const minutes = parseInt(match4[2]);
+    const ampm = match4[3].toUpperCase();
+    
+    if (ampm === 'PM' && hours < 12) hours += 12;
+    if (ampm === 'AM' && hours === 12) hours = 0;
+    
+    if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      const idx = match4.index;
+      const contextBefore = singleLineText.substring(Math.max(0, idx - 30), idx).toLowerCase();
+      
+      // Exclude arrival times
+      if (contextBefore.includes('arriving') || contextBefore.includes('arrival')) {
+        continue;
+      }
+      
+      let priority = 5;
+      if (contextBefore.includes('depart')) priority = 1;
+      
+      if (!foundTimes.some(t => t.time === formattedTime)) {
+        foundTimes.push({ time: formattedTime, context: match4[0], priority, source: 'am-pm-format' });
+        console.error('[TIME] Found AM/PM: ' + formattedTime);
+      }
+    }
+  }
+
+  // Sorteaza dupa prioritate si returneaza cea mai buna
+  if (foundTimes.length > 0) {
+    foundTimes.sort((a, b) => a.priority - b.priority);
+    console.error('[TIME] All found times: ' + foundTimes.map(t => t.time + '(' + t.source + ':' + t.priority + ')').join(', '));
+    const best = foundTimes[0];
+    console.error('[TIME] SELECTED: ' + best.time + ' (source: ' + best.source + ')');
+    return best.time;
+  }
+
+  console.error('[TIME] WARNING: No departure time found in PDF text!');
+  return null;
+}
+
+
+/**
+ * Extrage gate number din textul PDF-ului
+ * Gate-ul NU se află în BCBP, ci doar în textul vizibil al boarding pass-ului
+ */
+function extractGateFromPDFText(pdfText: string): string | null {
+  if (!pdfText) return null;
+  
+  const singleLineText = pdfText.replace(/\s+/g, ' ').trim();
+  
+  // Pattern-uri pentru gate
+  const gatePatterns = [
+    /(?:gate|poarta|gt\.?)[:\s]*([A-Z]?\d{1,3}[A-Z]?)/gi,
+    /(?:gate|poarta)[:\s]*([A-Z]{1,2}\d{1,2})/gi,
+    /\bgate\s+([A-Z0-9]{1,4})\b/gi,
+  ];
+  
+  for (const pattern of gatePatterns) {
+    const match = singleLineText.match(pattern);
+    if (match) {
+      // Extrage doar valoarea gate-ului
+      const gateMatch = match[0].match(/([A-Z]?\d{1,3}[A-Z]?)/i);
+      if (gateMatch) {
+        const gate = gateMatch[1].toUpperCase();
+        console.error(`[GATE] Found: ${gate}`);
+        return gate;
+      }
+    }
+  }
+  
+  return null;
+}
+
+
+/**
+ * Extrage boarding group din textul PDF-ului
+ * Pentru companii cu prioritate boarding (Aer Lingus, Ryanair Priority, etc.)
+ */
+function extractBoardingGroupFromPDFText(pdfText: string): string | null {
+  if (!pdfText) return null;
+  
+  const singleLineText = pdfText.replace(/\s+/g, ' ').trim();
+  
+  // Pattern-uri pentru boarding group
+  const groupPatterns = [
+    /(?:boarding\s*group|group|zona|zone)[:\s]*(\d{1,2}|[A-Z])/gi,
+    /(?:priority|prioritate)[:\s]*(\d{1,2}|yes|da)/gi,
+    /(?:group)[:\s]*([A-Z0-9]{1,3})/gi,
+    /\b(group\s*\d{1,2})\b/gi,
+  ];
+  
+  for (const pattern of groupPatterns) {
+    const match = singleLineText.match(pattern);
+    if (match) {
+      // Extrage valoarea
+      const groupMatch = match[0].match(/(\d{1,2}|[A-Z]|yes|da)$/i);
+      if (groupMatch) {
+        let group = groupMatch[1].toUpperCase();
+        // Formatează ca "Group X" dacă e doar un număr
+        if (/^\d+$/.test(group)) {
+          group = `Group ${group}`;
+        }
+        console.error(`[BOARDING GROUP] Found: ${group}`);
+        return group;
+      }
+    }
+  }
+  
+  // Verifică pentru priority boarding
+  if (/priority\s*boarding/i.test(singleLineText) || /flexi\s*plus/i.test(singleLineText)) {
+    console.error(`[BOARDING GROUP] Found: Priority`);
+    return 'Priority';
+  }
+  
+  return null;
+}
+
+
+/**
+ * Extrage sequence number din textul PDF-ului
+ */
+function extractSequenceNumberFromPDFText(pdfText: string): string | null {
+  if (!pdfText) return null;
+  
+  const singleLineText = pdfText.replace(/\s+/g, ' ').trim();
+  
+  // Pattern-uri pentru sequence number
+  const seqPatterns = [
+    /(?:seq|sequence|secv)[:\s#]*(\d{3,4})/gi,
+    /(?:boarding\s*seq)[:\s]*(\d{3,4})/gi,
+  ];
+  
+  for (const pattern of seqPatterns) {
+    const match = singleLineText.match(pattern);
+    if (match) {
+      const seqMatch = match[0].match(/(\d{3,4})/);
+      if (seqMatch) {
+        console.error(`[SEQUENCE] Found: ${seqMatch[1]}`);
+        return seqMatch[1];
+      }
+    }
+  }
+  
+  return null;
+}
+
 
 // Parser BCBP IATA Resolution 792 - FĂRĂ VALORI DEFAULT
 function parseIATABCBP(bcbpData: string) {
@@ -94,6 +401,7 @@ function parseIATABCBP(bcbpData: string) {
   let seatNumber: string | null = null;
   let flightDate: string | null = null;
   let julianDate: string | null = null;
+  let departureTime: string | null = null;
   
   // === EXTRAGE NUMELE PASAGERULUI ===
   const slashIndex = cleanBCBP.indexOf('/');
@@ -113,7 +421,17 @@ function parseIATABCBP(bcbpData: string) {
     if (nameField.includes('/')) {
       const parts = nameField.split('/');
       const lastName = parts[0].trim();
-      const firstName = parts[1] ? parts[1].trim().split(' ')[0] : '';
+      let firstName = parts[1] ? parts[1].trim().split(' ')[0] : '';
+      
+      // Curăță titlurile (MR, MRS, MS, MISS, DR, etc.) de la sfârșitul prenumelui
+      const titleSuffixes = ['MR', 'MRS', 'MS', 'MISS', 'DR', 'MSTR', 'CHD', 'INF'];
+      for (const title of titleSuffixes) {
+        if (firstName.endsWith(title)) {
+          firstName = firstName.slice(0, -title.length).trim();
+          break;
+        }
+      }
+      
       passengerName = firstName ? `${firstName} ${lastName}` : lastName;
     }
     console.log(`✅ Passenger: "${passengerName}"`);
@@ -171,10 +489,18 @@ function parseIATABCBP(bcbpData: string) {
   }
   
   // === EXTRAGE AEROPORTURI + CARRIER + FLIGHT ===
+  // IMPORTANT: Unele companii (easyJet, Ryanair) folosesc coduri ICAO de 3 caractere în BCBP
+  // Exemplu easyJet: ORYBEREJU4873 = ORY + BER + EJU + 4873
+  
   const flightPatterns = [
+    // Pattern pentru ICAO 3-char carrier: ORYBEREJU4873 (origin+dest+3char_carrier+flight)
+    /([A-Z]{3})([A-Z]{3})([A-Z]{3})(\d{3,4})/,
+    // Pattern standard 2-char carrier cu spațiu
     /([A-Z]{3})([A-Z]{3})([A-Z0-9]{2})\s*(\d{3,4})/,
     /([A-Z]{3})([A-Z]{3})\s+([A-Z0-9]{2})\s+(\d{3,4})/,
     /E([A-Z]{2})(\d{4})\s+([A-Z]{3})([A-Z]{3})/,
+    // Pattern pentru format compact 2-char: ORYBERU24873
+    /([A-Z]{3})([A-Z]{3})([A-Z]{2})(\d{4})/,
   ];
   
   for (const pattern of flightPatterns) {
@@ -201,27 +527,72 @@ function parseIATABCBP(bcbpData: string) {
         continue;
       }
       
+      // Verifică carrier-ul să fie valid (2 sau 3 caractere alfanumerice)
+      // 3 caractere = ICAO code (EJU, WZZ, RYR)
+      // 2 caractere = IATA code (U2, W6, FR)
+      if (carrierCode && !/^[A-Z0-9]{2,3}$/.test(carrierCode)) {
+        console.log(`⚠️ Invalid carrier: ${carrierCode}`);
+        origin = null;
+        destination = null;
+        carrierCode = null;
+        flightNumber = null;
+        continue;
+      }
+      
+      // Verifică dacă carrier-ul de 3 caractere este un ICAO cunoscut
+      if (carrierCode && carrierCode.length === 3) {
+        if (KNOWN_CARRIERS[carrierCode]) {
+          console.log(`✅ ICAO carrier detected: ${carrierCode} = ${KNOWN_CARRIERS[carrierCode]}`);
+        } else {
+          // Dacă nu e ICAO cunoscut, ar putea fi un aeroport interpretat greșit
+          // Verifică dacă e aeroport valid
+          if (isValidAirport(carrierCode)) {
+            console.log(`⚠️ 3-char code ${carrierCode} is an airport, not carrier - skipping pattern`);
+            origin = null;
+            destination = null;
+            carrierCode = null;
+            flightNumber = null;
+            continue;
+          }
+        }
+      }
+      
       console.log(`✅ Flight: ${origin}→${destination} ${carrierCode}${flightNumber}`);
       break;
     }
   }
   
-  // Fallback: caută aeroporturi valide
+  // Fallback: caută aeroporturi valide consecutive în string
   if (!origin || !destination) {
     console.log('🔄 Searching for valid airports...');
+    
+    // Caută toate secvențele de 3 litere
     const allThreeLetters = cleanBCBP.match(/[A-Z]{3}/g) || [];
     const validAirports = allThreeLetters.filter(code => isValidAirport(code));
     console.log(`🔍 Valid airports found: ${validAirports.join(', ')}`);
     
+    // Caută perechi consecutive de aeroporturi valide
     if (validAirports.length >= 2) {
-      for (let i = 0; i < allThreeLetters.length - 1; i++) {
-        if (isValidAirport(allThreeLetters[i]) && isValidAirport(allThreeLetters[i + 1])) {
-          origin = allThreeLetters[i];
-          destination = allThreeLetters[i + 1];
-          console.log(`✅ Airport pair: ${origin}→${destination}`);
+      // Prima încercare: caută două aeroporturi consecutive în string-ul original
+      for (let i = 0; i < cleanBCBP.length - 5; i++) {
+        const potential = cleanBCBP.substring(i, i + 6);
+        const first = potential.substring(0, 3);
+        const second = potential.substring(3, 6);
+        
+        if (isValidAirport(first) && isValidAirport(second)) {
+          origin = first;
+          destination = second;
+          console.log(`✅ Airport pair (consecutive): ${origin}→${destination}`);
           break;
         }
       }
+    }
+    
+    // A doua încercare: folosește primele două aeroporturi valide găsite
+    if (!origin && validAirports.length >= 2) {
+      origin = validAirports[0];
+      destination = validAirports[1];
+      console.log(`✅ Airport pair (first two valid): ${origin}→${destination}`);
     }
   }
   
@@ -379,6 +750,31 @@ function parseIATABCBP(bcbpData: string) {
     }
   }
   
+  // === EXTRAGE ORA DE PLECARE ===
+  // Caută pattern-uri de timp în format HH:MM sau H:MM
+  const timePatterns = [
+    /(\d{1,2}):(\d{2})\s*(?:AM|PM)?/gi,  // 9:00, 09:00, 9:00 AM
+    /(\d{2})(\d{2})\s*(?:hrs?|h)/gi,      // 0900hrs, 0900h
+    /(?:departure|plecare|dep)[:\s]*(\d{1,2}):(\d{2})/gi,  // Departure: 09:00
+  ];
+  
+  for (const pattern of timePatterns) {
+    const matches = cleanBCBP.matchAll(pattern);
+    for (const match of matches) {
+      let hours = parseInt(match[1]);
+      let minutes = parseInt(match[2]);
+      
+      // Validare: ora trebuie să fie între 0-23, minute între 0-59
+      if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+        // Formatează ca HH:MM
+        departureTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        console.log(`✅ Departure Time: ${departureTime}`);
+        break;
+      }
+    }
+    if (departureTime) break;
+  }
+  
   // Log rezultate
   console.log('📊 Parsing result:');
   console.log(`   Passenger: ${passengerName || 'NOT FOUND'}`);
@@ -386,6 +782,7 @@ function parseIATABCBP(bcbpData: string) {
   console.log(`   Flight: ${carrierCode || '??'}${flightNumber || '????'}`);
   console.log(`   Route: ${origin || '???'} → ${destination || '???'}`);
   console.log(`   Date: ${flightDate || 'NOT FOUND'}`);
+  console.log(`   Time: ${departureTime || 'NOT FOUND'}`);
   console.log(`   Seat: ${seatNumber || 'NOT FOUND'}`);
   
   return {
@@ -399,18 +796,24 @@ function parseIATABCBP(bcbpData: string) {
     compartment,
     flightDate,
     julianDate,
-    raw: cleanBCBP
+    departureTime,
+    raw: cleanBCBP,
+    // Gate și boarding group se extrag din PDF text, nu din BCBP
+    gate: null as string | null,
+    boardingGroup: null as string | null,
+    sequenceNumber: null as string | null
   };
 }
 
 
 // Extrage BCBP din PDF folosind procesorul modern
-async function extractBCBPFromPDF(pdfBuffer: Buffer): Promise<string | { airlineSpecific: true; airline: string; flightData: any; multiPassenger?: boolean }> {
+async function extractBCBPFromPDF(pdfBuffer: Buffer): Promise<string | { airlineSpecific: true; airline: string; flightData: any; multiPassenger?: boolean; pdfText?: string } | { bcbp: string; pdfText: string }> {
   try {
     console.log('🔄 Starting PDF processing...');
     
     let ModernPDFProcessor;
     try {
+      // @ts-ignore - Dynamic require for optional module
       const processorModule = require('../../../../lib/modern-pdf-processor');
       ModernPDFProcessor = processorModule.ModernPDFProcessor;
     } catch (importError) {
@@ -423,7 +826,11 @@ async function extractBCBPFromPDF(pdfBuffer: Buffer): Promise<string | { airline
     
     if (result.success && result.bcbp) {
       console.log('✅ BCBP found:', result.bcbp.substring(0, 50) + '...');
-      return result.bcbp;
+      if (result.pdfText) {
+        console.log('📄 PDF text available for time extraction');
+      }
+      // Returnează obiect cu BCBP și textul PDF pentru extragerea orei
+      return { bcbp: result.bcbp, pdfText: result.pdfText || '' };
     }
     
     if (result.success && result.airlineSpecific && result.flightData) {
@@ -432,7 +839,8 @@ async function extractBCBPFromPDF(pdfBuffer: Buffer): Promise<string | { airline
         airlineSpecific: true,
         airline: result.airline,
         flightData: result.flightData,
-        multiPassenger: result.multiPassenger || false
+        multiPassenger: result.multiPassenger || false,
+        pdfText: result.pdfText || ''
       };
     }
     
@@ -445,6 +853,61 @@ async function extractBCBPFromPDF(pdfBuffer: Buffer): Promise<string | { airline
   }
 }
 
+/**
+ * Construiește obiectul boardingAndSeatingInfo pentru Google Wallet
+ * - Free Seating: nu include seatNumber sau pune undefined
+ * - Cu loc alocat: include seatNumber
+ * - Cu prioritate: include boardingGroup
+ * - Cu gate: include în origin
+ */
+function buildBoardingAndSeatingInfo(flightData: any): any {
+  // Verifică dacă avem informații de seating
+  const hasSeat = flightData.seatNumber && 
+                  flightData.seatNumber.trim() !== '' && 
+                  flightData.seatNumber.toUpperCase() !== 'FREE' &&
+                  flightData.seatNumber.toUpperCase() !== 'OPEN' &&
+                  !flightData.seatNumber.toUpperCase().includes('FREE');
+  
+  const hasBoardingGroup = flightData.boardingGroup && flightData.boardingGroup.trim() !== '';
+  const hasSequenceNumber = flightData.sequenceNumber && flightData.sequenceNumber.trim() !== '';
+  
+  // Dacă nu avem nici seat, nici boarding group, returnăm undefined
+  if (!hasSeat && !hasBoardingGroup && !hasSequenceNumber) {
+    return undefined;
+  }
+  
+  const info: any = {};
+  
+  // Adaugă seat number doar dacă există și nu e Free Seating
+  if (hasSeat) {
+    info.seatNumber = flightData.seatNumber.toUpperCase();
+    
+    // Determină clasa de călătorie
+    const compartment = flightData.compartment?.toUpperCase() || 'Y';
+    if (compartment === 'F' || compartment === 'P' || compartment === 'A') {
+      info.seatClass = 'FIRST';
+    } else if (compartment === 'J' || compartment === 'C' || compartment === 'D' || compartment === 'I') {
+      info.seatClass = 'BUSINESS';
+    } else if (compartment === 'W' || compartment === 'S') {
+      info.seatClass = 'PREMIUM_ECONOMY';
+    } else {
+      info.seatClass = 'ECONOMY';
+    }
+  }
+  
+  // Adaugă boarding group dacă există (pentru bilete cu prioritate)
+  if (hasBoardingGroup) {
+    info.boardingGroup = flightData.boardingGroup;
+  }
+  
+  // Adaugă sequence number dacă există
+  if (hasSequenceNumber) {
+    info.sequenceNumber = flightData.sequenceNumber;
+  }
+  
+  return info;
+}
+
 // Generează Google Wallet Link
 function generateGoogleWalletLink(flightData: any): string | null {
   // Validare - nu genera link dacă lipsesc date esențiale
@@ -453,59 +916,89 @@ function generateGoogleWalletLink(flightData: any): string | null {
     return null;
   }
   
-  const issuerId = '3388000000023061835';
-  const timestamp = Date.now();
-  const now = Math.floor(timestamp / 1000);
-  
-  const airlineName = KNOWN_CARRIERS[flightData.carrierCode] || flightData.carrierCode;
-  
-  // Folosește data extrasă sau data curentă + 7 zile ca fallback
-  let departureDate = flightData.flightDate;
-  if (!departureDate) {
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + 7);
-    departureDate = futureDate.toISOString().split('T')[0];
+  // Verifică dacă credențialele Google Wallet sunt configurate
+  if (!serviceAccount.client_email || !serviceAccount.private_key) {
+    console.log('⚠️ Google Wallet credentials not configured - skipping wallet link generation');
+    return null;
   }
   
-  const payload = {
-    iss: serviceAccount.client_email,
-    aud: "google",
-    typ: "savetowallet",
-    iat: now,
-    exp: now + 3600,
-    payload: {
-      flightClasses: [{
-        id: `${issuerId}.CLASS_${timestamp}`,
-        issuerName: "EMA PLUS SOLUTION SRL",
-        reviewStatus: "UNDER_REVIEW",
-        transitType: "AIR",
-        flightHeader: {
-          carrier: {
-            carrierIataCode: flightData.carrierCode,
-            airlineName: { defaultValue: { language: "en-US", value: airlineName } }
-          },
-          flightNumber: flightData.flightNumber
-        },
-        origin: { airportIataCode: flightData.origin, terminal: "1" },
-        destination: { airportIataCode: flightData.destination, terminal: "1" },
-        localScheduledDepartureDateTime: `${departureDate}T10:00:00`,
-        localScheduledArrivalDateTime: `${departureDate}T12:30:00`
-      }],
-      flightObjects: [{
-        id: `${issuerId}.OBJ_${timestamp}`,
-        classId: `${issuerId}.CLASS_${timestamp}`,
-        state: "ACTIVE",
-        passengerName: flightData.passengerName || "Passenger",
-        reservationInfo: { confirmationCode: flightData.confirmationCode || "XXXXXX" },
-        flightNumber: flightData.flightNumber,
-        seatInfo: flightData.seatNumber ? { seatNumber: flightData.seatNumber, seatClass: flightData.compartment || "Y" } : undefined,
-        barcode: { type: "QR_CODE", value: flightData.raw || "", alternateText: `${flightData.carrierCode}${flightData.flightNumber}` }
-      }]
+  try {
+    const issuerId = '3388000000023061835';
+    const timestamp = Date.now();
+    const now = Math.floor(timestamp / 1000);
+    
+    const airlineName = KNOWN_CARRIERS[flightData.carrierCode] || flightData.carrierCode;
+    
+    // Folosește data extrasă sau data curentă + 7 zile ca fallback
+    let departureDate = flightData.flightDate;
+    if (!departureDate) {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      departureDate = futureDate.toISOString().split('T')[0];
     }
-  };
-  
-  const token = jwt.sign(payload, serviceAccount.private_key, { algorithm: 'RS256' });
-  return `https://pay.google.com/gp/v/save/${token}`;
+    
+    // Folosește ora extrasă din PDF sau 10:00 ca fallback
+    const departureTimeStr = flightData.departureTime || '10:00';
+    
+    // Calculează ora de sosire (adaugă 2.5 ore ca estimare)
+    const [depHours, depMinutes] = departureTimeStr.split(':').map(Number);
+    const arrivalHours = (depHours + 2) % 24;
+    const arrivalMinutes = (depMinutes + 30) % 60;
+    const arrivalTimeStr = `${arrivalHours.toString().padStart(2, '0')}:${arrivalMinutes.toString().padStart(2, '0')}`;
+    
+    console.log(`🕐 Using departure time: ${departureTimeStr}, arrival time: ${arrivalTimeStr}`);
+    
+    const payload = {
+      iss: serviceAccount.client_email,
+      aud: "google",
+      typ: "savetowallet",
+      iat: now,
+      exp: now + 3600,
+      payload: {
+        flightClasses: [{
+          id: `${issuerId}.CLASS_${timestamp}`,
+          issuerName: "EMA PLUS SOLUTION SRL",
+          reviewStatus: "UNDER_REVIEW",
+          transitType: "AIR",
+          flightHeader: {
+            carrier: {
+              carrierIataCode: flightData.carrierCode,
+              airlineName: { defaultValue: { language: "en-US", value: airlineName } }
+            },
+            flightNumber: flightData.flightNumber
+          },
+          origin: { 
+            airportIataCode: flightData.origin, 
+            terminal: flightData.terminal || undefined,
+            gate: flightData.gate || undefined
+          },
+          destination: { airportIataCode: flightData.destination, terminal: undefined },
+          localScheduledDepartureDateTime: `${departureDate}T${departureTimeStr}:00`,
+          localScheduledArrivalDateTime: `${departureDate}T${arrivalTimeStr}:00`,
+          boardingAndSeatingPolicy: {
+            boardingPolicy: "ZONE_BASED",
+            seatClassPolicy: "CABIN_BASED"
+          }
+        }],
+        flightObjects: [{
+          id: `${issuerId}.OBJ_${timestamp}`,
+          classId: `${issuerId}.CLASS_${timestamp}`,
+          state: "ACTIVE",
+          passengerName: flightData.passengerName || "Passenger",
+          reservationInfo: { confirmationCode: flightData.confirmationCode || "XXXXXX" },
+          flightNumber: flightData.flightNumber,
+          boardingAndSeatingInfo: buildBoardingAndSeatingInfo(flightData),
+          barcode: { type: "QR_CODE", value: flightData.raw || "", alternateText: `${flightData.carrierCode}${flightData.flightNumber}` }
+        }]
+      }
+    };
+    
+    const token = jwt.sign(payload, serviceAccount.private_key, { algorithm: 'RS256' });
+    return `https://pay.google.com/gp/v/save/${token}`;
+  } catch (error) {
+    console.error('❌ Error generating Google Wallet link:', error);
+    return null;
+  }
 }
 
 
@@ -534,7 +1027,8 @@ export async function POST(request: NextRequest) {
     const file = formData.get('pdf') as File;
     const manualBCBP = formData.get('bcbp') as string;
     
-    let bcbpData: string;
+    let bcbpData: string = '';
+    let pdfText: string = '';
     
     if (file) {
       console.log(`Processing PDF: ${file.name}, size: ${file.size} bytes`);
@@ -559,8 +1053,17 @@ export async function POST(request: NextRequest) {
       const extractionResult = await extractBCBPFromPDF(buffer);
       
       // Handle airline-specific data
-      if (typeof extractionResult === 'object' && extractionResult.airlineSpecific) {
+      if (typeof extractionResult === 'object' && 'airlineSpecific' in extractionResult && extractionResult.airlineSpecific) {
         console.log(`✅ Airline-specific data: ${extractionResult.airline}`);
+        
+        // Extrage ora din textul PDF dacă este disponibil
+        if (extractionResult.pdfText && extractionResult.flightData) {
+          const extractedTime = extractDepartureTimeFromPDFText(extractionResult.pdfText);
+          if (extractedTime) {
+            extractionResult.flightData.departureTime = extractedTime;
+            console.log(`🕐 Departure time extracted from PDF text: ${extractedTime}`);
+          }
+        }
         
         if (extractionResult.multiPassenger && Array.isArray(extractionResult.flightData)) {
           const passengersWithWallet = extractionResult.flightData.map((passenger: any) => ({
@@ -590,8 +1093,93 @@ export async function POST(request: NextRequest) {
         }, { headers });
       }
       
-      bcbpData = extractionResult as string;
-      console.log(`BCBP extracted: ${bcbpData.substring(0, 50)}...`);
+      // Handle new format with bcbp and pdfText
+      let bcbpDataLocal: string;
+      let pdfTextLocal: string = '';
+      
+      if (typeof extractionResult === 'object' && 'bcbp' in extractionResult) {
+        bcbpDataLocal = extractionResult.bcbp;
+        pdfTextLocal = extractionResult.pdfText || '';
+      } else {
+        // Fallback pentru string simplu (compatibilitate)
+        bcbpDataLocal = extractionResult as string;
+      }
+      
+      // FALLBACK: Dacă pdfText e gol, extrage direct din PDF folosind pdfjs-dist legacy în child process
+      if (!pdfTextLocal && buffer) {
+        try {
+          const { execSync } = require('child_process');
+          const fs = require('fs');
+          const path = require('path');
+          const os = require('os');
+          
+          // Save buffer to temp file
+          const tempPdfPath = path.join(os.tmpdir(), `bp_${Date.now()}.pdf`);
+          fs.writeFileSync(tempPdfPath, buffer);
+          
+          // Get the project root for node_modules
+          const projectRoot = process.cwd();
+          
+          // Create extraction script using pdfjs-dist legacy build (CommonJS compatible)
+          const extractScript = `
+            const fs = require('fs');
+            const pdfjsLib = require('${projectRoot.replace(/\\/g, '/')}/node_modules/pdfjs-dist/legacy/build/pdf.js');
+            
+            // Disable worker
+            pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+            
+            async function extractText() {
+              try {
+                const buffer = fs.readFileSync('${tempPdfPath.replace(/\\/g, '/')}');
+                const uint8Array = new Uint8Array(buffer);
+                
+                const loadingTask = pdfjsLib.getDocument({ data: uint8Array, useSystemFonts: true });
+                const pdfDoc = await loadingTask.promise;
+                
+                let fullText = '';
+                for (let i = 1; i <= pdfDoc.numPages; i++) {
+                  const page = await pdfDoc.getPage(i);
+                  const textContent = await page.getTextContent();
+                  const pageText = textContent.items.map(item => item.str).join(' ');
+                  fullText += pageText + ' ';
+                }
+                
+                process.stdout.write(fullText.trim());
+              } catch (err) {
+                process.stderr.write('ERROR:' + err.message);
+                process.exit(1);
+              }
+            }
+            
+            extractText();
+          `;
+          
+          const scriptPath = path.join(os.tmpdir(), `extract_${Date.now()}.js`);
+          fs.writeFileSync(scriptPath, extractScript);
+          
+          // Run extraction in separate process
+          const result = execSync(`node "${scriptPath}"`, { 
+            encoding: 'utf8',
+            timeout: 15000,
+            maxBuffer: 5 * 1024 * 1024,
+            cwd: projectRoot
+          });
+          
+          // Cleanup
+          try { fs.unlinkSync(tempPdfPath); } catch (e) {}
+          try { fs.unlinkSync(scriptPath); } catch (e) {}
+          
+          if (result) {
+            pdfTextLocal = result.trim();
+            console.error('[FALLBACK] PDF text extracted via pdfjs-dist legacy:', pdfTextLocal.length, 'chars');
+          }
+        } catch (pdfError: any) {
+          console.error('[FALLBACK] PDF text extraction failed:', pdfError.message || pdfError);
+        }
+      }
+      
+      bcbpData = bcbpDataLocal;
+      pdfText = pdfTextLocal;
       
     } else if (manualBCBP) {
       bcbpData = manualBCBP.trim();
@@ -605,6 +1193,39 @@ export async function POST(request: NextRequest) {
     
     // Parse BCBP
     const flightData = parseIATABCBP(bcbpData);
+    
+    // Debug info for time extraction
+    let timeExtractionDebug: any = {
+      pdfTextLength: pdfText?.length || 0,
+      pdfTextPreview: pdfText ? pdfText.substring(0, 500) : 'NO PDF TEXT',
+      bcbpDepartureTime: flightData.departureTime || null,
+      extractedFromPdfText: null
+    };
+    
+    // Extrage ora de plecare din textul PDF dacă nu a fost găsită în BCBP
+    if (!flightData.departureTime && pdfText) {
+      const extractedTime = extractDepartureTimeFromPDFText(pdfText);
+      timeExtractionDebug.extractedFromPdfText = extractedTime;
+      if (extractedTime) {
+        flightData.departureTime = extractedTime;
+      }
+    }
+    
+    // Extrage gate, boarding group și sequence number din PDF text
+    if (pdfText) {
+      // Gate
+      if (!flightData.gate) {
+        flightData.gate = extractGateFromPDFText(pdfText);
+      }
+      // Boarding group (pentru bilete cu prioritate)
+      if (!flightData.boardingGroup) {
+        flightData.boardingGroup = extractBoardingGroupFromPDFText(pdfText);
+      }
+      // Sequence number
+      if (!flightData.sequenceNumber) {
+        flightData.sequenceNumber = extractSequenceNumberFromPDFText(pdfText);
+      }
+    }
     
     // Validare - returnează erori specifice pentru câmpurile lipsă
     const missingFields: string[] = [];
@@ -639,7 +1260,10 @@ export async function POST(request: NextRequest) {
       walletLink,
       bcbpData,
       validation,
-      processingMethod: 'bcbp-parser'
+      processingMethod: 'bcbp-parser',
+      debug: {
+        timeExtraction: timeExtractionDebug
+      }
     }, { headers });
     
   } catch (error: any) {

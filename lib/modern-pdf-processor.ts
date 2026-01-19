@@ -7,9 +7,14 @@ import GoogleVisionScanner from './google-vision-scanner';
 export interface ModernPDFProcessingResult {
   success: boolean;
   bcbp?: string;
+  pdfText?: string;  // Textul complet extras din PDF pentru extragerea orei
   confidence?: number;
   processingSteps: string[];
   error?: string;
+  airlineSpecific?: boolean;
+  airline?: string;
+  flightData?: any;
+  multiPassenger?: boolean;
   debugInfo?: {
     pdfPages: number;
     imageSize: { width: number; height: number };
@@ -64,18 +69,19 @@ export class ModernPDFProcessor {
         processingSteps.push('🔄 Using direct PDF text extraction as primary method');
         const directTextResult = await this.directPDFTextExtraction(pdfBuffer, processingSteps);
         
-        if (directTextResult) {
+        if (directTextResult.bcbp) {
           processingSteps.push('✅ BCBP found via direct PDF text extraction');
           return {
             success: true,
-            bcbp: directTextResult,
+            bcbp: directTextResult.bcbp,
+            pdfText: directTextResult.pdfText,
             confidence: 0.90,
             processingSteps,
             debugInfo: {
               pdfPages: 1,
               imageSize: { width: 0, height: 0 },
               processingTime: Date.now() - startTime,
-              rawBarcodeData: directTextResult
+              rawBarcodeData: directTextResult.bcbp
             }
           };
         }
@@ -83,6 +89,7 @@ export class ModernPDFProcessor {
         return {
           success: false,
           error: 'No BCBP found in PDF using any method',
+          pdfText: directTextResult.pdfText,
           processingSteps
         };
       }
@@ -108,6 +115,10 @@ export class ModernPDFProcessor {
       // Etapa 4: Scanează cu Google Cloud Vision API / ML Kit pentru barcode detection
       processingSteps.push('🔍 Scanning optimized bitmap with ML Kit / Google Vision API for barcodes');
       
+      // Extrage textul PDF pentru ora de plecare (întotdeauna)
+      const pdfTextExtraction = await this.directPDFTextExtraction(pdfBuffer, processingSteps);
+      const pdfText = pdfTextExtraction.pdfText;
+      
       const visionResult = await this.visionScanner.scanForBCBP(optimizedBuffer);
       
       if (visionResult.success && visionResult.bcbp) {
@@ -121,6 +132,7 @@ export class ModernPDFProcessor {
         return {
           success: true,
           bcbp: visionResult.bcbp,
+          pdfText: pdfText,
           confidence: 0.95,
           processingSteps,
           debugInfo: {
@@ -143,6 +155,7 @@ export class ModernPDFProcessor {
           return {
             success: true,
             bcbp: fallbackResult,
+            pdfText: pdfText,
             confidence: 0.85,
             processingSteps,
             debugInfo: {
@@ -158,18 +171,19 @@ export class ModernPDFProcessor {
         processingSteps.push('🔄 Trying direct PDF text extraction as final fallback');
         const pdfTextResult = await this.directPDFTextExtraction(pdfBuffer, processingSteps);
         
-        if (pdfTextResult) {
+        if (pdfTextResult.bcbp) {
           processingSteps.push('✅ BCBP found via direct PDF text extraction');
           return {
             success: true,
-            bcbp: pdfTextResult,
+            bcbp: pdfTextResult.bcbp,
+            pdfText: pdfTextResult.pdfText,
             confidence: 0.75,
             processingSteps,
             debugInfo: {
               pdfPages: 1,
               imageSize: { width: imageInfo.width || 0, height: imageInfo.height || 0 },
               processingTime: Date.now() - startTime,
-              rawBarcodeData: pdfTextResult
+              rawBarcodeData: pdfTextResult.bcbp
             }
           };
         }
@@ -177,6 +191,7 @@ export class ModernPDFProcessor {
         return {
           success: false,
           error: 'No BCBP found in PDF using any method',
+          pdfText: pdfTextResult.pdfText,
           processingSteps
         };
       }
@@ -279,8 +294,9 @@ export class ModernPDFProcessor {
   
   /**
    * Direct PDF text extraction using pdf-parse
+   * Returns both BCBP and full PDF text for time extraction
    */
-  private async directPDFTextExtraction(pdfBuffer: Buffer, processingSteps: string[]): Promise<string | null> {
+  private async directPDFTextExtraction(pdfBuffer: Buffer, processingSteps: string[]): Promise<{ bcbp: string | null; pdfText: string }> {
     try {
       // Use require for pdf-parse (CommonJS module)
       const pdfParse = require('pdf-parse');
@@ -291,19 +307,16 @@ export class ModernPDFProcessor {
       const text = data.text;
       
       processingSteps.push(`📊 Extracted ${text.length} characters from PDF`);
-      console.log('📄 PDF Text Content:', text.substring(0, 200) + '...');
+      console.log('📄 PDF Text Content:', text.substring(0, 500) + '...');
       
       // Caută BCBP în textul extras
       const bcbpMatch = this.extractBCBPFromText(text);
-      if (bcbpMatch) {
-        return bcbpMatch;
-      }
       
-      return null;
+      return { bcbp: bcbpMatch, pdfText: text };
     } catch (error) {
       processingSteps.push(`❌ Direct PDF text extraction failed: ${error}`);
       console.error('PDF text extraction error:', error);
-      return null;
+      return { bcbp: null, pdfText: '' };
     }
   }
   

@@ -145,7 +145,11 @@ function generateGoogleWalletLink(flightData: any): string {
           terminal: "1"
         },
         localScheduledDepartureDateTime: "2026-06-01T10:00:00",
-        localScheduledArrivalDateTime: "2026-06-01T12:30:00"
+        localScheduledArrivalDateTime: "2026-06-01T12:30:00",
+        boardingAndSeatingPolicy: {
+          boardingPolicy: "ZONE_BASED",
+          seatClassPolicy: "CABIN_BASED"
+        }
       }],
       flightObjects: [{
         id: `${issuerId}.OBJ_${timestamp}`,
@@ -156,14 +160,15 @@ function generateGoogleWalletLink(flightData: any): string {
           confirmationCode: flightData.confirmationCode // OBLIGATORIU
         },
         flightNumber: flightData.flightNumber,
-        seatInfo: {
+        boardingAndSeatingInfo: flightData.seatNumber ? {
           seatNumber: flightData.seatNumber,
-          seatClass: flightData.compartment
-        },
+          seatClass: flightData.compartment === 'F' ? 'FIRST' : 
+                     flightData.compartment === 'C' || flightData.compartment === 'J' ? 'BUSINESS' : 'ECONOMY'
+        } : undefined,
         barcode: {
           type: "QR_CODE",
           value: flightData.raw,
-          alternateText: `${flightData.flightNumber} ${flightData.origin}-${flightData.destination} ${flightData.seatNumber}`
+          alternateText: `${flightData.flightNumber} ${flightData.origin}-${flightData.destination} ${flightData.seatNumber || ''}`
         }
       }]
     }

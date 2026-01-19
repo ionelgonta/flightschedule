@@ -237,6 +237,52 @@ export default function CacheManagement() {
     )
   }
 
+  if (!stats) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center text-red-600">
+            <AlertCircle className="h-6 w-6 mr-2" />
+            Eroare la încărcarea statisticilor cache. Reîncarcă pagina.
+          </div>
+          <div className="flex justify-center mt-4">
+            <Button onClick={loadStats} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reîncearcă
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Ensure stats has all required properties with defaults
+  const safeStats = {
+    config: stats.config || {
+      flightData: { cronInterval: 10, cacheUntilNext: true },
+      analytics: { cronInterval: 30, cacheMaxAge: 360 },
+      aircraft: { cronInterval: 360, cacheMaxAge: 360 }
+    },
+    requestCounter: stats.requestCounter || {
+      flightData: 0,
+      analytics: 0,
+      aircraft: 0,
+      totalRequests: 0,
+      lastReset: null
+    },
+    cacheEntries: stats.cacheEntries || {
+      flightData: 0,
+      analytics: 0,
+      aircraft: 0,
+      total: 0
+    },
+    lastUpdated: stats.lastUpdated || {
+      flightData: null,
+      analytics: null,
+      aircraft: null
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Configurație Cache */}
@@ -417,19 +463,19 @@ export default function CacheManagement() {
             {/* Request Counter */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{stats.requestCounter.flightData}</div>
+                <div className="text-2xl font-bold text-blue-600">{safeStats.requestCounter.flightData}</div>
                 <div className="text-sm text-muted-foreground">Flight Data</div>
               </div>
               <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">{stats.requestCounter.analytics}</div>
+                <div className="text-2xl font-bold text-green-600">{safeStats.requestCounter.analytics}</div>
                 <div className="text-sm text-muted-foreground">Analytics</div>
               </div>
               <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">{stats.requestCounter.aircraft}</div>
+                <div className="text-2xl font-bold text-purple-600">{safeStats.requestCounter.aircraft}</div>
                 <div className="text-sm text-muted-foreground">Aircraft</div>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-600">{stats.requestCounter.totalRequests}</div>
+                <div className="text-2xl font-bold text-gray-600">{safeStats.requestCounter.totalRequests}</div>
                 <div className="text-sm text-muted-foreground">Total</div>
               </div>
             </div>
@@ -437,7 +483,7 @@ export default function CacheManagement() {
             <div className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
                 <Clock className="h-4 w-4 inline mr-1" />
-                Ultimul reset: {formatDate(stats.requestCounter.lastReset)}
+                Ultimul reset: {formatDate(safeStats.requestCounter.lastReset)}
               </div>
               <Button variant="outline" onClick={resetCounter}>
                 Reset Contor
@@ -451,28 +497,28 @@ export default function CacheManagement() {
               <h3 className="text-lg font-semibold">Intrări Cache</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 border rounded-lg">
-                  <div className="text-xl font-bold">{stats.cacheEntries.flightData}</div>
+                  <div className="text-xl font-bold">{safeStats.cacheEntries.flightData}</div>
                   <div className="text-sm text-muted-foreground">Flight Data</div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {formatDate(stats.lastUpdated.flightData)}
+                    {formatDate(safeStats.lastUpdated.flightData)}
                   </div>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
-                  <div className="text-xl font-bold">{stats.cacheEntries.analytics}</div>
+                  <div className="text-xl font-bold">{safeStats.cacheEntries.analytics}</div>
                   <div className="text-sm text-muted-foreground">Analytics</div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {formatDate(stats.lastUpdated.analytics)}
+                    {formatDate(safeStats.lastUpdated.analytics)}
                   </div>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
-                  <div className="text-xl font-bold">{stats.cacheEntries.aircraft}</div>
+                  <div className="text-xl font-bold">{safeStats.cacheEntries.aircraft}</div>
                   <div className="text-sm text-muted-foreground">Aircraft</div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {formatDate(stats.lastUpdated.aircraft)}
+                    {formatDate(safeStats.lastUpdated.aircraft)}
                   </div>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
-                  <div className="text-xl font-bold">{stats.cacheEntries.total}</div>
+                  <div className="text-xl font-bold">{safeStats.cacheEntries.total}</div>
                   <div className="text-sm text-muted-foreground">Total</div>
                 </div>
               </div>
@@ -656,15 +702,15 @@ function PersistentCacheSection() {
             {/* Statistici Generale */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{persistentStats.totalFlights}</div>
+                <div className="text-2xl font-bold text-blue-600">{persistentStats.totalFlights || 0}</div>
                 <div className="text-sm text-muted-foreground">Total Zboruri</div>
               </div>
               <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">{persistentStats.flightsByType.arrivals}</div>
+                <div className="text-2xl font-bold text-green-600">{persistentStats.flightsByType?.arrivals || 0}</div>
                 <div className="text-sm text-muted-foreground">Sosiri</div>
               </div>
               <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">{persistentStats.flightsByType.departures}</div>
+                <div className="text-2xl font-bold text-purple-600">{persistentStats.flightsByType?.departures || 0}</div>
                 <div className="text-sm text-muted-foreground">Plecări</div>
               </div>
             </div>

@@ -37,34 +37,47 @@ export default function BoardingPassPage() {
   const [result, setResult] = useState<{
     flightData?: any;
     walletLink?: string;
+    publicUrl?: string;
+    boardingPassId?: string;
     error?: string;
   } | null>(null);
 
   useEffect(() => {
     // Verifică dacă utilizatorul este autentificat
     const checkAuth = () => {
-      const authenticated = localStorage.getItem('colibri_authenticated');
-      const authTime = localStorage.getItem('colibri_auth_time');
-      
-      if (authenticated === 'true' && authTime) {
-        // Verifică dacă sesiunea nu a expirat (24 ore)
-        const now = Date.now();
-        const authTimestamp = parseInt(authTime);
-        const twentyFourHours = 24 * 60 * 60 * 1000;
+      try {
+        // Verifică dacă suntem în browser
+        if (typeof window === 'undefined') {
+          setIsLoading(false);
+          return;
+        }
         
-        if (now - authTimestamp < twentyFourHours) {
-          setIsAuthenticated(true);
+        const authenticated = localStorage.getItem('colibri_authenticated');
+        const authTime = localStorage.getItem('colibri_auth_time');
+        
+        if (authenticated === 'true' && authTime) {
+          // Verifică dacă sesiunea nu a expirat (24 ore)
+          const now = Date.now();
+          const authTimestamp = parseInt(authTime);
+          const twentyFourHours = 24 * 60 * 60 * 1000;
+          
+          if (now - authTimestamp < twentyFourHours) {
+            setIsAuthenticated(true);
+          } else {
+            // Sesiunea a expirat
+            localStorage.removeItem('colibri_authenticated');
+            localStorage.removeItem('colibri_auth_time');
+            setIsAuthenticated(false);
+          }
         } else {
-          // Sesiunea a expirat
-          localStorage.removeItem('colibri_authenticated');
-          localStorage.removeItem('colibri_auth_time');
           setIsAuthenticated(false);
         }
-      } else {
+      } catch (error) {
+        console.error('Auth check error:', error);
         setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
 
     checkAuth();
@@ -109,9 +122,34 @@ export default function BoardingPassPage() {
       const data = await response.json();
       
       if (data.success && data.walletLink) {
+        // Salvează boarding pass-ul actualizat
+        let publicUrl = null;
+        let boardingPassId = null;
+        
+        try {
+          const saveResponse = await fetch('/api/boarding-pass/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...editData,
+              walletLink: data.walletLink
+            })
+          });
+          
+          const saveData = await saveResponse.json();
+          if (saveData.success) {
+            publicUrl = saveData.publicUrl;
+            boardingPassId = saveData.id;
+          }
+        } catch (saveErr) {
+          console.error('Failed to save boarding pass:', saveErr);
+        }
+        
         setResult({
           flightData: editData,
-          walletLink: data.walletLink
+          walletLink: data.walletLink,
+          publicUrl,
+          boardingPassId
         });
         setIsEditing(false);
         setEditData(null);
@@ -160,10 +198,55 @@ export default function BoardingPassPage() {
         throw new Error(data.error || 'Processing failed');
       }
 
+      // Verifică că avem datele necesare
+      if (!data.flightData) {
+        throw new Error('No flight data returned from server');
+      }
+
+      // Convert PDF to base64 for storage
+      let pdfBase64: string | null = null;
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        pdfBase64 = btoa(binary);
+      } catch (pdfErr) {
+        console.error('Failed to convert PDF to base64:', pdfErr);
+      }
+
+      // Salvează boarding pass-ul și obține link-ul public
+      let publicUrl = null;
+      let boardingPassId = null;
+      
+      try {
+        const saveResponse = await fetch('/api/boarding-pass/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...data.flightData,
+            walletLink: data.walletLink,
+            pdfBase64: pdfBase64
+          })
+        });
+        
+        const saveData = await saveResponse.json();
+        if (saveData.success) {
+          publicUrl = saveData.publicUrl;
+          boardingPassId = saveData.id;
+        }
+      } catch (saveErr) {
+        console.error('Failed to save boarding pass:', saveErr);
+      }
+
       // Succes
       setResult({
         flightData: data.flightData,
-        walletLink: data.walletLink
+        walletLink: data.walletLink,
+        publicUrl,
+        boardingPassId
       });
 
     } catch (error) {
@@ -416,6 +499,15 @@ export default function BoardingPassPage() {
                           />
                         </div>
                         <div>
+                          <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>🕐 Ora Plecare</label>
+                          <input
+                            type="time"
+                            value={editData.departureTime || ''}
+                            onChange={(e) => setEditData({ ...editData, departureTime: e.target.value })}
+                            style={{ width: '100%', padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '4px' }}
+                          />
+                        </div>
+                        <div>
                           <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.25rem' }}>💺 Loc</label>
                           <input
                             type="text"
@@ -491,6 +583,9 @@ export default function BoardingPassPage() {
                                   📅 {new Date(result.flightData.flightDate).toLocaleDateString('ro-RO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                 </div>
                               )}
+                              <div style={{ fontSize: '0.875rem', color: result.flightData.departureTime ? '#059669' : '#f59e0b', fontWeight: 600 }}>
+                                🕐 Ora plecare: {result.flightData.departureTime || '(nedetectată - editează pentru a adăuga)'}
+                              </div>
                             </div>
                             <div>
                               <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>🛫🛬 Rută</div>
@@ -538,6 +633,67 @@ export default function BoardingPassPage() {
                           >
                             📱 Adaugă în Google Wallet
                           </a>
+                        </div>
+                      )}
+
+                      {/* Public URL for sharing */}
+                      {result.publicUrl && (
+                        <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: '#f0f9ff', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                          <p style={{ fontSize: '0.875rem', color: '#0369a1', marginBottom: '0.5rem', fontWeight: 600 }}>
+                            <a 
+                              href={result.publicUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={{ color: '#0369a1', textDecoration: 'underline', cursor: 'pointer' }}
+                            >
+                              🔗 Link public pentru client:
+                            </a>
+                          </p>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <a
+                              href={result.publicUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                flex: 1,
+                                padding: '0.75rem',
+                                border: '1px solid #7dd3fc',
+                                borderRadius: '6px',
+                                backgroundColor: 'white',
+                                fontSize: '0.875rem',
+                                fontFamily: 'monospace',
+                                color: '#0369a1',
+                                textDecoration: 'none',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                display: 'block'
+                              }}
+                              title={result.publicUrl}
+                            >
+                              {result.publicUrl}
+                            </a>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(result.publicUrl || '');
+                                alert('Link copiat în clipboard!');
+                              }}
+                              style={{
+                                padding: '0.75rem 1rem',
+                                backgroundColor: '#0284c7',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontWeight: 600
+                              }}
+                            >
+                              📋 Copiază
+                            </button>
+                          </div>
+                          <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.5rem' }}>
+                            Trimite acest link clientului pentru a-și adăuga boarding pass-ul în Google Wallet
+                          </p>
                         </div>
                       )}
                     </>

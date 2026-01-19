@@ -131,7 +131,7 @@ export class AdvancedBarcodeDetector {
   /**
    * Find BCBP patterns in text
    */
-  private findBCBPPatterns(text: string): string | null {
+  private findBCBPPatterns(text: string): string | undefined {
     // Clean text
     const cleanText = text.replace(/[\\n\\r\\t]/g, ' ').replace(/\s+/g, ' ');
     
@@ -169,7 +169,7 @@ export class AdvancedBarcodeDetector {
   /**
    * Extract from PDF structure
    */
-  private extractFromPDFStructure(pdfBuffer: Buffer): string | null {
+  private extractFromPDFStructure(pdfBuffer: Buffer): string | undefined {
     const pdfText = pdfBuffer.toString('binary');
     
     // Look for PDF text objects
@@ -194,13 +194,13 @@ export class AdvancedBarcodeDetector {
       }
     }
     
-    return null;
+    return undefined;
   }
   
   /**
    * Reconstruct BCBP from parts
    */
-  private reconstructBCBP(text: string): string | null {
+  private reconstructBCBP(text: string): string | undefined {
     // Extract components
     const nameMatch = text.match(/([A-Z]{2,}\/[A-Z]{2,})/);
     const flightMatch = text.match(/(RO|W4|WZ|LH|FR|BA|KL|AF)(\d{3,4})/);
@@ -222,13 +222,13 @@ export class AdvancedBarcodeDetector {
       }
     }
     
-    return null;
+    return undefined;
   }
   
   /**
    * Clean and validate BCBP
    */
-  private cleanAndValidateBCBP(bcbp: string): string | null {
+  private cleanAndValidateBCBP(bcbp: string): string | undefined {
     // Clean the BCBP
     let cleaned = bcbp
       .replace(/[\\n\\r\\t]/g, ' ')
@@ -237,12 +237,12 @@ export class AdvancedBarcodeDetector {
     
     // Ensure it starts with M1
     if (!cleaned.startsWith('M1')) {
-      return null;
+      return undefined;
     }
     
     // Validate structure
     if (!this.validateBCBPStructure(cleaned)) {
-      return null;
+      return undefined;
     }
     
     // Limit length

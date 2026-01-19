@@ -345,10 +345,14 @@ class FixedCacheManager {
     // FIXED: Staggered start times to prevent simultaneous API calls
     
     // Flight Data Cron - starts immediately, then every X minutes
+    console.log(`[FLIGHT CRON] Scheduling flight data cron to start in 1 second, then every ${this.config.flightData.cronInterval} minutes`)
     setTimeout(async () => {
+      console.log(`[FLIGHT CRON] Initial flight data cron starting NOW at ${new Date().toISOString()}`)
       await this.runFlightDataCron()
       const flightDataInterval = this.config!.flightData.cronInterval * 60 * 1000
+      console.log(`[FLIGHT CRON] Setting up recurring cron every ${flightDataInterval / 1000 / 60} minutes`)
       const flightDataJob = setInterval(async () => {
+        console.log(`[FLIGHT CRON] Recurring flight data cron triggered at ${new Date().toISOString()}`)
         await this.runFlightDataCron()
       }, flightDataInterval)
       this.cronJobs.set('flightData', flightDataJob)
@@ -374,7 +378,254 @@ class FixedCacheManager {
       this.cronJobs.set('analytics', analyticsJob)
     }, 5 * 60 * 1000)
 
+    // AviationStack Daily Cron for Romanian airports - runs at 7:00 AM Romania time (UTC+2/+3)
+    this.scheduleDailyAviationStackCron()
+
     console.log('[Fixed Cache Manager] All cron jobs scheduled with staggered start times')
+  }
+
+  /**
+   * Schedule daily AviationStack cron for Romanian airports at 7:00 AM Romania time
+   */
+  private scheduleDailyAviationStackCron(): void {
+    const scheduleNextRun = () => {
+      const now = new Date()
+      
+      // Calculate next 7:00 AM Romania time (Europe/Bucharest = UTC+2 winter, UTC+3 summer)
+      // Using UTC+2 as base (winter time), adjust if needed
+      const romaniaOffset = 2 // hours ahead of UTC (winter time)
+      const targetHour = 7 // 7:00 AM Romania time
+      
+      // Get current time in Romania
+      const nowUtc = now.getTime() + (now.getTimezoneOffset() * 60 * 1000)
+      const romaniaTime = new Date(nowUtc + (romaniaOffset * 60 * 60 * 1000))
+      
+      // Calculate next 7:00 AM
+      let nextRun = new Date(romaniaTime)
+      nextRun.setHours(targetHour, 0, 0, 0)
+      
+      // If it's already past 7:00 AM today, schedule for tomorrow
+      if (romaniaTime.getHours() >= targetHour) {
+        nextRun.setDate(nextRun.getDate() + 1)
+      }
+      
+      // Convert back to local server time
+      const nextRunUtc = nextRun.getTime() - (romaniaOffset * 60 * 60 * 1000)
+      const nextRunLocal = new Date(nextRunUtc - (now.getTimezoneOffset() * 60 * 1000))
+      
+      const msUntilNextRun = nextRunLocal.getTime() - now.getTime()
+      
+      console.log(`[AviationStack Daily] Scheduled next run at 7:00 AM Romania time`)
+      console.log(`[AviationStack Daily] Next run in ${Math.round(msUntilNextRun / 1000 / 60)} minutes (${nextRunLocal.toISOString()})`)
+      
+      const dailyJob = setTimeout(async () => {
+        console.log(`[AviationStack Daily] ========== STARTING DAILY AVIATIONSTACK CRON FOR ROMANIA ==========`)
+        await this.runAviationStackForRomanianAirports()
+        // Schedule next run after completion
+        scheduleNextRun()
+      }, msUntilNextRun)
+      
+      this.cronJobs.set('aviationStackDaily', dailyJob)
+    }
+    
+    scheduleNextRun()
+  }
+
+  /**
+   * Romanian airports list for daily AviationStack scan
+   */
+  private getRomanianAirports(): string[] {
+    return [
+      'OTP', // București Henri Coandă
+      'BBU', // București Aurel Vlaicu
+      'CLJ', // Cluj-Napoca
+      'TSR', // Timișoara
+      'IAS', // Iași
+      'CND', // Constanța
+      'SBZ', // Sibiu
+      'CRA', // Craiova
+      'BCM', // Bacău
+      'OMR', // Oradea
+      'SCV', // Suceava
+      'TGM', // Târgu Mureș
+      'ARW', // Arad
+      'SUJ', // Satu Mare
+    ]
+  }
+
+  /**
+   * Run AviationStack for all Romanian airports (daily at 7:00 AM)
+   */
+  private async runAviationStackForRomanianAirports(): Promise<void> {
+    const startTime = new Date()
+    console.log(`[AviationStack Daily] Start time: ${startTime.toISOString()}`)
+    
+    const aviationStackApiKey = process.env.AVIATIONSTACK_API_KEY
+    if (!aviationStackApiKey) {
+      console.log(`[AviationStack Daily] AVIATIONSTACK_API_KEY not configured, skipping`)
+      return
+    }
+    
+    const romanianAirports = this.getRomanianAirports()
+    console.log(`[AviationStack Daily] Processing ${romanianAirports.length} Romanian airports: ${romanianAirports.join(', ')}`)
+    
+    let successCount = 0
+    let errorCount = 0
+    
+    for (const airportCode of romanianAirports) {
+      try {
+        console.log(`[AviationStack Daily] Processing ${airportCode}...`)
+        
+        // Fetch arrivals
+        await this.fetchAviationStackAndMerge(airportCode, 'arrivals')
+        await this.delay(2000) // 2 second delay between requests to avoid rate limiting
+        
+        // Fetch departures
+        await this.fetchAviationStackAndMerge(airportCode, 'departures')
+        await this.delay(2000)
+        
+        successCount++
+      } catch (error) {
+        errorCount++
+        console.error(`[AviationStack Daily] Error processing ${airportCode}:`, error)
+      }
+    }
+    
+    const endTime = new Date()
+    const durationMs = endTime.getTime() - startTime.getTime()
+    console.log(`[AviationStack Daily] ========== DAILY AVIATIONSTACK CRON COMPLETED ==========`)
+    console.log(`[AviationStack Daily] Duration: ${Math.round(durationMs / 1000)} seconds`)
+    console.log(`[AviationStack Daily] Success: ${successCount}/${romanianAirports.length}, Errors: ${errorCount}`)
+  }
+
+  /**
+   * Fetch from AviationStack and merge with existing cache data
+   */
+  private async fetchAviationStackAndMerge(
+    airportCode: string,
+    type: 'arrivals' | 'departures'
+  ): Promise<void> {
+    const aviationStackApiKey = process.env.AVIATIONSTACK_API_KEY
+    if (!aviationStackApiKey) return
+    
+    const cacheKey = `${airportCode}_${type}`
+    
+    try {
+      const { default: AviationStackService } = await import('./aviationStackService')
+      const aviationStackService = new AviationStackService(aviationStackApiKey)
+      
+      const aviationStackFlights = type === 'arrivals'
+        ? await aviationStackService.getArrivals(airportCode)
+        : await aviationStackService.getDepartures(airportCode)
+      
+      const convertedFlights = aviationStackService.convertToStandardFormat(aviationStackFlights, type)
+      
+      console.log(`[AviationStack Daily] ${airportCode} ${type}: ${convertedFlights.length} flights from AviationStack`)
+      
+      if (convertedFlights.length === 0) {
+        console.log(`[AviationStack Daily] No flights from AviationStack for ${airportCode} ${type}, skipping merge`)
+        return
+      }
+      
+      // Get existing cache data
+      const existingEntry = this.getValidCacheEntry(cacheKey)
+      let existingFlights: any[] = []
+      
+      if (existingEntry?.data) {
+        // Handle both array and {flights: [...]} structure
+        if (Array.isArray(existingEntry.data)) {
+          existingFlights = existingEntry.data
+        } else if (existingEntry.data.flights && Array.isArray(existingEntry.data.flights)) {
+          existingFlights = existingEntry.data.flights
+        }
+      }
+      
+      // Merge with AviationStack having priority
+      const mergedFlights = this.mergeAndDeduplicateFlights(existingFlights, convertedFlights, type)
+      
+      console.log(`[AviationStack Daily] ${airportCode} ${type}: Merged ${mergedFlights.length} unique flights`)
+      
+      // Save merged data to cache
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      
+      const cacheEntry: CacheEntry = {
+        id: `flight_${cacheKey}_${Date.now()}`,
+        category: 'flightData',
+        key: cacheKey,
+        data: mergedFlights,
+        createdAt: new Date().toISOString(),
+        expiresAt,
+        lastAccessed: new Date().toISOString(),
+        source: 'cron',
+        success: true
+      }
+      
+      // Remove old entries for this key
+      const oldEntries = Array.from(this.cacheData.values()).filter(
+        entry => entry.category === 'flightData' && entry.key === cacheKey
+      )
+      oldEntries.forEach(entry => this.cacheData.delete(entry.id))
+      
+      // Add new entry
+      this.cacheData.set(cacheEntry.id, cacheEntry)
+      await this.saveCacheData()
+      
+      // Save to persistent system
+      if (persistentFlightSystem) {
+        try {
+          await persistentFlightSystem.ingestFlightData(mergedFlights, airportCode, type)
+        } catch (error) {
+          console.error(`[AviationStack Daily] Failed to save to persistent system:`, error)
+        }
+      }
+      
+    } catch (error) {
+      console.error(`[AviationStack Daily] Error fetching ${airportCode} ${type}:`, error)
+      throw error
+    }
+  }
+
+  /**
+   * Manual trigger for AviationStack Romanian airports scan
+   */
+  async triggerAviationStackRomanianScan(): Promise<{ success: boolean; message: string }> {
+    console.log(`[AviationStack Manual] Manual trigger for Romanian airports scan`)
+    try {
+      await this.runAviationStackForRomanianAirports()
+      return { success: true, message: 'AviationStack scan completed for all Romanian airports' }
+    } catch (error) {
+      console.error(`[AviationStack Manual] Error:`, error)
+      return { success: false, message: `Error: ${error}` }
+    }
+  }
+
+  /**
+   * Manual trigger for AviationStack scan of a single airport
+   */
+  async triggerAviationStackSingleAirport(airportCode: string): Promise<{ success: boolean; message: string }> {
+    console.log(`[AviationStack Manual] Manual trigger for single airport: ${airportCode}`)
+    
+    const aviationStackApiKey = process.env.AVIATIONSTACK_API_KEY
+    if (!aviationStackApiKey) {
+      return { success: false, message: 'AVIATIONSTACK_API_KEY not configured' }
+    }
+    
+    try {
+      // Fetch arrivals
+      console.log(`[AviationStack Manual] Fetching arrivals for ${airportCode}...`)
+      await this.fetchAviationStackAndMerge(airportCode, 'arrivals')
+      
+      await this.delay(2000) // 2 second delay between requests
+      
+      // Fetch departures
+      console.log(`[AviationStack Manual] Fetching departures for ${airportCode}...`)
+      await this.fetchAviationStackAndMerge(airportCode, 'departures')
+      
+      return { success: true, message: `AviationStack scan completed for ${airportCode} (arrivals + departures)` }
+    } catch (error) {
+      console.error(`[AviationStack Manual] Error for ${airportCode}:`, error)
+      return { success: false, message: `Error scanning ${airportCode}: ${error}` }
+    }
   }
 
   private stopCronJobs(): void {
@@ -389,30 +640,47 @@ class FixedCacheManager {
    * FIXED: Flight data cron cu rate limiting și error handling îmbunătățit
    */
   private async runFlightDataCron(): Promise<void> {
-    console.log('[Fixed Cache Manager] Running flight data cron job...')
+    const startTime = new Date()
+    console.log(`[FLIGHT CRON] ========== STARTING FLIGHT DATA CRON ==========`)
+    console.log(`[FLIGHT CRON] Start time: ${startTime.toISOString()}`)
+    console.log(`[FLIGHT CRON] Interval configured: ${this.config?.flightData.cronInterval} minutes`)
     
     const airports = await this.getAllSupportedAirports()
+    console.log(`[FLIGHT CRON] Processing ${airports.length} airports: ${airports.join(', ')}`)
+    
+    let successCount = 0
+    let errorCount = 0
     
     // FIXED: Process airports sequentially to avoid API rate limiting
     for (const airport of airports) {
       try {
+        console.log(`[FLIGHT CRON] Processing ${airport}...`)
         await this.fetchAndCacheFlightDataSafe(airport, 'arrivals', 'cron')
         await this.delay(1000) // 1 second delay between airport requests
         
         await this.fetchAndCacheFlightDataSafe(airport, 'departures', 'cron')
         await this.delay(1000) // 1 second delay between requests
         
+        successCount++
       } catch (error) {
-        console.error(`[Fixed Cache Manager] Error processing ${airport}:`, error)
+        errorCount++
+        console.error(`[FLIGHT CRON] Error processing ${airport}:`, error)
         // Continue with next airport instead of failing completely
       }
     }
     
-    console.log('[Fixed Cache Manager] Flight data cron job completed')
+    const endTime = new Date()
+    const durationMs = endTime.getTime() - startTime.getTime()
+    console.log(`[FLIGHT CRON] ========== FLIGHT DATA CRON COMPLETED ==========`)
+    console.log(`[FLIGHT CRON] End time: ${endTime.toISOString()}`)
+    console.log(`[FLIGHT CRON] Duration: ${Math.round(durationMs / 1000)} seconds`)
+    console.log(`[FLIGHT CRON] Success: ${successCount}/${airports.length}, Errors: ${errorCount}`)
+    console.log(`[FLIGHT CRON] Next run in: ${this.config?.flightData.cronInterval} minutes`)
   }
 
   /**
    * FIXED: Safe flight data fetching with proper error handling
+   * ENHANCED: For RMO (Chișinău), fetches from both AeroDataBox AND AviationStack, then merges/deduplicates
    */
   private async fetchAndCacheFlightDataSafe(
     airportCode: string, 
@@ -460,6 +728,69 @@ class FixedCacheManager {
           ? await apiService.getArrivals(airportCode)
           : await apiService.getDepartures(airportCode)
       }, airportCode, type)
+      
+      // ENHANCED: For RMO (Chișinău), also fetch from AviationStack and merge data
+      // AviationStack is called only once every 4 hours to save API quota
+      if (airportCode === 'RMO') {
+        const aviationStackApiKey = process.env.AVIATIONSTACK_API_KEY
+        if (aviationStackApiKey) {
+          // Check if we should call AviationStack (only every 4 hours)
+          const aviationStackCacheKey = `aviationstack_${airportCode}_${type}_lastCall`
+          const lastAviationStackCall = this.getCachedData<number>(aviationStackCacheKey)
+          const now = Date.now()
+          const fourHoursMs = 4 * 60 * 60 * 1000 // 4 hours in milliseconds
+          
+          const shouldCallAviationStack = !lastAviationStackCall || (now - lastAviationStackCall) >= fourHoursMs
+          
+          if (shouldCallAviationStack) {
+            console.log(`[Fixed Cache Manager] RMO detected - fetching data from AviationStack (4-hour interval)`)
+            try {
+              const { default: AviationStackService } = await import('./aviationStackService')
+              const aviationStackService = new AviationStackService(aviationStackApiKey)
+              
+              await this.delay(500) // Small delay between API calls
+              
+              const aviationStackFlights = type === 'arrivals'
+                ? await aviationStackService.getArrivals(airportCode)
+                : await aviationStackService.getDepartures(airportCode)
+              
+              const convertedAviationStackFlights = aviationStackService.convertToStandardFormat(aviationStackFlights, type)
+              
+              console.log(`[Fixed Cache Manager] AviationStack returned ${convertedAviationStackFlights.length} ${type} for RMO`)
+              
+              // Save timestamp of last AviationStack call
+              this.setCachedData(aviationStackCacheKey, now, 'flightData', 5 * 60 * 60 * 1000) // 5 hours TTL
+              
+              // Merge and deduplicate flights - AviationStack has PRIORITY
+              if (response.success && convertedAviationStackFlights.length > 0) {
+                const mergedFlights = this.mergeAndDeduplicateFlights(
+                  response.data || [],
+                  convertedAviationStackFlights,
+                  type
+                )
+                response.data = mergedFlights
+                response.source = 'AeroDataBox + AviationStack (merged)'
+                console.log(`[Fixed Cache Manager] Merged RMO ${type}: ${mergedFlights.length} unique flights`)
+              } else if (!response.success && convertedAviationStackFlights.length > 0) {
+                // AeroDataBox failed but AviationStack succeeded
+                response.success = true
+                response.data = convertedAviationStackFlights
+                response.source = 'AviationStack'
+                response.error = undefined
+                console.log(`[Fixed Cache Manager] Using AviationStack data for RMO ${type}: ${convertedAviationStackFlights.length} flights`)
+              }
+            } catch (aviationStackError) {
+              console.error(`[Fixed Cache Manager] AviationStack failed for RMO ${type}:`, aviationStackError)
+              // Continue with AeroDataBox data only
+            }
+          } else {
+            const minutesSinceLastCall = Math.round((now - (lastAviationStackCall || 0)) / (60 * 1000))
+            console.log(`[Fixed Cache Manager] RMO - skipping AviationStack (last call ${minutesSinceLastCall} min ago, next in ${240 - minutesSinceLastCall} min)`)
+          }
+        } else {
+          console.log(`[Fixed Cache Manager] AVIATIONSTACK_API_KEY not configured, skipping AviationStack for RMO`)
+        }
+      }
 
       // FIXED: Distinguish between API failure and empty results
       // Empty results (0 flights) is valid - some airports have no flights at certain times
@@ -532,6 +863,74 @@ class FixedCacheManager {
         await this.saveCacheData()
       }
     }
+  }
+
+  /**
+   * Merge and deduplicate flights from multiple sources (AeroDataBox + AviationStack)
+   * Uses flight number + scheduled time as unique key
+   */
+  private mergeAndDeduplicateFlights(
+    aeroDataBoxFlights: any[],
+    aviationStackFlights: any[],
+    type: 'arrivals' | 'departures'
+  ): any[] {
+    // Ensure inputs are arrays
+    const adbFlights = Array.isArray(aeroDataBoxFlights) ? aeroDataBoxFlights : []
+    const asFlights = Array.isArray(aviationStackFlights) ? aviationStackFlights : []
+    
+    const seenKeys: Set<string> = new Set()
+    const result: any[] = []
+    
+    // Helper to create unique key for a flight
+    const getFlightKey = (flight: any): string => {
+      const flightNumber = (flight.flightNumber || flight.flight_number || '').toUpperCase().replace(/\s+/g, '')
+      const scheduledTime = flight.scheduledTime || flight.scheduled_time || ''
+      // Extract just the time part for comparison (HH:MM)
+      const timeMatch = scheduledTime.match(/(\d{2}:\d{2})/)
+      const time = timeMatch ? timeMatch[1] : scheduledTime.substring(0, 16)
+      return `${flightNumber}_${time}`
+    }
+    
+    // Add AviationStack flights FIRST (PRIORITY source)
+    for (let i = 0; i < asFlights.length; i++) {
+      const flight = asFlights[i]
+      const key = getFlightKey(flight)
+      if (key && key !== '_' && !seenKeys.has(key)) {
+        seenKeys.add(key)
+        result.push({
+          ...flight,
+          source: 'AviationStack'
+        })
+      }
+    }
+    
+    const aviationStackCount = result.length
+    let addedFromAeroDataBox = 0
+    
+    // Add AeroDataBox flights only if not already present from AviationStack
+    for (let i = 0; i < adbFlights.length; i++) {
+      const flight = adbFlights[i]
+      const key = getFlightKey(flight)
+      if (key && key !== '_' && !seenKeys.has(key)) {
+        seenKeys.add(key)
+        result.push({
+          ...flight,
+          source: flight.source || 'AeroDataBox'
+        })
+        addedFromAeroDataBox++
+      }
+    }
+    
+    console.log(`[Fixed Cache Manager] Merge result: ${aviationStackCount} from AviationStack (priority), ${addedFromAeroDataBox} unique from AeroDataBox`)
+    
+    // Sort by scheduled time
+    result.sort((a, b) => {
+      const timeA = a.scheduledTime || a.scheduled_time || ''
+      const timeB = b.scheduledTime || b.scheduled_time || ''
+      return timeA.localeCompare(timeB)
+    })
+    
+    return result
   }
 
   /**

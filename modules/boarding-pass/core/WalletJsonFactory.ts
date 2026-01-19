@@ -56,7 +56,11 @@ export class WalletJsonFactory {
       destination: {
         airportIataCode: data.destination
       },
-      localScheduledDepartureDateTime: this.formatDepartureTime(data.departureTime)
+      localScheduledDepartureDateTime: this.formatDepartureTime(data.departureTime),
+      boardingAndSeatingPolicy: {
+        boardingPolicy: 'ZONE_BASED',
+        seatClassPolicy: 'CABIN_BASED'
+      }
     };
   }
 
@@ -82,6 +86,15 @@ export class WalletJsonFactory {
         type: 'QR_CODE',
         value: data.bcbpData
       };
+    }
+
+    // Adaugă informații despre loc și îmbarcare dacă sunt disponibile
+    if (data.seatNumber || data.gate || data.boardingTime) {
+      flightObject.boardingAndSeatingInfo = {};
+      
+      if (data.seatNumber) {
+        flightObject.boardingAndSeatingInfo.seatNumber = data.seatNumber;
+      }
     }
 
     return flightObject;
