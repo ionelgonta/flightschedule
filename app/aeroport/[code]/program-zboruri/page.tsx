@@ -78,36 +78,23 @@ export default function FlightSchedulesPage({ params, searchParams }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       
-      <div className="min-h-screen">
-        {/* Header Banner Ad */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-          <AdBanner 
-            slot="header-banner"
-            size="728x90"
-            className="max-w-7xl mx-auto py-4"
-          />
+      <div className="min-h-screen relative z-10">
+        <div className="glass-card mx-4 mt-4 rounded-2xl overflow-hidden">
+          <AdBanner slot="header-banner" size="728x90" className="max-w-7xl mx-auto py-4" />
         </div>
 
-        {/* Page Header */}
-        <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12">
+        <section className="px-4 py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">
-                Program Zboruri {airport.city}
-              </h1>
-              <p className="text-xl text-blue-100 mb-2">
-                {airport.name}
-              </p>
-              <p className="text-blue-200">
-                Programul complet al zborurilor cu filtre avansate și calendar interactiv
-              </p>
+              <h1 className="text-3xl md:text-4xl font-bold mb-4 text-white">Program Zboruri {airport.city}</h1>
+              <p className="text-xl text-white/90 mb-2">{airport.name}</p>
+              <p className="text-white/80">Programul complet al zborurilor cu filtre avansate și calendar interactiv</p>
             </div>
           </div>
         </section>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Main Content */}
             <div className="lg:col-span-3 space-y-6">
               {/* Airport Selector */}
               <AirportSelector 
@@ -127,70 +114,29 @@ export default function FlightSchedulesPage({ params, searchParams }: Props) {
               />
             </div>
 
-            {/* Sidebar */}
             <div className="lg:col-span-1 space-y-6">
-              {/* Sidebar Ad */}
-              <AdBanner 
-                slot="sidebar-right"
-                size="300x600"
-              />
-              
-              {/* Quick Info */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Informații Aeroport
-                </h3>
-                <div className="space-y-3">
-                  <div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Cod IATA</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">{airport.code}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Oraș</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">{airport.city}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Țară</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">{airport.country}</div>
-                  </div>
+              <div className="glass-card rounded-2xl overflow-hidden p-2">
+                <AdBanner slot="sidebar-right" size="300x600" />
+              </div>
+              <div className="glass-card rounded-2xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Informații Aeroport</h3>
+                <div className="space-y-3 text-sm">
+                  <div><div className="text-sm text-white/70">Cod IATA</div><div className="font-semibold text-white">{airport.code}</div></div>
+                  <div><div className="text-sm text-white/70">Oraș</div><div className="font-semibold text-white">{airport.city}</div></div>
+                  <div><div className="text-sm text-white/70">Țară</div><div className="font-semibold text-white">{airport.country}</div></div>
                 </div>
               </div>
-
-              {/* Navigation Links */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Analize Zboruri
-                </h3>
+              <div className="glass-card rounded-2xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Analize Zboruri</h3>
                 <div className="space-y-2">
-                  <a
-                    href={`/aeroport/${generateAirportSlug(airport)}/statistici`}
-                    className="block p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <div className="font-medium text-gray-900 dark:text-white">Statistici</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Performanță și întârzieri</div>
-                  </a>
-                  <a
-                    href={`/aeroport/${generateAirportSlug(airport)}/istoric-zboruri`}
-                    className="block p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <div className="font-medium text-gray-900 dark:text-white">Istoric</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Tendințe și evoluție</div>
-                  </a>
-                  <a
-                    href={`/aeroport/${generateAirportSlug(airport)}/analize-zboruri`}
-                    className="block p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <div className="font-medium text-gray-900 dark:text-white">Analize</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Rute și destinații</div>
-                  </a>
+                  <a href={`/aeroport/${generateAirportSlug(airport)}/statistici`} className="block p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors border border-white/10"><div className="font-medium text-white">Statistici</div><div className="text-sm text-white/80">Performanță și întârzieri</div></a>
+                  <a href={`/aeroport/${generateAirportSlug(airport)}/istoric-zboruri`} className="block p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors border border-white/10"><div className="font-medium text-white">Istoric</div><div className="text-sm text-white/80">Tendințe și evoluție</div></a>
+                  <a href={`/aeroport/${generateAirportSlug(airport)}/analize-zboruri`} className="block p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors border border-white/10"><div className="font-medium text-white">Analize</div><div className="text-sm text-white/80">Rute și destinații</div></a>
                 </div>
               </div>
-
-              {/* Sidebar Square Ad */}
-              <AdBanner 
-                slot="sidebar-square"
-                size="300x250"
-              />
+              <div className="glass-card rounded-2xl overflow-hidden p-2">
+                <AdBanner slot="sidebar-square" size="300x250" />
+              </div>
             </div>
           </div>
         </div>

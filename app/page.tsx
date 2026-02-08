@@ -51,44 +51,42 @@ export default function HomePage() {
         }
       }} />
       
-      <div className="min-h-screen bg-gray-50">
-        {/* Compact Header Banner */}
-        <div className="bg-white border-b border-gray-200">
+      <div className="min-h-screen">
+        {/* Header Banner - glass */}
+        <div className="glass-card mx-4 mt-4 rounded-2xl overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 py-2 flex justify-center">
             <AdBanner slot="header-banner" size="728x90" />
           </div>
         </div>
 
-        {/* Compact Hero Section - Mobile First */}
-        <section className="bg-white">
-          <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+        {/* Hero - weather-app style: location + large title + CTA */}
+        <section className="px-4 pt-8 md:pt-12 pb-6">
+          <div className="max-w-7xl mx-auto">
             <div className="text-center">
-              {/* Compact Icon */}
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 rounded-lg mb-4">
-                <Plane className="h-6 w-6 text-white" />
+              {/* Location-style header (map pin + title) */}
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <MapPin className="h-5 w-5 text-white/90" />
+                <span className="text-lg font-medium text-white/95">România & Moldova</span>
               </div>
-              
-              {/* SEO Optimized Headlines */}
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-3">
-                Orarul Zborurilor România - Informații în Timp Real
+              {/* Large headline */}
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+                Orarul Zborurilor în Timp Real
               </h1>
-              <p className="text-base md:text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
-                Monitorizează sosirile și plecările zborurilor din aeroporturile din România și Moldova. 
-                Informații actualizate despre statusul zborurilor, întârzieri și schimbări de program.
+              <p className="text-base md:text-lg text-white/85 mb-8 max-w-2xl mx-auto">
+                Monitorizează sosirile și plecările din toate aeroporturile. Informații actualizate despre status, întârzieri și program.
               </p>
-              
-              {/* Compact Action Buttons */}
+              {/* CTA buttons - glass style */}
               <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
                 <Link
                   href="/aeroporturi"
-                  className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  className="flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-2xl font-medium hover:bg-white/30 border border-white/20 transition-colors"
                 >
                   <MapPin className="h-4 w-4 mr-2" />
                   Vezi Aeroporturi
                 </Link>
                 <Link
                   href="/cautare"
-                  className="flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-2xl font-medium hover:bg-white/20 border border-white/20 transition-colors"
                 >
                   <Search className="h-4 w-4 mr-2" />
                   Caută Zboruri
@@ -98,49 +96,47 @@ export default function HomePage() {
           </div>
         </section>
 
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Main Content */}
-            <div className="lg:col-span-3 space-y-8">
+            <div className="lg:col-span-3 space-y-6">
               
-              {/* Compact Features - Mobile First */}
+              {/* Features - glass cards (weather-app style) */}
               <section>
-                <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4">
+                <h2 className="text-lg md:text-xl font-bold text-white mb-4">
                   Funcționalități Principale
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="glass-card p-5 rounded-2xl">
                     <div className="flex items-center mb-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                        <Clock className="h-4 w-4 text-blue-600" />
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                        <Clock className="h-5 w-5 text-white" />
                       </div>
-                      <h3 className="font-semibold text-gray-900">Timp Real</h3>
+                      <h3 className="font-semibold text-white">Timp Real</h3>
                     </div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-white/80">
                       Actualizări continue despre statusul zborurilor și întârzieri.
                     </p>
                   </div>
-                  
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="glass-card p-5 rounded-2xl">
                     <div className="flex items-center mb-3">
-                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                        <MapPin className="h-4 w-4 text-green-600" />
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                        <MapPin className="h-5 w-5 text-white" />
                       </div>
-                      <h3 className="font-semibold text-gray-900">Toate Aeroporturile</h3>
+                      <h3 className="font-semibold text-white">Toate Aeroporturile</h3>
                     </div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-white/80">
                       Acoperire completă pentru România și Moldova.
                     </p>
                   </div>
-                  
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="glass-card p-5 rounded-2xl">
                     <div className="flex items-center mb-3">
-                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                        <BarChart3 className="h-4 w-4 text-purple-600" />
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                        <BarChart3 className="h-5 w-5 text-white" />
                       </div>
-                      <h3 className="font-semibold text-gray-900">Statistici</h3>
+                      <h3 className="font-semibold text-white">Statistici</h3>
                     </div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-white/80">
                       Analize detaliate și tendințe pentru fiecare aeroport.
                     </p>
                   </div>
@@ -152,47 +148,43 @@ export default function HomePage() {
                 <AdBanner slot="inline-banner" size="728x90" />
               </div>
 
-              {/* Compact Airport List - Mobile Optimized */}
+              {/* Airport list - glass cards */}
               <section>
-                <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4">
+                <h2 className="text-lg md:text-xl font-bold text-white mb-4">
                   Aeroporturi România și Moldova
                 </h2>
-                
-                {/* Mobile-First Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
                   {featuredAirports.map((airport) => (
                     <Link
                       key={airport.code}
                       href={`/aeroport/${generateAirportSlug(airport)}`}
-                      className="bg-white rounded-lg border border-gray-200 p-3 hover:border-blue-300 hover:shadow-sm transition-all"
+                      className="glass-card rounded-2xl p-4 hover:bg-white/20 transition-all"
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center">
-                          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-                            <span className="text-xs font-bold text-white">{airport.code}</span>
+                          <div className="w-10 h-10 bg-white/25 rounded-xl flex items-center justify-center mr-3">
+                            <span className="text-sm font-bold text-white">{airport.code}</span>
                           </div>
                           <div>
-                            <div className="font-semibold text-gray-900 text-sm">{airport.city}</div>
-                            <div className="text-xs text-gray-500">{airport.country}</div>
+                            <div className="font-semibold text-white text-sm">{airport.city}</div>
+                            <div className="text-xs text-white/70">{airport.country}</div>
                           </div>
                         </div>
-                        <Plane className="h-4 w-4 text-gray-400" />
+                        <Plane className="h-4 w-4 text-white/70" />
                       </div>
-                      <div className="text-xs text-gray-600 truncate">
+                      <div className="text-xs text-white/70 truncate">
                         {airport.name}
                       </div>
                     </Link>
                   ))}
                 </div>
-                
-                {/* Call to Action */}
-                <div className="bg-blue-50 rounded-lg p-4 text-center border border-blue-200">
-                  <h3 className="font-semibold text-blue-900 mb-2">
+                <div className="glass-card rounded-2xl p-5 text-center">
+                  <h3 className="font-semibold text-white mb-3">
                     Vezi toate aeroporturile ({MAJOR_AIRPORTS.length})
                   </h3>
                   <Link
                     href="/aeroporturi"
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                    className="inline-flex items-center px-5 py-2.5 bg-white/25 text-white rounded-2xl text-sm font-medium hover:bg-white/35 border border-white/20 transition-colors"
                   >
                     <MapPin className="h-4 w-4 mr-2" />
                     Explorează toate
@@ -200,93 +192,61 @@ export default function HomePage() {
                 </div>
               </section>
 
-              {/* Compact Services - Mobile First */}
+              {/* Services - glass cards */}
               <section>
-                <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4">
+                <h2 className="text-lg md:text-xl font-bold text-white mb-4">
                   Servicii Disponibile
                 </h2>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Link
-                    href="/statistici-aeroporturi"
-                    className="bg-white rounded-lg border border-gray-200 p-4 hover:border-green-300 hover:shadow-sm transition-all"
-                  >
+                  <Link href="/statistici-aeroporturi" className="glass-card rounded-2xl p-5 hover:bg-white/20 transition-all">
                     <div className="flex items-center mb-3">
-                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                        <TrendingUp className="h-4 w-4 text-green-600" />
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                        <TrendingUp className="h-5 w-5 text-white" />
                       </div>
-                      <h3 className="font-semibold text-gray-900">Statistici Aeroporturi</h3>
+                      <h3 className="font-semibold text-white">Statistici Aeroporturi</h3>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">
-                      Analizează performanța și punctualitatea aeroporturilor.
-                    </p>
-                    <div className="text-xs text-green-600 font-medium">
-                      Vezi statistici →
-                    </div>
+                    <p className="text-sm text-white/80 mb-2">Analizează performanța și punctualitatea aeroporturilor.</p>
+                    <div className="text-xs text-white/90 font-medium">Vezi statistici →</div>
                   </Link>
-                  
-                  <Link
-                    href="/planificator-zboruri"
-                    className="bg-white rounded-lg border border-gray-200 p-4 hover:border-purple-300 hover:shadow-sm transition-all"
-                  >
+                  <Link href="/planificator-zboruri" className="glass-card rounded-2xl p-5 hover:bg-white/20 transition-all">
                     <div className="flex items-center mb-3">
-                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                        <Plane className="h-4 w-4 text-purple-600" />
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                        <Plane className="h-5 w-5 text-white" />
                       </div>
-                      <h3 className="font-semibold text-gray-900">Planificator Zboruri</h3>
+                      <h3 className="font-semibold text-white">Planificator Zboruri</h3>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">
-                      Găsește zborurile perfecte cu flexibilitate maximă.
-                    </p>
-                    <div className="text-xs text-purple-600 font-medium">
-                      Planifică călătoria →
-                    </div>
+                    <p className="text-sm text-white/80 mb-2">Găsește zborurile perfecte cu flexibilitate maximă.</p>
+                    <div className="text-xs text-white/90 font-medium">Planifică călătoria →</div>
                   </Link>
-                  
-                  <Link
-                    href="/aeronave"
-                    className="bg-white rounded-lg border border-gray-200 p-4 hover:border-orange-300 hover:shadow-sm transition-all"
-                  >
+                  <Link href="/aeronave" className="glass-card rounded-2xl p-5 hover:bg-white/20 transition-all">
                     <div className="flex items-center mb-3">
-                      <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
-                        <Plane className="h-4 w-4 text-orange-600" />
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                        <Plane className="h-5 w-5 text-white" />
                       </div>
-                      <h3 className="font-semibold text-gray-900">Catalog Aeronave</h3>
+                      <h3 className="font-semibold text-white">Catalog Aeronave</h3>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">
-                      Căutare aeronave după înmatriculare sau model.
-                    </p>
-                    <div className="text-xs text-orange-600 font-medium">
-                      Explorează catalogul →
-                    </div>
+                    <p className="text-sm text-white/80 mb-2">Căutare aeronave după înmatriculare sau model.</p>
+                    <div className="text-xs text-white/90 font-medium">Explorează catalogul →</div>
                   </Link>
-                  
-                  <Link
-                    href="/cautare"
-                    className="bg-white rounded-lg border border-gray-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all"
-                  >
+                  <Link href="/cautare" className="glass-card rounded-2xl p-5 hover:bg-white/20 transition-all">
                     <div className="flex items-center mb-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                        <Search className="h-4 w-4 text-blue-600" />
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                        <Search className="h-5 w-5 text-white" />
                       </div>
-                      <h3 className="font-semibold text-gray-900">Căutare Zboruri</h3>
+                      <h3 className="font-semibold text-white">Căutare Zboruri</h3>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">
-                      Caută zboruri specifice după număr sau destinație.
-                    </p>
-                    <div className="text-xs text-blue-600 font-medium">
-                      Caută acum →
-                    </div>
+                    <p className="text-sm text-white/80 mb-2">Caută zboruri specifice după număr sau destinație.</p>
+                    <div className="text-xs text-white/90 font-medium">Caută acum →</div>
                   </Link>
                 </div>
               </section>
 
-              {/* SEO Content - Compact */}
-              <section className="bg-white rounded-lg p-6 border border-gray-200">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">
+              {/* SEO Content - glass card */}
+              <section className="glass-card rounded-2xl p-6">
+                <h2 className="text-lg font-bold text-white mb-4">
                   Monitorizare Zboruri România - Informații Complete
                 </h2>
-                <div className="space-y-4 text-sm text-gray-600">
+                <div className="space-y-4 text-sm text-white/85">
                   <p>
                     <strong>Orarul Zborurilor România</strong> oferă informații complete și actualizate în timp real despre 
                     zborurile din aeroporturile majore din România și Moldova. Monitorizează sosirile și plecările de la 
@@ -309,32 +269,31 @@ export default function HomePage() {
               </section>
             </div>
 
-            {/* Compact Sidebar */}
+            {/* Sidebar - glass cards */}
             <div className="lg:col-span-1 space-y-6">
-              {/* Sidebar Ad */}
-              <AdBanner slot="sidebar-right" size="300x600" />
-              
-              {/* Quick Stats - Compact */}
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <h3 className="font-semibold text-gray-900 mb-3 text-sm">
+              <div className="glass-card rounded-2xl overflow-hidden p-2">
+                <AdBanner slot="sidebar-right" size="300x600" />
+              </div>
+              <div className="glass-card rounded-2xl p-5">
+                <h3 className="font-semibold text-white mb-3 text-sm">
                   Statistici Platformă
                 </h3>
                 <div className="space-y-2 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Aeroporturi</span>
-                    <span className="font-semibold">{MAJOR_AIRPORTS.length}</span>
+                  <div className="flex justify-between text-white/90">
+                    <span>Aeroporturi</span>
+                    <span className="font-semibold text-white">{MAJOR_AIRPORTS.length}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Zboruri/zi</span>
-                    <span className="font-semibold">1000+</span>
+                  <div className="flex justify-between text-white/90">
+                    <span>Zboruri/zi</span>
+                    <span className="font-semibold text-white">1000+</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Companii</span>
-                    <span className="font-semibold">50+</span>
+                  <div className="flex justify-between text-white/90">
+                    <span>Companii</span>
+                    <span className="font-semibold text-white">50+</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Țări</span>
-                    <span className="font-semibold">2</span>
+                  <div className="flex justify-between text-white/90">
+                    <span>Țări</span>
+                    <span className="font-semibold text-white">2</span>
                   </div>
                 </div>
               </div>

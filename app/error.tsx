@@ -16,48 +16,30 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-md w-full text-center px-4">
+    <div className="min-h-screen flex items-center justify-center relative z-10">
+      <div className="glass-card rounded-2xl p-8 max-w-md w-full text-center">
         <div className="mb-8">
           <div className="flex justify-center mb-6">
-            <div className="p-4 bg-red-100 dark:bg-red-900 rounded-full">
-              <AlertTriangle className="h-16 w-16 text-red-600 dark:text-red-400" />
+            <div className="p-4 bg-red-500/20 rounded-2xl border border-red-400/40">
+              <AlertTriangle className="h-16 w-16 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Something went wrong
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-            We encountered an error while loading the flight information. This might be a temporary issue.
-          </p>
+          <h1 className="text-4xl font-bold text-white mb-4">Ceva nu a mers bine</h1>
+          <p className="text-lg text-white/85 mb-8">A apărut o eroare la încărcarea informațiilor. Poate fi temporar.</p>
         </div>
-
         <div className="space-y-4">
-          <button
-            onClick={reset}
-            className="inline-flex items-center justify-center w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors space-x-2"
-          >
-
-            <span>Try Again</span>
+          <button onClick={reset} className="inline-flex items-center justify-center w-full px-6 py-3 bg-white/25 text-white font-semibold rounded-2xl hover:bg-white/35 border border-white/20 transition-colors">
+            Încearcă din nou
           </button>
-          
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center w-full px-6 py-3 border-2 border-primary-600 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 font-semibold rounded-lg transition-colors space-x-2"
-          >
+          <Link href="/" className="inline-flex items-center justify-center w-full px-6 py-3 border-2 border-white/30 text-white hover:bg-white/10 font-semibold rounded-2xl transition-colors space-x-2">
             <Home className="h-5 w-5" />
-            <span>Go Home</span>
+            <span>Acasă</span>
           </Link>
         </div>
-
         {process.env.NODE_ENV === 'development' && (
-          <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-left">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
-              Error Details (Development)
-            </h3>
-            <pre className="text-xs text-gray-600 dark:text-gray-400 overflow-auto">
-              {error.message}
-            </pre>
+          <div className="mt-8 p-4 bg-white/10 rounded-2xl border border-white/20 text-left">
+            <h3 className="text-sm font-semibold text-white mb-2">Detalii eroare (Development)</h3>
+            <pre className="text-xs text-white/80 overflow-auto">{error.message}</pre>
           </div>
         )}
       </div>

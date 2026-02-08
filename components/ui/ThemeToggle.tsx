@@ -26,7 +26,7 @@ export function ThemeToggle() {
   // Don't render until mounted to avoid hydration mismatch
   if (!mounted) {
     return (
-      <div className="w-9 h-9 rounded-md bg-gray-100 animate-pulse" />
+      <div className="w-9 h-9 rounded-xl bg-white/10 animate-pulse" />
     )
   }
 
@@ -60,54 +60,31 @@ export function ThemeToggle() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        className="flex items-center justify-center w-9 h-9 rounded-xl text-sm font-medium text-white hover:bg-white/10 transition-colors"
         aria-label="Schimbă tema"
       >
         {getThemeIcon()}
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+        <div className="absolute top-full right-0 mt-2 w-48 glass-card shadow-xl py-2 z-50">
           <button
-            onClick={() => {
-              setTheme('light')
-              setIsOpen(false)
-            }}
-            className={`w-full flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-              theme === 'light' 
-                ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20' 
-                : 'text-gray-700 dark:text-gray-300'
-            }`}
+            onClick={() => { setTheme('light'); setIsOpen(false); }}
+            className={`w-full flex items-center space-x-3 px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors ${theme === 'light' ? 'bg-white/15' : ''}`}
           >
             <Sun className="h-4 w-4" />
             <span>Luminos</span>
           </button>
-          
           <button
-            onClick={() => {
-              setTheme('dark')
-              setIsOpen(false)
-            }}
-            className={`w-full flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-              theme === 'dark' 
-                ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20' 
-                : 'text-gray-700 dark:text-gray-300'
-            }`}
+            onClick={() => { setTheme('dark'); setIsOpen(false); }}
+            className={`w-full flex items-center space-x-3 px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors ${theme === 'dark' ? 'bg-white/15' : ''}`}
           >
             <Moon className="h-4 w-4" />
             <span>Întunecat</span>
           </button>
-          
           <button
-            onClick={() => {
-              setTheme('system')
-              setIsOpen(false)
-            }}
-            className={`w-full flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-              theme === 'system' 
-                ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20' 
-                : 'text-gray-700 dark:text-gray-300'
-            }`}
+            onClick={() => { setTheme('system'); setIsOpen(false); }}
+            className={`w-full flex items-center space-x-3 px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors ${theme === 'system' ? 'bg-white/15' : ''}`}
           >
             <Monitor className="h-4 w-4" />
             <span>Sistem</span>

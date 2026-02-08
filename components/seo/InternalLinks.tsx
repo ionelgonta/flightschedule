@@ -20,23 +20,23 @@ export function InternalLinks({ currentPage, className = '' }: InternalLinksProp
   ]
 
   return (
-    <div className={`bg-gray-50 dark:bg-gray-800 rounded-lg p-6 ${className}`}>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+    <div className={`glass-card rounded-2xl p-5 ${className}`}>
+      <h3 className="text-lg font-semibold text-white mb-4">
         Navigare Rapidă
       </h3>
       
       {/* Main Pages */}
-      <div className="space-y-3 mb-6">
+      <div className="space-y-2 mb-5">
         {mainPages.map((page) => {
           const Icon = page.icon
           return (
             <Link
               key={page.href}
               href={page.href}
-              className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+              className={`flex items-center space-x-3 p-3 rounded-xl transition-colors ${
                 currentPage === page.href
-                  ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                  ? 'bg-white/20 text-white'
+                  : 'text-white/85 hover:bg-white/10 hover:text-white'
               }`}
             >
               <Icon className="h-5 w-5" />
@@ -47,8 +47,8 @@ export function InternalLinks({ currentPage, className = '' }: InternalLinksProp
       </div>
 
       {/* Top Airports */}
-      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+      <div className="border-t border-white/20 pt-4">
+        <h4 className="text-sm font-semibold text-white mb-3">
           Aeroporturi Populare
         </h4>
         <div className="space-y-2">
@@ -56,11 +56,11 @@ export function InternalLinks({ currentPage, className = '' }: InternalLinksProp
             <Link
               key={airport.code}
               href={`/aeroport/${generateAirportSlug(airport)}`}
-              className="block p-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              className="block p-2 text-sm text-white/85 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
             >
               <div className="flex items-center justify-between">
                 <span>{airport.city}</span>
-                <span className="text-xs text-gray-500">{airport.code}</span>
+                <span className="text-xs text-white/60">{airport.code}</span>
               </div>
             </Link>
           ))}

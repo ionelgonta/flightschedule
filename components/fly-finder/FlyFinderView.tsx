@@ -1819,32 +1819,31 @@ export default function FlyFinderView() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center relative z-10">
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
-            <div className="h-16 w-16 border-4 border-blue-200 rounded-full" />
-            <div className="absolute top-0 left-0 h-16 w-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <div className="h-16 w-16 border-4 border-white/30 rounded-full" />
+            <div className="absolute top-0 left-0 h-16 w-16 border-4 border-white border-t-transparent rounded-full animate-spin" />
           </div>
-          <span className="text-gray-600 font-medium">Se încarcă FlyFinder...</span>
+          <span className="text-white font-medium">Se încarcă FlyFinder...</span>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Hero Header */}
-      <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 text-white relative overflow-hidden">
+    <div className="min-h-screen relative z-10">
+      <div className="bg-gradient-to-r from-indigo-600/95 via-blue-600/95 to-cyan-500/95 text-white relative overflow-hidden border-b border-white/20">
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 relative">
           <div className="text-center">
             <div className="inline-flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20">
                 <Sparkles className="h-6 w-6" />
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold">FlyFinder | Colibri24.com</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-white">FlyFinder</h1>
             </div>
-            <p className="text-blue-100 text-sm md:text-base max-w-2xl mx-auto">
+            <p className="text-white/90 text-sm md:text-base max-w-2xl mx-auto">
               Asistentul inteligent de călătorie. Selectează zilele, intervalele orare și găsește destinațiile perfecte.
             </p>
           </div>
@@ -1852,16 +1851,12 @@ export default function FlyFinderView() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Search Panel */}
-        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 -mt-6 relative z-10 overflow-hidden">
-          {/* Trip Type Toggle */}
-          <div className="flex border-b border-gray-100">
+        <div className="glass-card rounded-3xl -mt-6 relative z-10 overflow-hidden border border-white/20">
+          <div className="flex border-b border-white/20">
             <button
               onClick={() => setTripType('roundtrip')}
               className={`flex-1 py-4 px-6 text-sm font-medium transition-all ${
-                tripType === 'roundtrip' 
-                  ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600' 
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                tripType === 'roundtrip' ? 'bg-white/25 text-white border-b-2 border-white' : 'text-white/70 hover:text-white hover:bg-white/10'
               }`}
             >
               <div className="flex items-center justify-center space-x-2">
@@ -1873,9 +1868,7 @@ export default function FlyFinderView() {
             <button
               onClick={() => setTripType('oneway')}
               className={`flex-1 py-4 px-6 text-sm font-medium transition-all ${
-                tripType === 'oneway' 
-                  ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600' 
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                tripType === 'oneway' ? 'bg-white/25 text-white border-b-2 border-white' : 'text-white/70 hover:text-white hover:bg-white/10'
               }`}
             >
               <div className="flex items-center justify-center space-x-2">
@@ -1886,10 +1879,9 @@ export default function FlyFinderView() {
           </div>
 
           <div className="p-6">
-            {/* Origin Airports Selection */}
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                <MapPin className="h-4 w-4 mr-2 text-blue-500" />
+              <label className="block text-sm font-semibold text-white/90 mb-3 flex items-center">
+                <MapPin className="h-4 w-4 mr-2 text-white" />
                 De unde pleci? (selectează unul sau mai multe aeroporturi)
               </label>
               <div className="flex flex-wrap gap-2">
@@ -1899,8 +1891,8 @@ export default function FlyFinderView() {
                     onClick={() => toggleOrigin(airport.code)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                       selectedOrigins.includes(airport.code)
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-white/25 text-white border border-white/20'
+                        : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/10'
                     }`}
                   >
                     {getCityName(airport.code)}

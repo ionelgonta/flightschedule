@@ -19,9 +19,24 @@ export default function MainLayout({ children }: MainLayoutProps) {
   }
   
   return (
-    <div className="min-h-screen bg-surface transition-colors duration-200">
+    <div className="min-h-screen relative">
+      {/* Subtle dots overlay (weather-app style) */}
+      <div className="weather-dots-bg" aria-hidden>
+        {[...Array(20)].map((_, i) => (
+          <span
+            key={i}
+            className="absolute w-1.5 h-1.5 rounded-full bg-white/40 animate-weather-dots"
+            style={{
+              left: `${3 + (i * 5)}%`,
+              top: 0,
+              animationDelay: `${i * 0.5}s`,
+              animationDuration: `${12 + (i % 4)}s`,
+            }}
+          />
+        ))}
+      </div>
       <Navbar />
-      <main className="pt-16">
+      <main className="relative z-10 pt-16">
         {children}
       </main>
       <Footer />
