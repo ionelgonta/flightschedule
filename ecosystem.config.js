@@ -28,6 +28,20 @@ module.exports = {
       autorestart: true,
       watch: false,
       max_memory_restart: '1G'
+    },
+    {
+      name: 'ota-agent-module',
+      script: 'server.js',
+      cwd: '/opt/anyway-flight-schedule/ota-agent-module',
+      env: {
+        NODE_ENV: 'production',
+        OTA_PORT: 3002
+      },
+      instances: 1,
+      exec_mode: 'fork',
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M'
     }
   ]
 };

@@ -183,7 +183,7 @@ class FixedCacheManager {
       // FIXED: Use safer intervals to prevent API rate limiting
       this.config = {
         flightData: {
-          cronInterval: Math.max(15, loadedConfig.flightData?.cronInterval || 15) // Minimum 15 minutes
+          cronInterval: Math.max(60, loadedConfig.flightData?.cronInterval || 60) // Minimum 60 minutes (1 hour)
         },
         analytics: {
           cronInterval: Math.max(1, loadedConfig.analytics?.cronInterval || 7), // Minimum 1 day
@@ -202,7 +202,7 @@ class FixedCacheManager {
     } catch {
       // Default safe configuration
       this.config = {
-        flightData: { cronInterval: 15 }, // 15 minutes - safe interval
+        flightData: { cronInterval: 60 }, // 60 minutes (1 hour) - AeroDataBox request interval
         analytics: { cronInterval: 7, cacheMaxAge: 30 },
         aircraft: { cronInterval: 30, cacheMaxAge: 30 },
         weather: { cronInterval: 30 }
@@ -692,7 +692,7 @@ class FixedCacheManager {
     const cacheKey = `${airportCode}_${type}`
     
     try {
-      // Check if we have recent data (less than 30 minutes old)
+      // Check if we have recent data (less than 60 minutes old)
       // BUT only skip if data is from TODAY - old data should always be refreshed
       const existingEntry = this.getValidCacheEntry(cacheKey)
       if (existingEntry && source === 'cron') {
@@ -701,8 +701,8 @@ class FixedCacheManager {
         const ageMinutes = (now.getTime() - createdAt.getTime()) / (1000 * 60)
         const isFromToday = createdAt.toDateString() === now.toDateString()
         
-        // Only skip if data is recent AND from today
-        if (ageMinutes < 30 && isFromToday) {
+        // Only skip if data is recent AND from today (1 hour = AeroDataBox request interval)
+        if (ageMinutes < 60 && isFromToday) {
           console.log(`[Fixed Cache Manager] Recent data exists for ${cacheKey} (${Math.round(ageMinutes)} min old, from today), skipping API call`)
           return
         }

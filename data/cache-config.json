@@ -1,6 +1,6 @@
 {
   "flightData": {
-    "cronInterval": 15
+    "cronInterval": 60
   },
   "analytics": {
     "cronInterval": 7,

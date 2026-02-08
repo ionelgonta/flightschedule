@@ -6,9 +6,23 @@
  * - PDF417: pentru BCBP (>100 caractere, date structurate)
  * - QR Code: pentru URL-uri sau ID-uri scurte
  * - Aztec: pentru coduri numerice și bilete pătrate
+ *
+ * bwip-js este încărcat dinamic la runtime (doar pe server) pentru a evita
+ * erori de bundling cu Next.js (modul opțional / native).
  */
 
-import bwipjs, { ToBufferOptions } from 'bwip-js';
+// Tip pentru opțiunile bwip-js (evită import static care provoacă Module not found la build)
+interface BwipToBufferOptions {
+  bcid: string;
+  text: string;
+  scale?: number;
+  height?: number;
+  includetext?: boolean;
+  eclevel?: number | string;
+  columns?: number;
+  rows?: number;
+  [key: string]: unknown;
+}
 
 export type BarcodeType = 'pdf417' | 'qrcode' | 'azteccode';
 
@@ -141,8 +155,9 @@ export async function generateUniversalBarcode(
 
     console.log(`[BARCODE-GEN] Generating ${barcodeType} barcode, data length: ${rawData.length}`);
 
-    // Generează barcode-ul
-    const png = await bwipjs.toBuffer(bwipOptions as unknown as ToBufferOptions);
+    // Încarcă bwip-js la runtime (doar pe server) – evită bundling Next.js
+    const bwipjs = (await import('bwip-js')).default;
+    const png = await bwipjs.toBuffer(bwipOptions as BwipToBufferOptions);
 
     const base64Image = `data:image/png;base64,${png.toString('base64')}`;
 

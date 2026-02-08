@@ -3,10 +3,19 @@
 ## 🚨 CRITICAL NGINX RULES
 
 ### **ABSOLUTE NGINX CONFIGURATION - NEVER CHANGE THESE:**
-1. **Only ONE active nginx config**: `master-config`
-2. **Location**: `/etc/nginx/sites-available/master-config`
-3. **Symlink**: `/etc/nginx/sites-enabled/master-config`
-4. **ALL other configs**: DELETED and FORBIDDEN
+1. **Only ONE active nginx config**: `master-config` (for anyway.ro + victoriaocara.com)
+2. **Separate config**: `citytravel.ro.conf` (for citytravel.ro - DO NOT modify)
+3. **Location**: `/etc/nginx/sites-available/master-config`
+4. **Symlink**: `/etc/nginx/sites-enabled/master-config`
+5. **ALL other configs**: DELETED and FORBIDDEN (except citytravel.ro.conf)
+
+### **⚠️ PROJECT ISOLATION - READ FIRST:**
+**See**: `.kiro/steering/project-isolation-rules.md` for complete isolation rules.
+
+**CRITICAL PORT ASSIGNMENTS:**
+- **anyway.ro** → Port 3000 → `/opt/anyway-flight-schedule/`
+- **victoriaocara.com** → Port 3001 → `/opt/victoriaocara/`
+- **citytravel.ro** → Port 3002 → (separate config, separate process)
 
 ## 📋 NGINX MASTER CONFIGURATION (NEVER MODIFY STRUCTURE)
 

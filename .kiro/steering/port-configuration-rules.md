@@ -3,10 +3,16 @@
 ## 🚨 CRITICAL PORT RULES
 
 ### **ABSOLUTE PORT ASSIGNMENTS - NEVER CHANGE THESE:**
-1. **anyway.ro** - Port 3000
-2. **victoriaocara.com** - Port 3001  
-3. **Boarding Pass Management System** - Port 3002
-4. **nginx** - Ports 80/443 (system nginx)
+1. **anyway.ro** - Port 3000 → `/opt/anyway-flight-schedule/` → PM2: `anyway-ro`
+2. **victoriaocara.com** - Port 3001 → `/opt/victoriaocara/` → PM2: `victoriaocara`
+3. **citytravel.ro** - Port 3002 → PM2: `facturapro-web` (separate config)
+4. **facturapro-api** - Port 3003 → PM2: `facturapro-api`
+5. **nginx** - Ports 80/443 (system nginx)
+
+### **⚠️ PROJECT ISOLATION:**
+**See**: `.kiro/steering/project-isolation-rules.md` for complete isolation documentation.
+
+**NEVER mix ports or directories between projects!**
 
 ## 📋 PORT MAPPING (NEVER MODIFY)
 

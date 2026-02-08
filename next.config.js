@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Native/Node-only packages: do not bundle, require at runtime
+  experimental: {
+    serverComponentsExternalPackages: ['bwip-js'],
+  },
+
   // Compiler optimizations
   compiler: {
     // Remove console.log in production builds
@@ -10,6 +15,13 @@ const nextConfig = {
   
   // Build performance
   webpack: (config, { dev, isServer }) => {
+    // bwip-js: external pe server (native/optional), nu bundle
+    if (isServer) {
+      const externals = Array.isArray(config.externals) ? config.externals : [];
+      externals.push({ 'bwip-js': 'commonjs bwip-js' });
+      config.externals = externals;
+    }
+
     // Fix for client-side modules in server-side rendering
     if (!isServer) {
       config.resolve.fallback = {
