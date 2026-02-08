@@ -3,8 +3,6 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Plane, Menu, X, ChevronDown, BarChart3, Car, Sparkles } from 'lucide-react'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
-
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false)
@@ -43,7 +41,7 @@ export function Navbar() {
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
       scrolled 
         ? 'glass-card border-b border-white/20 shadow-lg' 
-        : 'bg-white/10 dark:bg-white/5 backdrop-blur-md border-b border-white/10'
+        : 'bg-white/10 backdrop-blur-md border-b border-white/10'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
@@ -239,8 +237,6 @@ export function Navbar() {
             >
               Despre
             </Link>
-            
-            <ThemeToggle />
           </div>
 
           {/* Mobile Menu Button */}
@@ -318,11 +314,6 @@ export function Navbar() {
               <Link href="/planificator-zboruri" className="px-3 py-2 rounded-xl text-sm font-medium text-white hover:bg-white/10 transition-colors" onClick={() => setIsMenuOpen(false)}>Planificator Zboruri</Link>
               <Link href="/program-saptamanal" className="px-3 py-2 rounded-xl text-sm font-medium text-white hover:bg-white/10 transition-colors" onClick={() => setIsMenuOpen(false)}>Program Săptămânal</Link>
               <Link href="/despre" className="px-3 py-2 rounded-xl text-sm font-medium text-white hover:bg-white/10 transition-colors" onClick={() => setIsMenuOpen(false)}>Despre</Link>
-              
-              {/* Mobile Theme Toggle */}
-              <div className="px-3 py-2">
-                <ThemeToggle />
-              </div>
             </div>
           </div>
         )}

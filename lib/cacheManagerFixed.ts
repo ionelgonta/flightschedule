@@ -728,6 +728,34 @@ class FixedCacheManager {
           ? await apiService.getArrivals(airportCode)
           : await apiService.getDepartures(airportCode)
       }, airportCode, type)
+
+      // Chișinău: unele surse încă folosesc codul vechi KIV; dacă RMO dă gol, încercăm KIV
+      if (airportCode === 'RMO' && (!response.success || (response.data?.length ?? 0) === 0)) {
+        console.log('[Fixed Cache Manager] RMO returned no data - trying legacy code KIV for Chișinău')
+        try {
+          await this.delay(500)
+          const kivResponse = await this.makeRateLimitedApiCall(async () => {
+            const { default: FlightApiService } = await import('./flightApiService')
+            const apiService = new FlightApiService({
+              provider: 'aerodatabox',
+              apiKey: process.env.NEXT_PUBLIC_FLIGHT_API_KEY || process.env.AERODATABOX_API_KEY || '',
+              baseUrl: 'https://prod.api.market/api/v1/aedbx/aerodatabox',
+              rateLimit: 100
+            })
+            return type === 'arrivals'
+              ? await apiService.getArrivals('KIV')
+              : await apiService.getDepartures('KIV')
+          }, 'KIV', type)
+          if (kivResponse.success && (kivResponse.data?.length ?? 0) > 0) {
+            response.success = true
+            response.data = kivResponse.data
+            response.error = undefined
+            console.log(`[Fixed Cache Manager] Using KIV data for RMO ${type}: ${response.data.length} flights`)
+          }
+        } catch (e) {
+          console.warn('[Fixed Cache Manager] KIV fallback failed:', e)
+        }
+      }
       
       // ENHANCED: For RMO (Chișinău), also fetch from AviationStack and merge data
       // AviationStack is called only once every 4 hours to save API quota

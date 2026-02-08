@@ -96,18 +96,18 @@ export function MobileCompactTable({
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-        <p className="text-red-700 text-sm">{error}</p>
+      <div className="glass-card border border-red-400/40 bg-red-500/10 rounded-lg p-4 text-center">
+        <p className="text-red-200 text-sm">{error}</p>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="glass-card border border-white/20 rounded-lg overflow-hidden">
         <div className="animate-pulse space-y-2 p-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-12 bg-gray-100 rounded" />
+            <div key={i} className="h-12 bg-white/10 rounded" />
           ))}
         </div>
       </div>
@@ -117,15 +117,15 @@ export function MobileCompactTable({
   return (
     <div className="space-y-3">
       {/* Header compact cu tabs */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="glass-card border border-white/20 rounded-lg overflow-hidden">
         {/* Tabs - FUNCȚIONALE */}
         <div className="flex">
           <button
             onClick={() => handleTabChange('arrivals')}
-            className={`flex-1 flex items-center justify-center space-x-2 py-3 text-sm font-medium border-r border-gray-200 ${
+            className={`flex-1 flex items-center justify-center space-x-2 py-3 text-sm font-medium border-r border-white/20 ${
               activeTab === 'arrivals' 
-                ? 'text-blue-600 bg-blue-50' 
-                : 'text-gray-500 bg-white'
+                ? 'text-white bg-white/20' 
+                : 'text-white/70 bg-white/5'
             }`}
           >
             <Plane className="h-4 w-4 rotate-45" />
@@ -135,8 +135,8 @@ export function MobileCompactTable({
             onClick={() => handleTabChange('departures')}
             className={`flex-1 flex items-center justify-center space-x-2 py-3 text-sm font-medium ${
               activeTab === 'departures' 
-                ? 'text-blue-600 bg-blue-50' 
-                : 'text-gray-500 bg-white'
+                ? 'text-white bg-white/20' 
+                : 'text-white/70 bg-white/5'
             }`}
           >
             <Plane className="h-4 w-4 -rotate-45" />
@@ -145,34 +145,34 @@ export function MobileCompactTable({
         </div>
 
         {/* Căutare */}
-        <div className="border-t border-gray-200 p-3">
+        <div className="border-t border-white/20 p-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
             <input
               type="text"
               placeholder="Caută zbor..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded text-sm text-white placeholder-white/50 focus:ring-1 focus:ring-white/30 focus:border-white/30"
             />
           </div>
         </div>
       </div>
 
       {/* Tabelă ultra-compactă - Full width, no borders */}
-      <div className="bg-white overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8">
+      <div className="glass-card border border-white/20 overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8">
         {filteredFlights.length === 0 ? (
           <div className="px-4 py-8 text-center">
-            <Plane className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-500 text-sm">
+            <Plane className="h-6 w-6 text-white/40 mx-auto mb-2" />
+            <p className="text-white/60 text-sm">
               {searchTerm ? 'Nu există zboruri' : `Nu sunt ${activeTab === 'arrivals' ? 'sosiri' : 'plecări'}`}
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             {/* Header tabel ultra-compact - layout fix */}
-            <div className="bg-gray-50 border-b border-gray-200 min-w-[400px]">
-              <div className="grid grid-cols-5 gap-1 px-1 py-1 text-xs font-semibold text-gray-600 uppercase">
+            <div className="bg-white/10 border-b border-white/20 min-w-[400px]">
+              <div className="grid grid-cols-5 gap-1 px-1 py-1 text-xs font-semibold text-white/70 uppercase">
                 <div className="text-left">CURSĂ</div>
                 <div className="text-left">DEST</div>
                 <div className="text-center">PROG</div>
@@ -182,18 +182,18 @@ export function MobileCompactTable({
             </div>
 
             {/* Rânduri tabel ultra-compact - layout fix */}
-            <div className="divide-y divide-gray-100 min-w-[400px]">
+            <div className="divide-y divide-white/10 min-w-[400px]">
               {filteredFlights.map((flight, index) => {
                 const relevantLocation = activeTab === 'arrivals' ? flight.origin : flight.destination;
                 
                 return (
                   <div 
                     key={`${flight.flight_number}-${index}`}
-                    className="grid grid-cols-5 gap-1 px-1 py-1 hover:bg-gray-50 text-xs"
+                    className="grid grid-cols-5 gap-1 px-1 py-1 hover:bg-white/10 text-xs"
                   >
                     {/* Cursă */}
                     <div className="flex items-center">
-                      <div className="font-bold text-gray-900 text-sm">
+                      <div className="font-bold text-white text-sm">
                         {flight.flight_number}
                       </div>
                     </div>
@@ -201,10 +201,10 @@ export function MobileCompactTable({
                     {/* Destinație */}
                     <div className="flex items-center">
                       <div className="min-w-0">
-                        <div className="font-semibold text-blue-600 text-sm truncate">
+                        <div className="font-semibold text-blue-300 text-sm truncate">
                           {relevantLocation?.city || 'N/A'}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-white/60">
                           ({relevantLocation?.code || 'N/A'})
                         </div>
                       </div>
@@ -212,7 +212,7 @@ export function MobileCompactTable({
 
                     {/* Ora programată */}
                     <div className="flex items-center justify-center px-0">
-                      <div className="text-sm font-semibold text-gray-900">
+                      <div className="text-sm font-semibold text-white">
                         {formatTime(flight.scheduled_time)}
                       </div>
                     </div>
@@ -220,15 +220,15 @@ export function MobileCompactTable({
                     {/* Ora estimată */}
                     <div className="flex items-center justify-center px-0">
                       {flight.actual_time && (flight.status === 'landed' || flight.status === 'arrived') ? (
-                        <div className="text-sm font-semibold text-green-600">
+                        <div className="text-sm font-semibold text-green-300">
                           {formatTime(flight.actual_time)}
                         </div>
                       ) : flight.estimated_time && formatTime(flight.estimated_time) !== formatTime(flight.scheduled_time) ? (
-                        <div className="text-sm font-semibold text-orange-600">
+                        <div className="text-sm font-semibold text-orange-300">
                           {formatTime(flight.estimated_time)}
                         </div>
                       ) : (
-                        <span className="text-sm text-gray-400">-</span>
+                        <span className="text-sm text-white/50">-</span>
                       )}
                     </div>
 
@@ -246,15 +246,15 @@ export function MobileCompactTable({
 
       {/* Footer */}
       {filteredFlights.length > 0 && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+        <div className="glass-card border border-white/20 rounded-lg px-3 py-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-600">
-              Total: <span className="font-semibold">{filteredFlights.length}</span> zboruri
+            <span className="text-white/70">
+              Total: <span className="font-semibold text-white">{filteredFlights.length}</span> zboruri
             </span>
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="text-blue-600 font-medium"
+                className="text-blue-300 hover:text-white font-medium"
               >
                 Resetează
               </button>

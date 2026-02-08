@@ -1906,14 +1906,14 @@ export default function FlyFinderView() {
             <div className={`grid gap-6 ${tripType === 'roundtrip' ? 'md:grid-cols-2' : 'md:grid-cols-1'}`}>
               {/* Departure Section */}
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-100">
-                <h3 className="font-semibold text-blue-900 mb-4 flex items-center">
+                <h3 className="font-semibold text-white mb-4 flex items-center">
                   <Plane className="h-5 w-5 mr-2 rotate-45" />
                   Plecare
                 </h3>
                 
                 {/* Days */}
                 <div className="mb-4">
-                  <label className="text-xs font-medium text-blue-700 mb-2 block">Zilele săptămânii:</label>
+                  <label className="text-xs font-medium text-white/90 mb-2 block">Zilele săptămânii:</label>
                   <div className="flex flex-wrap gap-1.5">
                     {DAYS_OF_WEEK.map(day => (
                       <button
@@ -1922,7 +1922,7 @@ export default function FlyFinderView() {
                         className={`w-10 h-10 rounded-lg text-xs font-bold transition-all ${
                           departureDays.includes(day.value)
                             ? 'bg-blue-600 text-white shadow-md scale-105'
-                            : 'bg-white text-gray-600 hover:bg-blue-100 border border-gray-200'
+                            : 'bg-white/10 text-white/90 hover:bg-white/20 border border-white/20'
                         }`}
                       >
                         {day.short}
@@ -1933,7 +1933,7 @@ export default function FlyFinderView() {
                 
                 {/* Time Slots */}
                 <div>
-                  <label className="text-xs font-medium text-blue-700 mb-2 block">Interval orar:</label>
+                  <label className="text-xs font-medium text-white/90 mb-2 block">Interval orar:</label>
                   <div className="flex flex-wrap gap-2">
                     {TIME_SLOTS.map(slot => (
                       <button
@@ -1942,7 +1942,7 @@ export default function FlyFinderView() {
                         className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                           departureTimeSlots.includes(slot.value)
                             ? 'bg-blue-600 text-white shadow-md'
-                            : 'bg-white text-gray-600 hover:bg-blue-100 border border-gray-200'
+                            : 'bg-white/10 text-white/90 hover:bg-white/20 border border-white/20'
                         }`}
                       >
                         {slot.icon}
@@ -1952,7 +1952,7 @@ export default function FlyFinderView() {
                   </div>
                 </div>
                 
-                <div className="mt-3 text-xs text-blue-600 bg-blue-100/50 rounded-lg px-3 py-2">
+                <div className="mt-3 text-xs text-white/90 bg-white/15 rounded-xl px-3 py-2">
                   • {departureDays.map(d => DAYS_OF_WEEK.find(x => x.value === d)?.label).join(', ')} • {departureTimeSlots.map(s => TIME_SLOTS.find(x => x.value === s)?.label).join(', ')}
                 </div>
               </div>
@@ -1967,7 +1967,7 @@ export default function FlyFinderView() {
                   
                   {/* Days */}
                   <div className="mb-4">
-                    <label className="text-xs font-medium text-green-700 mb-2 block">Zilele săptămânii:</label>
+                    <label className="text-xs font-medium text-white/90 mb-2 block">Zilele săptămânii:</label>
                     <div className="flex flex-wrap gap-1.5">
                       {DAYS_OF_WEEK.map(day => (
                         <button
@@ -1976,7 +1976,7 @@ export default function FlyFinderView() {
                           className={`w-10 h-10 rounded-lg text-xs font-bold transition-all ${
                             returnDays.includes(day.value)
                               ? 'bg-green-600 text-white shadow-md scale-105'
-                              : 'bg-white text-gray-600 hover:bg-green-100 border border-gray-200'
+                              : 'bg-white/10 text-white/90 hover:bg-white/20 border border-white/20'
                           }`}
                         >
                           {day.short}
@@ -1987,7 +1987,7 @@ export default function FlyFinderView() {
                   
                   {/* Time Slots */}
                   <div>
-                    <label className="text-xs font-medium text-green-700 mb-2 block">Interval orar:</label>
+                    <label className="text-xs font-medium text-white/90 mb-2 block">Interval orar:</label>
                     <div className="flex flex-wrap gap-2">
                       {TIME_SLOTS.map(slot => (
                         <button
@@ -1996,7 +1996,7 @@ export default function FlyFinderView() {
                           className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                             returnTimeSlots.includes(slot.value)
                               ? 'bg-green-600 text-white shadow-md'
-                              : 'bg-white text-gray-600 hover:bg-green-100 border border-gray-200'
+                              : 'bg-white/10 text-white/90 hover:bg-white/20 border border-white/20'
                           }`}
                         >
                           {slot.icon}
@@ -2006,7 +2006,7 @@ export default function FlyFinderView() {
                     </div>
                   </div>
                   
-                  <div className="mt-3 text-xs text-green-600 bg-green-100/50 rounded-lg px-3 py-2">
+                  <div className="mt-3 text-xs text-white/90 bg-white/15 rounded-xl px-3 py-2">
                     • {returnDays.map(d => DAYS_OF_WEEK.find(x => x.value === d)?.label).join(', ')} • {returnTimeSlots.map(s => TIME_SLOTS.find(x => x.value === s)?.label).join(', ')}
                   </div>
                 </div>
@@ -2017,12 +2017,12 @@ export default function FlyFinderView() {
             <div className="mt-6">
               <button
                 onClick={() => setShowAirlineFilter(!showAirlineFilter)}
-                className="flex items-center text-sm font-semibold text-gray-700 mb-3 hover:text-purple-600 transition-colors"
+                className="flex items-center text-sm font-semibold text-white mb-3 hover:text-white/90 transition-colors"
               >
-                <Plane className="h-4 w-4 mr-2 text-purple-500" />
+                <Plane className="h-4 w-4 mr-2 text-white" />
                 Filtrează după companie aeriană
                 {selectedAirlines.length > 0 && (
-                  <span className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs">
+                  <span className="ml-2 px-2 py-0.5 bg-white/20 text-white rounded-full text-xs">
                     {selectedAirlines.length} selectate
                   </span>
                 )}
@@ -2037,7 +2037,7 @@ export default function FlyFinderView() {
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                         selectedAirlines.length === 0
                           ? 'bg-purple-600 text-white shadow-md'
-                          : 'bg-white text-gray-600 hover:bg-purple-100 border border-gray-200'
+                          : 'bg-white/10 text-white/90 hover:bg-white/20 border border-white/20'
                       }`}
                     >
                       Toate companiile
@@ -2051,7 +2051,7 @@ export default function FlyFinderView() {
                           className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center space-x-1.5 ${
                             selectedAirlines.includes(airline)
                               ? 'bg-purple-600 text-white shadow-md'
-                              : 'bg-white text-gray-600 hover:bg-purple-100 border border-gray-200'
+                              : 'bg-white/10 text-white/90 hover:bg-white/20 border border-white/20'
                           }`}
                         >
                           <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
@@ -2067,7 +2067,7 @@ export default function FlyFinderView() {
                     })}
                   </div>
                   {selectedAirlines.length > 0 && (
-                    <div className="text-xs text-purple-600 bg-purple-100/50 rounded-lg px-3 py-2">
+                    <div className="text-xs text-white/90 bg-white/15 rounded-xl px-3 py-2">
                       • Filtru activ: {selectedAirlines.join(', ')}
                     </div>
                   )}
@@ -2077,26 +2077,26 @@ export default function FlyFinderView() {
           </div>
 
           {/* Search Summary Bar */}
-          <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-t border-gray-100">
+          <div className="px-6 py-4 bg-white/10 border-t border-white/20">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-3 text-sm">
-                <div className="flex items-center bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full">
+                <div className="flex items-center bg-white/20 text-white px-3 py-1.5 rounded-full">
                   <MapPin className="h-3.5 w-3.5 mr-1.5" />
                   <span className="font-medium">{selectedOrigins.map(c => getCityName(c)).join(', ')}</span>
                 </div>
-                <ArrowRight className="h-4 w-4 text-gray-400" />
-                <div className="flex items-center bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full">
+                <ArrowRight className="h-4 w-4 text-white/60" />
+                <div className="flex items-center bg-white/20 text-white px-3 py-1.5 rounded-full">
                   <Globe className="h-3.5 w-3.5 mr-1.5" />
                   <span className="font-medium">{results.length} destinații găsite</span>
                 </div>
                 {tripType === 'roundtrip' && (
-                  <div className="flex items-center bg-green-100 text-green-700 px-3 py-1.5 rounded-full">
+                  <div className="flex items-center bg-white/20 text-white px-3 py-1.5 rounded-full">
                     <TrendingUp className="h-3.5 w-3.5 mr-1.5" />
                     <span className="font-medium">{results.reduce((sum, r) => sum + r.outboundCount, 0)} plecări</span>
                   </div>
                 )}
                 {selectedAirlines.length > 0 && (
-                  <div className="flex items-center bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full">
+                  <div className="flex items-center bg-white/20 text-white px-3 py-1.5 rounded-full">
                     <Plane className="h-3.5 w-3.5 mr-1.5" />
                     <span className="font-medium">{selectedAirlines.length} companii</span>
                   </div>
@@ -2106,14 +2106,14 @@ export default function FlyFinderView() {
               <div className="flex items-center space-x-4">
                 {/* Group by Country Toggle */}
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs text-gray-500">Vizualizare:</span>
-                  <div className="flex bg-gray-100 rounded-lg p-0.5">
+                  <span className="text-xs text-white/70">Vizualizare:</span>
+                  <div className="flex bg-white/10 rounded-xl p-0.5 border border-white/10">
                     <button
                       onClick={() => setGroupByCountry(false)}
                       className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                         !groupByCountry 
-                          ? 'bg-white text-blue-600 shadow-sm' 
-                          : 'text-gray-500 hover:text-gray-700'
+                          ? 'bg-white/25 text-white shadow-sm border border-white/20' 
+                          : 'text-white/70 hover:text-white'
                       }`}
                       title="Lista completă"
                     >
@@ -2124,8 +2124,8 @@ export default function FlyFinderView() {
                       onClick={() => setGroupByCountry(true)}
                       className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                         groupByCountry 
-                          ? 'bg-white text-blue-600 shadow-sm' 
-                          : 'text-gray-500 hover:text-gray-700'
+                          ? 'bg-white/25 text-white shadow-sm border border-white/20' 
+                          : 'text-white/70 hover:text-white'
                       }`}
                       title="Grupat pe țări"
                     >
@@ -2136,11 +2136,11 @@ export default function FlyFinderView() {
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs text-gray-500">Sortare:</span>
+                  <span className="text-xs text-white/70">Sortare:</span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                    className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:ring-2 focus:ring-blue-500"
+                    className="text-sm border border-white/20 rounded-xl px-3 py-1.5 bg-white/10 text-white focus:ring-2 focus:ring-white/30"
                   >
                     <option value="combinations">Nr. combinații</option>
                     <option value="score">Scor potrivire</option>
@@ -2153,15 +2153,15 @@ export default function FlyFinderView() {
         </div>
 
         {/* Destination Search */}
-        <div className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+        <div className="mt-6 glass-card rounded-2xl p-4">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/60" />
             <input
               type="text"
               value={destinationSearch}
               onChange={(e) => handleDestinationSearchChange(e.target.value)}
               placeholder="Caută destinația (ex: Londra, Paris, Milano, Padova...)"
-              className="w-full pl-12 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all"
+              className="w-full pl-12 pr-10 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-white/30 focus:border-white/30 transition-all"
             />
             {destinationSearch && (
               <button
@@ -2170,9 +2170,9 @@ export default function FlyFinderView() {
                   setShowProximityResults(false)
                   clearProximityResult()
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-white/20 rounded-full transition-colors"
               >
-                <X className="h-4 w-4 text-gray-400" />
+                <X className="h-4 w-4 text-white/60" />
               </button>
             )}
           </div>
@@ -2192,23 +2192,23 @@ export default function FlyFinderView() {
         {/* Results Section */}
         <div className="mt-6">
           {loading || searching ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12">
+            <div className="glass-card rounded-2xl p-12">
               <div className="flex flex-col items-center">
                 <div className="relative mb-4">
                   <div className="h-12 w-12 border-4 border-blue-200 rounded-full" />
                   <div className="absolute top-0 left-0 h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
                 </div>
-                <p className="text-gray-600 font-medium">Căutăm destinațiile perfecte...</p>
-                <p className="text-sm text-gray-400 mt-1">Analizăm programul săptămânal</p>
+                <p className="text-white font-medium">Căutăm destinațiile perfecte...</p>
+                <p className="text-sm text-white/80 mt-1">Analizăm programul săptămânal</p>
               </div>
             </div>
           ) : results.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+            <div className="glass-card rounded-2xl p-12 text-center">
               <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Info className="h-8 w-8 text-amber-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Nu am găsit destinații</h3>
-              <p className="text-gray-500 max-w-md mx-auto mb-4">
+              <h3 className="text-lg font-semibold text-white mb-2">Nu am găsit destinații</h3>
+              <p className="text-white/80 max-w-md mx-auto mb-4">
                 Pentru criteriile selectate nu există destinații cu zboruri {tripType === 'roundtrip' ? 'dus-întors' : ''}.
                 Încearcă să modifici zilele sau intervalele orare.
               </p>
@@ -2218,7 +2218,7 @@ export default function FlyFinderView() {
                     setDepartureDays(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])
                     setReturnDays(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])
                   }}
-                  className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors"
+                  className="px-4 py-2 bg-white/20 text-white rounded-xl text-sm font-medium hover:bg-white/30 transition-colors"
                 >
                   Selectează toate zilele
                 </button>
@@ -2227,7 +2227,7 @@ export default function FlyFinderView() {
                     setDepartureTimeSlots(['morning', 'afternoon', 'evening'])
                     setReturnTimeSlots(['morning', 'afternoon', 'evening'])
                   }}
-                  className="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors"
+                  className="px-4 py-2 bg-white/20 text-white rounded-xl text-sm font-medium hover:bg-white/30 transition-colors"
                 >
                   Toate intervalele orare
                 </button>
@@ -2268,7 +2268,7 @@ export default function FlyFinderView() {
                     })
                     
                     return sortedCountries.map(country => (
-                      <div key={country} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                      <div key={country} className="glass-card rounded-2xl overflow-hidden">
                         {/* Country Header - Clickable to expand/collapse */}
                         <button
                           onClick={() => {
@@ -2289,25 +2289,25 @@ export default function FlyFinderView() {
                               <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-lg flex items-center justify-center">
                                 <Globe className="h-4 w-4 text-white" />
                               </div>
-                              <h3 className="text-base font-bold text-gray-900">{country}</h3>
-                              <span className="text-sm text-gray-500">— {groupedByCountry[country].length} {groupedByCountry[country].length === 1 ? 'destinație disponibilă' : 'destinații disponibile'}</span>
+                              <h3 className="text-base font-bold text-white">{country}</h3>
+                              <span className="text-sm text-white/70">— {groupedByCountry[country].length} {groupedByCountry[country].length === 1 ? 'destinație disponibilă' : 'destinații disponibile'}</span>
                             </div>
                             {expandedCountries.has(country) ? (
-                              <ChevronUp className="h-5 w-5 text-gray-400" />
+                              <ChevronUp className="h-5 w-5 text-white/60" />
                             ) : (
-                              <ChevronDown className="h-5 w-5 text-gray-400" />
+                              <ChevronDown className="h-5 w-5 text-white/60" />
                             )}
                           </div>
                         </button>
                         
                         {/* Destinations in this country - vertical list */}
                         {expandedCountries.has(country) && (
-                        <div className="divide-y divide-gray-100">
+                        <div className="divide-y divide-white/20">
                           {groupedByCountry[country].map((result) => (
                             <div key={result.destination} id={`destination-${result.destinationCode}`}>
                               <button
                                 onClick={() => toggleExpanded(result.destination)}
-                                className="w-full p-4 text-left hover:bg-gray-50 transition-colors"
+                                className="w-full p-4 text-left hover:bg-white/10 transition-colors"
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center space-x-3">
@@ -2316,29 +2316,29 @@ export default function FlyFinderView() {
                                     </div>
                                     <div>
                                       <div className="flex items-center space-x-2">
-                                        <h4 className="font-semibold text-gray-900">{result.destination}</h4>
+                                        <h4 className="font-semibold text-white">{result.destination}</h4>
                                         {result.isStableRoute && (
                                           <Star className="h-4 w-4 text-amber-500 fill-current" />
                                         )}
                                       </div>
-                                      <div className="flex items-center space-x-2 mt-0.5 text-xs text-gray-500">
+                                      <div className="flex items-center space-x-2 mt-0.5 text-xs text-white/70">
                                         <span>{result.airlines.slice(0, 2).join(', ')}{result.airlines.length > 2 ? '...' : ''}</span>
                                       </div>
                                     </div>
                                   </div>
                                   <div className="flex items-center space-x-3">
                                     <div className="text-right">
-                                      <div className="text-sm text-blue-600">
-                                        <span className="font-bold">Plecare</span> <span className="text-blue-400 font-normal">- {result.outboundCount} opțiuni</span>
+                                      <div className="text-sm text-white">
+                                        <span className="font-bold">Plecare</span> <span className="text-white/80 font-normal">- {result.outboundCount} opțiuni</span>
                                         {tripType === 'roundtrip' && (
-                                          <> / <span className="font-bold">Întoarcere</span> <span className="text-blue-400 font-normal">- {result.returnCount} opțiuni</span></>
+                                          <> / <span className="font-bold">Întoarcere</span> <span className="text-white/80 font-normal">- {result.returnCount} opțiuni</span></>
                                         )}
                                       </div>
                                     </div>
                                     {expandedResults.has(result.destination) ? (
-                                      <ChevronUp className="h-5 w-5 text-gray-400" />
+                                      <ChevronUp className="h-5 w-5 text-white/60" />
                                     ) : (
-                                      <ChevronDown className="h-5 w-5 text-gray-400" />
+                                      <ChevronDown className="h-5 w-5 text-white/60" />
                                     )}
                                   </div>
                                 </div>
@@ -2346,7 +2346,7 @@ export default function FlyFinderView() {
                               
                               {/* Expanded Details - same as list view */}
                               {expandedResults.has(result.destination) && (
-                                <div className="border-t border-gray-100 bg-gray-50 p-5">
+                                <div className="border-t border-white/20 bg-white/10 p-5">
                                   <div className={`grid gap-6 ${tripType === 'roundtrip' ? 'md:grid-cols-2' : 'md:grid-cols-1'}`}>
                                     {/* Outbound Flights */}
                                     <div>
@@ -2358,10 +2358,10 @@ export default function FlyFinderView() {
                                             ? `din ${originCities.slice(0, 2).join(', ')}${originCities.length > 2 ? '...' : ''}`
                                             : ''
                                         return (
-                                          <h4 className="font-semibold text-blue-900 mb-3 flex items-center flex-wrap">
+                                          <h4 className="font-semibold text-white mb-3 flex items-center flex-wrap">
                                             <Plane className="h-4 w-4 mr-2 rotate-45" />
                                             <span>Zboruri de plecare {originDisplay}</span>
-                                            <span className="ml-1 text-blue-600">({result.outboundFlights.length})</span>
+                                            <span className="ml-1 text-white/90">({result.outboundFlights.length})</span>
                                           </h4>
                                         )
                                       })()}
@@ -2422,13 +2422,13 @@ export default function FlyFinderView() {
                                                       />
                                                     )}
                                                     <div className="text-left">
-                                                      <div className="font-semibold text-gray-900">{normalizeFlightNumber(flight.flightNumber)}</div>
-                                                      <div className="text-xs text-gray-500">{flight.airline}</div>
+                                                      <div className="font-semibold text-white">{normalizeFlightNumber(flight.flightNumber)}</div>
+                                                      <div className="text-xs text-white/70">{flight.airline}</div>
                                                     </div>
                                                   </div>
                                                   <div className="text-right">
-                                                    <div className="font-bold text-blue-600">{flight.time}</div>
-                                                    <div className="text-xs text-gray-500">
+                                                    <div className="font-bold text-white">{flight.time}</div>
+                                                    <div className="text-xs text-white/70">
                                                       {daysDisplay}
                                                       {flight.originCity && <span className="ml-1">• din {flight.originCity}</span>}
                                                     </div>
@@ -2451,10 +2451,10 @@ export default function FlyFinderView() {
                                               ? `spre ${returnToCities.slice(0, 2).join(', ')}${returnToCities.length > 2 ? '...' : ''}`
                                               : ''
                                           return (
-                                            <h4 className="font-semibold text-green-900 mb-3 flex items-center flex-wrap">
+                                            <h4 className="font-semibold text-white mb-3 flex items-center flex-wrap">
                                               <Plane className="h-4 w-4 mr-2 -rotate-45" />
                                               <span>Zboruri de întoarcere {returnDisplay}</span>
-                                              <span className="ml-1 text-green-600">({result.returnFlights.length})</span>
+                                              <span className="ml-1 text-white/90">({result.returnFlights.length})</span>
                                             </h4>
                                           )
                                         })()}
@@ -2516,13 +2516,13 @@ export default function FlyFinderView() {
                                                           />
                                                         )}
                                                         <div className="text-left">
-                                                          <div className="font-semibold text-gray-900">{normalizeFlightNumber(flight.flightNumber)}</div>
-                                                          <div className="text-xs text-gray-500">{flight.airline}</div>
+                                                          <div className="font-semibold text-white">{normalizeFlightNumber(flight.flightNumber)}</div>
+                                                          <div className="text-xs text-white/70">{flight.airline}</div>
                                                         </div>
                                                       </div>
                                                       <div className="text-right">
-                                                        <div className="font-bold text-green-600">{flight.time}</div>
-                                                        <div className="text-xs text-gray-500">
+                                                        <div className="font-bold text-white">{flight.time}</div>
+                                                        <div className="text-xs text-white/70">
                                                           {daysDisplay}
                                                           {flight.originCode && <span className="ml-1">spre {getCityName(flight.originCode) || flight.originCode}</span>}
                                                         </div>
@@ -2532,7 +2532,7 @@ export default function FlyFinderView() {
                                                 })
                                             })()
                                           ) : (
-                                            <div className="text-center py-6 text-gray-500">
+                                            <div className="text-center py-6 text-white/70">
                                               <Info className="h-8 w-8 mx-auto mb-2 opacity-50" />
                                               <p className="text-sm">Nu sunt zboruri de întoarcere pentru zilele selectate</p>
                                             </div>
@@ -2543,15 +2543,15 @@ export default function FlyFinderView() {
                                   </div>
 
                                   {/* Action Bar */}
-                                  <div className="mt-4 pt-4 border-t border-gray-200">
+                                  <div className="mt-4 pt-4 border-t border-white/20">
                                     <div className="flex items-center justify-between flex-wrap gap-3">
-                                      <div className="text-sm text-gray-600">
+                                      <div className="text-sm text-white/80">
                                         {tripType === 'roundtrip' ? (
                                           <span>
                                             <strong>{result.outboundFlights.length}</strong> plecări / <strong>{result.returnFlights.length}</strong> întoarceri
                                           </span>
                                         ) : (
-                                          <span><strong className="text-blue-600">{result.outboundFlights.length}</strong> zboruri disponibile</span>
+                                          <span><strong className="text-white">{result.outboundFlights.length}</strong> zboruri disponibile</span>
                                         )}
                                       </div>
                                       
@@ -2570,16 +2570,16 @@ export default function FlyFinderView() {
                                     
                                     {(selectedOutboundFlight?.destination === result.destination || selectedReturnFlight?.destination === result.destination) && (
                                       <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border border-blue-100">
-                                        <div className="text-xs font-medium text-gray-700 mb-2">Selecție curentă:</div>
+                                        <div className="text-xs font-medium text-white/90 mb-2">Selecție curentă:</div>
                                         <div className="flex flex-wrap gap-2">
                                           {selectedOutboundFlight?.destination === result.destination && (
-                                            <div className="flex items-center space-x-2 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-lg text-sm">
+                                            <div className="flex items-center space-x-2 px-3 py-1.5 bg-white/20 text-white rounded-xl text-sm">
                                               <Plane className="h-3.5 w-3.5 rotate-45" />
                                               <span>Plecare: {normalizeFlightNumber(selectedOutboundFlight.flight.flightNumber)} • {selectedOutboundFlight.flight.time} • {DAYS_OF_WEEK.find(d => d.value === selectedOutboundFlight.flight.day)?.label}</span>
                                             </div>
                                           )}
                                           {tripType === 'roundtrip' && selectedReturnFlight?.destination === result.destination && (
-                                            <div className="flex items-center space-x-2 px-3 py-1.5 bg-green-100 text-green-800 rounded-lg text-sm">
+                                            <div className="flex items-center space-x-2 px-3 py-1.5 bg-white/20 text-white rounded-xl text-sm">
                                               <Plane className="h-3.5 w-3.5 -rotate-45" />
                                               <span>Întoarcere: {normalizeFlightNumber(selectedReturnFlight.flight.flightNumber)} • {selectedReturnFlight.flight.time} • {DAYS_OF_WEEK.find(d => d.value === selectedReturnFlight.flight.day)?.label}</span>
                                             </div>
@@ -2619,12 +2619,12 @@ export default function FlyFinderView() {
                     <div
                       key={result.destination}
                       id={`destination-${result.destinationCode}`}
-                      className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+                      className="glass-card rounded-2xl overflow-hidden hover:bg-white/20 transition-all"
                     >
                       {/* Result Header */}
                       <button
                         onClick={() => toggleExpanded(result.destination)}
-                        className="w-full p-5 text-left hover:bg-gray-50 transition-colors"
+                        className="w-full p-5 text-left hover:bg-white/10 transition-colors"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
@@ -2633,9 +2633,9 @@ export default function FlyFinderView() {
                             </div>
                             <div>
                               <div className="flex items-center space-x-2">
-                                <h3 className="text-lg font-bold text-gray-900">
+                                <h3 className="text-lg font-bold text-white">
                                   {result.destination}
-                                  <span className="ml-2 text-sm font-normal text-gray-500">({result.destinationCode})</span>
+                                  <span className="ml-2 text-sm font-normal text-white/70">({result.destinationCode})</span>
                                 </h3>
                                 {result.isStableRoute && (
                                   <span className="flex items-center text-amber-500" title="Rută stabilă">
@@ -2643,19 +2643,19 @@ export default function FlyFinderView() {
                                   </span>
                                 )}
                               </div>
-                              <div className="flex items-center space-x-3 mt-1 text-sm text-gray-500">
+                              <div className="flex items-center space-x-3 mt-1 text-sm text-white/70">
                                 <span className="flex items-center">
-                                  <Plane className="h-3.5 w-3.5 mr-1 text-blue-500" />
+                                  <Plane className="h-3.5 w-3.5 mr-1 text-white" />
                                   {result.outboundFlights.length} plecare
                                 </span>
                                 {tripType === 'roundtrip' && (
                                   <span className="flex items-center">
-                                    <Plane className="h-3.5 w-3.5 mr-1 text-green-500 rotate-180" />
+                                    <Plane className="h-3.5 w-3.5 mr-1 text-white rotate-180" />
                                     {result.returnFlights.length} întoarcere
                                   </span>
                                 )}
                                 <span className="flex items-center">
-                                  <Users className="h-3.5 w-3.5 mr-1 text-purple-500" />
+                                  <Users className="h-3.5 w-3.5 mr-1 text-white" />
                                   {result.airlines.slice(0, 2).join(', ')}{result.airlines.length > 2 ? ` +${result.airlines.length - 2}` : ''}
                                 </span>
                               </div>
@@ -2664,17 +2664,17 @@ export default function FlyFinderView() {
                           
                           <div className="flex items-center space-x-4">
                             <div className="text-right">
-                              <div className="text-base text-blue-600">
-                                <span className="font-bold">Plecare</span> <span className="text-blue-400 font-normal">- {result.outboundCount} opțiuni</span>
+                              <div className="text-base text-white">
+                                <span className="font-bold">Plecare</span> <span className="text-white/80 font-normal">- {result.outboundCount} opțiuni</span>
                                   {tripType === 'roundtrip' && (
-                                    <> / <span className="font-bold">Întoarcere</span> <span className="text-blue-400 font-normal">- {result.returnCount} opțiuni</span></>
+                                    <> / <span className="font-bold">Întoarcere</span> <span className="text-white/80 font-normal">- {result.returnCount} opțiuni</span></>
                                   )}
                               </div>
                             </div>
                             {expandedResults.has(result.destination) ? (
-                          <ChevronUp className="h-5 w-5 text-gray-400" />
+                          <ChevronUp className="h-5 w-5 text-white/60" />
                         ) : (
-                          <ChevronDown className="h-5 w-5 text-gray-400" />
+                          <ChevronDown className="h-5 w-5 text-white/60" />
                         )}
                       </div>
                     </div>
@@ -2682,7 +2682,7 @@ export default function FlyFinderView() {
 
                   {/* Expanded Details */}
                   {expandedResults.has(result.destination) && (
-                    <div className="border-t border-gray-100 bg-gray-50 p-5">
+                    <div className="border-t border-white/20 bg-white/10 p-5">
                       <div className={`grid gap-6 ${tripType === 'roundtrip' ? 'md:grid-cols-2' : 'md:grid-cols-1'}`}>
                         {/* Outbound Flights */}
                         <div>
@@ -2695,10 +2695,10 @@ export default function FlyFinderView() {
                                 ? `din ${originCities.slice(0, 2).join(', ')}${originCities.length > 2 ? '...' : ''}`
                                 : ''
                             return (
-                              <h4 className="font-semibold text-blue-900 mb-3 flex items-center flex-wrap">
+                              <h4 className="font-semibold text-white mb-3 flex items-center flex-wrap">
                                 <Plane className="h-4 w-4 mr-2 rotate-45" />
                                 <span>Zboruri de plecare {originDisplay}</span>
-                                <span className="ml-1 text-blue-600">({result.outboundFlights.length})</span>
+                                <span className="ml-1 text-white/90">({result.outboundFlights.length})</span>
                               </h4>
                             )
                           })()}
@@ -2763,13 +2763,13 @@ export default function FlyFinderView() {
                                           />
                                         )}
                                         <div className="text-left">
-                                          <div className="font-semibold text-gray-900">{normalizeFlightNumber(flight.flightNumber)}</div>
-                                          <div className="text-xs text-gray-500">{flight.airline}</div>
+                                          <div className="font-semibold text-white">{normalizeFlightNumber(flight.flightNumber)}</div>
+                                          <div className="text-xs text-white/70">{flight.airline}</div>
                                         </div>
                                       </div>
                                       <div className="text-right">
-                                        <div className="font-bold text-blue-600">{flight.time}</div>
-                                        <div className="text-xs text-gray-500">
+                                        <div className="font-bold text-white">{flight.time}</div>
+                                        <div className="text-xs text-white/70">
                                           {daysDisplay}
                                           {flight.originCity && <span className="ml-1">• din {flight.originCity}</span>}
                                         </div>
@@ -2793,10 +2793,10 @@ export default function FlyFinderView() {
                                   ? `spre ${returnToCities.slice(0, 2).join(', ')}${returnToCities.length > 2 ? '...' : ''}`
                                   : ''
                               return (
-                                <h4 className="font-semibold text-green-900 mb-3 flex items-center flex-wrap">
+                                <h4 className="font-semibold text-white mb-3 flex items-center flex-wrap">
                                   <Plane className="h-4 w-4 mr-2 -rotate-45" />
                                   <span>Zboruri de ├«ntoarcere {returnDisplay}</span>
-                                  <span className="ml-1 text-green-600">({result.returnFlights.length})</span>
+                                  <span className="ml-1 text-white/90">({result.returnFlights.length})</span>
                                 </h4>
                               )
                             })()}
@@ -2862,13 +2862,13 @@ export default function FlyFinderView() {
                                               />
                                             )}
                                             <div className="text-left">
-                                              <div className="font-semibold text-gray-900">{normalizeFlightNumber(flight.flightNumber)}</div>
-                                              <div className="text-xs text-gray-500">{flight.airline}</div>
+                                              <div className="font-semibold text-white">{normalizeFlightNumber(flight.flightNumber)}</div>
+                                              <div className="text-xs text-white/70">{flight.airline}</div>
                                             </div>
                                           </div>
                                           <div className="text-right">
-                                            <div className="font-bold text-green-600">{flight.time}</div>
-                                            <div className="text-xs text-gray-500">
+                                            <div className="font-bold text-white">{flight.time}</div>
+                                            <div className="text-xs text-white/70">
                                               {daysDisplay}
                                               {flight.originCode && <span className="ml-1">spre {getCityName(flight.originCode) || flight.originCode}</span>}
                                             </div>
@@ -2878,7 +2878,7 @@ export default function FlyFinderView() {
                                     })
                                 })()
                               ) : (
-                                <div className="text-center py-6 text-gray-500">
+                                <div className="text-center py-6 text-white/70">
                                   <Info className="h-8 w-8 mx-auto mb-2 opacity-50" />
                                   <p className="text-sm">Nu sunt zboruri de întoarcere pentru zilele selectate</p>
                                 </div>
@@ -2889,15 +2889,15 @@ export default function FlyFinderView() {
                       </div>
 
                       {/* Action Bar */}
-                      <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div className="mt-4 pt-4 border-t border-white/20">
                         <div className="flex items-center justify-between flex-wrap gap-3">
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-white/80">
                             {tripType === 'roundtrip' ? (
                               <span>
                                 <strong>{result.outboundFlights.length}</strong> plec─âri / <strong>{result.returnFlights.length}</strong> ├«ntoarceri
                               </span>
                             ) : (
-                              <span><strong className="text-blue-600">{result.outboundFlights.length}</strong> zboruri disponibile</span>
+                              <span><strong className="text-white">{result.outboundFlights.length}</strong> zboruri disponibile</span>
                             )}
                           </div>
                           
@@ -2918,16 +2918,16 @@ export default function FlyFinderView() {
                         {/* Selection Summary */}
                         {(selectedOutboundFlight?.destination === result.destination || selectedReturnFlight?.destination === result.destination) && (
                           <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border border-blue-100">
-                            <div className="text-xs font-medium text-gray-700 mb-2">Selec╚¢ie curent─â:</div>
+                            <div className="text-xs font-medium text-white/90 mb-2">Selecție curentă:</div>
                             <div className="flex flex-wrap gap-2">
                               {selectedOutboundFlight?.destination === result.destination && (
-                                <div className="flex items-center space-x-2 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-lg text-sm">
+                                <div className="flex items-center space-x-2 px-3 py-1.5 bg-white/20 text-white rounded-xl text-sm">
                                   <Plane className="h-3.5 w-3.5 rotate-45" />
                                   <span>Plecare: {selectedOutboundFlight.flight.flightNumber} • {selectedOutboundFlight.flight.time} • {DAYS_OF_WEEK.find(d => d.value === selectedOutboundFlight.flight.day)?.label}</span>
                                 </div>
                               )}
                               {tripType === 'roundtrip' && selectedReturnFlight?.destination === result.destination && (
-                                <div className="flex items-center space-x-2 px-3 py-1.5 bg-green-100 text-green-800 rounded-lg text-sm">
+                                <div className="flex items-center space-x-2 px-3 py-1.5 bg-white/20 text-white rounded-xl text-sm">
                                   <Plane className="h-3.5 w-3.5 -rotate-45" />
                                   <span>Întoarcere: {selectedReturnFlight.flight.flightNumber} • {selectedReturnFlight.flight.time} • {DAYS_OF_WEEK.find(d => d.value === selectedReturnFlight.flight.day)?.label}</span>
                                 </div>
@@ -2954,59 +2954,59 @@ export default function FlyFinderView() {
 
         {/* How It Works & Tips Section */}
         <div className="mt-8 grid md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="glass-card rounded-2xl p-6">
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-              <Calendar className="h-6 w-6 text-blue-600" />
+              <Calendar className="h-6 w-6 text-white" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Flexibilitate Maximă</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="font-semibold text-white mb-2">Flexibilitate Maximă</h3>
+            <p className="text-sm text-white/80">
               Selectează mai multe zile pentru plecare și întoarcere. FlyFinder găsește toate combinațiile posibile.
             </p>
           </div>
           
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="glass-card rounded-2xl p-6">
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
-              <Clock className="h-6 w-6 text-green-600" />
+              <Clock className="h-6 w-6 text-white" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Intervale Orare</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="font-semibold text-white mb-2">Intervale Orare</h3>
+            <p className="text-sm text-white/80">
               Filtrează după dimineața, amiază sau seară. Perfect pentru a găsi zboruri care se potrivesc programului tău.
             </p>
           </div>
           
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="glass-card rounded-2xl p-6">
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-              <MapPin className="h-6 w-6 text-purple-600" />
+              <MapPin className="h-6 w-6 text-white" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Aeroporturi Multiple</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="font-semibold text-white mb-2">Aeroporturi Multiple</h3>
+            <p className="text-sm text-white/80">
               Caută simultan din mai multe aeroporturi. Ideal când ești flexibil cu locul de plecare.
             </p>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-            <Info className="h-5 w-5 mr-2 text-gray-400" />
+        <div className="mt-6 glass-card rounded-2xl p-6">
+          <h3 className="font-semibold text-white mb-4 flex items-center">
+            <Info className="h-5 w-5 mr-2 text-white/70" />
             Legendă și Sfaturi
           </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
             <div className="flex items-center space-x-2">
               <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-              <span className="text-gray-600">Rută stabilă (operează regulat)</span>
+              <span className="text-white/80">Rută stabilă (operează regulat)</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-blue-600 rounded" />
-              <span className="text-gray-600">Zi/interval selectat</span>
+              <span className="text-white/80">Zi/interval selectat</span>
             </div>
             <div className="flex items-center space-x-2">
               <Sunrise className="h-4 w-4 text-orange-500" />
-              <span className="text-gray-600">Dimineața: 06:00-12:00</span>
+              <span className="text-white/80">Dimineața: 06:00-12:00</span>
             </div>
             <div className="flex items-center space-x-2">
               <Moon className="h-4 w-4 text-indigo-500" />
-              <span className="text-gray-600">Seara: 18:00-24:00</span>
+              <span className="text-white/80">Seara: 18:00-24:00</span>
             </div>
           </div>
           
@@ -3024,15 +3024,15 @@ export default function FlyFinderView() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900">
+            <div className="flex items-center justify-between p-4 border-b border-white/20">
+              <h3 className="text-lg font-semibold text-white">
                 {bookingModal.step === 'departure' && 'Selectează data plecării'}
                 {bookingModal.step === 'return' && 'Selectează data întoarcerii'}
                 {bookingModal.step === 'passengers' && 'Selectează pasagerii'}
               </h3>
               <button
                 onClick={closeBookingModal}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
               >
                 <X className="h-5 w-5 text-gray-500" />
               </button>
@@ -3040,13 +3040,13 @@ export default function FlyFinderView() {
 
             {/* Step Tabs */}
             {(bookingModal.step === 'departure' || bookingModal.step === 'return') && (
-              <div className="flex border-b border-gray-100">
+              <div className="flex border-b border-white/20">
                 <button
                   onClick={() => setBookingModal(prev => ({ ...prev, step: 'departure' }))}
                   className={`flex-1 py-3 px-4 text-sm font-medium transition-all flex items-center justify-center space-x-2 ${
                     bookingModal.step === 'departure'
                       ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600'
-                      : 'text-gray-500 hover:text-gray-700'
+                      : 'text-white/70 hover:text-white'
                   }`}
                 >
                   <Calendar className="h-4 w-4" />
@@ -3058,7 +3058,7 @@ export default function FlyFinderView() {
                     className={`flex-1 py-3 px-4 text-sm font-medium transition-all flex items-center justify-center space-x-2 ${
                       bookingModal.step === 'return'
                         ? 'bg-green-50 text-green-700 border-b-2 border-green-600'
-                        : 'text-gray-500 hover:text-gray-700'
+                        : 'text-white/70 hover:text-white'
                     } ${!bookingModal.departureDate ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <Calendar className="h-4 w-4" />
@@ -3075,7 +3075,7 @@ export default function FlyFinderView() {
                 <div className="flex items-center justify-between mb-4">
                   <button
                     onClick={() => navigateMonth(-1)}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-2 hover:bg-white/10 rounded-full transition-colors"
                   >
                     <ChevronLeft className="h-5 w-5 text-gray-600" />
                   </button>
@@ -3084,7 +3084,7 @@ export default function FlyFinderView() {
                   </h4>
                   <button
                     onClick={() => navigateMonth(1)}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-2 hover:bg-white/10 rounded-full transition-colors"
                   >
                     <ChevronRight className="h-5 w-5 text-gray-600" />
                   </button>
@@ -3246,14 +3246,14 @@ export default function FlyFinderView() {
                 <h4 className="text-sm font-medium text-gray-700 mb-4">Selectează pasagerii</h4>
 
                 {/* Adults */}
-                <div className="flex items-center justify-between py-4 border-b border-gray-100">
+                <div className="flex items-center justify-between py-4 border-b border-white/20">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                       <User className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
                       <div className="font-medium text-gray-900">Adulți</div>
-                      <div className="text-xs text-gray-500">De la 12 ani</div>
+                      <div className="text-xs text-white/70">De la 12 ani</div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
@@ -3276,14 +3276,14 @@ export default function FlyFinderView() {
                 </div>
 
                 {/* Children */}
-                <div className="flex items-center justify-between py-4 border-b border-gray-100">
+                <div className="flex items-center justify-between py-4 border-b border-white/20">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                       <Users className="h-5 w-5 text-green-600" />
                     </div>
                     <div>
                       <div className="font-medium text-gray-900">Copii</div>
-                      <div className="text-xs text-gray-500">2-11 ani</div>
+                      <div className="text-xs text-white/70">2-11 ani</div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
@@ -3313,7 +3313,7 @@ export default function FlyFinderView() {
                     </div>
                     <div>
                       <div className="font-medium text-gray-900">Bebeluși</div>
-                      <div className="text-xs text-gray-500">Până la 2 ani</div>
+                      <div className="text-xs text-white/70">Până la 2 ani</div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">

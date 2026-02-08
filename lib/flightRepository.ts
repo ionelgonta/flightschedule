@@ -1,10 +1,11 @@
 /**
  * Flight Repository - Folosește noul sistem de cache centralizat
- * NU mai face request-uri API direct - doar citește din cache
+ * La cache miss declanșează fetch on-demand pentru a popula datele pentru orice aeroport suportat.
  */
 
 import { fixedCacheManager as cacheManager } from './cacheManagerFixed';
 import { RawFlightData } from './flightApiService';
+import { isAirportSupported } from './airports';
 
 export interface FlightFilters {
   airline?: string;
@@ -44,6 +45,9 @@ export interface FlightApiResponse {
 }
 
 class FlightRepository {
+  /** Evită refresh-uri duplicate simultane pentru același aeroport */
+  private refreshInProgress: Map<string, Promise<void>> = new Map();
+
   constructor() {
     // NU inițializa cache manager-ul aici - se inițializează automat la primul acces
   }
@@ -53,6 +57,35 @@ class FlightRepository {
    */
   private getCacheKey(airportCode: string, type: 'arrivals' | 'departures'): string {
     return `${airportCode}_${type}`;
+  }
+
+  /**
+   * La cache miss, declanșează o singură dată fetch pentru acest aeroport (arrivals + departures)
+   * și așteaptă finalizarea. Request-uri concurente pentru același aeroport așteaptă același refresh.
+   */
+  private async ensureFlightDataForAirport(airportCode: string): Promise<void> {
+    if (typeof window !== 'undefined') return; // doar pe server
+    if (!isAirportSupported(airportCode)) return;
+
+    const existing = this.refreshInProgress.get(airportCode);
+    if (existing) {
+      await existing;
+      return;
+    }
+
+    const refreshPromise = (async () => {
+      try {
+        console.log(`[Flight Repository] Cache miss for ${airportCode} - triggering on-demand fetch`);
+        await cacheManager.manualRefresh('flightData', airportCode);
+      } catch (err) {
+        console.error(`[Flight Repository] On-demand fetch failed for ${airportCode}:`, err);
+      } finally {
+        this.refreshInProgress.delete(airportCode);
+      }
+    })();
+
+    this.refreshInProgress.set(airportCode, refreshPromise);
+    await refreshPromise;
   }
 
   /**
@@ -163,9 +196,24 @@ class FlightRepository {
         };
       }
 
-      // Nu există intrare în cache
-      console.log(`No cached entry for ${airportCode} arrivals`);
-      
+      // Cache miss: declanșează fetch on-demand și reîncearcă o dată
+      await this.ensureFlightDataForAirport(airportCode);
+      const retry = cacheManager.getFlightDataWithWeather<any[]>(airportCode, 'arrivals');
+      if (retry.flights !== null && Array.isArray(retry.flights)) {
+        const mappedData = this.mapCacheDataToRawFlightData(retry.flights);
+        return {
+          success: true,
+          data: this.applyFilters(mappedData, filters),
+          cached: true,
+          last_updated: new Date().toISOString(),
+          airport_code: airportCode,
+          type: 'arrivals',
+          weather_info: retry.weather_info || undefined,
+          hasWeatherAlert: retry.hasWeatherAlert || false
+        };
+      }
+
+      console.log(`No cached entry for ${airportCode} arrivals (after on-demand fetch)`);
       return {
         success: false,
         data: [],
@@ -229,9 +277,24 @@ class FlightRepository {
         };
       }
 
-      // Nu există intrare în cache
-      console.log(`No cached entry for ${airportCode} departures`);
-      
+      // Cache miss: declanșează fetch on-demand și reîncearcă o dată
+      await this.ensureFlightDataForAirport(airportCode);
+      const retry = cacheManager.getFlightDataWithWeather<any[]>(airportCode, 'departures');
+      if (retry.flights !== null && Array.isArray(retry.flights)) {
+        const mappedData = this.mapCacheDataToRawFlightData(retry.flights);
+        return {
+          success: true,
+          data: this.applyFilters(mappedData, filters),
+          cached: true,
+          last_updated: new Date().toISOString(),
+          airport_code: airportCode,
+          type: 'departures',
+          weather_info: retry.weather_info || undefined,
+          hasWeatherAlert: retry.hasWeatherAlert || false
+        };
+      }
+
+      console.log(`No cached entry for ${airportCode} departures (after on-demand fetch)`);
       return {
         success: false,
         data: [],

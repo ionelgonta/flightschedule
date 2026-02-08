@@ -85,8 +85,8 @@ export function RelatedPages({ currentAirport }: { currentAirport?: { name: stri
   ]
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+    <div className="glass-card rounded-2xl p-6">
+      <h3 className="text-lg font-semibold text-white mb-4">
         {currentAirport.name} - Pagini Relacionate
       </h3>
       <div className="grid grid-cols-2 gap-3">
@@ -94,7 +94,7 @@ export function RelatedPages({ currentAirport }: { currentAirport?: { name: stri
           <Link
             key={page.href}
             href={page.href}
-            className="p-3 text-center bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-700 dark:hover:text-primary-300 transition-colors text-sm font-medium"
+            className="p-3 text-center bg-white/15 text-white rounded-xl hover:bg-white/25 border border-white/10 transition-colors text-sm font-medium"
           >
             {page.name}
           </Link>

@@ -4,76 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Weather-app style theme (cool blues, purples, glass cards) */
+/* Weather-app style theme – dark only (cool blues, purples, glass cards) */
 :root {
-  --weather-bg-start: 59 130 246;   /* blue-500 */
-  --weather-bg-mid: 99 102 241;     /* indigo-500 */
-  --weather-bg-end: 139 92 246;     /* violet-500 */
-  --weather-glass: 255 255 255;
-  --weather-glass-opacity: 0.12;
-  --weather-glass-border: 255 255 255;
-  --weather-glass-border-opacity: 0.15;
-  --weather-on-glass: 255 255 255;
-  --weather-on-glass-muted: 226 232 240;
-  --weather-dot-opacity: 0.4;
-}
-
-.dark {
   --weather-bg-start: 30 58 138;
   --weather-bg-mid: 49 46 129;
   --weather-bg-end: 76 29 149;
+  --weather-glass: 255 255 255;
   --weather-glass-opacity: 0.18;
+  --weather-glass-border: 255 255 255;
   --weather-glass-border-opacity: 0.2;
+  --weather-on-glass: 255 255 255;
+  --weather-on-glass-muted: 226 232 240;
   --weather-dot-opacity: 0.35;
 }
 
-/* Material Design 3 Design Tokens (kept for components that use them) */
+/* Material Design 3 Design Tokens – dark theme only */
 :root {
-  /* Light Theme Colors */
-  --md-sys-color-primary: 0 104 166;
-  --md-sys-color-on-primary: 255 255 255;
-  --md-sys-color-primary-container: 193 232 255;
-  --md-sys-color-on-primary-container: 0 29 54;
-  
-  --md-sys-color-secondary: 82 87 92;
-  --md-sys-color-on-secondary: 255 255 255;
-  --md-sys-color-secondary-container: 214 219 224;
-  --md-sys-color-on-secondary-container: 15 20 25;
-  
-  --md-sys-color-tertiary: 125 74 0;
-  --md-sys-color-on-tertiary: 255 255 255;
-  --md-sys-color-tertiary-container: 255 220 158;
-  --md-sys-color-on-tertiary-container: 45 22 0;
-  
-  --md-sys-color-error: 186 26 26;
-  --md-sys-color-on-error: 255 255 255;
-  --md-sys-color-error-container: 255 218 214;
-  --md-sys-color-on-error-container: 65 0 2;
-  
-  --md-sys-color-surface: 252 252 255;
-  --md-sys-color-surface-dim: 217 219 224;
-  --md-sys-color-surface-bright: 252 252 255;
-  --md-sys-color-surface-container-lowest: 255 255 255;
-  --md-sys-color-surface-container-low: 246 247 252;
-  --md-sys-color-surface-container: 240 241 246;
-  --md-sys-color-surface-container-high: 234 235 240;
-  --md-sys-color-surface-container-highest: 228 229 234;
-  
-  --md-sys-color-on-surface: 26 28 30;
-  --md-sys-color-on-surface-variant: 66 71 78;
-  --md-sys-color-outline: 114 119 126;
-  --md-sys-color-outline-variant: 194 199 206;
-  
-  --md-sys-color-inverse-surface: 47 49 51;
-  --md-sys-color-inverse-on-surface: 241 240 244;
-  --md-sys-color-inverse-primary: 125 213 255;
-  
-  --md-sys-color-scrim: 0 0 0;
-  --md-sys-color-shadow: 0 0 0;
-}
-
-/* Dark Theme Colors */
-.dark {
   --md-sys-color-primary: 125 213 255;
   --md-sys-color-on-primary: 0 50 78;
   --md-sys-color-primary-container: 0 76 126;

@@ -18,47 +18,47 @@ const getCompactStatusBadge = (status: string) => {
   const statusConfig: Record<string, { label: string; className: string }> = {
     scheduled: { 
       label: 'PROGRAMAT',
-      className: 'bg-green-100 text-green-800 border-green-200'
+      className: 'bg-green-500/25 text-green-300 border border-green-400/40'
     },
     active: { 
       label: 'ÎN ZBOR',
-      className: 'bg-blue-100 text-blue-800 border-blue-200'
+      className: 'bg-blue-500/25 text-blue-300 border border-blue-400/40'
     },
     landed: { 
       label: 'ATERIZAT',
-      className: 'bg-green-100 text-green-800 border-green-200'
+      className: 'bg-green-500/25 text-green-300 border border-green-400/40'
     },
     arrived: { 
       label: 'SOSIT',
-      className: 'bg-green-100 text-green-800 border-green-200'
+      className: 'bg-green-500/25 text-green-300 border border-green-400/40'
     },
     cancelled: { 
       label: 'ANULAT',
-      className: 'bg-red-100 text-red-800 border-red-200'
+      className: 'bg-red-500/25 text-red-300 border border-red-400/40'
     },
     delayed: { 
       label: 'ÎNTÂRZIAT',
-      className: 'bg-orange-100 text-orange-800 border-orange-200'
+      className: 'bg-orange-500/25 text-orange-300 border border-orange-400/40'
     },
     diverted: { 
       label: 'DEVIAT',
-      className: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      className: 'bg-yellow-500/25 text-yellow-300 border border-yellow-400/40'
     },
     boarding: { 
       label: 'ÎMBARCARE',
-      className: 'bg-purple-100 text-purple-800 border-purple-200'
+      className: 'bg-purple-500/25 text-purple-300 border border-purple-400/40'
     },
     departed: { 
       label: 'PLECAT',
-      className: 'bg-blue-100 text-blue-800 border-blue-200'
+      className: 'bg-blue-500/25 text-blue-300 border border-blue-400/40'
     },
     estimated: { 
       label: 'ESTIMAT',
-      className: 'bg-indigo-100 text-indigo-800 border-indigo-200'
+      className: 'bg-indigo-500/25 text-indigo-300 border border-indigo-400/40'
     },
     unknown: { 
       label: 'NECUNOSCUT',
-      className: 'bg-gray-100 text-gray-800 border-gray-200'
+      className: 'bg-white/15 text-white/80 border border-white/20'
     }
   };
 
@@ -135,23 +135,23 @@ export function CompactFlightTable({
 
   if (error) {
     return (
-      <div className="bg-red-50 rounded-lg border border-red-200 p-6 text-center">
-        <Plane className="h-8 w-8 text-red-500 mx-auto mb-2" />
-        <h3 className="text-lg font-semibold text-red-800 mb-2">
+      <div className="glass-card rounded-lg border border-red-400/40 bg-red-500/10 p-6 text-center">
+        <Plane className="h-8 w-8 text-red-400 mx-auto mb-2" />
+        <h3 className="text-lg font-semibold text-red-200 mb-2">
           Eroare la încărcarea datelor
         </h3>
-        <p className="text-sm text-red-700">{error}</p>
+        <p className="text-sm text-red-300/90">{error}</p>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="glass-card rounded-lg border border-white/20 overflow-hidden">
         <div className="animate-pulse">
-          <div className="bg-gray-100 h-12"></div>
+          <div className="bg-white/10 h-12"></div>
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="border-t border-gray-100 h-16 bg-gray-50" />
+            <div key={i} className="border-t border-white/10 h-16 bg-white/5" />
           ))}
         </div>
       </div>
@@ -161,16 +161,16 @@ export function CompactFlightTable({
   return (
     <div className="space-y-4">
       {/* Header cu tabs și căutare */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="glass-card rounded-lg border border-white/20 p-4">
         <div className="flex flex-col space-y-3">
           {/* Tabs pentru Sosiri/Plecări - FUNCȚIONALE */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          <div className="flex bg-white/10 rounded-lg p-1">
             <button
               onClick={() => handleTabChange('arrivals')}
               className={`flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors flex-1 ${
                 activeTab === 'arrivals' 
-                  ? 'bg-white text-blue-600 shadow-sm' 
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white/25 text-white shadow-sm' 
+                  : 'text-white/70 hover:text-white'
               }`}
             >
               <Plane className="h-4 w-4 rotate-45" />
@@ -180,8 +180,8 @@ export function CompactFlightTable({
               onClick={() => handleTabChange('departures')}
               className={`flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors flex-1 ${
                 activeTab === 'departures' 
-                  ? 'bg-white text-blue-600 shadow-sm' 
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white/25 text-white shadow-sm' 
+                  : 'text-white/70 hover:text-white'
               }`}
             >
               <Plane className="h-4 w-4 -rotate-45" />
@@ -192,24 +192,24 @@ export function CompactFlightTable({
           {/* Căutare */}
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
+              <Search className="h-4 w-4 text-white/50" />
             </div>
             <input
               type="text"
               placeholder={`Caută ${activeTab === 'arrivals' ? 'sosiri' : 'plecări'}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-sm text-white placeholder-white/50 focus:ring-2 focus:ring-white/30 focus:border-white/30"
             />
           </div>
         </div>
       </div>
 
       {/* Tabelă compactă - Full width, no borders */}
-      <div className="bg-white overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8">
+      <div className="glass-card overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 border border-white/20">
         {/* Header tabel */}
-        <div className="bg-gray-50 border-b border-gray-200">
-          <div className="grid grid-cols-5 gap-1 px-1 py-1 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <div className="bg-white/10 border-b border-white/20">
+          <div className="grid grid-cols-5 gap-1 px-1 py-1 text-xs font-semibold text-white/70 uppercase tracking-wider">
             <div className="text-left">CURSĂ</div>
             <div className="text-left">{activeTab === 'arrivals' ? 'ORIGINE' : 'DESTINAȚIE'}</div>
             <div className="text-center">PROG</div>
@@ -219,11 +219,11 @@ export function CompactFlightTable({
         </div>
 
         {/* Rânduri tabel */}
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-white/10">
           {filteredFlights.length === 0 ? (
             <div className="px-4 py-8 text-center">
-              <Plane className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500 text-sm">
+              <Plane className="h-8 w-8 text-white/40 mx-auto mb-2" />
+              <p className="text-white/60 text-sm">
                 {searchTerm 
                   ? 'Nu există zboruri care să corespundă căutării'
                   : `Nu sunt ${activeTab === 'arrivals' ? 'sosiri' : 'plecări'} programate`
@@ -237,11 +237,11 @@ export function CompactFlightTable({
               return (
                 <div 
                   key={`${flight.flight_number}-${index}`}
-                  className="grid grid-cols-5 gap-1 px-1 py-1 hover:bg-gray-50 transition-colors text-xs"
+                  className="grid grid-cols-5 gap-1 px-1 py-1 hover:bg-white/10 transition-colors text-xs"
                 >
                   {/* Număr cursă */}
                   <div className="flex items-center">
-                    <div className="font-bold text-gray-900 text-sm">
+                    <div className="font-bold text-white text-sm">
                       {flight.flight_number}
                     </div>
                   </div>
@@ -249,10 +249,10 @@ export function CompactFlightTable({
                   {/* Destinație/Origine */}
                   <div className="flex items-center">
                     <div className="min-w-0">
-                      <div className="font-semibold text-blue-600 text-sm truncate">
+                      <div className="font-semibold text-blue-300 text-sm truncate">
                         {relevantLocation?.city || 'N/A'}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-white/60">
                         ({relevantLocation?.code || 'N/A'})
                       </div>
                     </div>
@@ -260,7 +260,7 @@ export function CompactFlightTable({
 
                   {/* Ora programată */}
                   <div className="flex items-center justify-center px-0">
-                    <div className="text-sm font-semibold text-gray-900">
+                    <div className="text-sm font-semibold text-white">
                       {formatTime(flight.scheduled_time)}
                     </div>
                   </div>
@@ -268,15 +268,15 @@ export function CompactFlightTable({
                   {/* Ora estimată */}
                   <div className="flex items-center justify-center px-0">
                     {flight.actual_time && (flight.status === 'landed' || flight.status === 'arrived') ? (
-                      <div className="text-sm font-semibold text-green-600">
+                      <div className="text-sm font-semibold text-green-300">
                         {formatTime(flight.actual_time)}
                       </div>
                     ) : flight.estimated_time && formatTime(flight.estimated_time) !== formatTime(flight.scheduled_time) ? (
-                      <div className="text-sm font-semibold text-orange-600">
+                      <div className="text-sm font-semibold text-orange-300">
                         {formatTime(flight.estimated_time)}
                       </div>
                     ) : (
-                      <span className="text-sm text-gray-400">-</span>
+                      <span className="text-sm text-white/50">-</span>
                     )}
                   </div>
 
@@ -293,14 +293,14 @@ export function CompactFlightTable({
 
       {/* Footer cu statistici */}
       {filteredFlights.length > 0 && (
-        <div className="bg-gray-50 rounded-lg border border-gray-200 px-4 py-3">
+        <div className="glass-card rounded-lg border border-white/20 px-4 py-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 text-sm">
             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-1 sm:space-y-0">
-              <span className="text-gray-600">
-                Total: <span className="font-semibold text-gray-900">{filteredFlights.length}</span> zboruri
+              <span className="text-white/70">
+                Total: <span className="font-semibold text-white">{filteredFlights.length}</span> zboruri
               </span>
               {lastUpdated && (
-                <span className="text-gray-500 text-xs sm:text-sm">
+                <span className="text-white/60 text-xs sm:text-sm">
                   Actualizat: {new Date(lastUpdated).toLocaleTimeString('ro-RO', { 
                     hour: '2-digit', 
                     minute: '2-digit' 
@@ -311,7 +311,7 @@ export function CompactFlightTable({
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="text-blue-600 hover:text-blue-800 font-medium text-left sm:text-right"
+                className="text-blue-300 hover:text-white font-medium text-left sm:text-right"
               >
                 Resetează căutarea
               </button>
