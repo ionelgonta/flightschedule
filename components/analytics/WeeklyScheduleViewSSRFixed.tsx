@@ -586,10 +586,10 @@ export default function WeeklyScheduleViewSSRFixed({ className = '', initialAirp
 
   if (!mounted) {
     return (
-      <div className={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 ${className}`}>
+      <div className={`glass-card rounded-2xl border border-white/20 p-6 ${className}`}>
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-          <span className="ml-2 text-gray-600">Se încarcă programul săptămânal...</span>
+          <div className="h-8 w-8 border-4 border-white/30 border-t-blue-400 rounded-full animate-spin"></div>
+          <span className="ml-2 text-white/80">Se încarcă programul săptămânal...</span>
         </div>
       </div>
     )
@@ -597,10 +597,10 @@ export default function WeeklyScheduleViewSSRFixed({ className = '', initialAirp
 
   if (loading) {
     return (
-      <div className={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 ${className}`}>
+      <div className={`glass-card rounded-2xl border border-white/20 p-6 ${className}`}>
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-          <span className="ml-2 text-gray-600">Se încarcă programul săptămânal...</span>
+          <div className="h-8 w-8 border-4 border-white/30 border-t-blue-400 rounded-full animate-spin"></div>
+          <span className="ml-2 text-white/80">Se încarcă programul săptămânal...</span>
         </div>
       </div>
     )
@@ -608,11 +608,11 @@ export default function WeeklyScheduleViewSSRFixed({ className = '', initialAirp
 
   if (error) {
     return (
-      <div className={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 ${className}`}>
+      <div className={`glass-card rounded-2xl border border-white/20 p-6 ${className}`}>
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <div className="text-red-600 mb-2">⚠️ Eroare</div>
-            <p className="text-gray-600">{error}</p>
+            <div className="text-red-300 mb-2">⚠️ Eroare</div>
+            <p className="text-white/80">{error}</p>
             <button 
               onClick={loadScheduleData}
               className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -626,17 +626,17 @@ export default function WeeklyScheduleViewSSRFixed({ className = '', initialAirp
   }
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`}>
+    <div className={`glass-card rounded-2xl border border-white/20 ${className}`}>
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-white/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Calendar className="h-6 w-6 text-blue-600" />
+            <Calendar className="h-6 w-6 text-blue-400" />
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-white">
                 Program Săptămânal Zboruri
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-white/80">
                 {filteredData.length} {getRoutesPlural(filteredData.length)} disponibile
                 {dataRange && (
                   <span className="ml-2">
@@ -648,13 +648,13 @@ export default function WeeklyScheduleViewSSRFixed({ className = '', initialAirp
           </div>
 
           {/* View Mode Toggle */}
-          <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center space-x-2 bg-white/10 rounded-lg p-1">
             <button
               onClick={() => setViewMode('destinations')}
               className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'destinations'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white/25 text-white shadow-sm'
+                  : 'text-white/70 hover:text-white'
               }`}
             >
               <Grid3X3 className="h-4 w-4" />
@@ -664,8 +664,8 @@ export default function WeeklyScheduleViewSSRFixed({ className = '', initialAirp
               onClick={() => setViewMode('days')}
               className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'days'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white/25 text-white shadow-sm'
+                  : 'text-white/70 hover:text-white'
               }`}
             >
               <List className="h-4 w-4" />
@@ -676,39 +676,39 @@ export default function WeeklyScheduleViewSSRFixed({ className = '', initialAirp
       </div>
 
       {/* Filters */}
-      <div className="p-6 border-b border-gray-200 bg-gray-50">
+      <div className="p-6 border-b border-white/20 bg-white/5">
         <div className="flex items-center space-x-4 mb-4">
-          <Filter className="h-5 w-5 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Filtre:</span>
+          <Filter className="h-5 w-5 text-white/70" />
+          <span className="text-sm font-medium text-white/90">Filtre:</span>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search Filter */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-medium text-white/80 mb-1">
               Căutare Destinație
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Caută după destinație sau aeroport..."
-                className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+                className="w-full pl-10 pr-3 py-2 text-sm border border-white/20 rounded-lg focus:ring-2 focus:ring-white/30 focus:border-white/30 bg-white/10 text-white placeholder-white/50"
               />
             </div>
           </div>
 
           {/* Day Filter - NEW */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-medium text-white/80 mb-1">
               Filtrare după Zi
             </label>
             <select
               value={dayFilter}
               onChange={(e) => setDayFilter(e.target.value as DayOfWeek | '')}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+              className="w-full px-3 py-2 text-sm border border-white/20 rounded-lg focus:ring-2 focus:ring-white/30 focus:border-white/30 bg-white/10 text-white"
             >
               <option value="">Toate zilele</option>
               <option value="monday">Luni</option>
@@ -723,13 +723,13 @@ export default function WeeklyScheduleViewSSRFixed({ className = '', initialAirp
           
           {/* Airport Filter */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-medium text-white/80 mb-1">
               Plecări din România/Moldova
             </label>
             <select
               value={airportFilter}
               onChange={(e) => setAirportFilter(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+              className="w-full px-3 py-2 text-sm border border-white/20 rounded-lg focus:ring-2 focus:ring-white/30 focus:border-white/30 bg-white/10 text-white"
             >
               <option value="">Toate aeroporturile</option>
               <optgroup label="România">
@@ -782,11 +782,11 @@ export default function WeeklyScheduleViewSSRFixed({ className = '', initialAirp
       <div className="p-6">
         {filteredData.length === 0 ? (
           <div className="text-center py-12">
-            <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-gray-900 mb-2">
+            <BarChart3 className="h-12 w-12 text-white/50 mx-auto mb-4" />
+            <h4 className="text-lg font-medium text-white mb-2">
               Nu sunt rute disponibile
             </h4>
-            <p className="text-gray-600 mb-4">
+            <p className="text-white/70 mb-4">
               Încearcă să modifici filtrele sau să aștepți actualizarea datelor.
             </p>
           </div>
@@ -809,8 +809,8 @@ export default function WeeklyScheduleViewSSRFixed({ className = '', initialAirp
 
       {/* Footer with metadata */}
       {filteredData.length > 0 && (
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between text-sm text-gray-600">
+        <div className="px-6 py-4 border-t border-white/20 bg-white/5">
+          <div className="flex items-center justify-between text-sm text-white/70">
             <div>
               Afișate: {filteredData.length} din {scheduleData.length} {getRoutesPlural(scheduleData.length)}
             </div>
@@ -910,48 +910,48 @@ function DestinationsMatrixView({ destinations }: DestinationsMatrixViewProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-lg font-medium text-gray-900">
+        <h4 className="text-lg font-medium text-white">
           Matrice Destinații
         </h4>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-white/80">
           {destinations.length} {destinations.length === 1 ? 'destinație disponibilă' : 'destinații disponibile'}
         </p>
       </div>
 
       {/* Desktop Matrix Table */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full border border-gray-200 rounded-lg">
-          <thead className="bg-blue-50">
+        <table className="w-full border border-white/20 rounded-lg">
+          <thead className="bg-white/10">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b border-gray-200">
+              <th className="px-4 py-3 text-left text-sm font-medium text-white border-b border-white/20">
                 Destinație
               </th>
               {dayShortLabels.map((day, index) => (
-                <th key={day} className="px-3 py-3 text-center text-sm font-medium text-gray-900 border-b border-gray-200">
+                <th key={day} className="px-3 py-3 text-center text-sm font-medium text-white border-b border-white/20">
                   {day}
                 </th>
               ))}
-              <th className="px-4 py-3 text-center text-sm font-medium text-gray-900 border-b border-gray-200">
+              <th className="px-4 py-3 text-center text-sm font-medium text-white border-b border-white/20">
                 Total
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-white/10">
             {destinations.map((dest, index) => (
               <React.Fragment key={dest.destination}>
                 <tr 
-                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} cursor-pointer hover:bg-blue-50 transition-colors`}
+                  className={`${index % 2 === 0 ? 'bg-white/5' : 'bg-white/10'} cursor-pointer hover:bg-white/15 transition-colors`}
                   onClick={() => toggleDestination(dest.destination)}
                 >
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                  <td className="px-4 py-3 text-sm font-medium text-white">
                     <div className="flex items-center space-x-2">
-                      <button className="text-blue-600 hover:text-blue-800">
+                      <button className="text-blue-300 hover:text-blue-200">
                         {expandedDestinations.has(dest.destination) ? '▼' : '▶'}
                       </button>
-                      <MapPin className="h-4 w-4 text-blue-600" />
+                      <MapPin className="h-4 w-4 text-blue-400" />
                       <span>{dest.destination}</span>
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-white/60 mt-1">
                       {dest.routes.length} {getRoutesPlural(dest.routes.length)}
                     </div>
                   </td>
@@ -959,15 +959,15 @@ function DestinationsMatrixView({ destinations }: DestinationsMatrixViewProps) {
                     <td key={day} className="px-3 py-3 text-center">
                       <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${
                         dest.weeklyPattern[day]
-                          ? 'bg-green-100 text-green-800 border border-green-200'
-                          : 'bg-gray-100 text-gray-400 border border-gray-200'
+                          ? 'bg-green-500/30 text-green-200 border border-green-400/40'
+                          : 'bg-white/10 text-white/50 border border-white/20'
                       }`}>
                         {dest.weeklyPattern[day] ? '●' : '○'}
                       </span>
                     </td>
                   ))}
                   <td className="px-4 py-3 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/25 text-blue-200 border border-blue-400/40">
                       {dest.totalFlights}
                     </span>
                   </td>
@@ -975,10 +975,10 @@ function DestinationsMatrixView({ destinations }: DestinationsMatrixViewProps) {
                 
                 {/* Expanded Details */}
                 {expandedDestinations.has(dest.destination) && (
-                  <tr className="bg-blue-50">
+                  <tr className="bg-white/10">
                     <td colSpan={9} className="px-4 py-4">
                       <div className="space-y-3">
-                        <h5 className="font-medium text-gray-900 mb-3">
+                        <h5 className="font-medium text-white mb-3">
                           Detalii rute către {dest.destination}:
                         </h5>
                         
@@ -987,34 +987,34 @@ function DestinationsMatrixView({ destinations }: DestinationsMatrixViewProps) {
                             const dayEntries = getFlightEntriesForDestinationAndDay(dest.destination, day)
                             return (
                               <div key={day} className="text-center">
-                                <div className="text-xs font-medium text-gray-700 mb-2 bg-gray-100 py-1 rounded">
+                                <div className="text-xs font-medium text-white/80 mb-2 bg-white/10 py-1 rounded">
                                   {dayLabels[day]}
                                 </div>
                                 {dayEntries.length > 0 ? (
                                   <div className="space-y-2">
                                     {dayEntries.map((entry, idx) => (
-                                      <div key={idx} className="bg-white rounded p-2 text-xs border border-gray-200 shadow-sm">
-                                        <div className="text-gray-500 text-[10px] mb-1">
+                                      <div key={idx} className="bg-white/10 rounded p-2 text-xs border border-white/20">
+                                        <div className="text-white/60 text-[10px] mb-1">
                                           din {entry.route.airport}
                                         </div>
-                                        <div className="font-semibold text-blue-700">
+                                        <div className="font-semibold text-blue-300">
                                           {entry.route.flightNumber}
                                         </div>
                                         {entry.time && (
-                                          <div className="text-green-700 font-bold mt-1">
-                                            <span className="inline-block bg-green-50 px-1.5 py-0.5 rounded border border-green-200">
+                                          <div className="text-green-300 font-bold mt-1">
+                                            <span className="inline-block bg-green-500/20 px-1.5 py-0.5 rounded border border-green-400/30">
                                               {entry.time}
                                             </span>
                                           </div>
                                         )}
-                                        <div className="text-gray-400 text-[10px] mt-1">
+                                        <div className="text-white/50 text-[10px] mt-1">
                                           {entry.route.airline.length > 10 ? `${entry.route.airline.substring(0, 10)}...` : entry.route.airline}
                                         </div>
                                       </div>
                                     ))}
                                   </div>
                                 ) : (
-                                  <div className="text-xs text-gray-400 py-2">
+                                  <div className="text-xs text-white/40 py-2">
                                     -
                                   </div>
                                 )}
@@ -1035,20 +1035,20 @@ function DestinationsMatrixView({ destinations }: DestinationsMatrixViewProps) {
       {/* Mobile Cards */}
       <div className="md:hidden space-y-3">
         {destinations.map((dest) => (
-          <div key={dest.destination} className="bg-white border border-gray-200 rounded-lg">
+          <div key={dest.destination} className="glass-card border border-white/20 rounded-xl">
             <div 
-              className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+              className="p-4 cursor-pointer hover:bg-white/10 transition-colors"
               onClick={() => toggleDestination(dest.destination)}
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-2">
-                  <button className="text-blue-600 hover:text-blue-800">
+                  <button className="text-blue-300 hover:text-blue-200">
                     {expandedDestinations.has(dest.destination) ? '▼' : '▶'}
                   </button>
-                  <MapPin className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium text-gray-900">{dest.destination}</span>
+                  <MapPin className="h-4 w-4 text-blue-400" />
+                  <span className="font-medium text-white">{dest.destination}</span>
                 </div>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/25 text-blue-200 border border-blue-400/40">
                   {dest.totalFlights} {getFlightsPlural(dest.totalFlights)}
                 </span>
               </div>
@@ -1056,11 +1056,11 @@ function DestinationsMatrixView({ destinations }: DestinationsMatrixViewProps) {
               <div className="grid grid-cols-7 gap-1">
                 {days.map((day, dayIndex) => (
                   <div key={day} className="text-center">
-                    <div className="text-xs text-gray-500 mb-1">{dayShortLabels[dayIndex]}</div>
+                    <div className="text-xs text-white/60 mb-1">{dayShortLabels[dayIndex]}</div>
                     <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${
                       dest.weeklyPattern[day]
-                        ? 'bg-green-100 text-green-800 border border-green-200'
-                        : 'bg-gray-100 text-gray-400 border border-gray-200'
+                        ? 'bg-green-500/30 text-green-200 border border-green-400/40'
+                        : 'bg-white/10 text-white/50 border border-white/20'
                     }`}>
                       {dest.weeklyPattern[day] ? '●' : '○'}
                     </span>
@@ -1071,8 +1071,8 @@ function DestinationsMatrixView({ destinations }: DestinationsMatrixViewProps) {
 
             {/* Mobile Expanded Details */}
             {expandedDestinations.has(dest.destination) && (
-              <div className="border-t border-gray-200 p-4 bg-blue-50">
-                <h5 className="font-medium text-gray-900 mb-3">
+              <div className="border-t border-white/20 p-4 bg-white/10">
+                <h5 className="font-medium text-white mb-3">
                   Detalii rute către {dest.destination}:
                 </h5>
                 
@@ -1082,26 +1082,26 @@ function DestinationsMatrixView({ destinations }: DestinationsMatrixViewProps) {
                     if (dayEntries.length === 0) return null
                     
                     return (
-                      <div key={day} className="bg-white rounded-lg p-3">
-                        <div className="font-medium text-gray-900 mb-2 pb-2 border-b border-gray-100">
+                      <div key={day} className="bg-white/10 rounded-lg p-3 border border-white/10">
+                        <div className="font-medium text-white mb-2 pb-2 border-b border-white/10">
                           {dayLabels[day]}
                         </div>
                         <div className="space-y-2">
                           {dayEntries.map((entry, idx) => (
-                            <div key={idx} className="flex items-center justify-between text-xs py-2 border-b border-gray-50 last:border-0">
+                            <div key={idx} className="flex items-center justify-between text-xs py-2 border-b border-white/10 last:border-0">
                               <div className="flex-1">
-                                <div className="text-gray-500 text-[10px]">din {entry.route.airport}</div>
-                                <div className="font-semibold text-blue-700">{entry.route.flightNumber}</div>
-                                <div className="text-gray-400 text-[10px]">{entry.route.airline}</div>
+                                <div className="text-white/60 text-[10px]">din {entry.route.airport}</div>
+                                <div className="font-semibold text-blue-300">{entry.route.flightNumber}</div>
+                                <div className="text-white/50 text-[10px]">{entry.route.airline}</div>
                               </div>
                               {entry.time ? (
-                                <div className="text-green-700 font-bold">
-                                  <span className="inline-block bg-green-50 px-2 py-1 rounded border border-green-200">
+                                <div className="text-green-300 font-bold">
+                                  <span className="inline-block bg-green-500/20 px-2 py-1 rounded border border-green-400/30">
                                     {entry.time}
                                   </span>
                                 </div>
                               ) : (
-                                <div className="text-gray-400">-</div>
+                                <div className="text-white/40">-</div>
                               )}
                             </div>
                           ))}
@@ -1135,16 +1135,16 @@ function DaysTabView({ selectedDay, onDayChange, dayLabels, dayShortLabels, getD
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h4 className="text-lg font-medium text-gray-900">
+        <h4 className="text-lg font-medium text-white">
           Program pe Zile
         </h4>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-white/80">
           {destinationsForSelectedDay.length} {destinationsForSelectedDay.length === 1 ? 'destinație' : 'destinații'} în {dayLabels[selectedDay]}
         </p>
       </div>
 
       {/* Day Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-white/20">
         <nav className="-mb-px flex space-x-8 overflow-x-auto">
           {days.map((day) => {
             const dayDestinations = getDestinationsForDay(day)
@@ -1154,16 +1154,16 @@ function DaysTabView({ selectedDay, onDayChange, dayLabels, dayShortLabels, getD
                 onClick={() => onDayChange(day)}
                 className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                   selectedDay === day
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-400 text-white'
+                    : 'border-transparent text-white/60 hover:text-white hover:border-white/30'
                 }`}
               >
                 <span className="hidden sm:inline">{dayLabels[day]}</span>
                 <span className="sm:hidden">{dayShortLabels[day]}</span>
                 <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                   selectedDay === day
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-blue-500/30 text-blue-200'
+                    : 'bg-white/15 text-white/80'
                 }`}>
                   {dayDestinations.length}
                 </span>
@@ -1177,8 +1177,8 @@ function DaysTabView({ selectedDay, onDayChange, dayLabels, dayShortLabels, getD
       <div className="space-y-4">
         {destinationsForSelectedDay.length === 0 ? (
           <div className="text-center py-8">
-            <Plane className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-600">
+            <Plane className="h-8 w-8 text-white/50 mx-auto mb-2" />
+            <p className="text-white/70">
               Nu sunt zboruri programate în {dayLabels[selectedDay]}
             </p>
           </div>
@@ -1187,50 +1187,50 @@ function DaysTabView({ selectedDay, onDayChange, dayLabels, dayShortLabels, getD
             {destinationsForSelectedDay.map((route, index) => {
               const times = route.scheduledTimes?.[selectedDay] || []
               return (
-                <div key={index} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div key={index} className="glass-card border border-white/20 rounded-xl p-4 hover:bg-white/10 transition-colors">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center space-x-2">
-                      <MapPin className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                      <MapPin className="h-4 w-4 text-blue-400 flex-shrink-0" />
                       <div>
-                        <h5 className="font-medium text-gray-900">{route.destination}</h5>
-                        <p className="text-xs text-gray-500">din {route.airport}</p>
+                        <h5 className="font-medium text-white">{route.destination}</h5>
+                        <p className="text-xs text-white/60">din {route.airport}</p>
                       </div>
                     </div>
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/25 text-blue-200 border border-blue-400/40">
                       {route.frequency}
                     </span>
                   </div>
                   
                   <div className="space-y-2">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-white/80">
                       <span className="font-medium">Zbor:</span> {route.flightNumber}
                     </div>
                     {times.length > 0 && (
                       <div className="text-sm">
-                        <span className="font-medium text-gray-600">Ora:</span>{' '}
+                        <span className="font-medium text-white/70">Ora:</span>{' '}
                         {times.map((time, timeIdx) => (
-                          <span key={timeIdx} className="inline-block bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-medium mr-1 mb-1">
+                          <span key={timeIdx} className="inline-block bg-blue-500/25 text-blue-200 px-2 py-0.5 rounded font-medium mr-1 mb-1 border border-blue-400/30">
                             {time}
                           </span>
                         ))}
                       </div>
                     )}
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-white/80">
                       <span className="font-medium">Companie:</span> {route.airline.length > 30 ? `${route.airline.substring(0, 30)}...` : route.airline}
                     </div>
                     
                     {/* Weekly pattern indicators */}
                     <div className="flex items-center space-x-1 pt-2">
-                      <span className="text-xs text-gray-500">Zile:</span>
+                      <span className="text-xs text-white/60">Zile:</span>
                       {days.map((day) => (
                         <span
                           key={day}
                           className={`inline-flex items-center justify-center w-5 h-5 rounded text-xs font-medium ${
                             route.weeklyPattern[day]
                               ? day === selectedDay
-                                ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                                : 'bg-green-100 text-green-800 border border-green-200'
-                              : 'bg-gray-100 text-gray-400 border border-gray-200'
+                                ? 'bg-blue-500/30 text-blue-200 border border-blue-400/50'
+                                : 'bg-green-500/25 text-green-200 border border-green-400/40'
+                              : 'bg-white/10 text-white/50 border border-white/20'
                           }`}
                         >
                           {dayShortLabels[day]}
